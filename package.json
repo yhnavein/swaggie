@@ -30,9 +30,8 @@
     "init": "yarn run clean && yarn run copy:template",
     "client": "ts-node --files src/cli.ts",
     "clean": "shx rm -rf ./dist",
-    "copy:template": "shx mkdir -p ./dist/gen/js && yarn run copy:service-ts && yarn run copy:service-js",
-    "copy:service-ts": "shx cp ./src/gen/js/service.ts.template ./dist/gen/js/service.ts.template",
-    "copy:service-js": "shx cp ./src/gen/js/service.js.template ./dist/gen/js/service.js.template"
+    "copy:template": "shx mkdir -p ./dist/gen/js && yarn run copy:service-ts",
+    "copy:service-ts": "shx cp ./src/gen/js/service.ts.template ./dist/gen/js/service.ts.template"
   },
   "files": [
     "dist"

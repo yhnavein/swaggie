@@ -9,7 +9,7 @@ export default function genService(options: ClientOptions) {
 }
 
 export function genServiceFile(options: ClientOptions) {
-  const path = `${options.outDir}/gateway/index.${options.language}`;
-  const contents = readFileSync(`${__dirname}/service.${options.language}.template`, 'utf8');
+  const path = `${options.outDir}/gateway/index.ts`;
+  const contents = readFileSync(`${__dirname}/service.ts.template`, 'utf8');
   return { path, contents };
 }

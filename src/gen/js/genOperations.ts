@@ -28,13 +28,13 @@ export function genOperationGroupFiles(
     const lines = [];
     join(lines, renderHeader(name, spec, options));
     join(lines, renderOperationGroup(group, renderOperation, spec, options));
-    if (options.language === 'ts') {
-      join(lines, renderOperationGroup(group, renderOperationParamType, spec, options));
-    }
+
+    join(lines, renderOperationGroup(group, renderOperationParamType, spec, options));
+
     join(lines, renderOperationGroup(group, renderOperationInfo, spec, options));
 
     files.push({
-      path: `${options.outDir}/${name}.${options.language}`,
+      path: `${options.outDir}/${name}.ts`,
       contents: lines.join('\n'),
     });
   }
@@ -43,7 +43,7 @@ export function genOperationGroupFiles(
 
 function renderHeader(name: string, spec: ApiSpec, options: ClientOptions): string[] {
   const lines = [];
-  if (spec.definitions && options.language === 'ts') {
+  if (spec.definitions) {
     lines.push(`/// <reference path="types.ts"/>`);
   }
   lines.push(`/** @module ${name} */`);
@@ -182,27 +182,23 @@ function renderOptionalParamsSignature(
   if (!pkg) {
     pkg = '';
   }
-  const s = options.language === 'ts' ? '?' : '';
+  const s = '?';
   const param = [`options${s}`];
-  if (options.language === 'ts') {
-    param.push(`${pkg}${op.id[0].toUpperCase() + op.id.slice(1)}Options`);
-  }
+
+  param.push(`${pkg}${op.id[0].toUpperCase() + op.id.slice(1)}Options`);
   return param;
 }
 
 function renderReturnSignature(op: ApiOperation, options: ClientOptions): string {
-  if (options.language !== 'ts') {
-    return '';
-  }
   const response = getBestResponse(op);
   return `: Promise<api.Response<${getTSParamType(response)}>>`;
 }
 
 function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
   const signature = [getParamName(param.name)];
-  if (options.language === 'ts') {
-    signature.push(getTSParamType(param));
-  }
+
+  signature.push(getTSParamType(param));
+
   return signature;
 }
 
@@ -267,11 +263,8 @@ function renderOperationObject(spec: ApiSpec, op: ApiOperation, options: ClientO
   });
 
   if (lines.length) {
-    if (options.language === 'ts') {
-      lines.unshift(`${SP}const parameters: api.OperationParamGroups = {`);
-    } else {
-      lines.unshift(`${SP}const parameters = {`);
-    }
+    lines.unshift(`${SP}const parameters: api.OperationParamGroups = {`);
+
     lines.push(`${SP}}${ST}`);
     const hasOptionals = op.parameters.some((op) => !op.required);
     if (hasOptionals) {
@@ -347,16 +340,13 @@ function renderOperationParamType(
 // We could just JSON.stringify this stuff but want it looking as if typed by developer
 function renderOperationInfo(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
   const lines = [];
-  if (options.language === 'ts') {
-    lines.push(`const ${op.id}Operation: api.OperationInfo = {`);
-  } else {
-    lines.push(`const ${op.id}Operation = {`);
-  }
+  lines.push(`const ${op.id}Operation: api.OperationInfo = {`);
+
   lines.push(`${SP}path: '${op.path}',`);
 
   const hasBody = op.parameters.some((p) => p.in === 'body');
   if (hasBody && op.contentTypes.length) {
-    lines.push(`${SP}contentTypes: ['${op.contentTypes.join('\',\'')}'],`);
+    lines.push(`${SP}contentTypes: ['${op.contentTypes.join(`','`)}'],`);
   }
   lines.push(`${SP}method: '${op.method}'${op.security ? ',' : ''}`);
   if (op.security && op.security.length) {

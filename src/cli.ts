@@ -18,7 +18,6 @@ const args: any = program
     'The path to the directory where files should be generated',
     process.env.OPEN_API_OUT
   )
-  .option('-l, --language <js|ts>', 'The language of code to generate', process.env.OPEN_API_LANG)
   .option(
     '--redux',
     'True if wanting to generate redux action creators',

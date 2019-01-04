@@ -54,6 +54,8 @@ export function removeOldFiles(options: ClientOptions) {
   cleanDirs(options.outDir, options);
 }
 
+const TS_EXTENSION = 'ts';
+
 function cleanDirs(dir: string, options: ClientOptions) {
   dir = PATH.resolve(dir);
   const stats = exists(dir);
@@ -64,7 +66,7 @@ function cleanDirs(dir: string, options: ClientOptions) {
   const files = FS.readdirSync(dir).map((file) => PATH.resolve(`${dir}/${file}`));
   while (files.length) {
     const file = files.pop();
-    if (file.endsWith(options.language) && !file.endsWith(`index.${options.language}`)) {
+    if (file.endsWith(TS_EXTENSION) && !file.endsWith(`index.${TS_EXTENSION}`)) {
       FS.unlinkSync(file);
     } else if (exists(file).isDirectory()) {
       cleanDirs(file, options);

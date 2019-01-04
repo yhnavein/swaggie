@@ -30,7 +30,7 @@ export function genReduxActionGroupFiles(
     lines.push(renderHeader(name, spec, options));
     lines.push(renderOperationGroup(group, renderReduxActionBlock, spec, options));
     files.push({
-      path: `${options.outDir}/action/${name}.${options.language}`,
+      path: `${options.outDir}/action/${name}.ts`,
       contents: lines.join('\n'),
     });
   }
@@ -39,7 +39,7 @@ export function genReduxActionGroupFiles(
 
 function renderHeader(name: string, spec: ApiSpec, options: ClientOptions): string {
   const code = `
-${options.language === 'ts' && spec.definitions ? '/// <reference path="../types.ts"/>' : ''}
+${spec.definitions ? '/// <reference path="../types.ts"/>' : ''}
 /** @module action/${name} */
 // Auto-generated, edits will be overwritten
 import * as ${name} from '../${name}'${ST}
@@ -49,10 +49,9 @@ import * as ${name} from '../${name}'${ST}
 
 function renderReduxActionBlock(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string {
   const lines = [];
-  const isTs = options.language === 'ts';
   const actionStart = camelToUppercase(op.id) + '_START';
   const actionComplete = camelToUppercase(op.id);
-  const infoParam = isTs ? 'info?: any' : 'info';
+  const infoParam = 'info?: any';
   let paramSignature = renderParamSignature(op, options, `${op.group}.`);
   paramSignature += `${paramSignature ? ', ' : ''}${infoParam}`;
   const required = op.parameters.filter((param) => param.required);
@@ -70,9 +69,9 @@ function renderReduxActionBlock(spec: ApiSpec, op: ApiOperation, options: Client
   return `
 export const ${actionStart} = 's/${op.group}/${actionStart}'${ST}
 export const ${actionComplete} = 's/${op.group}/${actionComplete}'${ST}
-${isTs ? `export type ${actionComplete} = ${returnType}${ST}` : ''}
+export type ${actionComplete} = ${returnType}${ST}
 
-export function ${op.id}(${paramSignature})${isTs ? ': any' : ''} {
+export function ${op.id}(${paramSignature}): any {
   return dispatch => {
     dispatch({ type: ${actionStart}, meta: { info } })${ST}
     return ${op.group}.${op.id}(${params})

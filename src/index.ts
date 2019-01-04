@@ -14,7 +14,6 @@ function verifyOptions(options: ClientOptions): Promise<any> {
   try {
     assert.ok(options.src, 'Open API src not specified');
     assert.ok(options.outDir, 'Output directory not specified');
-    assert.ok(options.language, 'Generation language not specified');
     return Promise.resolve(options);
   } catch (e) {
     return Promise.reject(e);
@@ -24,12 +23,5 @@ function verifyOptions(options: ClientOptions): Promise<any> {
 function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {
   removeOldFiles(options);
   const operations = getOperations(spec);
-  switch (options.language) {
-    case 'js':
-      return genJsCode(spec, operations, options);
-    case 'ts':
-      return genJsCode(spec, operations, options);
-    default:
-      throw new Error(`Language '${options.language}' not supported`);
-  }
+  return genJsCode(spec, operations, options);
 }

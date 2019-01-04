@@ -1,5 +1,5 @@
 import { writeFileSync, join } from '../util';
-import { DOC, SP, ST, getDocType, getTSParamType, formatDocDescription } from './support';
+import { DOC, SP, ST, getDocType, getTSParamType } from './support';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
   const file = genTypesFile(spec, options);
@@ -11,7 +11,7 @@ export function genTypesFile(spec: ApiSpec, options: ClientOptions) {
   join(lines, renderHeader());
   join(lines, renderDefinitions(spec, options));
   return {
-    path: `${options.outDir}/types.${options.language}`,
+    path: `${options.outDir}/types.ts`,
     contents: lines.join('\n'),
   };
 }
@@ -25,22 +25,19 @@ function renderHeader() {
 }
 
 function renderDefinitions(spec: ApiSpec, options: ClientOptions): string[] {
-  const isTs = options.language === 'ts';
   const defs = spec.definitions || {};
-  const typeLines = isTs ? [`namespace api {`] : undefined;
+  const typeLines = [`namespace api {`];
   const docLines = [];
   Object.keys(defs).forEach((name) => {
     const def = defs[name];
-    if (isTs) {
-      join(typeLines, renderTsType(name, def, options));
-    }
+    join(typeLines, renderTsType(name, def, options));
     join(docLines, renderTypeDoc(name, def));
   });
-  if (isTs) {
-    join(typeLines, renderTsDefaultTypes());
-    typeLines.push('}');
-  }
-  return isTs ? typeLines.concat(docLines) : docLines;
+
+  join(typeLines, renderTsDefaultTypes());
+  typeLines.push('}');
+
+  return typeLines.concat(docLines);
 }
 
 function renderTsType(name, def, options) {
