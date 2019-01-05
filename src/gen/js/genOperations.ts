@@ -1,5 +1,5 @@
 import { writeFileSync, join, groupOperationsByGroupName, getBestResponse } from '../util';
-import { DOC, SP, ST, getDocType, getTSParamType } from './support';
+import { DOC, SP, ST, getTSParamType } from './support';
 
 export default function genOperations(
   spec: ApiSpec,
@@ -60,58 +60,6 @@ function renderOperation(spec: ApiSpec, op: ApiOperation, options: ClientOptions
   // join(lines, renderOperationDocs(op));
   join(lines, renderOperationBlock(spec, op, options));
   return lines;
-}
-
-function renderOperationDocs(op: ApiOperation): string[] {
-  const lines = [];
-  lines.push(`/**`);
-  join(lines, renderDocDescription(op));
-  join(lines, renderDocParams(op));
-  lines.push(` */`);
-  return lines;
-}
-
-function renderDocDescription(op: ApiOperation) {
-  const desc = op.description || op.summary;
-  return desc ? `${DOC}${desc.trim()}`.replace(/\n/g, `\n${DOC}`).split('\n') : [];
-}
-
-function renderDocParams(op: ApiOperation) {
-  const params = op.parameters;
-  if (!params.length) {
-    return [];
-  }
-
-  const required = params.filter((param) => param.required);
-  const optional = params.filter((param) => !param.required);
-
-  const lines = [];
-  join(lines, required.map(renderDocParam));
-  if (optional.length) {
-    lines.push(`${DOC}@param {object} options Optional options`);
-    join(lines, optional.map(renderDocParam));
-  }
-  if (op.description || op.summary) {
-    lines.unshift(DOC);
-  }
-
-  return lines;
-}
-
-function renderDocParam(param) {
-  let name = getParamName(param.name);
-  let description = (param.description || '').trim().replace(/\n/g, `\n${DOC}${SP}`);
-  if (!param.required) {
-    name = `options.${name}`;
-    if (param.default) {
-      name += `=${param.default}`;
-    }
-    name = `[${name}]`;
-  }
-  if (param.enum && param.enum.length) {
-    description = `Enum: ${param.enum.join(', ')}. ${description}`;
-  }
-  return `${DOC}@param {${getDocType(param)}} ${name} ${description}`;
 }
 
 function renderOperationBlock(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
