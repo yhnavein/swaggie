@@ -1,4 +1,4 @@
-import { writeFileSync, join, groupOperationsByGroupName, getBestResponse } from '../util';
+import { saveAndPrettifyFile, join, groupOperationsByGroupName, getBestResponse } from '../util';
 import { DOC, SP, ST, getTSParamType } from './support';
 
 import * as ejs from 'ejs';
@@ -10,7 +10,7 @@ export default function genOperations(
   options: ClientOptions
 ) {
   genOperationGroupFiles(spec, operations, options);
-  // files.forEach((file) => writeFileSync(file.path, file.contents));
+  // files.forEach((file) => saveAndPrettifyFile(file.path, file.contents));
 }
 
 export function genOperationGroupFiles(
@@ -27,7 +27,7 @@ export function genOperationGroupFiles(
       const path = `${options.outDir}/${name}.ts`;
       const contents = str;
 
-      writeFileSync(path, contents);
+      saveAndPrettifyFile(path, contents);
     });
     // const lines = [];
     // join(lines, renderHeader(name, spec, options));

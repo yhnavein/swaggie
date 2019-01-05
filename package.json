@@ -52,7 +52,8 @@
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
-    "mustache": "3.0.1"
+    "mustache": "3.0.1",
+    "prettier": "^1.15.3"
   },
   "devDependencies": {
     "@types/ejs": "^2.6.1",
@@ -63,6 +64,7 @@
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.18",
+    "@types/prettier": "^1.15.2",
     "cross-env": "^5.2.0",
     "expect": "^23.6.0",
     "mocha": "^5.2.0",

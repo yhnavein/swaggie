@@ -1,5 +1,5 @@
 import {
-  writeFileSync,
+  saveAndPrettifyFile,
   join,
   groupOperationsByGroupName,
   camelToUppercase,
@@ -14,7 +14,7 @@ export default function genReduxActions(
   options: ClientOptions
 ) {
   const files = genReduxActionGroupFiles(spec, operations, options);
-  files.forEach((file) => writeFileSync(file.path, file.contents));
+  files.forEach((file) => saveAndPrettifyFile(file.path, file.contents));
 }
 
 export function genReduxActionGroupFiles(

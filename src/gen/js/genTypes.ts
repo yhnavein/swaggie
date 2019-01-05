@@ -1,9 +1,9 @@
-import { writeFileSync, join } from '../util';
+import { saveAndPrettifyFile, join } from '../util';
 import { DOC, SP, ST, getDocType, getTSParamType } from './support';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
   const file = genTypesFile(spec, options);
-  writeFileSync(file.path, file.contents);
+  saveAndPrettifyFile(file.path, file.contents);
 }
 
 export function genTypesFile(spec: ApiSpec, options: ClientOptions) {

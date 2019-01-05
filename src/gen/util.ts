@@ -1,6 +1,7 @@
 import { Stats, lstatSync, writeFileSync as fsWriteFileSync, readdirSync, unlinkSync } from 'fs';
 import * as PATH from 'path';
 import { sync as mkdirSync } from 'mkdirp';
+import * as prettier from 'prettier';
 
 export function exists(filePath: string): Stats {
   try {
@@ -10,9 +11,17 @@ export function exists(filePath: string): Stats {
   }
 }
 
-export function writeFileSync(filePath, contents) {
+export function saveAndPrettifyFile(filePath, contents) {
   mkdirSync(PATH.dirname(filePath));
-  fsWriteFileSync(filePath, contents);
+
+  let result = null;
+  try {
+    result = prettier.format(contents, { parser: 'typescript' });
+  } catch (ex) {
+    result = contents;
+  }
+
+  fsWriteFileSync(filePath, result);
 }
 
 export function groupOperationsByGroupName(operations) {

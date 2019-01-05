@@ -1,9 +1,9 @@
 import { SP, ST } from './support';
-import { writeFileSync } from '../util';
+import { saveAndPrettifyFile } from '../util';
 
 export default function genSpec(spec: ApiSpec, options: ClientOptions) {
   const file = genSpecFile(spec, options);
-  writeFileSync(file.path, file.contents);
+  saveAndPrettifyFile(file.path, file.contents);
 }
 
 export function genSpecFile(spec: ApiSpec, options: ClientOptions) {
