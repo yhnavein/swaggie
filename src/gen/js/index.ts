@@ -1,6 +1,5 @@
 import genOperations from './genOperations';
 import genReduxActions from './genReduxActions';
-import genService from './genService';
 import genTypes from './genTypes';
 import genSpec from './genSpec';
 import { applyFormatOptions } from './support';
@@ -11,7 +10,6 @@ export default function genCode(
   options: ClientOptions
 ): ApiSpec {
   applyFormatOptions(options);
-  genService(options);
   genSpec(spec, options);
   genOperations(spec, operations, options);
   genTypes(spec, options);

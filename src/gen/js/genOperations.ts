@@ -1,13 +1,16 @@
 import { writeFileSync, join, groupOperationsByGroupName, getBestResponse } from '../util';
 import { DOC, SP, ST, getTSParamType } from './support';
 
+import * as ejs from 'ejs';
+import { camelCase } from 'lodash';
+
 export default function genOperations(
   spec: ApiSpec,
   operations: ApiOperation[],
   options: ClientOptions
 ) {
-  const files = genOperationGroupFiles(spec, operations, options);
-  files.forEach((file) => writeFileSync(file.path, file.contents));
+  genOperationGroupFiles(spec, operations, options);
+  // files.forEach((file) => writeFileSync(file.path, file.contents));
 }
 
 export function genOperationGroupFiles(
@@ -16,23 +19,52 @@ export function genOperationGroupFiles(
   options: ClientOptions
 ) {
   const groups = groupOperationsByGroupName(operations);
-  const files = [];
+  // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
+    const clientData = prepareClient(name, group);
+    ejs.renderFile(process.cwd() + '\\templates\\axios\\client.ejs', clientData, (err, str) => {
+      const path = `${options.outDir}/${name}.ts`;
+      const contents = str;
 
-    const lines = [];
-    join(lines, renderHeader(name, spec, options));
-    join(lines, renderOperationGroup(group, renderOperation, spec, options));
-    join(lines, renderOperationGroup(group, renderOperationInfo, spec, options));
-    join(lines, ['}']);
-    join(lines, renderOperationGroup(group, renderOperationParamType, spec, options));
-
-    files.push({
-      path: `${options.outDir}/${name}.ts`,
-      contents: lines.join('\n'),
+      writeFileSync(path, contents);
     });
+    // const lines = [];
+    // join(lines, renderHeader(name, spec, options));
+    // join(lines, renderOperationGroup(group, renderOperation, spec, options));
+    // join(lines, renderOperationGroup(group, renderOperationInfo, spec, options));
+    // join(lines, ['}']);
+    // join(lines, renderOperationGroup(group, renderOperationParamType, spec, options));
   }
-  return files;
+}
+
+function prepareClient(name: string, operations: ApiOperation[]): IServiceClient {
+  return {
+    clientName: name,
+    operations: prepareOperations(operations),
+  };
+}
+
+function prepareOperations(operations: ApiOperation[]): IApiOperation[] {
+  return operations.map((op) => {
+    const response = getBestResponse(op);
+    const respType = getTSParamType(response, true);
+
+    return {
+      returnType: respType,
+      name: getOperationName(op.id, op.group),
+      url: op.path,
+      parameters: op.parameters,
+    };
+  });
+}
+
+function getOperationName(opId: string, group?: string) {
+  if (!group) {
+    return opId;
+  }
+
+  return camelCase(opId.replace(group + '_', ''));
 }
 
 function renderHeader(groupName: string, spec: ApiSpec, options: ClientOptions): string[] {
@@ -308,4 +340,22 @@ function renderSecurityInfo(security: ApiOperationSecurity[]): string[] {
       return secLines;
     })
     .reduce((a, b) => a.concat(b));
+}
+
+export interface IApiOperation {
+  returnType: string;
+  name: string;
+  url: string;
+  parameters: ApiOperationParam[];
+}
+
+// export interface IOperationParam {
+//   name: string;
+//   type: string;
+//   optional: boolean;
+// }
+
+export interface IServiceClient {
+  clientName: string;
+  operations: IApiOperation[];
 }

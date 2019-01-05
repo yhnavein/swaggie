@@ -23,15 +23,14 @@
     "openapi": "dist/cli.js"
   },
   "scripts": {
-    "prebuild": "yarn run init",
+    "prebuild": "npm run init",
     "build": "tsc",
-    "predev": "yarn run init",
+    "predev": "npm run init",
     "dev": "tsc -w",
-    "init": "yarn run clean && yarn run copy:template",
+    "init": "npm run clean && npm run copy:template",
     "client": "ts-node --files src/cli.ts",
     "clean": "shx rm -rf ./dist",
-    "copy:template": "shx mkdir -p ./dist/gen/js && yarn run copy:service-ts",
-    "copy:service-ts": "shx cp ./src/gen/js/service.ts.template ./dist/gen/js/service.ts.template"
+    "copy:template": "shx mkdir -p ./dist/gen/js"
   },
   "files": [
     "dist"
@@ -48,15 +47,19 @@
   "dependencies": {
     "chalk": "^2.4.1",
     "commander": "2.19.0",
+    "ejs": "^2.6.1",
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.12.0",
+    "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
     "mustache": "3.0.1"
   },
   "devDependencies": {
+    "@types/ejs": "^2.6.1",
     "@types/expect": "^1.20.3",
     "@types/isomorphic-fetch": "^0.0.34",
     "@types/js-yaml": "^3.11.4",
+    "@types/lodash": "^4.14.119",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.18",
