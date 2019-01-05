@@ -66,6 +66,7 @@ function prepareOperations(operations: ApiOperation[]): IApiOperation[] {
 
     return {
       returnType: respType,
+      method: op.method.toUpperCase(),
       name: getOperationName(op.id, op.group),
       url: op.path,
       parameters: getParams(op.parameters),

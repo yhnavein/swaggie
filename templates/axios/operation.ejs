@@ -9,7 +9,10 @@
   ): AxiosPromise<<%- returnType -%>> {
     let url = this.baseUrl + '<%- url -%>';
 
-    return axios.get<<%- returnType -%>>(url, {
+    return axios.request<<%- returnType -%>>({
+      url: url,
+      method: '<%- method -%>',
+      data: null,
       params: {
         <% parameters.forEach(function(parameter) { -%>
     '<%- parameter.originalName -%>': <%- parameter.name -%>,

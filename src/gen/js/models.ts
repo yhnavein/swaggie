@@ -1,6 +1,6 @@
-
 export interface IApiOperation {
   returnType: string;
+  method: string;
   name: string;
   url: string;
   parameters: IOperationParam[];
