@@ -82,3 +82,48 @@ function cleanDirs(dir: string, options: ClientOptions) {
     }
   }
 }
+
+const reservedWords = [
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'export',
+  'extends',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'import',
+  'in',
+  'instanceof',
+  'new',
+  'return',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+];
+
+export function escapeReservedWords(name: string): string {
+  let escapedName = name;
+
+  if (reservedWords.indexOf(name) >= 0) {
+    escapedName = '_' + name;
+  }
+  return escapedName;
+}
