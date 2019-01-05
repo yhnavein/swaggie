@@ -39,16 +39,13 @@ export function genReduxActionGroupFiles(
 
 function renderHeader(name: string, spec: ApiSpec, options: ClientOptions): string {
   const code = `
-${spec.definitions ? '/// <reference path="../types.ts"/>' : ''}
-/** @module action/${name} */
-// Auto-generated, edits will be overwritten
+  // Auto-generated, edits will be overwritten
 import * as ${name} from '../${name}'${ST}
 `.trim();
   return code;
 }
 
 function renderReduxActionBlock(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string {
-  const lines = [];
   const actionStart = camelToUppercase(op.id) + '_START';
   const actionComplete = camelToUppercase(op.id);
   const infoParam = 'info?: any';

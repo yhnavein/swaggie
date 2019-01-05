@@ -31,7 +31,7 @@ export function join(parent: string[], child: string[]): string[] {
 }
 
 export function camelToUppercase(value: string): string {
-  return value.replace(/([A-Z]+)/g, '_$1').toUpperCase();
+  return value.replace(/([A-Z]+)/g, '$1').toUpperCase();
 }
 
 export function getBestResponse(op: ApiOperation): ApiOperationResponse {
