@@ -19,13 +19,13 @@ export function genOperationGroupFiles(
   const files = [];
   for (let name in groups) {
     const group = groups[name];
+
     const lines = [];
     join(lines, renderHeader(name, spec, options));
     join(lines, renderOperationGroup(group, renderOperation, spec, options));
-
-    join(lines, renderOperationGroup(group, renderOperationParamType, spec, options));
-
     join(lines, renderOperationGroup(group, renderOperationInfo, spec, options));
+    join(lines, ['}']);
+    join(lines, renderOperationGroup(group, renderOperationParamType, spec, options));
 
     files.push({
       path: `${options.outDir}/${name}.ts`,
@@ -35,13 +35,14 @@ export function genOperationGroupFiles(
   return files;
 }
 
-function renderHeader(name: string, spec: ApiSpec, options: ClientOptions): string[] {
+function renderHeader(groupName: string, spec: ApiSpec, options: ClientOptions): string[] {
   const lines = [];
   lines.push(`/* tslint:disable */`);
   lines.push(`// Auto-generated, edits will be overwritten`);
   lines.push(`import * as types from './types'${ST}`);
   lines.push(`import * as gateway from './gateway'${ST}`);
   lines.push('');
+  lines.push(`export class ${groupName}Client {`);
   return lines;
 }
 
@@ -56,7 +57,7 @@ export function renderOperationGroup(
 
 function renderOperation(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
   const lines = [];
-  join(lines, renderOperationDocs(op));
+  // join(lines, renderOperationDocs(op));
   join(lines, renderOperationBlock(spec, op, options));
   return lines;
 }
@@ -93,7 +94,7 @@ function renderDocParams(op: ApiOperation) {
   if (op.description || op.summary) {
     lines.unshift(DOC);
   }
-  lines.push(renderDocReturn(op));
+
   return lines;
 }
 
@@ -113,13 +114,6 @@ function renderDocParam(param) {
   return `${DOC}@param {${getDocType(param)}} ${name} ${description}`;
 }
 
-function renderDocReturn(op: ApiOperation): string {
-  const response = getBestResponse(op);
-  let description = response ? response.description || '' : '';
-  description = description.trim().replace(/\n/g, `\n${DOC}${SP}`);
-  return `${DOC}@return {Promise<types.${getDocType(response)}>} ${description}`;
-}
-
 function renderOperationBlock(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
   const lines = [];
   join(lines, renderOperationSignature(op, options));
@@ -132,7 +126,7 @@ function renderOperationBlock(spec: ApiSpec, op: ApiOperation, options: ClientOp
 function renderOperationSignature(op: ApiOperation, options: ClientOptions): string[] {
   const paramSignature = renderParamSignature(op, options);
   const rtnSignature = renderReturnSignature(op, options);
-  return [`export function ${op.id}(${paramSignature})${rtnSignature} {`];
+  return [`${SP}${op.id}(${paramSignature})${rtnSignature} {`];
 }
 
 export function renderParamSignature(
@@ -255,12 +249,12 @@ function renderOperationObject(spec: ApiSpec, op: ApiOperation, options: ClientO
   });
 
   if (lines.length) {
-    lines.unshift(`${SP}const parameters: types.OperationParamGroups = {`);
+    lines.unshift(`${SP}${SP}const parameters: types.OperationParamGroups = {`);
 
-    lines.push(`${SP}}${ST}`);
+    lines.push(`${SP}${SP}}${ST}`);
     const hasOptionals = op.parameters.some((op) => !op.required);
     if (hasOptionals) {
-      lines.unshift(`${SP}if (!options) options = {}${ST}`);
+      lines.unshift(`${SP}${SP}if (!options) options = {}${ST}`);
     }
   }
   return lines;
@@ -300,7 +294,7 @@ function renderParamGroup(name: string, groupLines: string[], last: boolean): st
 
 function renderRequestCall(op: ApiOperation, options: ClientOptions) {
   const params = op.parameters.length ? ', parameters' : '';
-  return [`${SP}return gateway.request(${op.id}Operation${params})${ST}`, '}'];
+  return [`${SP}${SP}return gateway.request(this.${op.id}Operation${params})${ST}`, SP + '}'];
 }
 
 function renderOperationParamType(
@@ -332,22 +326,22 @@ function renderOperationParamType(
 // We could just JSON.stringify this stuff but want it looking as if typed by developer
 function renderOperationInfo(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
   const lines = [];
-  lines.push(`const ${op.id}Operation: types.OperationInfo = {`);
+  lines.push(`${SP}${op.id}Operation: types.OperationInfo = {`);
 
-  lines.push(`${SP}path: '${op.path}',`);
+  lines.push(`${SP}${SP}path: '${op.path}',`);
 
   const hasBody = op.parameters.some((p) => p.in === 'body');
   if (hasBody && op.contentTypes.length) {
-    lines.push(`${SP}contentTypes: ['${op.contentTypes.join(`','`)}'],`);
+    lines.push(`${SP}${SP}contentTypes: ['${op.contentTypes.join(`','`)}'],`);
   }
-  lines.push(`${SP}method: '${op.method}'${op.security ? ',' : ''}`);
+  lines.push(`${SP}${SP}method: '${op.method}'${op.security ? ',' : ''}`);
   if (op.security && op.security.length) {
     const secLines = renderSecurityInfo(op.security);
-    lines.push(`${SP}security: [`);
+    lines.push(`${SP}${SP}security: [`);
     join(lines, secLines);
-    lines.push(`${SP}]`);
+    lines.push(`${SP}${SP}]`);
   }
-  lines.push(`}${ST}`);
+  lines.push(`${SP}}${ST}`);
   lines.push('');
   return lines;
 }
