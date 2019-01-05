@@ -54,7 +54,7 @@ function prepareOperations(operations: ApiOperation[]): IApiOperation[] {
       returnType: respType,
       name: getOperationName(op.id, op.group),
       url: op.path,
-      parameters: op.parameters,
+      parameters: getParams(op.parameters),
     };
   });
 }
@@ -65,6 +65,20 @@ function getOperationName(opId: string, group?: string) {
   }
 
   return camelCase(opId.replace(group + '_', ''));
+}
+
+function getParams(params: ApiOperationParam[]): IOperationParam[] {
+  if (!params || params.length < 1) {
+    return [];
+  }
+
+  return params.map((p) => {
+    return {
+      name: getParamName(p.name),
+      type: getTSParamType(p, true),
+      optional: !p.required,
+    };
+  });
 }
 
 function renderHeader(groupName: string, spec: ApiSpec, options: ClientOptions): string[] {
@@ -346,14 +360,14 @@ export interface IApiOperation {
   returnType: string;
   name: string;
   url: string;
-  parameters: ApiOperationParam[];
+  parameters: IOperationParam[];
 }
 
-// export interface IOperationParam {
-//   name: string;
-//   type: string;
-//   optional: boolean;
-// }
+export interface IOperationParam {
+  name: string;
+  type: string;
+  optional: boolean;
+}
 
 export interface IServiceClient {
   clientName: string;
