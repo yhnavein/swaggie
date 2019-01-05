@@ -74,6 +74,7 @@ function getParams(params: ApiOperationParam[]): IOperationParam[] {
 
   return params.map((p) => {
     return {
+      originalName: p.name,
       name: getParamName(p.name),
       type: getTSParamType(p, true),
       optional: !p.required,
@@ -183,9 +184,7 @@ function getParamSignature(param: ApiOperationParam, options: ClientOptions): st
 }
 
 export function getParamName(name: string): string {
-  const parts = name.split(/[_-\s!@\#$%^&*\(\)]/g).filter((n) => !!n);
-  const reduced = parts.reduce((name, p) => `${name}${p[0].toUpperCase()}${p.slice(1)}`);
-  return escapeReservedWords(reduced);
+  return escapeReservedWords(camelCase(name));
 }
 
 function escapeReservedWords(name: string): string {
@@ -228,7 +227,7 @@ function escapeReservedWords(name: string): string {
   ];
 
   if (reservedWords.indexOf(name) >= 0) {
-    escapedName = name + '_';
+    escapedName = '_' + name;
   }
   return escapedName;
 }
@@ -365,6 +364,7 @@ export interface IApiOperation {
 
 export interface IOperationParam {
   name: string;
+  originalName: string;
   type: string;
   optional: boolean;
 }

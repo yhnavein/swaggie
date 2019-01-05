@@ -1,5 +1,5 @@
   /**<% parameters.forEach(function(parameter) { %>
-   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%>
+   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
 <% }); %>
    * @return Success
    */
@@ -12,7 +12,7 @@
     return axios.get<<%- returnType -%>>(url, {
       params: {
         <% parameters.forEach(function(parameter) { -%>
-    <%- parameter.name -%>: <%- parameter.name -%>,
+    '<%- parameter.originalName -%>': <%- parameter.name -%>,
     <% }); -%>
       },
     });
