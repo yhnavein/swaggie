@@ -1,18 +1,18 @@
-import * as FS from 'fs';
+import { Stats, lstatSync, writeFileSync as fsWriteFileSync, readdirSync, unlinkSync } from 'fs';
 import * as PATH from 'path';
-import * as mkdirp from 'mkdirp';
+import { sync as mkdirSync } from 'mkdirp';
 
-export function exists(filePath: string): FS.Stats {
+export function exists(filePath: string): Stats {
   try {
-    return FS.lstatSync(filePath);
+    return lstatSync(filePath);
   } catch (e) {
     return undefined;
   }
 }
 
 export function writeFileSync(filePath, contents) {
-  mkdirp.sync(PATH.dirname(filePath));
-  FS.writeFileSync(filePath, contents);
+  mkdirSync(PATH.dirname(filePath));
+  fsWriteFileSync(filePath, contents);
 }
 
 export function groupOperationsByGroupName(operations) {
@@ -63,11 +63,11 @@ function cleanDirs(dir: string, options: ClientOptions) {
     return;
   }
 
-  const files = FS.readdirSync(dir).map((file) => PATH.resolve(`${dir}/${file}`));
+  const files = readdirSync(dir).map((file) => PATH.resolve(`${dir}/${file}`));
   while (files.length) {
     const file = files.pop();
     if (file.endsWith(TS_EXTENSION) && !file.endsWith(`index.${TS_EXTENSION}`)) {
-      FS.unlinkSync(file);
+      unlinkSync(file);
     } else if (exists(file).isDirectory()) {
       cleanDirs(file, options);
     }

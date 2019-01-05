@@ -10,6 +10,7 @@ export function genTypesFile(spec: ApiSpec, options: ClientOptions) {
   const lines = [];
   join(lines, renderHeader());
   join(lines, renderDefinitions(spec, options));
+
   return {
     path: `${options.outDir}/types.ts`,
     contents: lines.join('\n'),
@@ -17,25 +18,22 @@ export function genTypesFile(spec: ApiSpec, options: ClientOptions) {
 }
 
 function renderHeader() {
-  const lines = [];
-  lines.push(`/** @module types */`);
-  lines.push(`// Auto-generated, edits will be overwritten`);
-  lines.push(``);
-  return lines;
+  return [`// Auto-generated, edits will be overwritten`, ''];
 }
 
 function renderDefinitions(spec: ApiSpec, options: ClientOptions): string[] {
   const defs = spec.definitions || {};
-  const typeLines = [`namespace api {`];
+  const typeLines = [];
   const docLines = [];
+
   Object.keys(defs).forEach((name) => {
     const def = defs[name];
     join(typeLines, renderTsType(name, def, options));
-    join(docLines, renderTypeDoc(name, def));
+    // TODO: Temporarily disabled docs as it's not useful right now
+    // join(docLines, renderTypeDoc(name, def));
   });
 
   join(typeLines, renderTsDefaultTypes());
-  typeLines.push('}');
 
   return typeLines.concat(docLines);
 }
@@ -91,7 +89,7 @@ function renderTsInheritance(name: string, allOf: any[], options: ClientOptions)
 
 function renderTsTypeProp(prop: string, info: any, required: boolean): string[] {
   const lines = [];
-  const type = getTSParamType(info, true);
+  const type = getTSParamType(info);
   if (info.description) {
     lines.push(`${SP}/**`);
     lines.push(
@@ -187,7 +185,8 @@ export interface ServiceOptions {
    * Function which should resolve rights for a request (e.g auth token) given
    * the OpenAPI defined security requirements of the operation to be executed.
    */
-  getAuthorization?: (security: OperationSecurity, securityDefinitions: any, op: OperationInfo) => Promise<OperationRights>${ST}
+  getAuthorization?: (security: OperationSecurity, securityDefinitions: any, op: OperationInfo)
+    => Promise<OperationRights>${ST}
   /**
    * Given an error response, custom format and return a ServiceError
    */
@@ -222,12 +221,12 @@ export interface ServiceOptions {
    *
    * The "attempt" param will tell you how many times a retry has been attempted.
    */
-  processResponse?: (req: api.ServiceRequest, res: Response<any>, attempt: number) => Promise<api.ResponseOutcome>${ST}
+  processResponse?: (req: ServiceRequest, res: Response<any>, attempt: number) => Promise<ResponseOutcome>${ST}
   /**
    * If a fetch request fails this function gives you a chance to process
    * that error before it's returned up the promise chain to the original caller.
    */
-  processError?: (req: api.ServiceRequest, res: api.ResponseOutcome) => Promise<api.ResponseOutcome>${ST}
+  processError?: (req: ServiceRequest, res: ResponseOutcome) => Promise<ResponseOutcome>${ST}
   /**
    * By default the authorization header name is "Authorization".
    * This property allows you to override it.
@@ -245,7 +244,9 @@ export interface ServiceOptions {
   authorizationHeader?: string${ST}
 }
 
-export type OperationRights = {[key: string]: OperationRightsInfo}${ST}
+export interface OperationRights {
+  [key: string]: OperationRightsInfo;
+}
 
 export interface OperationRightsInfo {
   username?: string${ST}
@@ -292,11 +293,11 @@ export interface FetchBody {
 
 export interface FetchHeaders {
   get(name: string): string${ST}
-  getAll(name: string): Array<string>${ST}
+  getAll(name: string): string[]${ST}
   has(name: string): boolean${ST}
 }
 
-export declare enum FetchResponseType { 'basic', 'cors', 'default', 'error', 'opaque' }${ST}
+export declare enum FetchResponseType { 'basic', 'cors', 'default', 'error', 'opaque' }
 
 export class ServiceError extends Error {
   status: number${ST}
@@ -323,8 +324,7 @@ function renderTypeDoc(name: string, def: any): string[] {
     return [];
   }
 
-  const group = 'types';
-  const lines = ['/**', `${DOC}@typedef ${name}`, `${DOC}@memberof module:${group}`];
+  const lines = ['/**', `${DOC}@typedef ${name}`];
   const req = def.required || [];
   const propLines = Object.keys(def.properties).map((prop) => {
     const info = def.properties[prop];

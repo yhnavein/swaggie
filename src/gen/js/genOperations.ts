@@ -1,10 +1,4 @@
-import {
-  writeFileSync,
-  join,
-  groupOperationsByGroupName,
-  camelToUppercase,
-  getBestResponse,
-} from '../util';
+import { writeFileSync, join, groupOperationsByGroupName, getBestResponse } from '../util';
 import { DOC, SP, ST, getDocType, getTSParamType } from './support';
 
 export default function genOperations(
@@ -43,11 +37,9 @@ export function genOperationGroupFiles(
 
 function renderHeader(name: string, spec: ApiSpec, options: ClientOptions): string[] {
   const lines = [];
-  if (spec.definitions) {
-    lines.push(`/// <reference path="types.ts"/>`);
-  }
-  lines.push(`/** @module ${name} */`);
+  lines.push(`/* tslint:disable */`);
   lines.push(`// Auto-generated, edits will be overwritten`);
+  lines.push(`import * as types from './types'${ST}`);
   lines.push(`import * as gateway from './gateway'${ST}`);
   lines.push('');
   return lines;
@@ -125,7 +117,7 @@ function renderDocReturn(op: ApiOperation): string {
   const response = getBestResponse(op);
   let description = response ? response.description || '' : '';
   description = description.trim().replace(/\n/g, `\n${DOC}${SP}`);
-  return `${DOC}@return {Promise<${getDocType(response)}>} ${description}`;
+  return `${DOC}@return {Promise<types.${getDocType(response)}>} ${description}`;
 }
 
 function renderOperationBlock(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
@@ -191,13 +183,13 @@ function renderOptionalParamsSignature(
 
 function renderReturnSignature(op: ApiOperation, options: ClientOptions): string {
   const response = getBestResponse(op);
-  return `: Promise<api.Response<${getTSParamType(response)}>>`;
+  return `: Promise<types.Response<${getTSParamType(response, true)}>>`;
 }
 
 function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
   const signature = [getParamName(param.name)];
 
-  signature.push(getTSParamType(param));
+  signature.push(getTSParamType(param, true));
 
   return signature;
 }
@@ -263,7 +255,7 @@ function renderOperationObject(spec: ApiSpec, op: ApiOperation, options: ClientO
   });
 
   if (lines.length) {
-    lines.unshift(`${SP}const parameters: api.OperationParamGroups = {`);
+    lines.unshift(`${SP}const parameters: types.OperationParamGroups = {`);
 
     lines.push(`${SP}}${ST}`);
     const hasOptionals = op.parameters.some((op) => !op.required);
@@ -340,7 +332,7 @@ function renderOperationParamType(
 // We could just JSON.stringify this stuff but want it looking as if typed by developer
 function renderOperationInfo(spec: ApiSpec, op: ApiOperation, options: ClientOptions): string[] {
   const lines = [];
-  lines.push(`const ${op.id}Operation: api.OperationInfo = {`);
+  lines.push(`const ${op.id}Operation: types.OperationInfo = {`);
 
   lines.push(`${SP}path: '${op.path}',`);
 

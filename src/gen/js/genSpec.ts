@@ -1,4 +1,4 @@
-import { DOC, SP, ST, getDocType, getTSParamType } from './support';
+import { SP, ST } from './support';
 import { writeFileSync } from '../util';
 
 export default function genSpec(spec: ApiSpec, options: ClientOptions) {
@@ -22,15 +22,18 @@ function renderSpecView(spec: ApiSpec, options: ClientOptions): string {
     accepts: spec.accepts,
     securityDefinitions: spec.securityDefinitions,
   };
-  const type = ': api.OpenApiSpec';
-  return `/// <reference path="../types.ts"/>
-// Auto-generated, edits will be overwritten
-const spec${type} = ${stringify(view)}${ST}
+  const type = ': OpenApiSpec';
+  return `// Auto-generated, edits will be overwritten
+import { OpenApiSpec } from '../types';
+
+const spec${type} = {
+  host: '${view.host}',
+  schemes: ${JSON.stringify(view.schemes)},
+  basePath: '${view.basePath}',
+  contentTypes: ${JSON.stringify(view.contentTypes)},
+  accepts: ${JSON.stringify(view.accepts)},
+}${ST}
+
 export default spec${ST}
 `;
-}
-
-function stringify(view: any): string {
-  const str = JSON.stringify(view, null, 2);
-  return str.replace(/"/g, `'`).replace(/  /g, SP);
 }

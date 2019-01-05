@@ -20,6 +20,7 @@ export function applyFormatOptions(options: ClientOptions) {
       SP = DEFAULT_SP;
       break;
   }
+
   if (options.semicolon) {
     ST = ';';
   }
@@ -67,7 +68,7 @@ export function getTSParamType(param: any, inTypesModule?: boolean): string {
   }
   if (param.$ref) {
     const type = param.$ref.split('/').pop();
-    return inTypesModule ? type : `api.${type}`;
+    return (inTypesModule ? 'types.' : '') + type;
   } else if (param.schema) {
     return getTSParamType(param.schema, inTypesModule);
   } else if (param.type === 'array') {
@@ -79,7 +80,7 @@ export function getTSParamType(param: any, inTypesModule?: boolean): string {
       }
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
-      return inTypesModule ? `${type}[]` : `api.${type}[]`;
+      return (inTypesModule ? 'types.' : '') + `${type}[]`;
     } else {
       return 'any[]';
     }

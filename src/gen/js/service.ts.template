@@ -1,4 +1,3 @@
-/// <reference path="../types.ts"/>
 // Auto-generated, edits will be overwritten
 import spec from './spec';;
 
