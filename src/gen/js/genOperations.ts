@@ -1,5 +1,5 @@
 import * as ejs from 'ejs';
-import { camelCase } from 'lodash';
+import { camelCase, last } from 'lodash';
 
 import { getTSParamType } from './support';
 import {
@@ -29,6 +29,9 @@ export function genOperationGroupFiles(
     const group = groups[name];
     const clientData = prepareClient(name, group);
     ejs.renderFile(process.cwd() + '\\templates\\axios\\client.ejs', clientData, (err, str) => {
+      if (err) {
+        console.error(err);
+      }
       const path = `${options.outDir}/${name}.ts`;
       const contents = str;
 
@@ -70,6 +73,9 @@ function prepareOperations(operations: ApiOperation[]): IApiOperation[] {
       name: getOperationName(op.id, op.group),
       url: op.path,
       parameters: getParams(op.parameters),
+      query: getParams(op.parameters, ['query', 'path']),
+      body: last(getParams(op.parameters, ['body'])),
+      headers: getParams(op.parameters, ['header']),
     };
   });
 }
@@ -82,19 +88,19 @@ function getOperationName(opId: string, group?: string) {
   return camelCase(opId.replace(group + '_', ''));
 }
 
-function getParams(params: ApiOperationParam[]): IOperationParam[] {
+function getParams(params: ApiOperationParam[], where?: string[]): IOperationParam[] {
   if (!params || params.length < 1) {
     return [];
   }
 
-  return params.map((p) => {
-    return {
+  return params
+    .filter((p) => !where || where.indexOf(p.in) > -1)
+    .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
       type: getTSParamType(p, true),
       optional: !p.required,
-    };
-  });
+    }));
 }
 
 export function renderOperationGroup(

@@ -3,7 +3,9 @@ export interface IApiOperation {
   method: string;
   name: string;
   url: string;
+  body: object | null | undefined;
   parameters: IOperationParam[];
+  headers: IOperationParam[];
 }
 
 export interface IOperationParam {
