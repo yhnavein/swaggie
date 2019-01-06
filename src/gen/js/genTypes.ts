@@ -1,5 +1,6 @@
 import { saveAndPrettifyFile, join } from '../util';
 import { DOC, SP, ST, getDocType, getTSParamType } from './support';
+import { uniq, uniqBy } from 'lodash';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
   const file = genTypesFile(spec, options);
@@ -25,20 +26,27 @@ function renderDefinitions(spec: ApiSpec, options: ClientOptions): string[] {
   const defs = spec.definitions || {};
   const typeLines = [];
   const docLines = [];
+  const nonGenericTypes = Object.keys(defs).filter((k) => k.indexOf('[') === -1);
+  const genericTypes = Object.keys(defs).filter((k) => k.indexOf('[') > -1);
+  const uniqGenericTypes = getDistinctGenericTypes(genericTypes);
 
-  Object.keys(defs).forEach((name) => {
+  nonGenericTypes.forEach((name) => {
     const def = defs[name];
     join(typeLines, renderTsType(name, def, options));
-    // TODO: Temporarily disabled docs as it's not useful right now
-    // join(docLines, renderTypeDoc(name, def));
   });
 
-  // join(typeLines, renderTsDefaultTypes());
+  uniqGenericTypes.forEach((name) => {
+    const realKey = genericTypes.filter((t) => t.indexOf(name) === 0).pop();
+    const def = defs[realKey];
+    const genericName = name + '<T>';
+    const typeToBeGeneric = realKey.substring(realKey.indexOf('[') + 1, realKey.indexOf(']'));
+    join(typeLines, renderTsType(genericName, def, options, typeToBeGeneric));
+  });
 
   return typeLines.concat(docLines);
 }
 
-function renderTsType(name, def, options) {
+function renderTsType(name, def, options, typeToBeGeneric?: string) {
   if (def.allOf) {
     return renderTsInheritance(name, def.allOf, options);
   }
@@ -61,11 +69,11 @@ function renderTsType(name, def, options) {
   const optionalProps = props.filter((p) => !~required.indexOf(p));
 
   const requiredPropLines = requiredProps
-    .map((prop) => renderTsTypeProp(prop, def.properties[prop], true))
+    .map((prop) => renderTsTypeProp(prop, def.properties[prop], true, typeToBeGeneric))
     .reduce((a, b) => a.concat(b), []);
 
   const optionalPropLines = optionalProps
-    .map((prop) => renderTsTypeProp(prop, def.properties[prop], false))
+    .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, typeToBeGeneric))
     .reduce((a, b) => a.concat(b), []);
 
   join(lines, requiredPropLines);
@@ -87,9 +95,17 @@ function renderTsInheritance(name: string, allOf: any[], options: ClientOptions)
   return lines;
 }
 
-function renderTsTypeProp(prop: string, info: any, required: boolean): string[] {
+function renderTsTypeProp(
+  prop: string,
+  info: any,
+  required: boolean,
+  typeToBeGeneric?: string
+): string[] {
   const lines = [];
-  const type = getTSParamType(info);
+  let type = getTSParamType(info);
+  if (typeToBeGeneric && type.indexOf(typeToBeGeneric) === 0) {
+    type = type.replace(typeToBeGeneric, 'T');
+  }
   if (info.description) {
     lines.push(`${SP}/**`);
     lines.push(
@@ -150,4 +166,9 @@ function verifyAllOf(name: string, allOf: any[]) {
   if (!ref.$ref) {
     throw new Error(`Json schema allOf '${name}' first element must be a $ref ${ref}`);
   }
+}
+
+function getDistinctGenericTypes(keys: string[]) {
+  const sanitizedKeys = keys.map((k) => k.substring(0, k.indexOf('[')));
+  return uniq(sanitizedKeys);
 }

@@ -51,7 +51,7 @@ export function getTSParamType(param: any, inTypesModule?: boolean): string {
   }
   if (param.$ref) {
     const type = param.$ref.split('/').pop();
-    return (inTypesModule ? 'types.' : '') + type;
+    return handleGenerics(type, inTypesModule);
   } else if (param.schema) {
     return getTSParamType(param.schema, inTypesModule);
   } else if (param.type === 'array') {
@@ -80,4 +80,17 @@ export function getTSParamType(param: any, inTypesModule?: boolean): string {
   } else {
     return param.type || 'any';
   }
+}
+
+function handleGenerics(type: string, inTypesModule: boolean) {
+  if (!/^\w+\[\w+\]/.test(type)) {
+    return (inTypesModule ? 'types.' : '') + type;
+  }
+
+  // const fixedType = type.replace(/\[/g, '<').replace(/\]/g, '>');
+  const parts = type.split('[');
+  return parts
+    .map((p) => (inTypesModule && p ? 'types.' : '') + p)
+    .join('<')
+    .replace(/\]/g, '>');
 }
