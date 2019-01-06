@@ -1,8 +1,9 @@
 /src
 /test
-/typings
-typings.json
 tslint.json
 tsconfig.json
 yarn.lock
-README.md
+.prettierrc
+.editorconfig
+yarn-error.log
+package-lock.json
