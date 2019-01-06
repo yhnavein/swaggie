@@ -1,4 +1,5 @@
 import * as YAML from 'js-yaml';
+import * as httpClient from 'got';
 
 export interface SpecOptions {
   /**
@@ -21,12 +22,16 @@ export function resolveSpec(src: string | object, options?: SpecOptions): Promis
 
 function loadJson(src: string): Promise<ApiSpec | any> {
   if (/^https?:\/\//im.test(src)) {
-    return fetch(src).then((response) => response.json());
+    return loadFromUrl(src);
   } else if (String(process) === '[object process]') {
     return readFile(src).then((contents) => parseFileContents(contents, src));
   } else {
     throw new Error(`Unable to load api at '${src}'`);
   }
+}
+
+function loadFromUrl(url: string) {
+  return httpClient(url, { json: true }).then((resp) => resp.body);
 }
 
 function readFile(filePath: string): Promise<string> {

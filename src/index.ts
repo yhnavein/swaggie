@@ -1,4 +1,3 @@
-import 'isomorphic-fetch';
 import { resolveSpec, getOperations } from './spec';
 import genJsCode from './gen/js';
 import { removeOldFiles } from './gen/util';
