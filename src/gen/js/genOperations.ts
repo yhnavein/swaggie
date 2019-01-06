@@ -1,4 +1,5 @@
 import * as ejs from 'ejs';
+import * as path from 'path';
 import { camelCase, last } from 'lodash';
 
 import { getTSParamType } from './support';
@@ -28,7 +29,9 @@ export function genOperationGroupFiles(
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group);
-    ejs.renderFile(process.cwd() + '\\templates\\axios\\client.ejs', clientData, (err, str) => {
+    const absPath = path.join(process.cwd(), 'templates', 'axios', 'client.ejs');
+
+    ejs.renderFile(absPath, clientData, (err, str) => {
       if (err) {
         console.error(err);
       }

@@ -1,6 +1,6 @@
 {
   "name": "@yhnavein/openapi-client",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec.",
   "author": {
     "name": "Mike Stead",
@@ -27,10 +27,8 @@
     "build": "tsc",
     "predev": "npm run init",
     "dev": "tsc -w",
-    "init": "npm run clean && npm run copy:template",
-    "client": "ts-node --files src/cli.ts",
-    "clean": "shx rm -rf ./dist",
-    "copy:template": "shx mkdir -p ./dist/gen/js"
+    "init": "npm run clean",
+    "clean": "shx rm -rf ./dist"
   },
   "files": [
     "dist"
@@ -49,6 +47,7 @@
     "commander": "2.19.0",
     "ejs": "^2.6.1",
     "isomorphic-fetch": "^2.2.1",
+    "js-yaml": "^3.12.0",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
     "mustache": "3.0.1",
@@ -58,6 +57,7 @@
     "@types/ejs": "^2.6.1",
     "@types/expect": "^1.20.3",
     "@types/isomorphic-fetch": "^0.0.34",
+    "@types/js-yaml": "^3.11.4",
     "@types/lodash": "^4.14.119",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.5",
@@ -67,7 +67,6 @@
     "expect": "^23.6.0",
     "mocha": "^5.2.0",
     "shx": "^0.3.2",
-    "ts-node": "^7.0.1",
     "tslint": "^5.12.0",
     "typescript": "3.2.2"
   }
