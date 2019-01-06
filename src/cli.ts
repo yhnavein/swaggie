@@ -28,11 +28,6 @@ const args: any = program
     'True if wanting to use a semicolon statement terminator',
     process.env.OPEN_API_SEMICOLON
   )
-  .option(
-    '--indent <2|4|tab>',
-    'Indentation to use, defaults to 2 spaces',
-    process.env.OPEN_API_INDENT
-  )
   .parse(process.argv);
 
 genCode(args).then(complete, error);

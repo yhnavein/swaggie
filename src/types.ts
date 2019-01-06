@@ -2,7 +2,6 @@ interface ClientOptions {
   src: string;
   outDir: string;
   redux?: boolean;
-  indent?: '2' | '4' | 'tab';
   semicolon?: boolean;
 }
 
