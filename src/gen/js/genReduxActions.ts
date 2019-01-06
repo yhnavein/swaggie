@@ -24,6 +24,8 @@ export function genReduxActionGroupFiles(
 ) {
   const groups = groupOperationsByGroupName(operations);
   const files = [];
+
+  // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
     const lines = [];

@@ -107,6 +107,8 @@ export function expandRefs(data: any, lookup: object, options: SpecOptions): any
       data = Object.assign({}, resolved, data);
     }
     dataCache.add(data);
+
+    // tslint:disable-next-line:forin prefer-const
     for (let name in data) {
       data[name] = expandRefs(data[name], lookup, options);
     }
