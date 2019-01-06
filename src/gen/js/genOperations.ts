@@ -29,7 +29,7 @@ export function genOperationGroupFiles(
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group);
-    const absPath = path.join(process.cwd(), 'templates', 'axios', 'client.ejs');
+    const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'client.ejs');
 
     ejs.renderFile(absPath, clientData, (err, str) => {
       if (err) {

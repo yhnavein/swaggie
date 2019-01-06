@@ -1,6 +1,6 @@
 {
   "name": "@yhnavein/openapi-client",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec.",
   "author": {
     "name": "Mike Stead",
@@ -31,7 +31,8 @@
     "clean": "shx rm -rf ./dist"
   },
   "files": [
-    "dist"
+    "dist",
+    "templates"
   ],
   "keywords": [
     "swagger",
