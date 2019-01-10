@@ -1,3 +1,5 @@
+import { isBasicType } from '../util';
+
 export const DOC = ' * ';
 export const DEFAULT_SP = '  ';
 export let SP = DEFAULT_SP;
@@ -90,7 +92,7 @@ function handleGenerics(type: string, inTypesModule: boolean) {
   // const fixedType = type.replace(/\[/g, '<').replace(/\]/g, '>');
   const parts = type.split('[');
   return parts
-    .map((p) => (inTypesModule && p ? 'types.' : '') + p)
+    .map((p) => (p && inTypesModule && !isBasicType(p) ? 'types.' : '') + p)
     .join('<')
     .replace(/\]/g, '>');
 }
