@@ -1,26 +1,26 @@
 {
-  "name": "@yhnavein/openapi-client",
-  "version": "0.0.8",
-  "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec.",
+  "name": "swaggie",
+  "version": "0.1.0",
+  "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
   "author": {
-    "name": "Mike Stead",
-    "url": "https://github.com/mikestead"
+    "name": "Piotr Dabrowski",
+    "url": "https://github.com/yhnavein"
   },
   "license": "MIT",
-  "homepage": "https://github.com/mikestead/openapi-client",
+  "homepage": "https://github.com/yhnavein/swaggie",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mikestead/openapi-client.git"
+    "url": "https://github.com/yhnavein/swaggie.git"
   },
   "bugs": {
-    "url": "https://github.com/mikestead/openapi-client/issues"
+    "url": "https://github.com/yhnavein/swaggie/issues"
   },
   "engines": {
     "node": ">=8.0.0"
   },
   "main": "dist/index.js",
   "bin": {
-    "openapi": "dist/cli.js"
+    "swaggie": "dist/cli.js"
   },
   "scripts": {
     "prebuild": "npm run init",

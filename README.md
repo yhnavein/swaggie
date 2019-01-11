@@ -1,29 +1,27 @@
-# OpenAPI Client
+# Swaggie
 
 Generate ES6 or Typescript service integration code from an OpenAPI 2.0 spec.
 
-Also supports optional Redux action creator generation.
-
-Tested against JSON services.
+Project is based and inspired by [OpenApi Client](https://github.com/mikestead/openapi-client).
 
 ## Install
 
 In your project
 
-    npm install @yhnavein/openapi-client --save-dev
+    npm install swaggie --save-dev
 
 Or globally to run CLI from anywhere
 
-    npm install @yhnavein/openapi-client -g
+    npm install swaggie -g
 
 ## Usage – Generating the API client
 
-`openapi-client` generates action creators in the `outDir` of your choosing. The rest of the examples assume that you've set `--outDir api-client`. You can generate the `api-client` either using the CLI, or in code.
+`swaggie` generates action creators in the `outDir` of your choosing. The rest of the examples assume that you've set `--outDir api-client`. You can generate the `api-client` either using the CLI, or in code.
 
 ### CLI
 
 ```
-Usage: openapi [options]
+Usage: swaggie [options]
 
 Options:
 
@@ -37,8 +35,8 @@ Options:
 ### Code
 
 ```javascript
-const openapi = require('openapi-client')
-openapi.genCode({
+const swaggie = require('swaggie')
+swaggie.genCode({
   src: 'http://petstore.swagger.io/v2/swagger.json',
   outDir: './src/service',
   redux: true
@@ -58,7 +56,7 @@ function error(e) {
 
 ### Using generated Redux action creators
 
-You can use the generated API client directly. However, if you pass `--redux` or `redux: true` to `openapi-client`, you will have generated Redux action creators to call your API (using a wrapper around `fetch`). The following example assumes that you're using `react-redux` to wrap action creators in `dispatch`. You also need to use for example `redux-thunk` as middleware to allow async actions.
+You can use the generated API client directly. However, if you pass `--redux` or `redux: true` to `swaggie`, you will have generated Redux action creators to call your API (using a wrapper around `fetch`). The following example assumes that you're using `react-redux` to wrap action creators in `dispatch`. You also need to use for example `redux-thunk` as middleware to allow async actions.
 
 In your component:
 
@@ -120,3 +118,4 @@ export default function reducer(state = initialState, action) {
   }
 }
 ```
+
