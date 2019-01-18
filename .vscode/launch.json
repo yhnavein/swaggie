@@ -8,16 +8,16 @@
       "type": "node",
       "request": "launch",
       "name": "Debug app",
-      "program": "${workspaceFolder}\\src\\cli.ts",
+      "program": "${workspaceFolder}/src/cli.ts",
       "preLaunchTask": "Build",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "cwd": "${workspaceFolder}",
       "protocol": "inspector",
       "args": [
         "-s",
-        "https://petstore.swagger.io/v2/swagger.json",
+        "http://localhost:4016/swagger/v1/swagger.json",
         "-o",
-        "C:\\bc\\test\\openapi-tests"
+        "/tmp/swagger-test/"
       ]
     }
   ]
