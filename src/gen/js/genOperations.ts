@@ -78,7 +78,8 @@ function prepareOperations(operations: ApiOperation[]): IApiOperation[] {
       name: getOperationName(op.id, op.group),
       url: op.path,
       parameters: getParams(op.parameters),
-      query: getParams(op.parameters, ['query', 'path']),
+      query: getParams(op.parameters, ['query']),
+      pathParams: getParams(op.parameters, ['path']),
       body: last(getParams(op.parameters, ['body'])),
       headers: getParams(op.parameters, ['header']),
     };

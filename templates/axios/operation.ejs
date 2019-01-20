@@ -9,6 +9,12 @@
   ): AxiosPromise<<%- returnType -%>> {
     let url = this.baseUrl + '<%- url -%>';
 
+<%_ if(pathParams && pathParams.length > 0) {
+  pathParams.forEach(function(parameter) { -%>
+    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+<% });
+} _%>
+
     return axios.request<<%- returnType -%>>({
       url: url,
       method: '<%- method -%>',
