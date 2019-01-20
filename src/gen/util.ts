@@ -2,6 +2,7 @@ import { Stats, lstatSync, writeFileSync as fsWriteFileSync, readdirSync, unlink
 import * as PATH from 'path';
 import { sync as mkdirSync } from 'mkdirp';
 import * as prettier from 'prettier';
+import { ApiOperation, ApiOperationResponse, ClientOptions } from '../types';
 
 export function exists(filePath: string): Stats {
   try {

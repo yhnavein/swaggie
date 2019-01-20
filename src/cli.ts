@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
+import "reflect-metadata";
 import * as program from 'commander';
 import chalk from 'chalk';
-import { genCode } from './index';
+import { generator } from './index';
+import { ApiSpec } from "./types";
+
+// TODO: refactor into class (move bootstrap code into ./bin)
 
 const args: any = program
   // tslint:disable-next-line:no-var-requires
@@ -30,7 +34,8 @@ const args: any = program
   )
   .parse(process.argv);
 
-genCode(args).then(complete, error);
+
+generator.generateCode(args).then(complete, error);
 
 function complete(spec: ApiSpec) {
   console.info(chalk.bold.cyan(`Api ${args.src} code generated into ${args.outDir}`));

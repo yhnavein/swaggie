@@ -7,6 +7,7 @@ import {
 } from '../util';
 import { DOC, SP, ST, getDocType, getTSParamType } from './support';
 import { renderParamSignature, renderOperationGroup, getParamName } from './genOperations';
+import { ApiSpec, ApiOperation, ClientOptions } from '../../types';
 
 export default function genReduxActions(
   spec: ApiSpec,

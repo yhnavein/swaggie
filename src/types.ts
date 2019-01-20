@@ -1,18 +1,18 @@
-interface ClientOptions {
+export interface ClientOptions {
   src: string;
   outDir: string;
   redux?: boolean;
   semicolon?: boolean;
 }
 
-interface ApiRequestData {
+export interface ApiRequestData {
   method: HttpMethod;
   url: string;
   headers: { [index: string]: string };
   body: any;
 }
 
-interface ApiSpec {
+export interface ApiSpec {
   host: string;
   basePath: string;
   schemes: string[];
@@ -23,9 +23,10 @@ interface ApiSpec {
   contentTypes: string[];
 }
 
-type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
+// TODO: SUPPORTED_METHODS from OperationsParser
+export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 
-interface ApiOperation {
+export interface ApiOperation {
   id: string;
   summary: string;
   description: string;
@@ -40,7 +41,7 @@ interface ApiOperation {
   tags?: string[];
 }
 
-interface ApiOperationParam extends ApiOperationParamBase {
+export interface ApiOperationParam extends ApiOperationParamBase {
   name: string;
   in: 'header' | 'path' | 'query' | 'body' | 'formData';
   description: string;
@@ -49,9 +50,9 @@ interface ApiOperationParam extends ApiOperationParamBase {
   schema: object;
 }
 
-type CollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi';
+export type CollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi';
 
-interface ApiOperationParamBase {
+export interface ApiOperationParamBase {
   type: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'file';
   format:
     | 'int32'
@@ -80,7 +81,7 @@ interface ApiOperationParamBase {
   multipleOf: number;
 }
 
-interface ApiOperationParamGroups {
+export interface ApiOperationParamGroups {
   header?: any;
   path?: any;
   query?: any;
@@ -88,7 +89,7 @@ interface ApiOperationParamGroups {
   body?: any;
 }
 
-interface ApiOperationResponse {
+export interface ApiOperationResponse {
   code: string;
   description: string;
   schema: object;
@@ -96,12 +97,12 @@ interface ApiOperationResponse {
   examples: object;
 }
 
-interface ApiOperationSecurity {
+export interface ApiOperationSecurity {
   id: string;
   scopes?: string[];
 }
 
-interface ApiRights {
+export interface ApiRights {
   query?: any;
   headers?: any;
 }

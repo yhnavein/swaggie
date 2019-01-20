@@ -10,6 +10,7 @@ import {
   escapeReservedWords,
 } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
+import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
 
 export default function genOperations(
   spec: ApiSpec,
