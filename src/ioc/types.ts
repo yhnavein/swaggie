@@ -1,4 +1,9 @@
+import * as ejs from 'ejs';
+
+export type Ejs = typeof ejs;
+
 export const TYPES = {
+  // Main
   CodeGenerator: Symbol('CodeGenerator'),
   DirectoryCleaner: Symbol('DirectoryCleaner'),
   FileLoader: Symbol('FileLoader'),
@@ -8,5 +13,8 @@ export const TYPES = {
   SpecFormatter: Symbol('SpecFormatter'),
   SpecRefExpander: Symbol('SpecRefExpander'),
   SpecResolver: Symbol('SpecResolver'),
+
+  // Externals
   SetFactory: Symbol('Factory<Set>'),
+  Ejs: Symbol('Ejs'),
 };
