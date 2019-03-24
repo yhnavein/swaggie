@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import "reflect-metadata";
+import 'reflect-metadata';
 import * as program from 'commander';
 import chalk from 'chalk';
 import { generator } from './index';
-import { ApiSpec } from "./types";
+import { ApiSpec } from './types';
 
 // TODO: refactor into class (move bootstrap code into ./bin)
 
@@ -33,7 +33,6 @@ const args: any = program
     process.env.OPEN_API_SEMICOLON
   )
   .parse(process.argv);
-
 
 generator.generateCode(args).then(complete, error);
 

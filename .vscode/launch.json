@@ -15,9 +15,9 @@
       "protocol": "inspector",
       "args": [
         "-s",
-        "http://localhost:4016/swagger/v1/swagger.json",
+        "http://localhost:8888/examiner-portal-swagger.json",
         "-o",
-        "/tmp/swagger-test/"
+        "./swagger-test/"
       ]
     }
   ]
