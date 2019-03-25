@@ -5,7 +5,6 @@ import { CodeGenerator } from '../gen';
 import { Generator } from '../generator';
 import { OperationsParser } from '../spec';
 import { SpecFormatter } from '../spec/spec-formatter';
-import { SpecRefExpander } from '../spec/spec-ref-expander';
 import { SpecResolver } from '../spec/spec-resolver';
 import { Ejs, TYPES } from './types';
 
@@ -18,7 +17,6 @@ container.bind<FilesystemFacade>(TYPES.FilesystemFacade).to(FilesystemFacade);
 container.bind<Generator>(TYPES.Generator).to(Generator);
 container.bind<OperationsParser>(TYPES.OperationsParser).to(OperationsParser);
 container.bind<SpecFormatter>(TYPES.SpecFormatter).to(SpecFormatter);
-container.bind<SpecRefExpander>(TYPES.SpecRefExpander).to(SpecRefExpander);
 container.bind<SpecResolver>(TYPES.SpecResolver).to(SpecResolver);
 
 container.bind<Ejs>(TYPES.Ejs).toDynamicValue(() => require('ejs'));
