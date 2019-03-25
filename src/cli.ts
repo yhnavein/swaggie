@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-
 import 'reflect-metadata';
-import * as program from 'commander';
+
 import chalk from 'chalk';
-import { generator } from './index';
+import * as program from 'commander';
+
+import { generator } from '.';
 import { ApiSpec } from './types';
 
 // TODO: refactor into class (move bootstrap code into ./bin)

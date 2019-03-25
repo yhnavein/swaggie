@@ -1,14 +1,13 @@
 import { Container } from 'inversify';
-import { SpecFormatter } from '../spec/spec-formatter';
-import { TYPES, Ejs } from './types';
-import { FileLoader } from '../common/file-loader';
-import { FilesystemFacade } from '../common/filesystem-facade';
-import { SpecRefExpander } from '../spec/spec-ref-expander';
-import { SpecResolver } from '../spec/spec-resolver';
+
+import { DirectoryCleaner, FileLoader, FilesystemFacade } from '../common';
+import { CodeGenerator } from '../gen';
 import { Generator } from '../generator';
 import { OperationsParser } from '../spec';
-import { DirectoryCleaner } from '../common/directory-cleaner';
-import { CodeGenerator } from '../gen/js';
+import { SpecFormatter } from '../spec/spec-formatter';
+import { SpecRefExpander } from '../spec/spec-ref-expander';
+import { SpecResolver } from '../spec/spec-resolver';
+import { Ejs, TYPES } from './types';
 
 const container = new Container();
 

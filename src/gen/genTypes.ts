@@ -1,7 +1,8 @@
-import { saveAndPrettifyFile, join } from '../util';
-import { DOC, SP, ST, getDocType, getTSParamType } from './support';
-import { uniq, uniqBy } from 'lodash';
-import { ApiSpec, ClientOptions } from '../../types';
+import { uniq } from 'lodash';
+
+import { ApiSpec, ClientOptions } from '../types';
+import { DOC, getDocType, getTSParamType, SP, ST } from './support';
+import { join, saveAndPrettifyFile } from './util';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
   const file = genTypesFile(spec, options);

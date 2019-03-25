@@ -4,7 +4,7 @@ import genOperations from './genOperations';
 import genReduxActions from './genReduxActions';
 import genTypes from './genTypes';
 import { applyFormatOptions } from './support';
-import { ApiSpec, ApiOperation, ClientOptions } from '../../types';
+import { ApiSpec, ApiOperation, ClientOptions } from '../types';
 
 @injectable()
 export class CodeGenerator {

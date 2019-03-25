@@ -1,13 +1,7 @@
-import {
-  saveAndPrettifyFile,
-  join,
-  groupOperationsByGroupName,
-  camelToUppercase,
-  getBestResponse,
-} from '../util';
-import { DOC, SP, ST, getDocType, getTSParamType } from './support';
-import { renderParamSignature, renderOperationGroup, getParamName } from './genOperations';
-import { ApiSpec, ApiOperation, ClientOptions } from '../../types';
+import { ApiOperation, ApiSpec, ClientOptions } from '../types';
+import { getParamName, renderOperationGroup, renderParamSignature } from './genOperations';
+import { getTSParamType, SP, ST } from './support';
+import { camelToUppercase, getBestResponse, groupOperationsByGroupName, saveAndPrettifyFile } from './util';
 
 export default function genReduxActions(
   spec: ApiSpec,

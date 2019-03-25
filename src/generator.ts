@@ -1,11 +1,12 @@
-import { injectable, inject } from 'inversify';
 import assert = require('assert');
-import { SpecResolver } from './spec/spec-resolver';
-import { OperationsParser } from './spec';
-import { CodeGenerator } from './gen/js';
-import { DirectoryCleaner } from './common/directory-cleaner';
-import { ClientOptions } from './types';
+import { inject, injectable } from 'inversify';
+
+import { DirectoryCleaner } from './common';
+import { CodeGenerator } from './gen';
 import { TYPES } from './ioc/types';
+import { OperationsParser } from './spec';
+import { SpecResolver } from './spec/spec-resolver';
+import { ClientOptions } from './types';
 
 @injectable()
 export class Generator {

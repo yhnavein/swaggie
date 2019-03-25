@@ -1,9 +1,9 @@
-import { injectable, inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import * as path from 'path';
 
 import { TYPES } from '../ioc/types';
-import { FilesystemFacade } from './filesystem-facade';
 import { ClientOptions } from '../types';
+import { FilesystemFacade } from './';
 
 const TS_EXTENSION = 'ts';
 

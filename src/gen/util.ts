@@ -1,7 +1,8 @@
-import { Stats, lstatSync, writeFileSync as fsWriteFileSync, readdirSync, unlinkSync } from 'fs';
-import * as PATH from 'path';
+import { lstatSync, readdirSync, Stats, unlinkSync, writeFileSync as fsWriteFileSync } from 'fs';
 import { sync as mkdirSync } from 'mkdirp';
+import * as PATH from 'path';
 import * as prettier from 'prettier';
+
 import { ApiOperation, ApiOperationResponse, ClientOptions } from '../types';
 
 export function exists(filePath: string): Stats {

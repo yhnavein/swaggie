@@ -1,9 +1,10 @@
-import { injectable, inject } from 'inversify';
-import { FileLoader } from '../common/file-loader';
-import { SpecOptions } from './types';
-import { SpecFormatter } from './spec-formatter';
+import { inject, injectable } from 'inversify';
+
+import { FileLoader } from '../common';
 import { TYPES } from '../ioc/types';
 import { ApiSpec } from '../types';
+import { SpecFormatter } from './spec-formatter';
+import { SpecOptions } from './types';
 
 @injectable()
 export class SpecResolver {

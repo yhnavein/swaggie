@@ -8,9 +8,9 @@ import {
   groupOperationsByGroupName,
   getBestResponse,
   escapeReservedWords,
-} from '../util';
+} from './util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
-import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
+import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../types';
 
 export default function genOperations(
   spec: ApiSpec,
@@ -30,7 +30,7 @@ export function genOperationGroupFiles(
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group);
-    const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'client.ejs');
+    const absPath = path.join(__dirname, '..', '..', 'templates', 'axios', 'client.ejs');
 
     ejs.renderFile(absPath, clientData, (err, str) => {
       if (err) {

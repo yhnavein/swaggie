@@ -1,11 +1,11 @@
 import { injectable, inject } from 'inversify';
-import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
+import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../types';
 import { camelCase, orderBy, last } from 'lodash';
-import { escapeReservedWords, saveAndPrettifyFile, groupOperationsByGroupName, getBestResponse } from '../util';
+import { escapeReservedWords, saveAndPrettifyFile, groupOperationsByGroupName, getBestResponse } from './util';
 import * as path from 'path';
 import { IOperationParam, IServiceClient, IApiOperation } from './models';
 import { getTSParamType } from './support';
-import { TYPES, Ejs } from '../../ioc/types';
+import { TYPES, Ejs } from '../ioc/types';
 
 @injectable()
 export class OperationsGenerator {

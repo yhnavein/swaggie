@@ -1,5 +1,5 @@
-import { isBasicType } from '../util';
-import { ClientOptions } from '../../types';
+import { isBasicType } from './util';
+import { ClientOptions } from '../types';
 
 export const DOC = ' * ';
 export const DEFAULT_SP = '  ';

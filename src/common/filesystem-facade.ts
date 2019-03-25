@@ -1,11 +1,5 @@
+import { lstat, readdir, readFile, unlink, writeFile } from 'fs';
 import { injectable } from 'inversify';
-import {
-  readdir,
-  readFile,
-  writeFile,
-  lstat,
-  unlink,
-} from 'fs';
 import { promisify } from 'util';
 
 @injectable()

@@ -1,8 +1,9 @@
-import { injectable, inject } from 'inversify';
-import * as YAML from 'js-yaml';
 import * as httpClient from 'got';
-import { FilesystemFacade } from './filesystem-facade';
+import { inject, injectable } from 'inversify';
+import * as YAML from 'js-yaml';
+
 import { TYPES } from '../ioc/types';
+import { FilesystemFacade } from './';
 
 @injectable()
 export class FileLoader {
