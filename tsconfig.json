@@ -6,7 +6,9 @@
     "module": "commonjs",
     "removeComments": false,
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "exclude": ["node_modules", "dist", "test", "sdk"]
 }
