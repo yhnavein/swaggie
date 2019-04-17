@@ -22,7 +22,7 @@ export class OperationsGenerator {
     // tslint:disable-next-line:forin prefer-const
     for (let name in groups) {
       const group = groups[name];
-      const clientData = this.prepareClient(name, group);
+      const clientData = this.prepareClient(name, group, options);
       const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'client.ejs');
 
       this.ejs.renderFile(absPath, clientData, (err, str) => {
@@ -78,10 +78,15 @@ export class OperationsGenerator {
     saveAndPrettifyFile(path, contents);
   }
 
-  private prepareClient(name: string, operations: ApiOperation[]): IServiceClient {
+  private prepareClient(
+    name: string,
+    operations: ApiOperation[],
+    options: ClientOptions
+  ): IServiceClient {
     return {
       clientName: name,
       operations: this.prepareOperations(operations),
+      baseUrl: options.baseUrl,
     };
   }
 

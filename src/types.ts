@@ -3,6 +3,7 @@ export interface ClientOptions {
   outDir: string;
   redux?: boolean;
   semicolon?: boolean;
+  baseUrl: string;
 }
 
 export interface ApiRequestData {
