@@ -29,7 +29,14 @@ Options:
   -V, --version           output the version number
   -s, --src <url|path>    The url or path to the Open API spec file
   -o, --outDir <dir>      The path to the directory where files should be generated
+  -b, --baseUrl <string>  Base URL that will be used as a default value in the clients. Default: ""
   --redux                 True if wanting to generate redux action creators
+```
+
+Sample CLI usage using Swagger's Pet Store:
+
+```
+swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore/
 ```
 
 ### Code
@@ -56,7 +63,7 @@ function error(e) {
 
 ### Using generated Redux action creators
 
-You can use the generated API client directly. However, if you pass `--redux` or `redux: true` to `swaggie`, you will have generated Redux action creators to call your API (using a wrapper around `fetch`). The following example assumes that you're using `react-redux` to wrap action creators in `dispatch`. You also need to use for example `redux-thunk` as middleware to allow async actions.
+You can use the generated API client directly. However, if you pass `--redux` or `redux: true` to `swaggie`, you will have generated Redux action creators to call your API (using a wrapper around `axios`). The following example assumes that you're using `react-redux` to wrap action creators in `dispatch`. You also need to use for example `redux-thunk` as middleware to allow async actions.
 
 In your component:
 
