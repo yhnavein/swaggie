@@ -28,8 +28,8 @@ export function genOperationGroupFiles(
   // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
-    const clientData = prepareClient(name, group);
-    const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'client.ejs');
+    const clientData = prepareClient(name, group, options);
+    const absPath = path.join(__dirname, '..', '..', 'templates', 'axios', 'client.ejs');
 
     ejs.renderFile(absPath, clientData, (err, str) => {
       if (err) {
@@ -58,10 +58,15 @@ function createBarrelFile(clients: any[], path: string) {
   saveAndPrettifyFile(path, contents);
 }
 
-function prepareClient(name: string, operations: ApiOperation[]): IServiceClient {
+function prepareClient(
+  name: string,
+  operations: ApiOperation[],
+  options: ClientOptions
+): IServiceClient {
   return {
     clientName: name,
     operations: prepareOperations(operations),
+    baseUrl: options.baseUrl,
   };
 }
 
