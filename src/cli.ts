@@ -28,6 +28,10 @@ const args: any = program
     'True if wanting to use a semicolon statement terminator',
     process.env.OPEN_API_SEMICOLON
   )
+  .option(
+    '-b, --baseUrl <string>',
+    'Base URL that will be used as a default value in the clients. Default: ""'
+  )
   .parse(process.argv);
 
 genCode(args).then(complete, error);
