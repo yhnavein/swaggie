@@ -25,6 +25,7 @@
   "scripts": {
     "prebuild": "npm run init",
     "build": "tsc",
+    "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "predev": "npm run init",
     "dev": "tsc -w",
     "init": "npm run clean",
@@ -66,6 +67,7 @@
     "mocha": "6.1.4",
     "prettier": "1.18.2",
     "shx": "^0.3.2",
+    "ts-node": "8.3.0",
     "tslint": "5.18.0",
     "typescript": "3.5.2"
   }
