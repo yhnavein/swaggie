@@ -1,5 +1,4 @@
 import { resolveSpec } from '../../src/spec/spec';
-import expect from 'expect';
 
 describe('spec', () => {
   it('should resolve a spec from url', async () => {

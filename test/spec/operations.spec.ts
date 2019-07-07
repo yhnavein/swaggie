@@ -1,6 +1,5 @@
 import { resolveSpec } from '../../src/spec/spec';
 import { getOperations } from '../../src/spec/operations';
-import expect from 'expect';
 
 describe('operations', () => {
   it('should parse operations from spec', async () => {
