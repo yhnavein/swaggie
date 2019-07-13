@@ -20,11 +20,6 @@ const args: any = program
     process.env.OPEN_API_OUT
   )
   .option(
-    '--redux',
-    'True if wanting to generate redux action creators',
-    process.env.OPEN_API_REDUX
-  )
-  .option(
     '--semicolon',
     'True if wanting to use a semicolon statement terminator',
     process.env.OPEN_API_SEMICOLON
