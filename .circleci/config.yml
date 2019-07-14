@@ -9,3 +9,4 @@ jobs:
       - checkout
       - run: yarn install
       - run: yarn build
+      - run: yarn test
