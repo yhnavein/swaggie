@@ -1,5 +1,12 @@
 # Swaggie
 
+[![Build Status](https://travis-ci.org/yhnavein/swaggie.svg?branch=master)](https://travis-ci.org/yhnavein/swaggie)
+[![CircleCI](https://circleci.com/gh/yhnavein/swaggie.svg?style=svg)](https://circleci.com/gh/yhnavein/swaggie)
+![Dependencies](https://img.shields.io/david/yhnavein/swaggie.svg)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
+![npm](https://img.shields.io/npm/dw/swaggie.svg)
+![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/yhnavein/swaggie.svg)
+
 Generate ES6 or Typescript service integration code from an OpenAPI 2.0 spec.
 
 Project is based and inspired by [OpenApi Client](https://github.com/mikestead/openapi-client).
