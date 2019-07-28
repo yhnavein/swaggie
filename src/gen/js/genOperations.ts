@@ -43,7 +43,7 @@ export function genOperationGroupFiles(
     });
   }
 
-  generateBarrelFile(groups, null).then((fileContents) =>
+  generateBarrelFile(groups, options).then((fileContents) =>
     saveAndPrettifyFile(`${options.outDir}/index.ts`, fileContents)
   );
 }

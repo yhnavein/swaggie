@@ -12,7 +12,7 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
 
   const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'barrel.ejs');
   const viewData = {
-    reactContexts: true,
+    reactContexts: clientOptions.reactHooks || false,
     clients: files
       .filter((c) => c)
       .map((c) => ({

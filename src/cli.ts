@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tslint:disable: max-line-length
 
 import * as program from 'commander';
 import chalk from 'chalk';
@@ -31,6 +32,10 @@ const args: any = program
   .option(
     '-b, --baseUrl <string>',
     'Base URL that will be used as a default value in the clients. Default: ""'
+  )
+  .option(
+    '-r, --reactHooks',
+    'Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false'
   )
   .parse(process.argv);
 

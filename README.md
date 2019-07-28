@@ -25,12 +25,13 @@ Usage: swaggie [options]
 
 Options:
 
-  -h, --help              output usage information
-  -V, --version           output the version number
-  -s, --src <url|path>    The url or path to the Open API spec file
-  -o, --outDir <dir>      The path to the directory where files should be generated
-  -b, --baseUrl <string>  Base URL that will be used as a default value in the clients. Default: ""
-  --redux                 True if wanting to generate redux action creators
+  -h, --help               output usage information
+  -V, --version            output the version number
+  -s, --src <url|path>     The url or path to the Open API spec file
+  -o, --outDir <dir>       The path to the directory where files should be generated
+  -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
+  -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
+  --redux                  True if wanting to generate redux action creators
 ```
 
 Sample CLI usage using Swagger's Pet Store:
@@ -46,7 +47,7 @@ const swaggie = require('swaggie')
 swaggie.genCode({
   src: 'http://petstore.swagger.io/v2/swagger.json',
   outDir: './src/service',
-  redux: true
+  reactHooks: true
 })
 .then(complete, error)
 
@@ -60,6 +61,19 @@ function error(e) {
 ```
 
 ## Usage – Integrating into your project
+
+### Using React Hooks Contexts
+
+If you pass `-r` or `--reactHooks` parameter then additional React Contexts will be generated for you in the barrel file.
+
+With that consuming generated Clients can be as easy as:
+
+```javascript
+import { ClientContext } from '../api-client';
+
+export const YourLovelyComponent: React.FC = () => {
+  const { authClient, petClient } = useContext(ClientContext);
+```
 
 ### Using generated Redux action creators
 

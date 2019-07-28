@@ -4,6 +4,7 @@ interface ClientOptions {
   redux?: boolean;
   semicolon?: boolean;
   baseUrl: string;
+  reactHooks: boolean;
 }
 
 interface ApiRequestData {
