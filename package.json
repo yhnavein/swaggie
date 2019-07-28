@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "0.1.1-fix.1",
+  "version": "0.1.4",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -44,29 +44,29 @@
     "codegen"
   ],
   "dependencies": {
-    "chalk": "^2.4.1",
-    "commander": "2.19.0",
-    "ejs": "^2.6.1",
-    "got": "9.5.0",
-    "js-yaml": "^3.12.0",
+    "chalk": "2.4.2",
+    "commander": "2.20.0",
+    "ejs": "2.6.2",
+    "got": "9.6.0",
+    "js-yaml": "3.13.1",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
-    "prettier": "^1.15.3"
+    "prettier": "1.18.2"
   },
   "devDependencies": {
-    "@types/ejs": "^2.6.1",
-    "@types/expect": "^1.20.3",
-    "@types/got": "9.3.0",
-    "@types/js-yaml": "^3.11.4",
-    "@types/lodash": "^4.14.119",
+    "@types/ejs": "2.6.3",
+    "@types/expect": "1.20.4",
+    "@types/got": "9.6.0",
+    "@types/js-yaml": "3.12.1",
+    "@types/lodash": "4.14.135",
     "@types/mkdirp": "^0.5.2",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.18",
-    "@types/prettier": "^1.15.2",
-    "expect": "^23.6.0",
-    "mocha": "^5.2.0",
+    "@types/mocha": "5.2.7",
+    "@types/node": "12.0.12",
+    "@types/prettier": "1.16.4",
+    "expect": "24.8.0",
+    "mocha": "6.1.4",
     "shx": "^0.3.2",
-    "tslint": "^5.12.0",
-    "typescript": "3.2.2"
+    "tslint": "5.18.0",
+    "typescript": "3.5.2"
   }
 }
