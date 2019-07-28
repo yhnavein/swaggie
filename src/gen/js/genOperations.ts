@@ -10,6 +10,7 @@ import {
   escapeReservedWords,
 } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
+import { generateBarrelFile } from './createBarrel';
 
 export default function genOperations(
   spec: ApiSpec,
@@ -42,20 +43,9 @@ export function genOperationGroupFiles(
     });
   }
 
-  createBarrelFile(groups, `${options.outDir}/index.ts`);
-}
-
-function createBarrelFile(clients: any[], path: string) {
-  const files = ['types'];
-
-  // tslint:disable-next-line:forin prefer-const
-  for (let name in clients) {
-    files.push(name);
-  }
-
-  const contents = files.map((f) => `export * from './${f}';`).join('\n');
-
-  saveAndPrettifyFile(path, contents);
+  generateBarrelFile(groups, null).then((fileContents) =>
+    saveAndPrettifyFile(`${options.outDir}/index.ts`, fileContents)
+  );
 }
 
 function prepareClient(
