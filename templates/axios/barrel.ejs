@@ -7,7 +7,7 @@
 // ReSharper disable InconsistentNaming
 
 <%_ if(reactContexts) { _%>
-import React from "react";
+import React, { useContext } from 'react';
 
   <%_ clients.forEach(function(client) { _%>
 import { <%- client.className %> } from './<%- client.fileName %>';
@@ -26,4 +26,8 @@ export const ClientContext = React.createContext({
   <%- client.varName %>: new <%- client.className %>(),
   <%_ }); _%>
 });
+
+export function useClient() {
+  return useContext(ClientContext);
+}
 <%_ } _%>
