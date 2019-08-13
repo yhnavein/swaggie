@@ -21,11 +21,13 @@ export * from './<%- client.fileName %>';
 
 <%_ if(reactContexts) { _%>
 
-export const ClientContext = React.createContext({
+export const clients = {
   <%_ clients.forEach(function(client) { _%>
-  <%- client.varName %>: new <%- client.className %>(),
+    <%- client.varName %>: new <%- client.className %>(),
   <%_ }); _%>
-});
+};
+
+export const ClientContext = React.createContext(clients);
 
 export function useClient() {
   return useContext(ClientContext);
