@@ -65,7 +65,7 @@ export function getTSParamType(param: any, inTypesModule?: boolean): string {
       }
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
-      return (inTypesModule ? 'types.' : '') + `${type}[]`;
+      return handleGenerics(type, inTypesModule) + '[]';
     } else {
       return 'any[]';
     }
