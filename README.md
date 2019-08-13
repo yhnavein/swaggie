@@ -40,6 +40,14 @@ Sample CLI usage using Swagger's Pet Store:
 swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore/
 ```
 
+`swaggie` no longer runs prettify on the output. But it's easy to do it in your app by doing so:
+
+```bash
+swaggie -o ./client/petstore/ && prettier -o ./client/petstore/*.ts --write`
+```
+
+With this your app's rules will be used. You can also use any other prettier available.
+
 ### Code
 
 ```javascript
@@ -69,10 +77,10 @@ If you pass `-r` or `--reactHooks` parameter then additional React Contexts will
 With that consuming generated Clients can be as easy as:
 
 ```javascript
-import { ClientContext } from '../api-client';
+import { useClient } from '../api-client';
 
 export const YourLovelyComponent: React.FC = () => {
-  const { authClient, petClient } = useContext(ClientContext);
+  const { authClient, petClient } = useClient();
 ```
 
 ### Using generated Redux action creators

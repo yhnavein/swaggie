@@ -1,6 +1,5 @@
 import {
-  saveAndPrettifyFile,
-  join,
+  saveFile,
   groupOperationsByGroupName,
   camelToUppercase,
   getBestResponse,
@@ -14,7 +13,7 @@ export default function genReduxActions(
   options: ClientOptions
 ) {
   const files = genReduxActionGroupFiles(spec, operations, options);
-  files.forEach((file) => saveAndPrettifyFile(file.path, file.contents));
+  files.forEach((file) => saveFile(file.path, file.contents));
 }
 
 export function genReduxActionGroupFiles(

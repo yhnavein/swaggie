@@ -4,7 +4,7 @@ import { camelCase, last, orderBy } from 'lodash';
 
 import { getTSParamType } from './support';
 import {
-  saveAndPrettifyFile,
+  saveFile,
   groupOperationsByGroupName,
   getBestResponse,
   escapeReservedWords,
@@ -39,12 +39,12 @@ export function genOperationGroupFiles(
       const path = `${options.outDir}/${name}.ts`;
       const contents = str;
 
-      saveAndPrettifyFile(path, contents);
+      saveFile(path, contents);
     });
   }
 
   generateBarrelFile(groups, options).then((fileContents) =>
-    saveAndPrettifyFile(`${options.outDir}/index.ts`, fileContents)
+    saveFile(`${options.outDir}/index.ts`, fileContents)
   );
 }
 
