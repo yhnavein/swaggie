@@ -1,6 +1,7 @@
 import { saveFile, join } from '../util';
 import { DOC, SP, ST, getDocType, getTSParamType } from './support';
 import { uniq, uniqBy } from 'lodash';
+import { SchemaDefinition } from 'js-yaml';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
   const file = genTypesFile(spec, options);
@@ -50,7 +51,7 @@ function renderTsType(name, def, options, typeToBeGeneric?: string) {
   if (def.allOf) {
     return renderTsInheritance(name, def.allOf, options);
   }
-  if (def.type !== 'object') {
+  if (!isSupportedDefType(def)) {
     console.warn(`Unable to render ${name} ${def.type}, skipping.`);
     return [];
   }
@@ -60,6 +61,10 @@ function renderTsType(name, def, options, typeToBeGeneric?: string) {
     lines.push(`/**`);
     lines.push(DOC + def.description.trim().replace(/\n/g, `\n${DOC}${SP}`));
     lines.push(` */`);
+  }
+  if (!!def['x-enumNames']) {
+    lines.push(renderXEnumType(name, def));
+    return lines;
   }
   lines.push(`export interface ${name} {`);
 
@@ -81,6 +86,23 @@ function renderTsType(name, def, options, typeToBeGeneric?: string) {
   lines.push('}');
   lines.push('');
   return lines;
+}
+
+/** Basically only object and x-enum types are supported */
+function isSupportedDefType(def: any) {
+  return def.type === 'object' || !!def['x-enumNames'];
+}
+
+function renderXEnumType(name: string, def: any) {
+  let res = `export enum ${name} {\n`;
+  const enumNames = def['x-enumNames'] as string[];
+  const enumValues = def.enum as any[];
+
+  for (let index = 0; index < enumNames.length; index++) {
+    res += `  ${enumNames[index]} = ${enumValues[index]},\n`;
+  }
+  res += '}\n';
+  return res;
 }
 
 function renderTsInheritance(name: string, allOf: any[], options: ClientOptions) {
