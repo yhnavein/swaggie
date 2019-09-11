@@ -63,7 +63,7 @@ function renderReduxActionBlock(spec: ApiSpec, op: ApiOperation, options: Client
   }
 
   const response = getBestResponse(op);
-  const returnType = response ? getTSParamType(response) : 'any';
+  const returnType = response ? getTSParamType(response, false, options) : 'any';
   return `
 export const ${actionStart} = 's/${op.group}/${actionStart}'${ST}
 export const ${actionComplete} = 's/${op.group}/${actionComplete}'${ST}

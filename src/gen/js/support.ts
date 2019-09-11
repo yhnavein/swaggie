@@ -32,18 +32,24 @@ export function getDocType(param: any): string {
     } else {
       return 'object[]';
     }
-  } else if (param.type === 'integer') {
+  } else if (param.type === 'integer' || param.type === 'number') {
     return 'number';
+  } else if (param.type === 'string') {
+    return 'string';
+  } else if (param.type === 'boolean') {
+    return 'boolean';
   } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
-    return 'date';
+    return 'Date';
   } else {
-    return param.type || 'object';
+    return 'object';
   }
 }
 
-export function getTSParamType(param: any, inTypesModule?: boolean): string {
+export function getTSParamType(param: any, inTypesModule: boolean, options: ClientOptions): string {
+  const unknownType = options.preferAny ? 'any' : 'unknown';
+
   if (!param) {
-    return 'any';
+    return unknownType;
   } else if (param.enum) {
     if (!param.type || param.type === 'string') {
       return `'${param.enum.join(`'|'`)}'`;
@@ -55,32 +61,36 @@ export function getTSParamType(param: any, inTypesModule?: boolean): string {
     const type = param.$ref.split('/').pop();
     return handleGenerics(type, inTypesModule);
   } else if (param.schema) {
-    return getTSParamType(param.schema, inTypesModule);
+    return getTSParamType(param.schema, inTypesModule, options);
   } else if (param.type === 'array') {
     if (param.items.type) {
       if (param.items.enum) {
-        return `(${getTSParamType(param.items, inTypesModule)})[]`;
+        return `(${getTSParamType(param.items, inTypesModule, options)})[]`;
       } else {
-        return `${getTSParamType(param.items, inTypesModule)}[]`;
+        return `${getTSParamType(param.items, inTypesModule, options)}[]`;
       }
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
       return handleGenerics(type, inTypesModule) + '[]';
     } else {
-      return 'any[]';
+      return unknownType + '[]';
     }
   } else if (param.type === 'object') {
     if (param.additionalProperties) {
       const extraProps = param.additionalProperties;
-      return `{[key: string]: ${getTSParamType(extraProps, inTypesModule)}}`;
+      return `{ [key: string]: ${getTSParamType(extraProps, inTypesModule, options)} }`;
     }
-    return 'any';
-  } else if (param.type === 'integer') {
+    return unknownType;
+  } else if (param.type === 'integer' || param.type === 'number') {
     return 'number';
+  } else if (param.type === 'string') {
+    return 'string';
+  } else if (param.type === 'boolean') {
+    return 'boolean';
   } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
     return 'Date';
   } else {
-    return param.type || 'any';
+    return unknownType;
   }
 }
 

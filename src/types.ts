@@ -5,6 +5,7 @@ interface ClientOptions {
   semicolon?: boolean;
   baseUrl: string;
   reactHooks: boolean;
+  preferAny?: boolean;
 }
 
 interface ApiRequestData {
