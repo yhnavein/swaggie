@@ -37,6 +37,10 @@ const args: any = program
     '-r, --reactHooks',
     'Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false'
   )
+  .option(
+    '--preferAny',
+    'Use "any" type instead of "unknown". Default: false'
+  )
   .parse(process.argv);
 
 genCode(args).then(complete, error);

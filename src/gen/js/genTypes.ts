@@ -47,7 +47,7 @@ function renderDefinitions(spec: ApiSpec, options: ClientOptions): string[] {
   return typeLines.concat(docLines);
 }
 
-function renderTsType(name, def, options, typeToBeGeneric?: string) {
+function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: string) {
   if (def.allOf) {
     return renderTsInheritance(name, def.allOf, options);
   }
@@ -74,11 +74,11 @@ function renderTsType(name, def, options, typeToBeGeneric?: string) {
   const optionalProps = props.filter((p) => !~required.indexOf(p));
 
   const requiredPropLines = requiredProps
-    .map((prop) => renderTsTypeProp(prop, def.properties[prop], true, typeToBeGeneric))
+    .map((prop) => renderTsTypeProp(prop, def.properties[prop], true, options, typeToBeGeneric))
     .reduce((a, b) => a.concat(b), []);
 
   const optionalPropLines = optionalProps
-    .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, typeToBeGeneric))
+    .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, options, typeToBeGeneric))
     .reduce((a, b) => a.concat(b), []);
 
   join(lines, requiredPropLines);
@@ -121,10 +121,11 @@ function renderTsTypeProp(
   prop: string,
   info: any,
   required: boolean,
+  options: ClientOptions,
   typeToBeGeneric?: string
 ): string[] {
   const lines = [];
-  let type = getTSParamType(info);
+  let type = getTSParamType(info, false, options);
   if (typeToBeGeneric && type.indexOf(typeToBeGeneric) === 0) {
     type = type.replace(typeToBeGeneric, 'T');
   }

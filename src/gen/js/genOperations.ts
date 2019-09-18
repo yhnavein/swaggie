@@ -55,28 +55,28 @@ function prepareClient(
 ): IServiceClient {
   return {
     clientName: name,
-    operations: prepareOperations(operations),
+    operations: prepareOperations(operations, options),
     baseUrl: options.baseUrl,
   };
 }
 
-function prepareOperations(operations: ApiOperation[]): IApiOperation[] {
+function prepareOperations(operations: ApiOperation[], options: ClientOptions): IApiOperation[] {
   const ops = fixDuplicateOperations(operations);
 
   return ops.map((op) => {
     const response = getBestResponse(op);
-    const respType = getTSParamType(response, true);
+    const respType = getTSParamType(response, true, options);
 
     return {
       returnType: respType,
       method: op.method.toUpperCase(),
       name: getOperationName(op.id, op.group),
       url: op.path,
-      parameters: getParams(op.parameters),
-      query: getParams(op.parameters, ['query']),
-      pathParams: getParams(op.parameters, ['path']),
-      body: last(getParams(op.parameters, ['body'])),
-      headers: getParams(op.parameters, ['header']),
+      parameters: getParams(op.parameters, options),
+      query: getParams(op.parameters, options, ['query']),
+      pathParams: getParams(op.parameters, options, ['path']),
+      body: last(getParams(op.parameters, options, ['body'])),
+      headers: getParams(op.parameters, options, ['header']),
     };
   });
 }
@@ -114,7 +114,7 @@ function getOperationName(opId: string, group?: string) {
   return camelCase(opId.replace(group + '_', ''));
 }
 
-function getParams(params: ApiOperationParam[], where?: string[]): IOperationParam[] {
+function getParams(params: ApiOperationParam[], options: ClientOptions, where?: string[]): IOperationParam[] {
   if (!params || params.length < 1) {
     return [];
   }
@@ -124,7 +124,7 @@ function getParams(params: ApiOperationParam[], where?: string[]): IOperationPar
     .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
-      type: getTSParamType(p, true),
+      type: getTSParamType(p, true, options),
       optional: !p.required,
     }));
 }
@@ -187,7 +187,7 @@ function renderOptionalParamsSignature(
 function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
   const signature = [getParamName(param.name)];
 
-  signature.push(getTSParamType(param, true));
+  signature.push(getTSParamType(param, true, options));
 
   return signature;
 }
