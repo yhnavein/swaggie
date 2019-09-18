@@ -31,6 +31,7 @@ Options:
   -o, --outDir <dir>       The path to the directory where files should be generated
   -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
   -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
+  --preferAny              Use "any" type instead of "unknown". Default: false
   --redux                  True if wanting to generate redux action creators
 ```
 
