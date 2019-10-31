@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug app",
+      "name": "Debug swaggie",
       "program": "${workspaceFolder}/src/cli.ts",
       "preLaunchTask": "Build",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
@@ -17,7 +17,8 @@
         "-s",
         "http://localhost:4016/swagger/v1/swagger.json",
         "-o",
-        "/tmp/swagger-test/"
+        "/tmp/swagger-test/",
+        "-r"
       ]
     }
   ]

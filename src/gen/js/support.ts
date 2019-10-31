@@ -34,12 +34,12 @@ export function getDocType(param: any): string {
     }
   } else if (param.type === 'integer' || param.type === 'number') {
     return 'number';
+  } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
+    return 'Date';
   } else if (param.type === 'string') {
     return 'string';
   } else if (param.type === 'boolean') {
     return 'boolean';
-  } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
-    return 'Date';
   } else {
     return 'object';
   }
@@ -83,12 +83,12 @@ export function getTSParamType(param: any, inTypesModule: boolean, options: Clie
     return unknownType;
   } else if (param.type === 'integer' || param.type === 'number') {
     return 'number';
+  } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
+    return 'Date';
   } else if (param.type === 'string') {
     return 'string';
   } else if (param.type === 'boolean') {
     return 'boolean';
-  } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
-    return 'Date';
   } else {
     return unknownType;
   }
