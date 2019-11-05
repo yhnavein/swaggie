@@ -125,6 +125,7 @@ export function escapeReservedWords(name: string): string {
   return escapedName;
 }
 
+/** Checks if type is a basic one. Basic type is one of ['number', 'boolean', 'null', 'undefined', 'object'] */
 export function isBasicType(type: string) {
   if (!type) {
     return false;

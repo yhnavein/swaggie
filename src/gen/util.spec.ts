@@ -1,4 +1,4 @@
-import { groupOperationsByGroupName } from './util';
+import { groupOperationsByGroupName, isBasicType, escapeReservedWords } from './util';
 
 describe('groupOperationsByGroupName', () => {
   it('handles null', async () => {
@@ -158,17 +158,54 @@ describe('groupOperationsByGroupName', () => {
   });
 });
 
-/*
-id: string;
-  summary: string;
-  description: string;
-  method: HttpMethod;
-  group: string;
-  path: string;
-  parameters: ApiOperationParam[];
-  responses: ApiOperationResponse[];
-  security?: ApiOperationSecurity[];
-  accepts: string[];
-  contentTypes: string[];
-  tags?: string[];
-  */
+describe('isBasicType', () => {
+  it('handles null', () => {
+    const res = isBasicType(null);
+
+    expect(res).toBe(false);
+  });
+
+  it('handles empty string', () => {
+    const res = isBasicType('');
+
+    expect(res).toBe(false);
+  });
+
+  it('handles basic type', () => {
+    const res = isBasicType('object');
+
+    expect(res).toBe(true);
+  });
+
+  it('handles strange basic type', () => {
+    const res = isBasicType('number]');
+
+    expect(res).toBe(true);
+  });
+});
+
+describe('escapeReservedWords', () => {
+  it('handles null', () => {
+    const res = escapeReservedWords(null);
+
+    expect(res).toBe(null);
+  });
+
+  it('handles empty string', () => {
+    const res = escapeReservedWords('');
+
+    expect(res).toBe('');
+  });
+
+  it('handles safe word', () => {
+    const res = escapeReservedWords('Burrito');
+
+    expect(res).toBe('Burrito');
+  });
+
+  it('handles reserved word', () => {
+    const res = escapeReservedWords('return');
+
+    expect(res).toBe('_return');
+  });
+});
