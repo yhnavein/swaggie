@@ -17,6 +17,9 @@ export function saveFile(filePath, contents) {
 }
 
 export function groupOperationsByGroupName(operations) {
+  if (!operations) {
+    return {};
+  }
   return operations.reduce((groups, op) => {
     if (!groups[op.group]) {
       groups[op.group] = [];

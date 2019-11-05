@@ -1,9 +1,9 @@
-import { resolveSpec } from '../../src/spec/spec';
-import { getOperations } from '../../src/spec/operations';
+import { resolveSpec } from './spec';
+import { getOperations } from './operations';
 
 describe('operations', () => {
   it('should parse operations from spec', async () => {
-    const path = `${__dirname}/../petstore.yml`;
+    const path = `${__dirname}/../../test/petstore.yml`;
     const spec = await resolveSpec(path);
     const operations = getOperations(spec);
     expect(operations).toBeDefined();
