@@ -234,69 +234,83 @@ describe('getTSParamType', () => {
     expect(res).toBe('unknown');
   });
 
-  describe('responses', () => {
-    it('array', async () => {
-      const param = {
-        uniqueItems: false,
-        type: 'array',
-        items: {
-          $ref: '#/definitions/Item',
-        },
-      };
-      const inTypesModule = true;
-      const options = {} as any;
+  it('file', async () => {
+    const param = {
+      name: 'attachment',
+      in: 'body',
+      required: false,
+      type: 'file',
+    };
+    const inTypesModule = false;
+    const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, inTypesModule, options);
 
-      expect(res).toBe('types.Item[]');
-    });
+    expect(res).toBe('File');
+  });
+  it('array', async () => {
+    const param = {
+      uniqueItems: false,
+      type: 'array',
+      items: {
+        $ref: '#/definitions/Item',
+      },
+    };
+    const inTypesModule = true;
+    const options = {} as any;
 
-    it('reference #0', async () => {
-      const param = {
+    const res = getTSParamType(param, inTypesModule, options);
+
+    expect(res).toBe('types.Item[]');
+  });
+
+  it('reference #0', async () => {
+    const param = {
+      $ref: '#/definitions/SomeItem',
+    };
+    const inTypesModule = true;
+    const options = {} as any;
+
+    const res = getTSParamType(param, inTypesModule, options);
+
+    expect(res).toBe('types.SomeItem');
+  });
+
+  it('reference #1', async () => {
+    const param = {
+      name: 'something',
+      in: 'body',
+      required: false,
+      schema: {
         $ref: '#/definitions/SomeItem',
-      };
-      const inTypesModule = true;
-      const options = {} as any;
+      },
+    };
+    const inTypesModule = true;
+    const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, inTypesModule, options);
 
-      expect(res).toBe('types.SomeItem');
-    });
+    expect(res).toBe('types.SomeItem');
+  });
 
-    it('reference #1', async () => {
-      const param = {
-        name: 'something',
-        in: 'body',
-        required: false,
-        schema: {
-          $ref: '#/definitions/SomeItem',
-        },
-      };
-      const inTypesModule = true;
-      const options = {} as any;
+  it('reference #2', async () => {
+    const param = {
+      name: 'something',
+      in: 'body',
+      required: false,
+      schema: {
+        $ref: '#/definitions/SomeItem',
+      },
+    };
+    const inTypesModule = false;
+    const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, inTypesModule, options);
 
-      expect(res).toBe('types.SomeItem');
-    });
+    expect(res).toBe('SomeItem');
+  });
 
-    it('reference #2', async () => {
-      const param = {
-        name: 'something',
-        in: 'body',
-        required: false,
-        schema: {
-          $ref: '#/definitions/SomeItem',
-        },
-      };
-      const inTypesModule = false;
-      const options = {} as any;
-
-      const res = getTSParamType(param, inTypesModule, options);
-
-      expect(res).toBe('SomeItem');
-    });
-
+  describe('responses', () => {
     it('generics', async () => {
       const param = {
         name: 'query',

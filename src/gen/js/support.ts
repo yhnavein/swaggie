@@ -87,6 +87,8 @@ export function getTSParamType(param: any, inTypesModule: boolean, options: Clie
     return 'Date';
   } else if (param.type === 'string') {
     return 'string';
+  } else if (param.type === 'file') {
+    return 'File';
   } else if (param.type === 'boolean') {
     return 'boolean';
   } else {
