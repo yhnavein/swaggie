@@ -1,7 +1,6 @@
 import { saveFile, join } from '../util';
-import { DOC, SP, ST, getDocType, getTSParamType } from './support';
-import { uniq, uniqBy } from 'lodash';
-import { SchemaDefinition } from 'js-yaml';
+import { DOC, SP, getDocType, getTSParamType } from './support';
+import { uniq } from 'lodash';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
   const file = genTypesFile(spec, options);
@@ -137,7 +136,7 @@ function renderTsTypeProp(
     lines.push(`${SP} */`);
   }
   const req = required ? '' : '?';
-  lines.push(`${SP}${prop}${req}: ${type}${ST}`);
+  lines.push(`${SP}${prop}${req}: ${type};`);
   return lines;
 }
 

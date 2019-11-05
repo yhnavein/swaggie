@@ -3,13 +3,6 @@ import { isBasicType } from '../util';
 export const DOC = ' * ';
 export const DEFAULT_SP = '  ';
 export let SP = DEFAULT_SP;
-export let ST = ''; // statement terminator
-
-export function applyFormatOptions(options: ClientOptions) {
-  if (options.semicolon) {
-    ST = ';';
-  }
-}
 
 export function formatDocDescription(description: string): string {
   return (description || '').trim().replace(/\n/g, `\n${DOC}${SP}`);
