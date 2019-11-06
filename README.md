@@ -44,17 +44,17 @@ Options:
 
 Sample CLI usage using Swagger's Pet Store:
 
-```
+```bash
 swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore/
 ```
 
-`swaggie` no longer runs prettify on the output. But it's easy to do it in your app by doing so:
+`swaggie` outputs TypeScript that is somehow formatted, but it's far from perfect. You can adjust the generated code by prettifying output using your preferred beautify tool using your repo's styling guidelines. For example involving `prettier` looks like this:
 
 ```bash
-swaggie -o ./client/petstore/ && prettier -o ./client/petstore/*.ts --write`
+swaggie -s $URL -o ./client/petstore/ && prettier ./client/petstore/*.ts --write`
 ```
 
-With this your app's rules will be used. You can also use any other prettier available.
+And this can be easily automated (in the npm scripts for example)
 
 ### Code
 

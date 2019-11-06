@@ -6,7 +6,7 @@ const petstore2 = {
     'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/yaml/petstore.yaml',
 };
 
-describe('spec', () => {
+describe('resolveSpec', () => {
   it('should resolve a JSON spec from url', async () => {
     const spec = await resolveSpec(petstore2.json);
     expect(spec).toBeDefined();

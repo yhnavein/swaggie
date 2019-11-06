@@ -1,8 +1,62 @@
 import { resolveSpec } from './spec';
 import { getOperations } from './operations';
 
-describe('operations', () => {
-  it('should parse operations from spec', async () => {
+describe('getPathOperation', () => {
+  it('handles empty operation list', () => {
+    const spec = {
+      swagger: '2.0',
+      paths: {},
+      definitions: {},
+    };
+
+    const res = getOperations(spec as any);
+
+    expect(res).toBeDefined();
+    expect(res.length).toBe(0);
+  });
+
+  it('handles one operation list', () => {
+    const spec = {
+      swagger: '2.0',
+      paths: {
+        '/api/heartbeat': {
+          get: {
+            tags: ['System'],
+            operationId: 'ApiHeartbeatGet',
+            produces: ['application/json'],
+            responses: {
+              '200': {
+                description: 'Service is available.',
+              },
+            },
+          },
+        },
+      },
+      definitions: {},
+      contentTypes: [],
+      accepts: [],
+    };
+
+    const res = getOperations(spec as any);
+
+    const validResp = [
+      {
+        accepts: ['application/json'],
+        contentTypes: [],
+        group: 'System',
+        id: 'ApiHeartbeatGet',
+        method: 'get',
+        parameters: [],
+        path: '/api/heartbeat',
+        responses: [{ code: '200', description: 'Service is available.' }],
+        security: undefined,
+        tags: ['System'],
+      },
+    ];
+    expect(res).toMatchObject(validResp);
+  });
+
+  it('[PerStore Example] should parse operations from spec', async () => {
     const path = `${__dirname}/../../test/petstore.yml`;
     const spec = await resolveSpec(path);
     const operations = getOperations(spec);

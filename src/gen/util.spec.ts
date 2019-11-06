@@ -1,4 +1,9 @@
-import { groupOperationsByGroupName, isBasicType, escapeReservedWords } from './util';
+import {
+  groupOperationsByGroupName,
+  isBasicType,
+  escapeReservedWords,
+  getBestResponse,
+} from './util';
 
 describe('groupOperationsByGroupName', () => {
   it('handles null', async () => {
@@ -207,5 +212,50 @@ describe('escapeReservedWords', () => {
     const res = escapeReservedWords('return');
 
     expect(res).toBe('_return');
+  });
+});
+
+describe('getBestResponse', () => {
+  it('handles no responses', () => {
+    const op = {
+      responses: [],
+    };
+
+    const res = getBestResponse(op as any);
+
+    expect(res).toBe(undefined);
+  });
+
+  it('handles one response', () => {
+    const op = {
+      responses: [{ code: '300' }],
+    };
+
+    const res = getBestResponse(op as any);
+
+    expect(res).toMatchObject({ code: '300' });
+  });
+
+  it('handles multiple responses', () => {
+    const op = {
+      responses: [{ code: '404' }, { code: '200' }],
+    };
+
+    const res = getBestResponse(op as any);
+
+    expect(res).toMatchObject({ code: '200' });
+  });
+
+  // TODO: This one does not make sense at all!
+  it('handles response without code (WTF?)', () => {
+    const first = { something: '404' };
+    const second = { something: '200' };
+    const op = {
+      responses: [first, second],
+    };
+
+    const res = getBestResponse(op as any);
+
+    expect(res).toMatchObject(first);
   });
 });
