@@ -1,7 +1,6 @@
 interface ClientOptions {
   src: string;
   outDir: string;
-  semicolon?: boolean;
   baseUrl: string;
   reactHooks: boolean;
   preferAny?: boolean;
