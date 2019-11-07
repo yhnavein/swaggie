@@ -6,6 +6,3 @@ node_js:
 
 before_script:
   - yarn build
-
-script:
-  - npm run build

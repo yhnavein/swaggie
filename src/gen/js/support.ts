@@ -3,13 +3,6 @@ import { isBasicType } from '../util';
 export const DOC = ' * ';
 export const DEFAULT_SP = '  ';
 export let SP = DEFAULT_SP;
-export let ST = ''; // statement terminator
-
-export function applyFormatOptions(options: ClientOptions) {
-  if (options.semicolon) {
-    ST = ';';
-  }
-}
 
 export function formatDocDescription(description: string): string {
   return (description || '').trim().replace(/\n/g, `\n${DOC}${SP}`);
@@ -87,6 +80,8 @@ export function getTSParamType(param: any, inTypesModule: boolean, options: Clie
     return 'Date';
   } else if (param.type === 'string') {
     return 'string';
+  } else if (param.type === 'file') {
+    return 'File';
   } else if (param.type === 'boolean') {
     return 'boolean';
   } else {

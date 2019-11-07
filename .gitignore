@@ -55,3 +55,4 @@ $RECYCLE.BIN/
 
 # Custom
 dist/
+coverage/

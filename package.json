@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -25,6 +25,8 @@
   "scripts": {
     "prebuild": "npm run init",
     "build": "tsc",
+    "test": "jest --ci",
+    "test:watch": "jest --watch",
     "predev": "npm run init",
     "dev": "tsc -w",
     "init": "npm run clean",
@@ -46,7 +48,7 @@
   "dependencies": {
     "chalk": "2.4.2",
     "commander": "2.20.0",
-    "ejs": "2.6.2",
+    "ejs": "2.7.1",
     "got": "9.6.0",
     "js-yaml": "3.13.1",
     "lodash": "^4.17.11",
@@ -54,19 +56,24 @@
   },
   "devDependencies": {
     "@types/ejs": "2.6.3",
-    "@types/expect": "1.20.4",
-    "@types/got": "9.6.0",
+    "@types/got": "9.6.8",
+    "@types/jest": "24.0.21",
     "@types/js-yaml": "3.12.1",
-    "@types/lodash": "4.14.135",
+    "@types/lodash": "4.14.144",
     "@types/mkdirp": "^0.5.2",
-    "@types/mocha": "5.2.7",
-    "@types/node": "12.0.12",
-    "@types/prettier": "1.16.4",
-    "expect": "24.8.0",
-    "mocha": "6.1.4",
-    "prettier": "1.18.2",
+    "@types/node": "12.12.5",
+    "jest": "24.9.0",
     "shx": "^0.3.2",
-    "tslint": "5.18.0",
-    "typescript": "3.5.2"
+    "ts-jest": "24.1.0",
+    "tslint": "5.20.0",
+    "typescript": "3.6.4"
+  },
+  "jest": {
+    "testRegex": "\\.(test|spec)\\.tsx?$",
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
+    "preset": "ts-jest",
+    "testEnvironment": "node"
   }
 }

@@ -14,27 +14,29 @@ export function resolveSpec(src: string | object, options?: SpecOptions): Promis
   }
 
   if (typeof src === 'string') {
-    return loadJson(src).then((spec) => formatSpec(spec, src, options));
+    return loadFile(src).then((spec) => formatSpec(spec, src, options));
   } else {
     return Promise.resolve(formatSpec(src as ApiSpec, null, options));
   }
 }
 
-function loadJson(src: string): Promise<ApiSpec | any> {
+function loadFile(src: string): Promise<ApiSpec | any> {
   if (/^https?:\/\//im.test(src)) {
     return loadFromUrl(src);
   } else if (String(process) === '[object process]') {
-    return readFile(src).then((contents) => parseFileContents(contents, src));
+    return readLocalFile(src).then((contents) => parseFileContents(contents, src));
   } else {
     throw new Error(`Unable to load api at '${src}'`);
   }
 }
 
 function loadFromUrl(url: string) {
-  return httpClient(url, { json: true }).then((resp) => resp.body);
+  return httpClient(url)
+    .then((resp) => resp.body)
+    .then((contents) => parseFileContents(contents, url));
 }
 
-function readFile(filePath: string): Promise<string> {
+function readLocalFile(filePath: string): Promise<string> {
   return new Promise((res, rej) =>
     require('fs').readFile(filePath, 'utf8', (err, contents) => (err ? rej(err) : res(contents)))
   );

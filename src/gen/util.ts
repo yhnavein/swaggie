@@ -17,6 +17,9 @@ export function saveFile(filePath, contents) {
 }
 
 export function groupOperationsByGroupName(operations) {
+  if (!operations) {
+    return {};
+  }
   return operations.reduce((groups, op) => {
     if (!groups[op.group]) {
       groups[op.group] = [];
@@ -122,6 +125,7 @@ export function escapeReservedWords(name: string): string {
   return escapedName;
 }
 
+/** Checks if type is a basic one. Basic type is one of ['number', 'boolean', 'null', 'undefined', 'object'] */
 export function isBasicType(type: string) {
   if (!type) {
     return false;

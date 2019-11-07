@@ -1,5 +1,23 @@
 const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
 
+/**
+ * This method converts dictionary-alike operation definition to operation array.
+ * Additionally some data inheritance from the specification is done as well
+ * @example
+ * {
+ *  "paths": {
+ *    "/api/heartbeat": {
+ *      "get": { ... },
+ *      "post": { ... }
+ *    }
+ *  }
+ * }
+ * @returns
+ *  [
+ *    { "method": "GET", "path": "/api/heartbeat", ... },
+ *    { "method": "POST", "path": "/api/heartbeat", ... },
+ *  ]
+ */
 export function getOperations(spec: ApiSpec): ApiOperation[] {
   return getPaths(spec).reduce<ApiOperation[]>(
     (ops, pathInfo) => ops.concat(getPathOperations(pathInfo, spec)),
