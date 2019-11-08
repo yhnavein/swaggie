@@ -1,7 +1,8 @@
-import { resolveSpec, getOperations } from './spec';
-import genJsCode from './gen/js';
-import { removeOldFiles } from './gen/util';
 import * as assert from 'assert';
+import genJsCode from './gen/js';
+import { loadAllTemplateFiles } from './gen/templateManager';
+import { removeOldFiles } from './gen/util';
+import { getOperations, resolveSpec } from './spec';
 
 export function genCode(options: ClientOptions): Promise<any> {
   return verifyOptions(options).then((options) =>
@@ -21,6 +22,8 @@ function verifyOptions(options: ClientOptions): Promise<any> {
 
 function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {
   removeOldFiles(options);
+  loadAllTemplateFiles('axios');
+
   const operations = getOperations(spec);
   return genJsCode(spec, operations, options);
 }
