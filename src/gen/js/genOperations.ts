@@ -1,5 +1,3 @@
-import * as ejs from 'ejs';
-import * as path from 'path';
 import { camelCase, last, orderBy } from 'lodash';
 
 import { getTSParamType } from './support';
@@ -11,6 +9,7 @@ import {
 } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
+import { render } from '../templateManager';
 
 export default function genOperations(
   spec: ApiSpec,
@@ -30,17 +29,9 @@ export function genOperationGroupFiles(
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group, options);
-    const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'client.ejs');
-
-    ejs.renderFile(absPath, clientData, (err, str) => {
-      if (err) {
-        console.error(err);
-      }
-      const path = `${options.outDir}/${name}.ts`;
-      const contents = str;
-
-      saveFile(path, contents);
-    });
+    const contents = render('client.ejs', clientData);
+    const path = `${options.outDir}/${name}.ts`;
+    saveFile(path, contents);
   }
 
   generateBarrelFile(groups, options).then((fileContents) =>
@@ -114,7 +105,11 @@ function getOperationName(opId: string, group?: string) {
   return camelCase(opId.replace(group + '_', ''));
 }
 
-function getParams(params: ApiOperationParam[], options: ClientOptions, where?: string[]): IOperationParam[] {
+function getParams(
+  params: ApiOperationParam[],
+  options: ClientOptions,
+  where?: string[]
+): IOperationParam[] {
   if (!params || params.length < 1) {
     return [];
   }
