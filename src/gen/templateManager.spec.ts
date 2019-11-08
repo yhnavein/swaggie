@@ -1,5 +1,5 @@
 import * as ejs from 'ejs';
-import { loadAllTemplateFiles, render } from './templateManager';
+import { loadAllTemplateFiles, renderFile } from './templateManager';
 
 const GOOD_FILE = 'client.ejs';
 
@@ -47,12 +47,34 @@ describe('render', () => {
   });
 
   it('should get existing template', async () => {
-    const templateFunction = render(GOOD_FILE, {
+    const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
       baseUrl: null,
       operations: [],
     });
 
     expect(templateFunction).toContain('TestClient');
+  });
+
+  it('should render template that is complex (multiple levels of includes)', async () => {
+    const templateFunction = renderFile(GOOD_FILE, {
+      clientName: 'Test',
+      baseUrl: null,
+      operations: [
+        {
+          parameters: [],
+          name: 'TestName',
+          returnType: 'string',
+          url: 'api/test',
+          pathParams: [],
+          method: 'GET',
+          body: null,
+          query: null,
+          headers: null,
+        },
+      ],
+    });
+
+    expect(templateFunction).toBe('TestClient');
   });
 });

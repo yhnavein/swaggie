@@ -20,14 +20,17 @@ export function loadAllTemplateFiles(templateName: string) {
   templates.forEach((t) => {
     const filePath = path.join(templatesDir, t);
     const file = fs.readFileSync(filePath, 'utf8');
-    const tfun = ejs.compile(file, { cache: true });
+    const tfun = ejs.compile(file, { cache: true, client: true });
     ejs.cache.set(t, tfun);
   });
 }
 
 /** Renders a file from the compiled template from cache */
-export function render(templateFile: string, data: ejs.Data) {
-  const tmpl = ejs.cache.get(templateFile);
+export function renderFile(templateFile: string, data: ejs.Data) {
+  const fun = ejs.cache.get(templateFile) as any;
 
-  return tmpl(data);
+  return fun(data, null, (path: string, d: ejs.Data) => {
+    const insideTemplateName = path + (path.match(/\.ejs$/i) ? '' : '.ejs');
+    return renderFile(insideTemplateName, d);
+  });
 }
