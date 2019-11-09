@@ -9,7 +9,7 @@ import {
 } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
-import { render } from '../templateManager';
+import { renderFile } from '../templateManager';
 
 export default function genOperations(
   spec: ApiSpec,
@@ -29,7 +29,7 @@ export function genOperationGroupFiles(
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group, options);
-    const contents = render('client.ejs', clientData);
+    const contents = renderFile('client.ejs', clientData);
     const path = `${options.outDir}/${name}.ts`;
     saveFile(path, contents);
   }

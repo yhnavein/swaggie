@@ -1,5 +1,5 @@
 import { camelCase } from 'lodash';
-import { render } from '../templateManager';
+import { renderFile } from '../templateManager';
 
 export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): Promise<string> {
   const files = [];
@@ -20,5 +20,5 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
       })),
   };
 
-  return new Promise((res, rej) => res(render('barrel.ejs', viewData)));
+  return new Promise((res, rej) => res(renderFile('barrel.ejs', viewData)));
 }
