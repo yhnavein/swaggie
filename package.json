@@ -30,7 +30,7 @@
     "predev": "npm run init",
     "dev": "tsc -w",
     "init": "npm run clean",
-    "clean": "shx rm -rf ./dist"
+    "clean": "rimraf ./dist"
   },
   "files": [
     "dist",
@@ -56,16 +56,16 @@
   },
   "devDependencies": {
     "@types/ejs": "2.6.3",
-    "@types/got": "9.6.8",
-    "@types/jest": "24.0.21",
+    "@types/got": "9.6.9",
+    "@types/jest": "24.0.22",
     "@types/js-yaml": "3.12.1",
-    "@types/lodash": "4.14.144",
+    "@types/lodash": "4.14.146",
     "@types/mkdirp": "^0.5.2",
-    "@types/node": "12.12.5",
+    "@types/node": "12.12.7",
     "jest": "24.9.0",
-    "shx": "^0.3.2",
+    "rimraf": "3.0.0",
     "ts-jest": "24.1.0",
-    "tslint": "5.20.0",
+    "tslint": "5.20.1",
     "typescript": "3.6.4"
   },
   "jest": {
