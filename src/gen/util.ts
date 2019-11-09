@@ -1,4 +1,4 @@
-import { Stats, lstatSync, writeFileSync as fsWriteFileSync, readdirSync, unlinkSync } from 'fs';
+import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
 import * as PATH from 'path';
 import { sync as mkdirSync } from 'mkdirp';
 
@@ -54,30 +54,6 @@ export function getBestResponse(op: ApiOperation): ApiOperationResponse {
     : op.responses.find((resp) => resp.code === lowestCode.toString());
 }
 
-export function removeOldFiles(options: ClientOptions) {
-  cleanDirs(options.outDir, options);
-}
-
-const TS_EXTENSION = 'ts';
-
-function cleanDirs(dir: string, options: ClientOptions) {
-  dir = PATH.resolve(dir);
-  const stats = exists(dir);
-  if (!stats || !stats.isDirectory()) {
-    return;
-  }
-
-  const files = readdirSync(dir).map((file) => PATH.resolve(`${dir}/${file}`));
-  while (files.length) {
-    const file = files.pop();
-    if (file.endsWith(TS_EXTENSION) && !file.endsWith(`index.${TS_EXTENSION}`)) {
-      unlinkSync(file);
-    } else if (exists(file).isDirectory()) {
-      cleanDirs(file, options);
-    }
-  }
-}
-
 const reservedWords = [
   'break',
   'case',
@@ -114,8 +90,6 @@ const reservedWords = [
   'yield',
 ];
 
-const basicTypes = ['number', 'boolean', 'null', 'undefined', 'object'];
-
 export function escapeReservedWords(name: string): string {
   let escapedName = name;
 
@@ -125,11 +99,17 @@ export function escapeReservedWords(name: string): string {
   return escapedName;
 }
 
-/** Checks if type is a basic one. Basic type is one of ['number', 'boolean', 'null', 'undefined', 'object'] */
-export function isBasicType(type: string) {
-  if (!type) {
-    return false;
+/** This method tries to fix potentially wrong out parameter given from commandline */
+export function prepareOutputFilename(out: string): string {
+  if (!out) {
+    return null;
   }
-  const sanitizeType = type.toLowerCase().replace(']', '');
-  return basicTypes.indexOf(sanitizeType) > -1;
+
+  if (/\.[jt]sx?$/i.test(out)) {
+    return out.replace(/[\\]/i, '/');
+  }
+  if (/[\/\\]$/i.test(out)) {
+    return out.replace(/[\/\\]$/i, '') + '/index.ts';
+  }
+  return out.replace(/[\\]/i, '/') + '.ts';
 }

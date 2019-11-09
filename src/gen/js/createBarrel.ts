@@ -1,8 +1,7 @@
-import * as ejs from 'ejs';
-import * as path from 'path';
 import { camelCase } from 'lodash';
+import { renderFile } from '../templateManager';
 
-export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): Promise<string> {
+export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): string {
   const files = [];
 
   // tslint:disable-next-line:forin prefer-const
@@ -10,7 +9,6 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
     files.push(name);
   }
 
-  const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'barrel.ejs');
   const viewData = {
     reactContexts: clientOptions.reactHooks || false,
     clients: files
@@ -22,13 +20,5 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
       })),
   };
 
-  return new Promise((res, rej) =>
-    ejs.renderFile(absPath, viewData, (err, str) => {
-      if (err) {
-        console.error(err);
-        rej(err);
-      }
-      res(str);
-    })
-  );
+  return renderFile('barrel.ejs', viewData);
 }

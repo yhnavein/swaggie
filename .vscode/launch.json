@@ -15,9 +15,9 @@
       "protocol": "inspector",
       "args": [
         "-s",
-        "http://localhost:4016/swagger/v1/swagger.json",
+        "https://petstore.swagger.io/v2/swagger.json",
         "-o",
-        "/tmp/swagger-test/",
+        "./dist/swagger-test/",
         "-r"
       ]
     }

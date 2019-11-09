@@ -1,7 +1,7 @@
-import { resolveSpec, getOperations } from './spec';
-import genJsCode from './gen/js';
-import { removeOldFiles } from './gen/util';
 import * as assert from 'assert';
+import genJsCode from './gen/js';
+import { loadAllTemplateFiles } from './gen/templateManager';
+import { getOperations, resolveSpec } from './spec';
 
 export function genCode(options: ClientOptions): Promise<any> {
   return verifyOptions(options).then((options) =>
@@ -12,7 +12,7 @@ export function genCode(options: ClientOptions): Promise<any> {
 function verifyOptions(options: ClientOptions): Promise<any> {
   try {
     assert.ok(options.src, 'Open API src not specified');
-    assert.ok(options.outDir, 'Output directory not specified');
+    assert.ok(options.out, 'Output not specified');
     return Promise.resolve(options);
   } catch (e) {
     return Promise.reject(e);
@@ -20,7 +20,8 @@ function verifyOptions(options: ClientOptions): Promise<any> {
 }
 
 function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {
-  removeOldFiles(options);
+  loadAllTemplateFiles('axios');
+
   const operations = getOperations(spec);
   return genJsCode(spec, operations, options);
 }

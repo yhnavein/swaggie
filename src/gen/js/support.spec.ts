@@ -31,7 +31,7 @@ describe('getDocType', () => {
 
     const res = getDocType(def);
 
-    expect(res).toBe('module:types.ActivityFilter');
+    expect(res).toBe('module:ActivityFilter');
   });
 
   it('some integer', async () => {
@@ -128,7 +128,7 @@ describe('getDocType', () => {
 
       const res = getDocType(def);
 
-      expect(res).toBe('module:types.Items[]');
+      expect(res).toBe('module:Items[]');
     });
 
     it('number', async () => {
@@ -194,42 +194,38 @@ describe('getDocType', () => {
 describe('getTSParamType', () => {
   it('empty #1', async () => {
     const param = null;
-    const inTypesModule = false;
     const options = {
       preferAny: true,
     } as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
     expect(res).toBe('any');
   });
 
   it('empty #2', async () => {
     const param = null;
-    const inTypesModule = false;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
     expect(res).toBe('unknown');
   });
 
   it('empty #3', async () => {
     const param = null;
-    const inTypesModule = true;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
     expect(res).toBe('unknown');
   });
 
   it('empty #3', async () => {
     const param = [];
-    const inTypesModule = false;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
     expect(res).toBe('unknown');
   });
@@ -241,10 +237,9 @@ describe('getTSParamType', () => {
       required: false,
       type: 'file',
     };
-    const inTypesModule = false;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
     expect(res).toBe('File');
   });
@@ -256,24 +251,22 @@ describe('getTSParamType', () => {
         $ref: '#/definitions/Item',
       },
     };
-    const inTypesModule = true;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
-    expect(res).toBe('types.Item[]');
+    expect(res).toBe('Item[]');
   });
 
   it('reference #0', async () => {
     const param = {
       $ref: '#/definitions/SomeItem',
     };
-    const inTypesModule = true;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
-    expect(res).toBe('types.SomeItem');
+    expect(res).toBe('SomeItem');
   });
 
   it('reference #1', async () => {
@@ -285,12 +278,11 @@ describe('getTSParamType', () => {
         $ref: '#/definitions/SomeItem',
       },
     };
-    const inTypesModule = true;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
-    expect(res).toBe('types.SomeItem');
+    expect(res).toBe('SomeItem');
   });
 
   it('reference #2', async () => {
@@ -302,10 +294,9 @@ describe('getTSParamType', () => {
         $ref: '#/definitions/SomeItem',
       },
     };
-    const inTypesModule = false;
     const options = {} as any;
 
-    const res = getTSParamType(param, inTypesModule, options);
+    const res = getTSParamType(param, options);
 
     expect(res).toBe('SomeItem');
   });
@@ -320,10 +311,9 @@ describe('getTSParamType', () => {
           $ref: '#/definitions/PagingAndSortingParameters[Item]',
         },
       };
-      const inTypesModule = false;
       const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+      const res = getTSParamType(param, options);
 
       expect(res).toBe('PagingAndSortingParameters<Item>');
     });
@@ -335,10 +325,9 @@ describe('getTSParamType', () => {
         required: false,
         type: 'string',
       };
-      const inTypesModule = false;
       const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+      const res = getTSParamType(param, options);
 
       expect(res).toBe('string');
     });
@@ -351,10 +340,9 @@ describe('getTSParamType', () => {
         type: 'string',
         format: 'date-time',
       };
-      const inTypesModule = false;
       const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+      const res = getTSParamType(param, options);
 
       expect(res).toBe('Date');
     });
@@ -372,10 +360,9 @@ describe('getTSParamType', () => {
           Disabled: 1,
         },
       };
-      const inTypesModule = false;
       const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+      const res = getTSParamType(param, options);
 
       expect(res).toBe('number');
     });
@@ -391,10 +378,9 @@ describe('getTSParamType', () => {
           },
         },
       };
-      const inTypesModule = false;
       const options = {} as any;
 
-      const res = getTSParamType(param, inTypesModule, options);
+      const res = getTSParamType(param, options);
 
       expect(res).toBe('Item[]');
     });

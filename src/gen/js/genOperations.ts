@@ -1,51 +1,35 @@
-import * as ejs from 'ejs';
-import * as path from 'path';
 import { camelCase, last, orderBy } from 'lodash';
 
 import { getTSParamType } from './support';
 import {
-  saveFile,
   groupOperationsByGroupName,
   getBestResponse,
   escapeReservedWords,
 } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
+import { renderFile } from '../templateManager';
 
 export default function genOperations(
   spec: ApiSpec,
   operations: ApiOperation[],
   options: ClientOptions
 ) {
-  genOperationGroupFiles(spec, operations, options);
-}
-
-export function genOperationGroupFiles(
-  spec: ApiSpec,
-  operations: ApiOperation[],
-  options: ClientOptions
-) {
   const groups = groupOperationsByGroupName(operations);
+  let result = renderFile('baseClient.ejs', {
+    reactContexts: options.reactHooks || false,
+  });
+
   // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group, options);
-    const absPath = path.join(__dirname, '..', '..', '..', 'templates', 'axios', 'client.ejs');
-
-    ejs.renderFile(absPath, clientData, (err, str) => {
-      if (err) {
-        console.error(err);
-      }
-      const path = `${options.outDir}/${name}.ts`;
-      const contents = str;
-
-      saveFile(path, contents);
-    });
+    result += renderFile('client.ejs', clientData);
   }
 
-  generateBarrelFile(groups, options).then((fileContents) =>
-    saveFile(`${options.outDir}/index.ts`, fileContents)
-  );
+  result += generateBarrelFile(groups, options);
+
+  return result;
 }
 
 function prepareClient(
@@ -65,7 +49,7 @@ function prepareOperations(operations: ApiOperation[], options: ClientOptions): 
 
   return ops.map((op) => {
     const response = getBestResponse(op);
-    const respType = getTSParamType(response, true, options);
+    const respType = getTSParamType(response, options);
 
     return {
       returnType: respType,
@@ -114,7 +98,11 @@ function getOperationName(opId: string, group?: string) {
   return camelCase(opId.replace(group + '_', ''));
 }
 
-function getParams(params: ApiOperationParam[], options: ClientOptions, where?: string[]): IOperationParam[] {
+function getParams(
+  params: ApiOperationParam[],
+  options: ClientOptions,
+  where?: string[]
+): IOperationParam[] {
   if (!params || params.length < 1) {
     return [];
   }
@@ -124,7 +112,7 @@ function getParams(params: ApiOperationParam[], options: ClientOptions, where?: 
     .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
-      type: getTSParamType(p, true, options),
+      type: getTSParamType(p, options),
       optional: !p.required,
     }));
 }
@@ -187,7 +175,7 @@ function renderOptionalParamsSignature(
 function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
   const signature = [getParamName(param.name)];
 
-  signature.push(getTSParamType(param, true, options));
+  signature.push(getTSParamType(param, options));
 
   return signature;
 }

@@ -1,5 +1,3 @@
-import { isBasicType } from '../util';
-
 export const DOC = ' * ';
 export const DEFAULT_SP = '  ';
 export let SP = DEFAULT_SP;
@@ -13,7 +11,7 @@ export function getDocType(param: any): string {
     return 'object';
   } else if (param.$ref) {
     const type = param.$ref.split('/').pop();
-    return `module:types.${type}`;
+    return `module:${type}`;
   } else if (param.schema) {
     return getDocType(param.schema);
   } else if (param.type === 'array') {
@@ -21,7 +19,7 @@ export function getDocType(param: any): string {
       return `${getDocType(param.items)}[]`;
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
-      return `module:types.${type}[]`;
+      return `module:${type}[]`;
     } else {
       return 'object[]';
     }
@@ -38,7 +36,7 @@ export function getDocType(param: any): string {
   }
 }
 
-export function getTSParamType(param: any, inTypesModule: boolean, options: ClientOptions): string {
+export function getTSParamType(param: any, options: ClientOptions): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
   if (!param) {
@@ -52,26 +50,26 @@ export function getTSParamType(param: any, inTypesModule: boolean, options: Clie
   }
   if (param.$ref) {
     const type = param.$ref.split('/').pop();
-    return handleGenerics(type, inTypesModule);
+    return handleGenerics(type);
   } else if (param.schema) {
-    return getTSParamType(param.schema, inTypesModule, options);
+    return getTSParamType(param.schema, options);
   } else if (param.type === 'array') {
     if (param.items.type) {
       if (param.items.enum) {
-        return `(${getTSParamType(param.items, inTypesModule, options)})[]`;
+        return `(${getTSParamType(param.items, options)})[]`;
       } else {
-        return `${getTSParamType(param.items, inTypesModule, options)}[]`;
+        return `${getTSParamType(param.items, options)}[]`;
       }
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
-      return handleGenerics(type, inTypesModule) + '[]';
+      return handleGenerics(type) + '[]';
     } else {
       return unknownType + '[]';
     }
   } else if (param.type === 'object') {
     if (param.additionalProperties) {
       const extraProps = param.additionalProperties;
-      return `{ [key: string]: ${getTSParamType(extraProps, inTypesModule, options)} }`;
+      return `{ [key: string]: ${getTSParamType(extraProps, options)} }`;
     }
     return unknownType;
   } else if (param.type === 'integer' || param.type === 'number') {
@@ -89,15 +87,12 @@ export function getTSParamType(param: any, inTypesModule: boolean, options: Clie
   }
 }
 
-function handleGenerics(type: string, inTypesModule: boolean) {
+function handleGenerics(type: string) {
   if (!/^\w+\[\w+\]/.test(type)) {
-    return (inTypesModule ? 'types.' : '') + type;
+    return type;
   }
 
   // const fixedType = type.replace(/\[/g, '<').replace(/\]/g, '>');
   const parts = type.split('[');
-  return parts
-    .map((p) => (p && inTypesModule && !isBasicType(p) ? 'types.' : '') + p)
-    .join('<')
-    .replace(/\]/g, '>');
+  return parts.join('<').replace(/\]/g, '>');
 }

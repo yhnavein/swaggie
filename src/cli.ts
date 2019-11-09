@@ -15,8 +15,8 @@ const args: any = program
     process.env.OPEN_API_SRC
   )
   .option(
-    '-o, --outDir <dir>',
-    'The path to the directory where files should be generated',
+    '-o, --out <filePath>',
+    'The path to the file where the API would be generated',
     process.env.OPEN_API_OUT
   )
   .option(
@@ -36,7 +36,7 @@ const args: any = program
 genCode(args).then(complete, error);
 
 function complete(spec: ApiSpec) {
-  console.info(chalk.bold.cyan(`Api ${args.src} code generated into ${args.outDir}`));
+  console.info(chalk.bold.cyan(`Api ${args.src} code generated into ${args.out}`));
   process.exit(0);
 }
 
