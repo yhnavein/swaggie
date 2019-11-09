@@ -90,8 +90,6 @@ const reservedWords = [
   'yield',
 ];
 
-const basicTypes = ['number', 'boolean', 'null', 'undefined', 'object'];
-
 export function escapeReservedWords(name: string): string {
   let escapedName = name;
 
@@ -99,13 +97,4 @@ export function escapeReservedWords(name: string): string {
     escapedName = '_' + name;
   }
   return escapedName;
-}
-
-/** Checks if type is a basic one. Basic type is one of ['number', 'boolean', 'null', 'undefined', 'object'] */
-export function isBasicType(type: string) {
-  if (!type) {
-    return false;
-  }
-  const sanitizeType = type.toLowerCase().replace(']', '');
-  return basicTypes.indexOf(sanitizeType) > -1;
 }

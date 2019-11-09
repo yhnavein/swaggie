@@ -111,7 +111,7 @@ function renderTsTypeProp(
   typeToBeGeneric?: string
 ): string[] {
   const lines = [];
-  let type = getTSParamType(info, false, options);
+  let type = getTSParamType(info, options);
   if (typeToBeGeneric && type.indexOf(typeToBeGeneric) === 0) {
     type = type.replace(typeToBeGeneric, 'T');
   }

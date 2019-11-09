@@ -1,6 +1,5 @@
 import {
   groupOperationsByGroupName,
-  isBasicType,
   escapeReservedWords,
   getBestResponse,
 } from './util';
@@ -160,32 +159,6 @@ describe('groupOperationsByGroupName', () => {
     expect(res.HealthCheck.length).toBe(1);
     expect(res.Illness).toBeDefined();
     expect(res.Illness.length).toBe(1);
-  });
-});
-
-describe('isBasicType', () => {
-  it('handles null', () => {
-    const res = isBasicType(null);
-
-    expect(res).toBe(false);
-  });
-
-  it('handles empty string', () => {
-    const res = isBasicType('');
-
-    expect(res).toBe(false);
-  });
-
-  it('handles basic type', () => {
-    const res = isBasicType('object');
-
-    expect(res).toBe(true);
-  });
-
-  it('handles strange basic type', () => {
-    const res = isBasicType('number]');
-
-    expect(res).toBe(true);
   });
 });
 

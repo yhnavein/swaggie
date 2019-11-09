@@ -47,7 +47,7 @@ function prepareOperations(operations: ApiOperation[], options: ClientOptions): 
 
   return ops.map((op) => {
     const response = getBestResponse(op);
-    const respType = getTSParamType(response, true, options);
+    const respType = getTSParamType(response, options);
 
     return {
       returnType: respType,
@@ -110,7 +110,7 @@ function getParams(
     .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
-      type: getTSParamType(p, true, options),
+      type: getTSParamType(p, options),
       optional: !p.required,
     }));
 }
@@ -173,7 +173,7 @@ function renderOptionalParamsSignature(
 function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
   const signature = [getParamName(param.name)];
 
-  signature.push(getTSParamType(param, true, options));
+  signature.push(getTSParamType(param, options));
 
   return signature;
 }

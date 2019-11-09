@@ -17,7 +17,7 @@
         "-s",
         "https://petstore.swagger.io/v2/swagger.json",
         "-o",
-        "./swagger-test/",
+        "./dist/swagger-test/",
         "-r"
       ]
     }
