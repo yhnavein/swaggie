@@ -15,8 +15,8 @@ const args: any = program
     process.env.OPEN_API_SRC
   )
   .option(
-    '-o, --outDir <dir>',
-    'The path to the directory where files should be generated',
+    '-o, --out <filePath>',
+    'The path to the file where the API would be generated',
     process.env.OPEN_API_OUT
   )
   .option(

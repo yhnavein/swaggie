@@ -1,6 +1,6 @@
 interface ClientOptions {
   src: string;
-  outDir: string;
+  out: string;
   baseUrl: string;
   reactHooks: boolean;
   preferAny?: boolean;

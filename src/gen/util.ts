@@ -1,4 +1,4 @@
-import { Stats, lstatSync, writeFileSync as fsWriteFileSync, readdirSync, unlinkSync } from 'fs';
+import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
 import * as PATH from 'path';
 import { sync as mkdirSync } from 'mkdirp';
 
@@ -52,30 +52,6 @@ export function getBestResponse(op: ApiOperation): ApiOperationResponse {
   return lowestCode === NOT_FOUND
     ? op.responses[0]
     : op.responses.find((resp) => resp.code === lowestCode.toString());
-}
-
-export function removeOldFiles(options: ClientOptions) {
-  cleanDirs(options.outDir, options);
-}
-
-const TS_EXTENSION = 'ts';
-
-function cleanDirs(dir: string, options: ClientOptions) {
-  dir = PATH.resolve(dir);
-  const stats = exists(dir);
-  if (!stats || !stats.isDirectory()) {
-    return;
-  }
-
-  const files = readdirSync(dir).map((file) => PATH.resolve(`${dir}/${file}`));
-  while (files.length) {
-    const file = files.pop();
-    if (file.endsWith(TS_EXTENSION) && !file.endsWith(`index.${TS_EXTENSION}`)) {
-      unlinkSync(file);
-    } else if (exists(file).isDirectory()) {
-      cleanDirs(file, options);
-    }
-  }
 }
 
 const reservedWords = [

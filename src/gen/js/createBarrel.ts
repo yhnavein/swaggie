@@ -1,7 +1,7 @@
 import { camelCase } from 'lodash';
 import { renderFile } from '../templateManager';
 
-export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): Promise<string> {
+export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): string {
   const files = [];
 
   // tslint:disable-next-line:forin prefer-const
@@ -20,5 +20,5 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
       })),
   };
 
-  return new Promise((res, rej) => res(renderFile('barrel.ejs', viewData)));
+  return renderFile('barrel.ejs', viewData);
 }

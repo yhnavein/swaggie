@@ -1,25 +1,12 @@
-import { saveFile, join } from '../util';
+import { join } from '../util';
 import { DOC, SP, getDocType, getTSParamType } from './support';
 import { uniq } from 'lodash';
 
 export default function genTypes(spec: ApiSpec, options: ClientOptions) {
-  const file = genTypesFile(spec, options);
-  saveFile(file.path, file.contents);
-}
-
-export function genTypesFile(spec: ApiSpec, options: ClientOptions) {
   const lines = [];
-  join(lines, renderHeader());
   join(lines, renderDefinitions(spec, options));
 
-  return {
-    path: `${options.outDir}/types.ts`,
-    contents: lines.join('\n'),
-  };
-}
-
-function renderHeader() {
-  return [`// Auto-generated, edits will be overwritten`, ''];
+  return  lines.join('\n');
 }
 
 function renderDefinitions(spec: ApiSpec, options: ClientOptions): string[] {

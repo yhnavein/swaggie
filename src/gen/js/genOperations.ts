@@ -2,7 +2,6 @@ import { camelCase, last, orderBy } from 'lodash';
 
 import { getTSParamType } from './support';
 import {
-  saveFile,
   groupOperationsByGroupName,
   getBestResponse,
   escapeReservedWords,
@@ -16,27 +15,19 @@ export default function genOperations(
   operations: ApiOperation[],
   options: ClientOptions
 ) {
-  genOperationGroupFiles(spec, operations, options);
-}
-
-export function genOperationGroupFiles(
-  spec: ApiSpec,
-  operations: ApiOperation[],
-  options: ClientOptions
-) {
   const groups = groupOperationsByGroupName(operations);
+  let result = renderFile('baseClient.ejs', {});
+
   // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
     const clientData = prepareClient(name, group, options);
-    const contents = renderFile('client.ejs', clientData);
-    const path = `${options.outDir}/${name}.ts`;
-    saveFile(path, contents);
+    result += renderFile('client.ejs', clientData);
   }
 
-  generateBarrelFile(groups, options).then((fileContents) =>
-    saveFile(`${options.outDir}/index.ts`, fileContents)
-  );
+  result += generateBarrelFile(groups, options);
+
+  return result;
 }
 
 function prepareClient(
