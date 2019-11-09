@@ -11,7 +11,7 @@ export function getDocType(param: any): string {
     return 'object';
   } else if (param.$ref) {
     const type = param.$ref.split('/').pop();
-    return `module:types.${type}`;
+    return `module:${type}`;
   } else if (param.schema) {
     return getDocType(param.schema);
   } else if (param.type === 'array') {
@@ -19,7 +19,7 @@ export function getDocType(param: any): string {
       return `${getDocType(param.items)}[]`;
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
-      return `module:types.${type}[]`;
+      return `module:${type}[]`;
     } else {
       return 'object[]';
     }

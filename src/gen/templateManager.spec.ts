@@ -75,6 +75,7 @@ describe('render', () => {
       ],
     });
 
-    expect(templateFunction).toBe('TestClient');
+    expect(templateFunction).toContain('TestClient');
+    expect(templateFunction).toContain('TestName');
   });
 });
