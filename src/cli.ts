@@ -36,7 +36,7 @@ const args: any = program
 genCode(args).then(complete, error);
 
 function complete(spec: ApiSpec) {
-  console.info(chalk.bold.cyan(`Api ${args.src} code generated into ${args.outDir}`));
+  console.info(chalk.bold.cyan(`Api ${args.src} code generated into ${args.out}`));
   process.exit(0);
 }
 

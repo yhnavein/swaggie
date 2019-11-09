@@ -16,7 +16,9 @@ export default function genOperations(
   options: ClientOptions
 ) {
   const groups = groupOperationsByGroupName(operations);
-  let result = renderFile('baseClient.ejs', {});
+  let result = renderFile('baseClient.ejs', {
+    reactContexts: options.reactHooks || false,
+  });
 
   // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {

@@ -1,6 +1,6 @@
 import genOperations from './genOperations';
 import genTypes from './genTypes';
-import { saveFile } from '../util';
+import { saveFile, prepareOutputFilename } from '../util';
 
 export default function genCode(
   spec: ApiSpec,
@@ -10,7 +10,7 @@ export default function genCode(
   let fileContents = genOperations(spec, operations, options);
   fileContents += genTypes(spec, options);
 
-  // const destFile = options.out
-  saveFile(`${options.out}/index.ts`, fileContents);
+  const destFile = prepareOutputFilename(options.out);
+  saveFile(destFile, fileContents);
   return spec;
 }
