@@ -3,10 +3,11 @@
 [![Build Status](https://travis-ci.org/yhnavein/swaggie.svg?branch=master)](https://travis-ci.org/yhnavein/swaggie)
 [![CircleCI](https://circleci.com/gh/yhnavein/swaggie.svg?style=svg)](https://circleci.com/gh/yhnavein/swaggie)
 ![Dependencies](https://img.shields.io/david/yhnavein/swaggie.svg)
-![npm](https://img.shields.io/npm/v/swaggie)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
-![npm](https://img.shields.io/npm/dw/swaggie.svg)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/yhnavein/swaggie.svg)
+![npm downloads](https://img.shields.io/npm/dw/swaggie.svg)
+![npm latest version](https://img.shields.io/npm/v/swaggie)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
+![npm install size](https://packagephobia.now.sh/badge?p=swaggie)
 
 Generate ES6 or Typescript code from an OpenAPI 2.0 spec, so that accessing REST API resources from the client code is less error-prone, static-typed and just easier to use long-term.
 
@@ -24,10 +25,6 @@ Or globally to run CLI from anywhere
 
     npm install swaggie -g
 
-## Usage – Generating the API client
-
-`swaggie` generates action creators in the `outDir` of your choosing. The rest of the examples assume that you've set `--outDir api-client`. You can generate the `api-client` either using the CLI, or in code.
-
 ### CLI
 
 ```
@@ -38,7 +35,7 @@ Options:
   -h, --help               output usage information
   -V, --version            output the version number
   -s, --src <url|path>     The url or path to the Open API spec file
-  -o, --outDir <dir>       The path to the directory where files should be generated
+  -o, --out <path>         The path to the file where the API would be generated
   -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
   -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
   --preferAny              Use "any" type instead of "unknown". Default: false
@@ -53,7 +50,7 @@ swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore/
 `swaggie` outputs TypeScript that is somehow formatted, but it's far from perfect. You can adjust the generated code by prettifying output using your preferred beautify tool using your repo's styling guidelines. For example involving `prettier` looks like this:
 
 ```bash
-swaggie -s $URL -o ./client/petstore/ && prettier ./client/petstore/*.ts --write`
+swaggie -s $URL -o ./client/petstore.ts && prettier ./client/petstore.ts --write`
 ```
 
 And this can be easily automated (in the npm scripts for example)
@@ -64,7 +61,7 @@ And this can be easily automated (in the npm scripts for example)
 const swaggie = require('swaggie')
 swaggie.genCode({
   src: 'http://petstore.swagger.io/v2/swagger.json',
-  outDir: './src/service',
+  out: './api/petstore.ts',
   reactHooks: true
 })
 .then(complete, error)
@@ -102,14 +99,13 @@ Instead of writing any code by hand for fetching particular resources, you could
 Let's run `swaggie` against PetStore API and see what will happen:
 
 ```bash
-swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./api
+swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./api/petstore.ts && prettier ./api/petstore.ts --write
 ```
 
 ```typescript
-// ./api/petClient.ts
+// ./api/petstore.ts
 
 import axios, { AxiosPromise } from 'axios';
-import * as types from './types';
 
 export class petClient {
   private baseUrl: string;
@@ -122,12 +118,12 @@ export class petClient {
    * @param petId
    * @return Success
    */
-  getPetById(petId: number): AxiosPromise<types.Pet> {
+  getPetById(petId: number): AxiosPromise<Pet> {
     let url = this.baseUrl + '/pet/{petId}';
 
     url = url.replace('{petId}', encodeURIComponent('' + petId));
 
-    return axios.request<types.Pet>({
+    return axios.request<Pet>({
       url: url,
       method: 'GET',
     });
