@@ -20,7 +20,7 @@ function verifyOptions(options: ClientOptions): Promise<any> {
 }
 
 function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {
-  loadAllTemplateFiles('axios');
+  loadAllTemplateFiles(options.template || 'axios');
 
   const operations = getOperations(spec);
   return genJsCode(spec, operations, options);

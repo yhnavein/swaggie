@@ -24,6 +24,10 @@ const args: any = program
     'Base URL that will be used as a default value in the clients. Default: ""'
   )
   .option(
+    '-t, --template <string>',
+    'Template used forgenerating API client. Default: "axios"'
+  )
+  .option(
     '-r, --reactHooks',
     'Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false'
   )
