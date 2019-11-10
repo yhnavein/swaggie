@@ -1,0 +1,10 @@
+export class <%- clientName -%>Client {
+  private baseUrl: string;
+
+  constructor(baseUrl?: string) {
+    this.baseUrl = baseUrl || '<%- baseUrl || '' -%>';
+  }
+  <% operations.forEach(function(operation) { %>
+<%- include('operation', operation); %>
+  <% }); %>
+}
