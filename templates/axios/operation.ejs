@@ -14,11 +14,21 @@
     url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
 <% });
 } _%>
+<%_ if(formData && formData.length > 0) { _%>
+    const formDataBody = new FormData();
+  <%_ formData.forEach(function(parameter) { -%>
+    if (!!<%- parameter.name -%>) {
+      formDataBody.append("<%- parameter.originalName -%>", <%- parameter.name -%>.toString());
+    }
+<% });
+} _%>
 
     return axios.request<<%- returnType -%>>({
       url: url,
       method: '<%- method -%>',
-<%_ if(body) { _%>
+<%_ if(formData && formData.length > 0) { _%>
+      data: formDataBody,
+<%_ } else if(body) { _%>
       data: <%- body.name -%>,
 <%_ } _%>
 <%_ if(query && query.length > 0) { _%>
