@@ -20,7 +20,7 @@
         "./dist/swagger-test/",
         "-r",
         "-t",
-        "fetch"
+        "ng1"
       ]
     }
   ]

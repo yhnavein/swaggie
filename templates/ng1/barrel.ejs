@@ -1,0 +1,10 @@
+export class ApiServices {
+  public static bootstrap(moduleName: string, baseUrl: string) {
+    angular
+      .module(moduleName)
+      .service('ApiConfig', () => new ApiConfig(baseUrl))
+<%_ clients.forEach(function(client) { _%>
+      .service('<%- client.fileName %>Service', <%- client.fileName %>Service)
+<%_ }); _%>;
+  }
+}

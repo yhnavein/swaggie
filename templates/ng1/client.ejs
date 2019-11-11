@@ -1,0 +1,12 @@
+export class <%- clientName -%>Service extends BaseService {
+  /* @ngInject */
+  constructor($http: IHttpService, ApiConfig: ApiConfig) {
+    super($http, ApiConfig);
+  }
+
+  public readonly systemName = 'SYSTEM-NAME';
+
+  <% operations.forEach(function(operation) { %>
+<%- include('operation', operation); %>
+  <% }); %>
+}
