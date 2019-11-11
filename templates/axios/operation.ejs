@@ -31,7 +31,11 @@
 <%_ if(headers && headers.length > 0) { _%>
       headers: {
         <% headers.forEach(function(parameter) { -%>
+    <%_ if (parameter.value) { _%>
+    '<%- parameter.originalName -%>': '<%- parameter.value -%>',
+    <%_ } else { _%>
     '<%- parameter.originalName -%>': <%- parameter.name -%>,
+    <%_ } _%>
     <% }); -%>
       },
 <%_ } _%>

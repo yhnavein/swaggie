@@ -56,6 +56,35 @@ describe('getPathOperation', () => {
     expect(res).toMatchObject(validResp);
   });
 
+  it('handles additional content types', () => {
+    const spec = {
+      swagger: '2.0',
+      paths: {
+        '/api/heartbeat': {
+          post: {
+            tags: ['System'],
+            operationId: 'ApiHeartbeatGet',
+            produces: ['application/json'],
+            consumes: ['application/x-www-form-urlencoded'],
+            responses: {
+              '200': {
+                description: 'Service is available.',
+              },
+            },
+          },
+        },
+      },
+      definitions: {},
+      contentTypes: [],
+      accepts: [],
+    };
+
+    const res = getOperations(spec as any);
+
+    expect(res).toBeDefined();
+    expect(res[0].contentTypes).toMatchObject(['application/x-www-form-urlencoded']);
+  });
+
   it('[PerStore Example] should parse operations from spec', async () => {
     const path = `${__dirname}/../../test/petstore.yml`;
     const spec = await resolveSpec(path);

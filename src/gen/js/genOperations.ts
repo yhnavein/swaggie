@@ -1,11 +1,7 @@
 import { camelCase, last, orderBy } from 'lodash';
 
 import { getTSParamType } from './support';
-import {
-  groupOperationsByGroupName,
-  getBestResponse,
-  escapeReservedWords,
-} from '../util';
+import { groupOperationsByGroupName, getBestResponse, escapeReservedWords } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
@@ -44,7 +40,10 @@ function prepareClient(
   };
 }
 
-function prepareOperations(operations: ApiOperation[], options: ClientOptions): IApiOperation[] {
+export function prepareOperations(
+  operations: ApiOperation[],
+  options: ClientOptions
+): IApiOperation[] {
   const ops = fixDuplicateOperations(operations);
 
   return ops.map((op) => {
@@ -58,9 +57,10 @@ function prepareOperations(operations: ApiOperation[], options: ClientOptions): 
       url: op.path,
       parameters: getParams(op.parameters, options),
       query: getParams(op.parameters, options, ['query']),
+      formData: getParams(op.parameters, options, ['formData']),
       pathParams: getParams(op.parameters, options, ['path']),
       body: last(getParams(op.parameters, options, ['body'])),
-      headers: getParams(op.parameters, options, ['header']),
+      headers: getHeaders(op, options),
     };
   });
 }
@@ -69,7 +69,7 @@ function prepareOperations(operations: ApiOperation[], options: ClientOptions): 
  * We will add numbers to the duplicated operation names to avoid breaking code
  * @param operations
  */
-function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
+export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
   if (!operations || operations.length < 2) {
     return operations;
   }
@@ -90,12 +90,32 @@ function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
   return results;
 }
 
-function getOperationName(opId: string, group?: string) {
+export function getOperationName(opId: string, group?: string) {
   if (!group) {
     return opId;
   }
 
   return camelCase(opId.replace(group + '_', ''));
+}
+
+function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[] {
+  const headersFromParams = getParams(op.parameters, options, ['header']);
+  // TODO: At some point there may be need for a new param to add implicitly default content types
+
+  if (
+    op.contentTypes.length > 0 &&
+    headersFromParams.filter((p) => p.originalName.toLowerCase() === 'content-type').length === 0
+  ) {
+    headersFromParams.push({
+      name: 'contentType',
+      optional: false,
+      originalName: 'Content-Type',
+      type: 'string',
+      value: op.contentTypes.join(', '),
+    });
+  }
+
+  return headersFromParams;
 }
 
 function getParams(

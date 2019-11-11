@@ -13,6 +13,7 @@ export interface IOperationParam {
   originalName: string;
   type: string;
   optional: boolean;
+  value?: string;
 }
 
 export interface IServiceClient {
