@@ -74,7 +74,8 @@ export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation
     return operations;
   }
 
-  const results = orderBy(operations, (o) => o.id);
+  const ops = operations.map((a) => Object.assign({}, a));
+  const results = orderBy(ops, (o) => o.id);
 
   let inc = 0;
   let prevOpId = results[0].id;
@@ -91,6 +92,9 @@ export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation
 }
 
 export function getOperationName(opId: string, group?: string) {
+  if (!opId) {
+    return '';
+  }
   if (!group) {
     return opId;
   }
@@ -144,60 +148,6 @@ export function renderOperationGroup(
   options: ClientOptions
 ): string[] {
   return group.map((op) => func.call(this, spec, op, options)).reduce((a, b) => a.concat(b));
-}
-
-export function renderParamSignature(
-  op: ApiOperation,
-  options: ClientOptions,
-  pkg?: string
-): string {
-  const params = op.parameters;
-  const required = params.filter((param) => param.required);
-  const optional = params.filter((param) => !param.required);
-  const funcParams = renderRequiredParamsSignature(required, options);
-  const optParam = renderOptionalParamsSignature(op, optional, options, pkg);
-  if (optParam.length) {
-    funcParams.push(optParam);
-  }
-
-  return funcParams.map((p) => p.join(': ')).join(', ');
-}
-
-function renderRequiredParamsSignature(
-  required: ApiOperationParam[],
-  options: ClientOptions
-): string[][] {
-  return required.reduce<string[][]>((a, param) => {
-    a.push(getParamSignature(param, options));
-    return a;
-  }, []);
-}
-
-function renderOptionalParamsSignature(
-  op: ApiOperation,
-  optional: ApiOperationParam[],
-  options: ClientOptions,
-  pkg?: string
-) {
-  if (!optional.length) {
-    return [];
-  }
-  if (!pkg) {
-    pkg = '';
-  }
-  const s = '?';
-  const param = [`options${s}`];
-
-  param.push(`${pkg}${op.id[0].toUpperCase() + op.id.slice(1)}Options`);
-  return param;
-}
-
-function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
-  const signature = [getParamName(param.name)];
-
-  signature.push(getTSParamType(param, options));
-
-  return signature;
 }
 
 export function getParamName(name: string): string {

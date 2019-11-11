@@ -34,10 +34,6 @@ export function join(parent: string[], child: string[]): string[] {
   return parent;
 }
 
-export function camelToUppercase(value: string): string {
-  return value.replace(/([A-Z]+)/g, '$1').toUpperCase();
-}
-
 export function getBestResponse(op: ApiOperation): ApiOperationResponse {
   const NOT_FOUND = 100000;
   const lowestCode = op.responses.reduce((code, resp) => {
