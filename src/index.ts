@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 import genJsCode from './gen/js';
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './spec';

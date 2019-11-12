@@ -1,5 +1,5 @@
 import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
-import * as PATH from 'path';
+import { dirname } from 'path';
 import { sync as mkdirSync } from 'mkdirp';
 
 export function exists(filePath: string): Stats {
@@ -11,7 +11,7 @@ export function exists(filePath: string): Stats {
 }
 
 export function saveFile(filePath, contents) {
-  mkdirSync(PATH.dirname(filePath));
+  mkdirSync(dirname(filePath));
 
   fsWriteFileSync(filePath, contents);
 }
