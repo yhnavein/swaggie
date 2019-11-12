@@ -68,6 +68,7 @@ describe('render', () => {
           url: 'api/test',
           pathParams: [],
           method: 'GET',
+          formData: [],
           body: null,
           query: null,
           headers: null,

@@ -5,6 +5,7 @@
     "target": "es6",
     "module": "commonjs",
     "removeComments": false,
+    "esModuleInterop": true,
     "sourceMap": true,
     "skipLibCheck": true
   },

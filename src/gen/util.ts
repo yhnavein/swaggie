@@ -1,5 +1,5 @@
 import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
-import * as PATH from 'path';
+import { dirname } from 'path';
 import { sync as mkdirSync } from 'mkdirp';
 
 export function exists(filePath: string): Stats {
@@ -11,7 +11,7 @@ export function exists(filePath: string): Stats {
 }
 
 export function saveFile(filePath, contents) {
-  mkdirSync(PATH.dirname(filePath));
+  mkdirSync(dirname(filePath));
 
   fsWriteFileSync(filePath, contents);
 }
@@ -32,10 +32,6 @@ export function groupOperationsByGroupName(operations) {
 export function join(parent: string[], child: string[]): string[] {
   parent.push.apply(parent, child);
   return parent;
-}
-
-export function camelToUppercase(value: string): string {
-  return value.replace(/([A-Z]+)/g, '$1').toUpperCase();
 }
 
 export function getBestResponse(op: ApiOperation): ApiOperationResponse {

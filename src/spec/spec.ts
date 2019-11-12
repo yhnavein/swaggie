@@ -1,5 +1,5 @@
-import * as YAML from 'js-yaml';
-import * as httpClient from 'got';
+import YAML from 'js-yaml';
+import httpClient from 'got';
 
 export interface SpecOptions {
   /**

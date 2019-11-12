@@ -1,11 +1,7 @@
 import { camelCase, last, orderBy } from 'lodash';
 
 import { getTSParamType } from './support';
-import {
-  groupOperationsByGroupName,
-  getBestResponse,
-  escapeReservedWords,
-} from '../util';
+import { groupOperationsByGroupName, getBestResponse, escapeReservedWords } from '../util';
 import { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
@@ -44,7 +40,10 @@ function prepareClient(
   };
 }
 
-function prepareOperations(operations: ApiOperation[], options: ClientOptions): IApiOperation[] {
+export function prepareOperations(
+  operations: ApiOperation[],
+  options: ClientOptions
+): IApiOperation[] {
   const ops = fixDuplicateOperations(operations);
 
   return ops.map((op) => {
@@ -58,9 +57,10 @@ function prepareOperations(operations: ApiOperation[], options: ClientOptions): 
       url: op.path,
       parameters: getParams(op.parameters, options),
       query: getParams(op.parameters, options, ['query']),
+      formData: getParams(op.parameters, options, ['formData']),
       pathParams: getParams(op.parameters, options, ['path']),
       body: last(getParams(op.parameters, options, ['body'])),
-      headers: getParams(op.parameters, options, ['header']),
+      headers: getHeaders(op, options),
     };
   });
 }
@@ -69,12 +69,13 @@ function prepareOperations(operations: ApiOperation[], options: ClientOptions): 
  * We will add numbers to the duplicated operation names to avoid breaking code
  * @param operations
  */
-function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
+export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
   if (!operations || operations.length < 2) {
     return operations;
   }
 
-  const results = orderBy(operations, (o) => o.id);
+  const ops = operations.map((a) => Object.assign({}, a));
+  const results = orderBy(ops, (o) => o.id);
 
   let inc = 0;
   let prevOpId = results[0].id;
@@ -90,12 +91,35 @@ function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
   return results;
 }
 
-function getOperationName(opId: string, group?: string) {
+export function getOperationName(opId: string, group?: string) {
+  if (!opId) {
+    return '';
+  }
   if (!group) {
     return opId;
   }
 
   return camelCase(opId.replace(group + '_', ''));
+}
+
+function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[] {
+  const headersFromParams = getParams(op.parameters, options, ['header']);
+  // TODO: At some point there may be need for a new param to add implicitly default content types
+
+  if (
+    op.contentTypes.length > 0 &&
+    headersFromParams.filter((p) => p.originalName.toLowerCase() === 'content-type').length === 0
+  ) {
+    headersFromParams.push({
+      name: 'contentType',
+      optional: false,
+      originalName: 'Content-Type',
+      type: 'string',
+      value: op.contentTypes.join(', '),
+    });
+  }
+
+  return headersFromParams;
 }
 
 function getParams(
@@ -124,60 +148,6 @@ export function renderOperationGroup(
   options: ClientOptions
 ): string[] {
   return group.map((op) => func.call(this, spec, op, options)).reduce((a, b) => a.concat(b));
-}
-
-export function renderParamSignature(
-  op: ApiOperation,
-  options: ClientOptions,
-  pkg?: string
-): string {
-  const params = op.parameters;
-  const required = params.filter((param) => param.required);
-  const optional = params.filter((param) => !param.required);
-  const funcParams = renderRequiredParamsSignature(required, options);
-  const optParam = renderOptionalParamsSignature(op, optional, options, pkg);
-  if (optParam.length) {
-    funcParams.push(optParam);
-  }
-
-  return funcParams.map((p) => p.join(': ')).join(', ');
-}
-
-function renderRequiredParamsSignature(
-  required: ApiOperationParam[],
-  options: ClientOptions
-): string[][] {
-  return required.reduce<string[][]>((a, param) => {
-    a.push(getParamSignature(param, options));
-    return a;
-  }, []);
-}
-
-function renderOptionalParamsSignature(
-  op: ApiOperation,
-  optional: ApiOperationParam[],
-  options: ClientOptions,
-  pkg?: string
-) {
-  if (!optional.length) {
-    return [];
-  }
-  if (!pkg) {
-    pkg = '';
-  }
-  const s = '?';
-  const param = [`options${s}`];
-
-  param.push(`${pkg}${op.id[0].toUpperCase() + op.id.slice(1)}Options`);
-  return param;
-}
-
-function getParamSignature(param: ApiOperationParam, options: ClientOptions): string[] {
-  const signature = [getParamName(param.name)];
-
-  signature.push(getTSParamType(param, options));
-
-  return signature;
 }
 
 export function getParamName(name: string): string {

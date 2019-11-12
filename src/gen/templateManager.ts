@@ -1,6 +1,6 @@
-import * as ejs from 'ejs';
-import * as fs from 'fs';
-import * as path from 'path';
+import ejs from 'ejs';
+import fs from 'fs';
+import path from 'path';
 
 /** Loads to memory all the EJS files for the selected template */
 export function loadAllTemplateFiles(templateName: string) {
