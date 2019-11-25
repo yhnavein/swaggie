@@ -1,3 +1,7 @@
+<div style="text-align: center; margin: 0px auto 30px; max-width: 600px">
+  <img src="./swaggie.svg" alt="Swaggie logo">
+</div>
+
 # Swaggie
 
 [![Build Status](https://travis-ci.org/yhnavein/swaggie.svg?branch=master)](https://travis-ci.org/yhnavein/swaggie)
