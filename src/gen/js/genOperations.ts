@@ -105,19 +105,21 @@ export function getOperationName(opId: string, group?: string) {
 function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[] {
   const headersFromParams = getParams(op.parameters, options, ['header']);
   // TODO: At some point there may be need for a new param to add implicitly default content types
+  // TODO: At this time content-type support was not essential to move forward with this functionality
+  // It needs to be reviewed
 
-  if (
-    op.contentTypes.length > 0 &&
-    headersFromParams.filter((p) => p.originalName.toLowerCase() === 'content-type').length === 0
-  ) {
-    headersFromParams.push({
-      name: 'contentType',
-      optional: false,
-      originalName: 'Content-Type',
-      type: 'string',
-      value: op.contentTypes.join(', '),
-    });
-  }
+  // if (
+  //   op.contentTypes.length > 0 &&
+  //   headersFromParams.filter((p) => p.originalName.toLowerCase() === 'content-type').length === 0
+  // ) {
+  //   headersFromParams.push({
+  //     name: 'contentType',
+  //     optional: false,
+  //     originalName: 'Content-Type',
+  //     type: 'string',
+  //     value: op.contentTypes.join(', '),
+  //   });
+  // }
 
   return headersFromParams;
 }

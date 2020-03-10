@@ -2,34 +2,35 @@ import { sortBy } from 'lodash';
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
 
 describe('prepareOperations', () => {
-  it(`operation's content type should be put in header`, () => {
-    const ops = [
-      {
-        id: 'getPetById',
-        summary: 'Find pet by ID',
-        description: 'Returns a single pet',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [],
-        responses: [],
-        group: null,
-        accepts: ['application/json'],
-        contentTypes: ['application/x-www-form-urlencoded'],
-      },
-    ] as ApiOperation[];
+  // TODO: For now we ignore custom content types
+  // it(`operation's content type should be put in header`, () => {
+  //   const ops = [
+  //     {
+  //       id: 'getPetById',
+  //       summary: 'Find pet by ID',
+  //       description: 'Returns a single pet',
+  //       method: 'get',
+  //       path: '/pet/{petId}',
+  //       parameters: [],
+  //       responses: [],
+  //       group: null,
+  //       accepts: ['application/json'],
+  //       contentTypes: ['application/x-www-form-urlencoded'],
+  //     },
+  //   ] as ApiOperation[];
 
-    const res = prepareOperations(ops, {} as any);
+  //   const res = prepareOperations(ops, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0].headers).toMatchObject([
-      {
-        name: 'contentType',
-        originalName: 'Content-Type',
-        type: 'string',
-        optional: false,
-      },
-    ]);
-  });
+  //   expect(res).toBeDefined();
+  //   expect(res[0].headers).toMatchObject([
+  //     {
+  //       name: 'contentType',
+  //       originalName: 'Content-Type',
+  //       type: 'string',
+  //       optional: false,
+  //     },
+  //   ]);
+  // });
 
   it(`operation's empty header list should be handled correctly`, () => {
     const ops = [
@@ -90,13 +91,14 @@ describe('prepareOperations', () => {
         type: 'string',
         optional: false,
       },
-      {
-        name: 'contentType',
-        originalName: 'Content-Type',
-        type: 'string',
-        optional: false,
-        value: 'application/x-www-form-urlencoded',
-      },
+      // TODO: For now we ignore custom content types
+      // {
+      //   name: 'contentType',
+      //   originalName: 'Content-Type',
+      //   type: 'string',
+      //   optional: false,
+      //   value: 'application/x-www-form-urlencoded',
+      // },
     ]);
   });
 
