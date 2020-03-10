@@ -5,6 +5,7 @@ interface ClientOptions {
   baseUrl: string;
   reactHooks: boolean;
   preferAny?: boolean;
+  servicePrefix?: string;
 }
 
 interface ApiRequestData {

@@ -32,6 +32,7 @@ const args: any = program
     'Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false'
   )
   .option('--preferAny', 'Use "any" type instead of "unknown". Default: false')
+  .option('--servicePrefix <string>', 'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""')
   .parse(process.argv);
 
 genCode(args).then(complete, error);

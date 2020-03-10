@@ -43,6 +43,7 @@ Options:
   -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
   -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
   --preferAny              Use "any" type instead of "unknown". Default: false
+  --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ''
 ```
 
 Sample CLI usage using Swagger's Pet Store:

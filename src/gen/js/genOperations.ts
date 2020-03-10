@@ -19,7 +19,7 @@ export default function genOperations(
   // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
-    const clientData = prepareClient(name, group, options);
+    const clientData = prepareClient((options.servicePrefix || '') + name, group, options);
     result += renderFile('client.ejs', clientData);
   }
 
