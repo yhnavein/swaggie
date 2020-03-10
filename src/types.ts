@@ -14,7 +14,14 @@ interface ApiRequestData {
   body: any;
 }
 
+interface ApiInfo {
+  version: string;
+  title: string;
+}
+
 interface ApiSpec {
+  swagger: string;
+  info: ApiInfo;
   host: string;
   basePath: string;
   schemes: string[];

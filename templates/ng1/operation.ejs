@@ -8,7 +8,7 @@
     <% }); -%>
     config?: IRequestShortcutConfig
   ): IPromise<<%- returnType -%>> {
-    let url = '<%- url -%>';
+    let url = '<%- url -%>?';
 <%_ if(pathParams && pathParams.length > 0) {
   pathParams.forEach(function(parameter) { -%>
     url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));

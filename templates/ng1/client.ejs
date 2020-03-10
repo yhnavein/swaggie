@@ -4,8 +4,6 @@ export class <%- clientName -%>Service extends BaseService {
     super($http, ApiConfig);
   }
 
-  public readonly systemName = 'SYSTEM-NAME';
-
   <% operations.forEach(function(operation) { %>
 <%- include('operation', operation); %>
   <% }); %>
