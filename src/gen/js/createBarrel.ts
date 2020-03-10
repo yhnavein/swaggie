@@ -14,9 +14,9 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
     clients: files
       .filter((c) => c)
       .map((c) => ({
-        fileName: c,
-        className: c + 'Client',
-        varName: camelCase(c + 'Client'),
+        fileName: (clientOptions.servicePrefix || '') + c,
+        className: (clientOptions.servicePrefix || '') + c + 'Client',
+        varName: camelCase((clientOptions.servicePrefix || '') + c + 'Client'),
       })),
   };
 

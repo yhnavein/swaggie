@@ -39,10 +39,12 @@ Options:
   -h, --help               output usage information
   -V, --version            output the version number
   -s, --src <url|path>     The url or path to the Open API spec file
+  -t, --template <string>  Template used forgenerating API client. Default: "axios"
   -o, --out <path>         The path to the file where the API would be generated
   -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
   -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
   --preferAny              Use "any" type instead of "unknown". Default: false
+  --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ''
 ```
 
 Sample CLI usage using Swagger's Pet Store:
@@ -58,6 +60,16 @@ swaggie -s $URL -o ./client/petstore.ts && prettier ./client/petstore.ts --write
 ```
 
 And this can be easily automated (in the npm scripts for example)
+
+### Bundled templates
+
+There are following templates bundled:
+
+```
+axios     Default template. Recommended for React / Vue / similar frameworks. Uses axios
+fetch     Template similar to axios, but uses fetch instead. Recommended for React / Vue / similar frameworks
+ng1       Template for Angular 1 (this is for the old one)
+```
 
 ### Code
 

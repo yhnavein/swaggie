@@ -18,7 +18,9 @@
         "https://petstore.swagger.io/v2/swagger.json",
         "-o",
         "./dist/swagger-test/",
-        "-r"
+        "-r",
+        "-t",
+        "ng1"
       ]
     }
   ]

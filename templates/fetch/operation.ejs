@@ -1,0 +1,37 @@
+  /**<% parameters.forEach(function(parameter) { %>
+   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
+<% }); %>
+   * @return Success
+   */
+  <%- name -%>(<% parameters.forEach(function(parameter) { -%>
+  <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
+    <% }); -%>
+  ): Promise<<%- returnType -%>> {
+    let url = this.baseUrl + '<%- url -%>?';
+<%_ if(pathParams && pathParams.length > 0) {
+  pathParams.forEach(function(parameter) { -%>
+    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+<% });
+} _%>
+<%_ if(query && query.length > 0) { _%>
+  <% query.forEach(function(parameter) { -%>
+  if (<%- parameter.name -%> !== undefined) {
+      url += '<%- parameter.originalName -%>=' + encodeURIComponent("" + <%- parameter.name -%>) + "&";
+    }
+  <% }); -%>
+<%_ } _%>
+
+    return fetch(url, {
+      method: '<%- method -%>',
+<%_ if(body) { _%>
+      body: JSON.stringify(<%- body.name -%>),
+<%_ } _%>
+<%_ if(headers && headers.length > 0) { _%>
+      headers: {
+        <% headers.forEach(function(parameter) { -%>
+    '<%- parameter.originalName -%>': <%- parameter.name -%>,
+    <% }); -%>
+      },
+<%_ } _%>
+    }).then((response) => response.json() as Promise<<%- returnType -%>>);
+  }

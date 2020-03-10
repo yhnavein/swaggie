@@ -1,0 +1,14 @@
+<%_ if(reactContexts) { _%>
+
+export const clients = {
+  <%_ clients.forEach(function(client) { _%>
+    <%- client.varName %>: new <%- client.className %>(),
+  <%_ }); _%>
+};
+
+export const ClientContext = React.createContext(clients);
+
+export function useClient() {
+  return useContext(ClientContext);
+}
+<%_ } _%>

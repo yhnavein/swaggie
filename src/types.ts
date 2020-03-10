@@ -1,9 +1,11 @@
 interface ClientOptions {
   src: string;
   out: string;
+  template: string;
   baseUrl: string;
   reactHooks: boolean;
   preferAny?: boolean;
+  servicePrefix?: string;
 }
 
 interface ApiRequestData {
@@ -13,7 +15,14 @@ interface ApiRequestData {
   body: any;
 }
 
+interface ApiInfo {
+  version: string;
+  title: string;
+}
+
 interface ApiSpec {
+  swagger: string;
+  info: ApiInfo;
   host: string;
   basePath: string;
   schemes: string[];
