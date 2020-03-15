@@ -14,6 +14,8 @@ export function getDocType(param: any): string {
     return `module:${type}`;
   } else if (param.schema) {
     return getDocType(param.schema);
+  } else if (param['x-schema']) {
+    return getDocType(param['x-schema']);
   } else if (param.type === 'array') {
     if (param.items.type) {
       return `${getDocType(param.items)}[]`;
@@ -53,6 +55,8 @@ export function getTSParamType(param: any, options: ClientOptions): string {
     return handleGenerics(type);
   } else if (param.schema) {
     return getTSParamType(param.schema, options);
+  } else if (param['x-schema']) {
+    return getTSParamType(param['x-schema'], options);
   } else if (param.type === 'array') {
     if (param.items.type) {
       if (param.items.enum) {

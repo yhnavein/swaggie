@@ -313,3 +313,43 @@ describe('getOperationName', () => {
     });
   });
 });
+
+describe('x-schema extension', () => {
+  it(`handle x-schema simple case in operation parameter`, () => {
+    const ops = [
+      {
+        id: 'getPetById',
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        method: 'get',
+        path: '/pet/{petId}',
+        parameters: [
+          {
+            type: 'object',
+            name: 'something',
+            in: 'query',
+            'x-schema': {
+              $ref: '#/definitions/SomeType',
+            },
+          },
+        ],
+        responses: [],
+        group: null,
+        accepts: ['application/json'],
+        contentTypes: [],
+      },
+    ];
+
+    const res = prepareOperations(ops as ApiOperation[], {} as any);
+
+    expect(res).toBeDefined();
+    expect(res[0].parameters).toMatchObject([
+      {
+        name: 'something',
+        originalName: 'something',
+        type: 'SomeType',
+        optional: true,
+      },
+    ]);
+  });
+});

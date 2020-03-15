@@ -57,6 +57,8 @@ interface ApiOperationParam extends ApiOperationParamBase {
   required: boolean;
   allowEmptyValue: boolean;
   schema: object;
+  'x-nullable'?: boolean;
+  'x-schema'?: object;
 }
 
 type CollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi';
