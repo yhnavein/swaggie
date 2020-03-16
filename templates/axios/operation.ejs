@@ -34,7 +34,7 @@
 <%_ if(query && query.length > 0) { _%>
       params: {
         <% query.forEach(function(parameter) { -%>
-    '<%- parameter.originalName -%>': <%- parameter.name -%>,
+    '<%- parameter.originalName -%>': serializeQueryParam(<%- parameter.name -%>),
     <% }); -%>
       },
 <%_ } _%>
