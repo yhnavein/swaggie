@@ -6,6 +6,8 @@ import { IServiceClient, IApiOperation, IOperationParam, IQueryDefinitions, IQue
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
 
+const MAX_QUERY_PARAMS:number = 1;
+
 export default function genOperations(
   spec: ApiSpec,
   operations: ApiOperation[],
@@ -61,7 +63,7 @@ export function prepareOperations(
     let queryParams = getParams(op.parameters, options, ['query']);
     let params = getParams(op.parameters, options);
 
-    if(options.queryModels && queryParams.length > 0) {
+    if(options.queryModels && queryParams.length > MAX_QUERY_PARAMS) {
       const [newQueryParam, queryParamDefinition] = getQueryDefinition(queryParams, op, options);
 
       [params, queryParams] = addQueryModelToParams(params, queryParams, newQueryParam);
