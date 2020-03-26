@@ -48,7 +48,7 @@ describe('prepareOperations', () => {
       },
     ] as ApiOperation[];
 
-    const res = prepareOperations(ops, {} as any);
+    const [res] = prepareOperations(ops, {} as any);
 
     expect(res).toBeDefined();
     expect(res[0].headers).toMatchObject([]);
@@ -81,7 +81,7 @@ describe('prepareOperations', () => {
       },
     ] as ApiOperation[];
 
-    const res = prepareOperations(ops, {} as any);
+    const [res] = prepareOperations(ops, {} as any);
 
     expect(res).toBeDefined();
     expect(res[0].headers).toMatchObject([
@@ -129,7 +129,7 @@ describe('prepareOperations', () => {
       },
     ] as ApiOperation[];
 
-    const res = prepareOperations(ops, {} as any);
+    const [res] = prepareOperations(ops, {} as any);
 
     expect(res).toBeDefined();
     expect(res[0].headers).toBeDefined();
