@@ -6,6 +6,7 @@ interface ClientOptions {
   reactHooks: boolean;
   preferAny?: boolean;
   servicePrefix?: string;
+  queryModels?: boolean;
 }
 
 interface ApiRequestData {

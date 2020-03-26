@@ -7,8 +7,8 @@ export default function genCode(
   operations: ApiOperation[],
   options: ClientOptions
 ): ApiSpec {
-  let fileContents = genOperations(spec, operations, options);
-  fileContents += genTypes(spec, options);
+  let [fileContents, queryDefinitions] = genOperations(spec, operations, options);
+  fileContents += genTypes(spec, queryDefinitions, options);
 
   const destFile = prepareOutputFilename(options.out);
   saveFile(destFile, fileContents);
