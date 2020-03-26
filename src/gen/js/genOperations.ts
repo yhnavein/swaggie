@@ -179,7 +179,7 @@ export function renderOperationGroup(
 }
 
 export function getParamName(name: string): string {
-  return escapeReservedWords(camelCase(name));
+  return escapeReservedWords(name.split('.').map(x => camelCase(x)).join('_'));
 }
 
 export function addQueryModelToParams(
