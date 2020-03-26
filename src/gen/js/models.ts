@@ -14,10 +14,21 @@ export interface IOperationParam {
   type: string;
   optional: boolean;
   value?: string;
+  original: ApiOperationParam;
 }
 
 export interface IServiceClient {
   clientName: string;
   baseUrl?: string;
   operations: IApiOperation[];
+}
+
+export interface IQueryPropDefinition {
+  type: string,
+  required: string[],
+  properties: {[key: string]: ApiOperationParam},
+}
+
+export interface IQueryDefinitions {
+  [key: string]: IQueryPropDefinition
 }

@@ -1,8 +1,8 @@
-import { camelCase, last, orderBy } from 'lodash';
+import { camelCase, last, orderBy, upperFirst } from 'lodash';
 
 import { getTSParamType } from './support';
 import { groupOperationsByGroupName, getBestResponse, escapeReservedWords } from '../util';
-import { IServiceClient, IApiOperation, IOperationParam } from './models';
+import { IServiceClient, IApiOperation, IOperationParam, IQueryDefinitions, IQueryPropDefinition } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
 
@@ -15,54 +15,72 @@ export default function genOperations(
   let result = renderFile('baseClient.ejs', {
     reactContexts: options.reactHooks || false,
   });
+  let queryDefinitions = {} as IQueryDefinitions;
 
   // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
-    const clientData = prepareClient((options.servicePrefix || '') + name, group, options);
+    const [clientData, clientQueryDefinitions] = prepareClient((options.servicePrefix || '') + name, group, options);
+
     result += renderFile('client.ejs', clientData);
+    queryDefinitions = {
+      ...queryDefinitions,
+      ...clientQueryDefinitions
+    }
   }
 
   result += generateBarrelFile(groups, options);
 
-  return result;
+  return [result, queryDefinitions];
 }
 
 function prepareClient(
   name: string,
   operations: ApiOperation[],
   options: ClientOptions
-): IServiceClient {
-  return {
+): [IServiceClient, IQueryDefinitions] {
+  let [preparedOperations, queryDefinitions] = prepareOperations(operations, options);
+  return [{
     clientName: name,
-    operations: prepareOperations(operations, options),
+    operations: preparedOperations,
     baseUrl: options.baseUrl,
-  };
+  }, queryDefinitions];
 }
 
 export function prepareOperations(
   operations: ApiOperation[],
   options: ClientOptions
-): IApiOperation[] {
+): [IApiOperation[], IQueryDefinitions] {
   const ops = fixDuplicateOperations(operations);
+  let queryDefinitions = {} as IQueryDefinitions;
 
-  return ops.map((op) => {
+  return [ops.map((op) => {
     const response = getBestResponse(op);
     const respType = getTSParamType(response, options);
+
+    let queryParams = getParams(op.parameters, options, ['query']);
+    let params = getParams(op.parameters, options);
+
+    if(options.queryModels && queryParams.length > 0) {
+      const [newQueryParam, queryParamDefinition] = getQueryDefinition(queryParams, op, options);
+
+      [params, queryParams] = addQueryModelToParams(params, queryParams, newQueryParam);
+      queryDefinitions[newQueryParam.type] = queryParamDefinition;
+    }
 
     return {
       returnType: respType,
       method: op.method.toUpperCase(),
       name: getOperationName(op.id, op.group),
       url: op.path,
-      parameters: getParams(op.parameters, options),
-      query: getParams(op.parameters, options, ['query']),
+      parameters: params,
+      query: queryParams,
       formData: getParams(op.parameters, options, ['formData']),
       pathParams: getParams(op.parameters, options, ['path']),
       body: last(getParams(op.parameters, options, ['body'])),
       headers: getHeaders(op, options),
     };
-  });
+  }), queryDefinitions];
 }
 
 /**
@@ -140,6 +158,7 @@ function getParams(
       name: getParamName(p.name),
       type: getTSParamType(p, options),
       optional: !p.required,
+      original: p,
     }));
 }
 
@@ -154,4 +173,46 @@ export function renderOperationGroup(
 
 export function getParamName(name: string): string {
   return escapeReservedWords(camelCase(name));
+}
+
+export function addQueryModelToParams(
+  params: IOperationParam[],
+  queryParams: IOperationParam[],
+  queryParam: IOperationParam,
+  ): [IOperationParam[], IOperationParam[]] {
+    const filteredParams = params.filter(x => !queryParams.find(y => y.name === x.name));
+    filteredParams.push(queryParam);
+
+    const updatedQueryParams = queryParams.map(x => ({
+      ...x,
+      name: `${queryParam.name}.${x.name}`,
+    }));
+
+    return [filteredParams, updatedQueryParams];
+}
+
+export function getQueryDefinition(
+  queryParams: IOperationParam[],
+  op: ApiOperation,
+  options: ClientOptions
+): [IOperationParam, IQueryPropDefinition] {
+
+    const queryParam = {
+      originalName: `${op.id.replace('_', '')}Query`,
+      name: getParamName(`${op.id.replace('_', '')}Query`),
+      type: `I${upperFirst(getOperationName(op.id, op.group))}From${options.servicePrefix || ''}${op.group}ServiceQuery`,
+      optional: false,
+    } as IOperationParam;
+
+    const queryParamDefinition = {
+      type: 'object',
+      required: [],
+      properties: queryParams
+        .reduce((prev, curr) => ({
+          ...prev,
+          [curr.name]: curr.original,
+        }), {}),
+    } as IQueryPropDefinition;
+
+    return [queryParam, queryParamDefinition];
 }
