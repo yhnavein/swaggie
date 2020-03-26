@@ -16,6 +16,7 @@ export default function genOperations(
   const groups = groupOperationsByGroupName(operations);
   let result = renderFile('baseClient.ejs', {
     reactContexts: options.reactHooks || false,
+    servicePrefix: options.servicePrefix || ''
   });
   let queryDefinitions = {} as IQueryDefinitions;
 
@@ -24,7 +25,11 @@ export default function genOperations(
     const group = groups[name];
     const [clientData, clientQueryDefinitions] = prepareClient((options.servicePrefix || '') + name, group, options);
 
-    result += renderFile('client.ejs', clientData);
+    result += renderFile('client.ejs', {
+      ...clientData,
+      servicePrefix: options.servicePrefix || ''
+    });
+
     queryDefinitions = {
       ...queryDefinitions,
       ...clientQueryDefinitions
