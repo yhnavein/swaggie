@@ -45,6 +45,7 @@ Options:
   -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
   --preferAny              Use "any" type instead of "unknown". Default: false
   --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ''
+  --queryModels <bool>     Generate models for query string instead list of parameters. Default: false
 ```
 
 Sample CLI usage using Swagger's Pet Store:
