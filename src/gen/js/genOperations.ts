@@ -182,7 +182,7 @@ export function getParamName(name: string): string {
   return escapeReservedWords(name.split('.').map(x => camelCase(x)).join('_'));
 }
 
-export function addQueryModelToParams(
+function addQueryModelToParams(
   params: IOperationParam[],
   queryParams: IOperationParam[],
   queryParam: IOperationParam,
@@ -198,7 +198,7 @@ export function addQueryModelToParams(
     return [filteredParams, updatedQueryParams];
 }
 
-export function getQueryDefinition(
+function getQueryDefinition(
   queryParams: IOperationParam[],
   op: ApiOperation,
   options: ClientOptions
@@ -217,7 +217,7 @@ export function getQueryDefinition(
       properties: queryParams
         .reduce((prev, curr) => ({
           ...prev,
-          [curr.name]: curr.original,
+          [curr.originalName]: curr.original,
         }), {}),
     } as IQueryPropDefinition;
 
