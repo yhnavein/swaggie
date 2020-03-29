@@ -2,7 +2,7 @@ export class ApiServices {
   public static bootstrap(moduleName: string, baseUrl: string) {
     angular
       .module(moduleName)
-      .service('ApiConfig', () => new ApiConfig(baseUrl))
+      .service('Api<%- servicePrefix -%>Config', () => new ApiConfig(baseUrl))
 <%_ clients.forEach(function(client) { _%>
       .service('<%- client.fileName %>Service', <%- client.fileName %>Service)
 <%_ }); _%>;
@@ -13,6 +13,6 @@ function serializeQueryParam(obj: any) {
   if (obj === null || obj === undefined) return '';
   if (typeof obj !== 'object' || Array.isArray(obj)) return encodeURIComponent(obj);
   return Object.keys(obj)
-    .reduce((a, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
+    .reduce((a: any, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
     .join('&');
 }

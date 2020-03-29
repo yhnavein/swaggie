@@ -17,8 +17,8 @@ class ApiConfig {
 class BaseService {
   protected baseUrl: string;
 
-  constructor(protected $http: IHttpService, ApiConfig: ApiConfig) {
-    this.baseUrl = ApiConfig.baseUrl;
+  constructor(protected $http: IHttpService, Api<%- servicePrefix -%>Config: ApiConfig) {
+    this.baseUrl = Api<%- servicePrefix -%>Config.baseUrl;
   }
 
   protected $get<T>(

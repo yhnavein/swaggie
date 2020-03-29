@@ -33,6 +33,7 @@ const args: any = program
   )
   .option('--preferAny', 'Use "any" type instead of "unknown". Default: false')
   .option('--servicePrefix <string>', 'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""')
+  .option('--queryModels', 'Generate models for query string instead list of parameters. Default: false')
   .parse(process.argv);
 
 genCode(args).then(complete, error);
