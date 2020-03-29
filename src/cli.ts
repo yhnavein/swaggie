@@ -3,11 +3,17 @@
 
 import program from 'commander';
 import chalk from 'chalk';
-import { genCode } from './index';
+import { runCodeGenerator } from './index';
 
 const args: any = program
   // tslint:disable-next-line:no-var-requires
   .version(require('../package.json').version)
+  .option(
+    '-c, --config <path>',
+    'The path to the configuration file. You can do all the set up there instead of parameters in the CLI',
+    String,
+    process.env.CONFIG_SRC
+  )
   .option(
     '-s, --src <url|path>',
     'The url or path to the Open API spec file',
@@ -36,7 +42,7 @@ const args: any = program
   .option('--queryModels', 'Generate models for query string instead list of parameters. Default: false')
   .parse(process.argv);
 
-genCode(args).then(complete, error);
+runCodeGenerator(args).then(complete, error);
 
 function complete(spec: ApiSpec) {
   console.info(chalk.bold.cyan(`Api ${args.src} code generated into ${args.out}`));
