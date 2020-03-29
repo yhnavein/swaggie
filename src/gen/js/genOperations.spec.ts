@@ -400,7 +400,7 @@ describe('x-schema extension', () => {
     const res = prepareOperations(ops as ApiOperation[], {} as any);
 
     expect(res).toBeDefined();
-    expect(res[0].parameters).toMatchObject([
+    expect(res[0][0].parameters).toMatchObject([
       {
         name: 'something',
         originalName: 'something',
