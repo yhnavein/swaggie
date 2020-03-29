@@ -16,7 +16,7 @@
 <%_ if(query && query.length > 0) { _%>
   <% query.forEach(function(parameter) { -%>
   if (<%- parameter.name -%> !== undefined) {
-      url += '<%- parameter.originalName -%>=' + encodeURIComponent("" + <%- parameter.name -%>) + "&";
+      url += '<%- parameter.originalName -%>=' + serializeQueryParam(<%- parameter.name -%>) + "&";
     }
   <% }); -%>
 <%_ } _%>
