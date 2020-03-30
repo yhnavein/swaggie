@@ -217,7 +217,7 @@ function getQueryDefinition(
       properties: queryParams
         .reduce((prev, curr) => ({
           ...prev,
-          [curr.originalName]: curr.original,
+          [curr.name]: curr.original,
         }), {}),
     } as IQueryPropDefinition;
 

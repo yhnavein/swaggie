@@ -166,6 +166,13 @@ describe('prepareOperations', () => {
             description: '',
             required: true,
             type: 'string',
+          },
+          {
+            name: 'Filter.AnotherParameter',
+            in: 'query',
+            description: '',
+            required: true,
+            type: 'string',
           }],
         responses: [],
         group: 'Pet',
@@ -181,8 +188,9 @@ describe('prepareOperations', () => {
       expect(queryDefs[expectedQueryType]).toBeDefined();
       expect(queryDefs[expectedQueryType].type).toBe('object');
       expect(queryDefs[expectedQueryType].properties).toMatchObject({
-        [op.parameters[0].name]: op.parameters[0],
-        [op.parameters[1].name]: op.parameters[1],
+        'firstParameter': op.parameters[0],
+        'secondParameter': op.parameters[1],
+        'filter_anotherParameter': op.parameters[2],
       });
 
       expect(res[0]).toBeDefined();
