@@ -1,5 +1,6 @@
 import genJsCode from './gen/js';
 import fs from 'fs';
+import chalk from 'chalk';
 
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './spec';
@@ -8,9 +9,14 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
   return verifyOptions(options)
     .then(applyConfigFile)
     .then((options) =>
-      resolveSpec(options.src, { ignoreRefType: '#/definitions/' }).then((spec) =>
-        gen(spec, options)
-      )
+      resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
+        .then((spec) => gen(spec, options))
+        .then(() => {
+          console.info(
+            chalk.bold.cyan(`Api from ${options.src} code generated into ${options.out}`)
+          );
+          return true;
+        })
     );
 }
 
