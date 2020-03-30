@@ -9,6 +9,10 @@ interface ClientOptions {
   queryModels?: boolean;
 }
 
+interface FullAppOptions extends ClientOptions {
+  config: string;
+}
+
 interface ApiRequestData {
   method: HttpMethod;
   url: string;

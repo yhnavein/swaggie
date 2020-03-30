@@ -38,6 +38,7 @@ Options:
 
   -h, --help               output usage information
   -V, --version            output the version number
+  -c, --config <path>      The path to the configuration JSON file. You can do all the set up there instead of parameters in the CLI
   -s, --src <url|path>     The url or path to the Open API spec file
   -t, --template <string>  Template used forgenerating API client. Default: "axios"
   -o, --out <path>         The path to the file where the API would be generated
@@ -61,6 +62,25 @@ swaggie -s $URL -o ./client/petstore.ts && prettier ./client/petstore.ts --write
 ```
 
 And this can be easily automated (in the npm scripts for example)
+
+### Configuration File
+
+Instead of providing all required flags from the command line you can alternatively create a new JSON file where you can fill up all settings.
+
+Sample configuration looks like this:
+
+```json
+{
+  "out": "./src/client/petstore.ts",
+  "src": "https://petstore.swagger.io/v2/swagger.json",
+  "template": "axios",
+  "baseUrl": "/api",
+  "reactHooks": true,
+  "preferAny": true,
+  "servicePrefix": "",
+  "queryModels": true
+}
+```
 
 ### Bundled templates
 

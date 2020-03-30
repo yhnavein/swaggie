@@ -10,5 +10,5 @@
     "newLine": "lf",
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "dist", "test", "sdk"]
+  "exclude": ["node_modules", "dist", "test", "coverage"]
 }
