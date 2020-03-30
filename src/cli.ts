@@ -10,7 +10,7 @@ const args: any = program
   .version(require('../package.json').version)
   .option(
     '-c, --config <path>',
-    'The path to the configuration file. You can do all the set up there instead of parameters in the CLI',
+    'The path to the configuration JSON file. You can do all the set up there instead of parameters in the CLI',
     String,
     process.env.CONFIG_SRC
   )
