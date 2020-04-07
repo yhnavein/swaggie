@@ -1,0 +1,15 @@
+@Injectable({
+  providedIn: 'root'
+})
+export class <%- clientName -%>Service extends BaseService {
+  constructor(
+    @Inject(HttpClient) http: HttpClient,
+    @Optional() @Inject(<%- (servicePrefix || 'API').toUpperCase() -%>_BASE_URL) baseUrl?: string
+  ) {
+    super(http, baseUrl);
+  }
+  <% operations.forEach(function(operation) { %>
+<%- include('operation', operation); %>
+  <% }); %>
+}
+
