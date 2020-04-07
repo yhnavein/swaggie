@@ -14,13 +14,8 @@
       "cwd": "${workspaceFolder}",
       "protocol": "inspector",
       "args": [
-        "-s",
-        "https://petstore.swagger.io/v2/swagger.json",
-        "-o",
-        "./dist/swagger-test/",
-        "-r",
-        "-t",
-        "ng1"
+        "-c",
+        "./api.config.json"
       ]
     }
   ]

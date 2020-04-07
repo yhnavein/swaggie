@@ -4,7 +4,7 @@
 export class <%- clientName -%>Service extends BaseService {
   constructor(
     @Inject(HttpClient) http: HttpClient,
-    @Optional() @Inject(AUTH_BASE_URL) baseUrl?: string
+    @Optional() @Inject(<%- (servicePrefix || 'API').toUpperCase() -%>_BASE_URL) baseUrl?: string
   ) {
     super(http, baseUrl);
   }

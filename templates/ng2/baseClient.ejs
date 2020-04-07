@@ -13,7 +13,7 @@ import { Observable, throwError as _observableThrow, of as _observableOf } from 
 import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
 import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/http";
 
-export const AUTH_BASE_URL = new InjectionToken<string>("AUTH_BASE_URL");
+export const <%- (servicePrefix || 'API').toUpperCase() -%>_BASE_URL = new InjectionToken<string>("<%- (servicePrefix || 'API').toUpperCase() -%>_BASE_URL");
 
 abstract class BaseService {
   private http: HttpClient;
@@ -22,7 +22,7 @@ abstract class BaseService {
 
   constructor(
     @Inject(HttpClient) http: HttpClient,
-    @Optional() @Inject(AUTH_BASE_URL) baseUrl?: string
+    @Optional() @Inject(<%- (servicePrefix || 'API').toUpperCase() -%>_BASE_URL) baseUrl?: string
   ) {
     this.http = http;
     this.baseUrl = baseUrl ? baseUrl : "";
