@@ -3,17 +3,25 @@ import { DOC, SP, getDocType, getTSParamType } from './support';
 import { uniq } from 'lodash';
 import { IQueryDefinitions } from './models';
 
-export default function genTypes(spec: ApiSpec, queryDefinitions: IQueryDefinitions, options: ClientOptions) {
+export default function genTypes(
+  spec: ApiSpec,
+  queryDefinitions: IQueryDefinitions,
+  options: ClientOptions
+) {
   const lines = [];
   join(lines, renderDefinitions(spec, queryDefinitions, options));
 
-  return  lines.join('\n');
+  return lines.join('\n');
 }
 
-function renderDefinitions(spec: ApiSpec, queryDefinitions: IQueryDefinitions, options: ClientOptions): string[] {
-  let defs = {
+function renderDefinitions(
+  spec: ApiSpec,
+  queryDefinitions: IQueryDefinitions,
+  options: ClientOptions
+): string[] {
+  const defs = {
     ...(spec.definitions || {}),
-    ...queryDefinitions
+    ...queryDefinitions,
   };
   const typeLines = [];
   const docLines = [];

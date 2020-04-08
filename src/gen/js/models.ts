@@ -24,11 +24,11 @@ export interface IServiceClient {
 }
 
 export interface IQueryPropDefinition {
-  type: string,
-  required: string[],
-  properties: {[key: string]: ApiOperationParam},
+  type: string;
+  required: string[];
+  properties: { [key: string]: ApiOperationParam };
 }
 
 export interface IQueryDefinitions {
-  [key: string]: IQueryPropDefinition
+  [key: string]: IQueryPropDefinition;
 }

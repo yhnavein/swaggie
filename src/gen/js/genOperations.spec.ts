@@ -145,52 +145,52 @@ describe('prepareOperations', () => {
   });
 
   describe('generate query model', () => {
-    const op =
-      {
-        id: 'Pet_GetPetById',
-        summary: 'Find pet by ID',
-        description: 'Returns a single pet',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [
-          {
-            name: 'FirstParameter',
-            in: 'query',
-            description: '',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'SecondParameter',
-            in: 'query',
-            description: '',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'Filter.AnotherParameter',
-            in: 'query',
-            description: '',
-            required: true,
-            type: 'string',
-          }],
-        responses: [],
-        group: 'Pet',
-        accepts: ['application/json'],
-        contentTypes: [],
-      }  as ApiOperation;
+    const op = {
+      id: 'Pet_GetPetById',
+      summary: 'Find pet by ID',
+      description: 'Returns a single pet',
+      method: 'get',
+      path: '/pet/{petId}',
+      parameters: [
+        {
+          name: 'FirstParameter',
+          in: 'query',
+          description: '',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'SecondParameter',
+          in: 'query',
+          description: '',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'Filter.AnotherParameter',
+          in: 'query',
+          description: '',
+          required: true,
+          type: 'string',
+        },
+      ],
+      responses: [],
+      group: 'Pet',
+      accepts: ['application/json'],
+      contentTypes: [],
+    } as ApiOperation;
 
-    it('query model should be generated instead array of params', () =>{
+    it('query model should be generated instead array of params', () => {
       const expectedQueryType = 'IGetPetByIdFromPetServiceQuery';
 
-      const [res, queryDefs] = prepareOperations([op], {queryModels: true} as any);
+      const [res, queryDefs] = prepareOperations([op], { queryModels: true } as any);
 
       expect(queryDefs[expectedQueryType]).toBeDefined();
       expect(queryDefs[expectedQueryType].type).toBe('object');
       expect(queryDefs[expectedQueryType].properties).toMatchObject({
-        'firstParameter': op.parameters[0],
-        'secondParameter': op.parameters[1],
-        'filter_anotherParameter': op.parameters[2],
+        firstParameter: op.parameters[0],
+        secondParameter: op.parameters[1],
+        filter_anotherParameter: op.parameters[2],
       });
 
       expect(res[0]).toBeDefined();
@@ -199,15 +199,14 @@ describe('prepareOperations', () => {
       expect(res[0].parameters[0].type).toBe(expectedQueryType);
     });
 
-    it('query model should not be generated', () =>{
+    it('query model should not be generated', () => {
       const [res, queryDef] = prepareOperations([op], {} as any);
 
       expect(queryDef).toMatchObject({});
       expect(res[0]).toBeDefined();
       expect(res[0].parameters.length).toBe(op.parameters.length);
     });
-  })
-
+  });
 });
 
 describe('fixDuplicateOperations', () => {
