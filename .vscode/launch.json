@@ -15,7 +15,7 @@
       "protocol": "inspector",
       "args": [
         "-c",
-        "./api.config.json"
+        "./test/api-test.json"
       ]
     }
   ]

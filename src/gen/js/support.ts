@@ -43,10 +43,11 @@ export function getTSParamType(param: any, options: ClientOptions): string {
 
   if (!param) {
     return unknownType;
-  } else if (param.enum) {
+  }
+  if (param.enum) {
     if (!param.type || param.type === 'string') {
       return `'${param.enum.join(`'|'`)}'`;
-    } else if (param.type === 'number') {
+    } else if (param.type === 'integer' || param.type === 'number') {
       return `${param.enum.join(`|`)}`;
     }
   }

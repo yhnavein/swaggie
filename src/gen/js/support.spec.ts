@@ -283,6 +283,7 @@ describe('getTSParamType', () => {
 
     expect(res).toBe('File');
   });
+
   it('array', async () => {
     const param = {
       uniqueItems: false,
