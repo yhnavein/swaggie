@@ -11,6 +11,7 @@ describe('serializeQueryParam', () => {
     { input: { a: 1, b: 'test' }, expected: 'a=1&b=test' },
     { input: { a: 1, b: [1, 2, 3, 'test'] }, expected: 'a=1&b=1%2C2%2C3%2Ctest' },
     { input: [1, 2, 3], expected: '1%2C2%2C3' },
+    { input: new Date('2020-04-16T00:00:00.000Z'), expected: '2020-04-16T00%3A00%3A00.000Z' },
   ].forEach((el) => {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = serializeQueryParam(el.input);
@@ -21,6 +22,7 @@ describe('serializeQueryParam', () => {
 
   function serializeQueryParam(obj: any) {
     if (obj === null || obj === undefined) return '';
+    if (obj instanceof Date) return encodeURIComponent(obj.toJSON());
     if (typeof obj !== 'object' || Array.isArray(obj)) return encodeURIComponent(obj);
     return Object.keys(obj)
       .reduce((a, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
@@ -39,6 +41,7 @@ describe('serializeQueryParam / axios', () => {
     { input: {}, expected: '' },
     { input: { a: 1, b: 'test' }, expected: 'a=1&b=test' },
     { input: { a: 1, b: [1, 2, 3, 'test'] }, expected: 'a=1&b=1,2,3,test' },
+    { input: new Date('2020-04-16T00:00:00.000Z'), expected: '2020-04-16T00:00:00.000Z' },
   ].forEach((el) => {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = serializeQueryParam(el.input);
@@ -55,6 +58,7 @@ describe('serializeQueryParam / axios', () => {
 
   function serializeQueryParam(obj: any) {
     if (obj === null || obj === undefined) return '';
+    if (obj instanceof Date) return obj.toJSON();
     if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
     return Object.keys(obj)
       .reduce((a, b) => a.push(b + '=' + obj[b]) && a, [])
