@@ -18,7 +18,11 @@ config?: any
 <%_ if(query && query.length > 0) { _%>
   <% query.forEach(function(parameter) { -%>
   if (<%- parameter.name -%> !== undefined) {
-      url += '<%- parameter.originalName -%>=' + encodeURIComponent("" + <%- parameter.name -%>) + "&";
+      <%_ if(!!parameter.original && parameter.original.type === 'array') { _%>
+        <%- parameter.name -%>.forEach(item => { url += '<%- parameter.originalName -%>=' + encodeURIComponent(item) + "&"; });
+      <%_ } else {_%>
+        url += '<%- parameter.originalName -%>=' + encodeURIComponent(<%- parameter.name -%>) + "&";
+      <%_ } _%>
     }
   <% }); -%>
 <%_ } _%>
