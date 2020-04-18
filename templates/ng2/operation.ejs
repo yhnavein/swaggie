@@ -29,7 +29,7 @@ config?: any
 
     return this.$<%- method.toLowerCase() -%>(
       url,
-<%_ if(['POST', 'PUT', 'PATH'].includes(method)) { _%>
+<%_ if(['POST', 'PUT', 'PATCH'].includes(method)) { _%>
       <%- body ? body.name : 'null' -%>,
 <%_ } _%>
       config);
