@@ -7,6 +7,8 @@ interface ClientOptions {
   preferAny?: boolean;
   servicePrefix?: string;
   queryModels?: boolean;
+
+  dateFormat?: DateSupport; // 'luxon', 'momentjs', etc
 }
 
 interface FullAppOptions extends ClientOptions {
@@ -39,6 +41,7 @@ interface ApiSpec {
 }
 
 type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
+type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
 
 interface ApiOperation {
   id: string;

@@ -6,7 +6,7 @@
     "module": "commonjs",
     "removeComments": false,
     "esModuleInterop": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "newLine": "lf",
     "skipLibCheck": true
   },

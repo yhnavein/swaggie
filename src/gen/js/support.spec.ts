@@ -116,6 +116,30 @@ describe('getDocType', () => {
     expect(res).toBe('Date');
   });
 
+  it('some date time with date format = string', async () => {
+    const def = {
+      format: 'date-time',
+      type: 'string',
+    };
+
+    const options = { dateFormat: 'string' } as ClientOptions;
+    const res = getDocType(def, options);
+
+    expect(res).toBe('string');
+  });
+
+  it('some date with date format = string', async () => {
+    const def = {
+      format: 'date',
+      type: 'string',
+    };
+
+    const options = { dateFormat: 'string' } as ClientOptions;
+    const res = getDocType(def, options);
+
+    expect(res).toBe('string');
+  });
+
   describe('array', () => {
     it('reference', async () => {
       const def = {
@@ -159,6 +183,22 @@ describe('getDocType', () => {
       const res = getDocType(def);
 
       expect(res).toBe('Date[]');
+    });
+
+    it('date with date format = string', async () => {
+      const def = {
+        uniqueItems: false,
+        type: 'array',
+        items: {
+          format: 'date-time',
+          type: 'string',
+        },
+      };
+
+      const options = { dateFormat: 'string' } as ClientOptions;
+      const res = getDocType(def, options);
+
+      expect(res).toBe('string[]');
     });
 
     it('boolean', async () => {
@@ -243,6 +283,7 @@ describe('getTSParamType', () => {
 
     expect(res).toBe('File');
   });
+
   it('array', async () => {
     const param = {
       uniqueItems: false,
@@ -347,6 +388,22 @@ describe('getTSParamType', () => {
       expect(res).toBe('Date');
     });
 
+    it('date with dateFormatter = string', async () => {
+      const param = {
+        name: 'dateFrom',
+        in: 'query',
+        required: false,
+        type: 'string',
+        format: 'date-time',
+      };
+      const options = { dateFormat: 'string' } as ClientOptions;
+
+      const res = getTSParamType(param, options);
+
+      expect(res).toBe('string');
+    });
+
+    // TODO: Implement support for extended enums
     it('enum', async () => {
       const param = {
         name: 'documentType',
@@ -364,7 +421,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('number');
+      expect(res).toBe('Active|Disabled');
     });
 
     it('array > reference', async () => {

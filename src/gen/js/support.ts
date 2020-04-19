@@ -6,19 +6,19 @@ export function formatDocDescription(description: string): string {
   return (description || '').trim().replace(/\n/g, `\n${DOC}${SP}`);
 }
 
-export function getDocType(param: any): string {
+export function getDocType(param: any, options?: ClientOptions): string {
   if (!param) {
     return 'object';
   } else if (param.$ref) {
     const type = param.$ref.split('/').pop();
     return `module:${type}`;
   } else if (param.schema) {
-    return getDocType(param.schema);
+    return getDocType(param.schema, options);
   } else if (param['x-schema']) {
-    return getDocType(param['x-schema']);
+    return getDocType(param['x-schema'], options);
   } else if (param.type === 'array') {
     if (param.items.type) {
-      return `${getDocType(param.items)}[]`;
+      return `${getDocType(param.items, options)}[]`;
     } else if (param.items.$ref) {
       const type = param.items.$ref.split('/').pop();
       return `module:${type}[]`;
@@ -28,7 +28,7 @@ export function getDocType(param: any): string {
   } else if (param.type === 'integer' || param.type === 'number') {
     return 'number';
   } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
-    return 'Date';
+    return options && options.dateFormat === 'string' ? 'string' : 'Date';
   } else if (param.type === 'string') {
     return 'string';
   } else if (param.type === 'boolean') {
@@ -43,10 +43,11 @@ export function getTSParamType(param: any, options: ClientOptions): string {
 
   if (!param) {
     return unknownType;
-  } else if (param.enum) {
+  }
+  if (param.enum) {
     if (!param.type || param.type === 'string') {
       return `'${param.enum.join(`'|'`)}'`;
-    } else if (param.type === 'number') {
+    } else if (param.type === 'integer' || param.type === 'number') {
       return `${param.enum.join(`|`)}`;
     }
   }
@@ -79,7 +80,7 @@ export function getTSParamType(param: any, options: ClientOptions): string {
   } else if (param.type === 'integer' || param.type === 'number') {
     return 'number';
   } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
-    return 'Date';
+    return options.dateFormat === 'string' ? 'string' : 'Date';
   } else if (param.type === 'string') {
     return 'string';
   } else if (param.type === 'file') {

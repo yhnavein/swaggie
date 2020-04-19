@@ -29,17 +29,20 @@ const args: any = program
     '-b, --baseUrl <string>',
     'Base URL that will be used as a default value in the clients. Default: ""'
   )
-  .option(
-    '-t, --template <string>',
-    'Template used forgenerating API client. Default: "axios"'
-  )
+  .option('-t, --template <string>', 'Template used forgenerating API client. Default: "axios"')
   .option(
     '-r, --reactHooks',
     'Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false'
   )
   .option('--preferAny', 'Use "any" type instead of "unknown". Default: false')
-  .option('--servicePrefix <string>', 'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""')
-  .option('--queryModels', 'Generate models for query string instead list of parameters. Default: false')
+  .option(
+    '--servicePrefix <string>',
+    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""'
+  )
+  .option(
+    '--queryModels',
+    'Generate models for query string instead list of parameters. Default: false'
+  )
   .parse(process.argv);
 
 runCodeGenerator(args).then(complete, error);
