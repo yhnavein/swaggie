@@ -78,7 +78,8 @@ Sample configuration looks like this:
   "reactHooks": true,
   "preferAny": true,
   "servicePrefix": "",
-  "queryModels": true
+  "queryModels": true,
+  "dateFormat": "Date" // "string" | "Date"
 }
 ```
 
