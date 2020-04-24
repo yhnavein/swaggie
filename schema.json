@@ -1,0 +1,61 @@
+{
+  "$id": "https://github.com/yhnavein/swaggie/blob/master/schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Swaggie Settings Schema",
+  "definitions": {
+    "Globals": {
+      "additionalProperties": true,
+      "description": "Main settings of the application",
+      "properties": {
+        "out": {
+          "description": "The path to the file where the API would be generated",
+          "type": "string"
+        },
+        "src": {
+          "description": "The url or path to the Open API spec file. Both JSON and YAML are supported",
+          "type": "string"
+        },
+        "template": {
+          "default": "axios",
+          "description": "Template that will be used for generating the API client",
+          "enum": ["axios", "fetch", "ng1", "ng2"],
+          "type": "string"
+        },
+        "baseUrl": {
+          "default": "",
+          "description": "Base URL that will be used as a default value in the clients",
+          "type": "string"
+        },
+        "reactHooks": {
+          "default": false,
+          "description": "Generate additional context that can be consumed in your application more easily. Requires React Hooks in your app.",
+          "type": "boolean"
+        },
+        "preferAny": {
+          "default": false,
+          "description": "Use `any` type instead of `unknown`",
+          "type": "boolean"
+        },
+        "queryModels": {
+          "default": false,
+          "description": "Generate models for query string instead list of parameters",
+          "type": "boolean"
+        },
+        "servicePrefix": {
+          "default": "",
+          "description": "Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions",
+          "type": "string"
+        },
+        "dateFormat": {
+          "default": "Date",
+          "description": "It determines how Date fields will be handled and what type they will have in models",
+          "enum": ["Date", "string"],
+          "type": "string"
+        }
+      },
+      "required": ["out", "src"],
+      "type": "object"
+    }
+  },
+  "allOf": [{ "$ref": "#/definitions/Globals" }]
+}

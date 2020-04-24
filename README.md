@@ -71,6 +71,7 @@ Sample configuration looks like this:
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
   "out": "./src/client/petstore.ts",
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "axios",

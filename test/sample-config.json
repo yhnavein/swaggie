@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
   "out": "./dist/test1",
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "axios",
@@ -6,5 +7,6 @@
   "reactHooks": true,
   "preferAny": true,
   "servicePrefix": "Test",
-  "queryModels": true
+  "queryModels": true,
+  "dateFormat": "string"
 }

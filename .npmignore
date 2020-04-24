@@ -3,6 +3,8 @@
 .DS_Store
 tslint.json
 tsconfig.json
+schema.json
+api.config.json
 yarn.lock
 .prettierrc
 .editorconfig
