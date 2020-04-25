@@ -25,8 +25,13 @@ export interface IServiceClient {
 
 export interface IQueryPropDefinition {
   type: string;
-  required: string[];
-  properties: { [key: string]: ApiOperationParam };
+  format?: string;
+  required?: string[];
+  properties?: { [key: string]: ApiOperationParam };
+  enum?: any;
+  fullEnum?: any;
+  description?: string;
+  'x-enumNames'?: string[];
 }
 
 export interface IQueryDefinitions {

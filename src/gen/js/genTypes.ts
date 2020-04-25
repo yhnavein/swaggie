@@ -107,8 +107,17 @@ function renderXEnumType(name: string, def: any) {
 }
 
 function renderEnumType(name: string, def: any) {
-  const values = (def.enum as any[]).map((v) => (typeof v === 'number' ? v : `'${v}'`)).join(' | ');
-  return `export type ${name} = ${values};\n`;
+  if (def.fullEnum) {
+    const enumKeys = Object.keys(def.fullEnum).map((k) => `  ${k} = ${def.fullEnum[k]},`);
+    return `export enum ${name} {
+${enumKeys.join('\n')}
+}\n`;
+  } else {
+    const values = (def.enum as any[])
+      .map((v) => (typeof v === 'number' ? v : `'${v}'`))
+      .join(' | ');
+    return `export type ${name} = ${values};\n`;
+  }
 }
 
 function renderTsInheritance(name: string, allOf: any[], options: ClientOptions) {
