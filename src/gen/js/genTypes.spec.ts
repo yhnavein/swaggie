@@ -80,8 +80,10 @@ describe('genTypes', () => {
         expect(res.trim()).toBe(`export type SomeEnum = 'Active' | 'Disabled';`);
       });
     });
+  });
 
-    it(`should handle x-enums correctly`, () => {
+  describe('enums', () => {
+    it(`should handle number-based x-enums correctly`, () => {
       const res = genTypes(
         emptySpec,
         {
@@ -101,6 +103,29 @@ describe('genTypes', () => {
   Password = 1,
   External = 2,
   Internal = 3,
+}`);
+    });
+
+    it(`should handle string-based x-enums correctly`, () => {
+      const res = genTypes(
+        emptySpec,
+        {
+          GrantType: {
+            type: 'string',
+            description: '',
+            'x-enumNames': ['None', 'Password', 'External', 'Internal'],
+            enum: ['None', 'Password', 'External', 'Internal'],
+          },
+        },
+        {} as any
+      );
+
+      expect(res).toBeDefined();
+      expect(res.trim()).toBe(`export enum GrantType {
+  None = "None",
+  Password = "Password",
+  External = "External",
+  Internal = "Internal",
 }`);
     });
   });

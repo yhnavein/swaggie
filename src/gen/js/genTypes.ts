@@ -95,9 +95,10 @@ function isSupportedDefType(def: any) {
 }
 
 function renderXEnumType(name: string, def: any) {
+  const isString = def.type === 'string';
   let res = `export enum ${name} {\n`;
   const enumNames = def['x-enumNames'] as string[];
-  const enumValues = def.enum as any[];
+  const enumValues = (def.enum as any[]).map((el) => (isString ? `"${el}"` : el));
 
   for (let index = 0; index < enumNames.length; index++) {
     res += `  ${enumNames[index]} = ${enumValues[index]},\n`;
