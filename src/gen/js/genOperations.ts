@@ -180,7 +180,12 @@ function getParams(
       originalName: p.name,
       name: getParamName(p.name),
       type: getTSParamType(p, options),
-      optional: !p.required,
+      optional:
+        p.required === undefined || p.required === null
+          ? p['x-nullable'] === undefined || p['x-nullable'] === null
+            ? true
+            : !!p['x-nullable']
+          : !p.required,
       original: p,
     }));
 }

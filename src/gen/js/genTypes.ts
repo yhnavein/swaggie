@@ -95,9 +95,10 @@ function isSupportedDefType(def: any) {
 }
 
 function renderXEnumType(name: string, def: any) {
+  const isString = def.type === 'string';
   let res = `export enum ${name} {\n`;
   const enumNames = def['x-enumNames'] as string[];
-  const enumValues = def.enum as any[];
+  const enumValues = (def.enum as any[]).map((el) => (isString ? `"${el}"` : el));
 
   for (let index = 0; index < enumNames.length; index++) {
     res += `  ${enumNames[index]} = ${enumValues[index]},\n`;
@@ -107,8 +108,17 @@ function renderXEnumType(name: string, def: any) {
 }
 
 function renderEnumType(name: string, def: any) {
-  const values = (def.enum as any[]).map((v) => (typeof v === 'number' ? v : `'${v}'`)).join(' | ');
-  return `export type ${name} = ${values};\n`;
+  if (def.fullEnum) {
+    const enumKeys = Object.keys(def.fullEnum).map((k) => `  ${k} = ${def.fullEnum[k]},`);
+    return `export enum ${name} {
+${enumKeys.join('\n')}
+}\n`;
+  } else {
+    const values = (def.enum as any[])
+      .map((v) => (typeof v === 'number' ? v : `'${v}'`))
+      .join(' | ');
+    return `export type ${name} = ${values};\n`;
+  }
 }
 
 function renderTsInheritance(name: string, allOf: any[], options: ClientOptions) {

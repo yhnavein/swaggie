@@ -10,6 +10,7 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
     .then(applyConfigFile)
     .then((options) =>
       resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
+        .then((spec) => verifySpec(spec))
         .then((spec) => gen(spec, options))
         .then(() => {
           console.info(
@@ -29,6 +30,12 @@ function verifyOptions(options: FullAppOptions): Promise<any> {
   } catch (e) {
     return Promise.reject(e);
   }
+}
+
+export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
+  if (!spec || !spec.swagger)
+    return Promise.reject('Spec does not look like Swagger / OpenAPI 2! Open API 3 support is WIP');
+  return Promise.resolve(spec);
 }
 
 function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {

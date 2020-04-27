@@ -30,10 +30,10 @@ interface ApiInfo {
 interface ApiSpec {
   swagger: string;
   info: ApiInfo;
-  host: string;
-  basePath: string;
-  schemes: string[];
-  securityDefinitions: any;
+  host?: string;
+  basePath?: string;
+  schemes?: string[];
+  securityDefinitions?: any;
   paths: any;
   definitions: any;
   accepts: string[];

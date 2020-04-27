@@ -1,4 +1,4 @@
-import { runCodeGenerator, applyConfigFile } from './index';
+import { runCodeGenerator, applyConfigFile, verifySpec } from './index';
 
 describe('runCodeGenerator', () => {
   it('fails with no parameters provided', () => {
@@ -89,5 +89,14 @@ describe('runCodeGenerator', () => {
     expect(conf.baseUrl).toBe('https://wp.pl');
     expect(conf.src).toBe('./test/petstore.yml');
     expect(conf.reactHooks).toBe(false);
+  });
+
+  it('fails when OpenAPI3 is provided', () => {
+    const res = verifySpec({
+      openapi: '3.0.2',
+      paths: {},
+    } as any);
+
+    expect(res).rejects.toContain('Spec does not look like');
   });
 });
