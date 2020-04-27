@@ -284,6 +284,24 @@ describe('getTSParamType', () => {
     expect(res).toBe('File');
   });
 
+  it('enum with x-schema', async () => {
+    const param = {
+      type: 'integer',
+      name: 'SomeEnum',
+      in: 'query',
+      'x-schema': {
+        $ref: '#/definitions/SomeEnum',
+      },
+      'x-nullable': false,
+      enum: [1, 2],
+    };
+    const options = {} as any;
+
+    const res = getTSParamType(param, options);
+
+    expect(res).toBe('SomeEnum');
+  });
+
   it('array', async () => {
     const param = {
       uniqueItems: false,

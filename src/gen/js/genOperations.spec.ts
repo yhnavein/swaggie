@@ -416,4 +416,124 @@ describe('x-schema extension', () => {
       },
     ]);
   });
+
+  it(`handle x-schema with enum in operation parameter`, () => {
+    const ops = [
+      {
+        id: 'getPetById',
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        method: 'get',
+        path: '/pet/{petId}',
+        parameters: [
+          {
+            type: 'integer',
+            name: 'something',
+            in: 'query',
+            'x-schema': {
+              $ref: '#/definitions/SomeType',
+            },
+            enum: [1, 2],
+          },
+        ],
+        responses: [],
+        group: null,
+        accepts: ['application/json'],
+        contentTypes: [],
+      },
+    ];
+
+    const res = prepareOperations(ops as ApiOperation[], {} as any);
+
+    expect(res).toBeDefined();
+    expect(res[0][0].parameters).toMatchObject([
+      {
+        name: 'something',
+        originalName: 'something',
+        type: 'SomeType',
+        optional: true,
+      },
+    ]);
+  });
+
+  it(`handle x-nullable as false correctly`, () => {
+    const ops = [
+      {
+        id: 'getPetById',
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        method: 'get',
+        path: '/pet/{petId}',
+        parameters: [
+          {
+            type: 'integer',
+            name: 'something',
+            in: 'query',
+            'x-schema': {
+              $ref: '#/definitions/SomeType',
+            },
+            'x-nullable': false,
+            enum: [1, 2],
+          },
+        ],
+        responses: [],
+        group: null,
+        accepts: ['application/json'],
+        contentTypes: [],
+      },
+    ];
+
+    const res = prepareOperations(ops as ApiOperation[], {} as any);
+
+    expect(res).toBeDefined();
+    expect(res[0][0].parameters).toMatchObject([
+      {
+        name: 'something',
+        originalName: 'something',
+        type: 'SomeType',
+        optional: false,
+      },
+    ]);
+  });
+
+  it(`handle x-nullable as true correctly`, () => {
+    const ops = [
+      {
+        id: 'getPetById',
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        method: 'get',
+        path: '/pet/{petId}',
+        parameters: [
+          {
+            type: 'integer',
+            name: 'something',
+            in: 'query',
+            'x-schema': {
+              $ref: '#/definitions/SomeType',
+            },
+            'x-nullable': true,
+            enum: [1, 2],
+          },
+        ],
+        responses: [],
+        group: null,
+        accepts: ['application/json'],
+        contentTypes: [],
+      },
+    ];
+
+    const [resOps, resDefs] = prepareOperations(ops as ApiOperation[], {} as any);
+
+    expect(resOps).toBeDefined();
+    expect(resDefs).toBeDefined();
+    expect(resOps[0].parameters).toMatchObject([
+      {
+        name: 'something',
+        originalName: 'something',
+        type: 'SomeType',
+        optional: true,
+      },
+    ]);
+  });
 });

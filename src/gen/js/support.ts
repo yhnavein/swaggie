@@ -44,7 +44,7 @@ export function getTSParamType(param: any, options: ClientOptions): string {
   if (!param) {
     return unknownType;
   }
-  if (param.enum) {
+  if (param.enum && !param['x-schema']) {
     if (!param.type || param.type === 'string') {
       return `'${param.enum.join(`'|'`)}'`;
     } else if (param.type === 'integer' || param.type === 'number') {
