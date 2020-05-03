@@ -48,7 +48,8 @@
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "mkdirp": "^1.0.3",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "swagger2openapi": "6.0.3"
   },
   "devDependencies": {
     "@sucrase/jest-plugin": "2.1.1",

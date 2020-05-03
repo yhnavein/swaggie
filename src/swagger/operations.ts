@@ -1,7 +1,7 @@
 const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
 
 /**
- * This method converts dictionary-alike operation definition to operation array.
+ * This method converts dictionary operation definitions to operation array.
  * Additionally some data inheritance from the specification is done as well
  * @example
  * {
