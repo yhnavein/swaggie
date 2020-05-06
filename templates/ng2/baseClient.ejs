@@ -58,7 +58,7 @@ abstract class BaseService {
 
   protected $put(url: string, data: any, options?: any): Observable<any> {
     return this.http
-      .post(this.baseUrl + url, data, options)
+      .put(this.baseUrl + url, data, options)
       .pipe((response: any) => response);
   }
 }
