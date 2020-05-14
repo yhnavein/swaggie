@@ -3,7 +3,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 
 import { loadAllTemplateFiles } from './gen/templateManager';
-import { getOperations, resolveSpec } from './spec';
+import { getOperations, resolveSpec } from './swagger';
 
 export function runCodeGenerator(options: FullAppOptions): Promise<any> {
   return verifyOptions(options)
