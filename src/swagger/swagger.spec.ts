@@ -1,4 +1,4 @@
-import { resolveSpec } from './spec';
+import { resolveSpec } from './swagger';
 
 const petstore2 = {
   json: 'http://petstore.swagger.io/v2/swagger.json',
