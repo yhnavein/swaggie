@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -55,18 +55,18 @@
     "mkdirp": "^1.0.3"
   },
   "devDependencies": {
-    "@types/ejs": "3.0.1",
-    "@types/got": "9.6.9",
-    "@types/jest": "25.1.4",
+    "@types/ejs": "3.0.3",
+    "@types/got": "9.6.10",
+    "@types/jest": "25.2.2",
     "@types/js-yaml": "3.12.3",
-    "@types/lodash": "4.14.149",
+    "@types/lodash": "4.14.150",
     "@types/mkdirp": "^1.0.0",
-    "@types/node": "12.12.7",
-    "jest": "25.2.4",
+    "@types/node": "14.0.1",
+    "jest": "26.0.1",
     "rimraf": "3.0.2",
-    "ts-jest": "25.2.1",
-    "tslint": "6.1.0",
-    "typescript": "3.8.3"
+    "ts-jest": "25.5.1",
+    "tslint": "6.1.2",
+    "typescript": "3.9.2"
   },
   "jest": {
     "testRegex": "\\.(test|spec)\\.tsx?$",

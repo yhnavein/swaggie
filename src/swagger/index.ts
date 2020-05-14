@@ -1,4 +1,4 @@
-import { resolveSpec } from './spec';
+import { resolveSpec } from './swagger';
 import { getOperations } from './operations';
 
 export { resolveSpec, getOperations };
