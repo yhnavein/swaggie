@@ -421,7 +421,7 @@ describe('getTSParamType', () => {
       expect(res).toBe('string');
     });
 
-    // TODO: Implement support for extended enums
+    // Full enums are not implemented. This is to ensure that full enums won't break anything
     it('enum', async () => {
       const param = {
         name: 'documentType',
@@ -439,7 +439,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('Active|Disabled');
+      expect(res).toBe('number');
     });
 
     it('array > reference', async () => {
