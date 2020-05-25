@@ -46,7 +46,7 @@ const options = program.opts() as FullAppOptions;
 
 runCodeGenerator(options).then(complete, error);
 
-function complete(spec: ApiSpec) {
+function complete(spec: Schema) {
   process.exit(0);
 }
 

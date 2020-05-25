@@ -3,10 +3,10 @@ import genTypes from './genTypes';
 import { saveFile, prepareOutputFilename } from '../util';
 
 export default function genCode(
-  spec: ApiSpec,
+  spec: any,
   operations: ApiOperation[],
   options: ClientOptions
-): ApiSpec {
+): Schema {
   let [fileContents, queryDefinitions] = genOperations(spec, operations, options);
   fileContents += genTypes(spec, queryDefinitions, options);
 

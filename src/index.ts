@@ -1,5 +1,6 @@
 import fs from 'fs';
 import chalk from 'chalk';
+import openApiConverter from 'swagger2openapi';
 
 import genJsCode from './gen/js';
 
@@ -11,14 +12,14 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
     .then(applyConfigFile)
     .then((options) =>
       resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
-        .then((spec) => verifySpec(spec))
+        .then((spec) => verifyAndConvert(spec))
         .then((spec) => gen(spec, options))
         .then(() => {
           console.info(
-            chalk.bold.cyan(`Api from ${options.src} code generated into ${options.out}`)
+            chalk.bold.cyan(`Api from ${options.src} code generated into ${options.out}`),
           );
           return true;
-        })
+        }),
     );
 }
 
@@ -33,13 +34,30 @@ function verifyOptions(options: FullAppOptions): Promise<any> {
   }
 }
 
-export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
-  if (!spec || !spec.swagger)
-    return Promise.reject('Spec does not look like Swagger / OpenAPI 2! Open API 3 support is WIP');
+export function verifyAndConvert(spec: any): Promise<Schema> {
+  if (!spec || !spec.swagger && !spec.openapi) {
+    return Promise.reject('Spec does not look like valid file! Supported are only OpenApi2/Swagger and OpenApi3');
+  }
+  if (spec.swagger) {
+    console.info(
+      chalk.bold.yellow(`Loaded spec looks like the OpenApi2. Converting to OpenApi3...`),
+    );
+    return new Promise((resolve, reject) => {
+      openApiConverter.convertObj(spec, {
+        patch: true,
+        warnOnly: true,
+      }, (err, convertedSpec) => {
+        if (err) {
+          return reject('Errors found when converting spec.');
+        }
+        return resolve(convertedSpec.openapi);
+      });
+    });
+  }
   return Promise.resolve(spec);
 }
 
-function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {
+function gen(spec: Schema, options: ClientOptions): Schema {
   loadAllTemplateFiles(options.template || 'axios');
 
   const operations = getOperations(spec);
@@ -62,7 +80,7 @@ export function applyConfigFile(options: FullAppOptions): Promise<ClientOptions>
         return resolve(Object.assign({}, parsedConfig, options));
       })
       .catch((ex) =>
-        reject('Could not correctly load config file. It does not exist or you cannot access it')
+        reject('Could not correctly load config file. It does not exist or you cannot access it'),
       );
   });
 }

@@ -1,4 +1,4 @@
-import { runCodeGenerator, applyConfigFile, verifySpec } from './index';
+import { runCodeGenerator, applyConfigFile, verifyAndConvert } from './index';
 
 describe('runCodeGenerator', () => {
   it('fails with no parameters provided', () => {
@@ -50,7 +50,7 @@ describe('runCodeGenerator', () => {
 
   it('fails when --config provided and the JSON file is wrong', () => {
     const parameters = {
-      config: './test/petstore.yml',
+      config: './test/petstore2.yml',
     };
 
     return runCodeGenerator(parameters as any).catch((e) =>
@@ -80,17 +80,17 @@ describe('runCodeGenerator', () => {
     const parameters = {
       config: './test/sample-config.json',
       baseUrl: 'https://wp.pl',
-      src: './test/petstore.yml',
+      src: './test/petstore2.yml',
     };
     const conf = await applyConfigFile(parameters as any);
     expect(conf).toBeDefined();
     expect(conf.baseUrl).toBe('https://wp.pl');
-    expect(conf.src).toBe('./test/petstore.yml');
+    expect(conf.src).toBe('./test/petstore2.yml');
   });
 
-  it('fails when OpenAPI3 is provided', () => {
-    const res = verifySpec({
-      openapi: '3.0.2',
+  it('fails when something strange is provided', () => {
+    const res = verifyAndConvert({
+      something: 'strange',
       paths: {},
     } as any);
 

@@ -1,4 +1,4 @@
-export interface Schema {
+interface Schema {
   /**
    * This is the version of the OpenAPI Specification used. It SHOULD be used by tooling specifications and clients to interpret the OpenAPI document.
    * This is not related to the API info.version string.
@@ -50,7 +50,7 @@ export interface Schema {
   externalDocs?: ExternalDocs;
 }
 
-export interface SchemaComponents {
+interface SchemaComponents {
   /** An object to hold reusable Schema Objects. */
   schemas?: { [path: string]: SchemaObject | ReferenceObject };
 
@@ -79,7 +79,7 @@ export interface SchemaComponents {
   callbacks?: { [path: string]: any | ReferenceObject };
 }
 
-export interface PathItemObject extends ReferenceObject {
+interface PathItemObject extends ReferenceObject {
   /** An optional, string summary, intended to apply to all operations in this path. */
   summary?: string;
 
@@ -124,7 +124,7 @@ export interface PathItemObject extends ReferenceObject {
   parameters?: (ParameterObject | ReferenceObject)[];
 }
 
-export interface OperationObject {
+interface OperationObject {
   /**
    * A list of tags for API documentation control.
    * Tags can be used for logical grouping of operations by resources or any other qualifier.
@@ -189,7 +189,7 @@ export interface OperationObject {
   servers?: ServerObject[];
 }
 
-export interface ParameterObject {
+interface ParameterObject {
   /** REQUIRED. The name of the parameter. Parameter names are case sensitive. */
   name: string;
 
@@ -257,9 +257,9 @@ export interface ParameterObject {
   content?: { [name: string]: MediaTypeObject };
 }
 
-export type ResponsesObject =  { [name: string]: ResponseObject | ReferenceObject };
+type ResponsesObject =  { [name: string]: ResponseObject | ReferenceObject };
 
-export interface ResponseObject {
+interface ResponseObject {
   /** REQUIRED. A short description of the response. CommonMark syntax MAY be used for rich text representation. */
   description: string;
 
@@ -282,7 +282,7 @@ export interface ResponseObject {
   links?: { [name: string]: LinkObject | ReferenceObject };
 }
 
-export interface RequestBodyObject {
+interface RequestBodyObject {
   /** A brief description of the parameter. This could contain examples of use. CommonMark syntax MAY be used for rich text representation. */
   description?: string;
 
@@ -296,14 +296,14 @@ export interface RequestBodyObject {
   required?: boolean;
 }
 
-export interface ReferenceObject {
+interface ReferenceObject {
   /** REQUIRED. The reference string. */
   $ref: string;
 }
 
-export interface HeaderObject extends Omit<ParameterObject, 'name' | 'in'> {}
+interface HeaderObject extends Omit<ParameterObject, 'name' | 'in'> {}
 
-export interface LinkObject {
+interface LinkObject {
   /**
    * A relative or absolute URI reference to an OAS operation. This field is mutually exclusive of the operationId field, and MUST point to an Operation Object.
    * Relative operationRef values MAY be used to locate an existing Operation Object in the OpenAPI definition.
@@ -331,7 +331,7 @@ export interface LinkObject {
   server?: ServerObject;
 }
 
-export interface SchemaObject
+interface SchemaObject
   extends JsonSchemaProperties,
     ExtendedJsonSchemaProperties,
     ReferenceObject {
@@ -383,7 +383,7 @@ export interface SchemaObject
   deprecated?: boolean;
 }
 
-export interface DiscriminatorObject {
+interface DiscriminatorObject {
   /** REQUIRED. The name of the property in the payload that will hold the discriminator value. */
   propertyName: string;
 
@@ -391,7 +391,7 @@ export interface DiscriminatorObject {
   mapping?: { [name: string]: string };
 }
 
-export interface XmlObject {
+interface XmlObject {
   /**
    * Replaces the name of the element/attribute used for the described schema property.
    * When defined within items, it will affect the name of the individual XML elements within the list.
@@ -415,7 +415,7 @@ export interface XmlObject {
   wrapped?: boolean;
 }
 
-export interface MediaTypeObject {
+interface MediaTypeObject {
   /** The schema defining the content of the request, response, or parameter. */
   schema?: SchemaObject | ReferenceObject;
 
@@ -436,7 +436,7 @@ export interface MediaTypeObject {
   encoding?: { [name: string]: EncodingObject };
 }
 
-export interface ExampleObject {
+interface ExampleObject {
   /** Short description for the example. */
   summary?: string;
 
@@ -457,7 +457,7 @@ export interface ExampleObject {
   externalValue?: string;
 }
 
-export interface EncodingObject {
+interface EncodingObject {
   /**
    * The Content-Type for encoding a specific property. Default value depends on the property type:
    * for string with format being binary – application/octet-stream; for other primitive types – text/plain;
@@ -494,7 +494,7 @@ export interface EncodingObject {
   allowReserved?: boolean;
 }
 
-export interface SchemaInfo {
+interface SchemaInfo {
   /** REQUIRED. The title of the API. */
   title: string;
 
@@ -514,7 +514,7 @@ export interface SchemaInfo {
   version: string;
 }
 
-export interface SchemaContact {
+interface SchemaContact {
   /** The identifying name of the contact person/organization. */
   name?: string;
 
@@ -525,7 +525,7 @@ export interface SchemaContact {
   email?: string;
 }
 
-export interface SchemaLicense {
+interface SchemaLicense {
   /** REQUIRED. The license name used for the API. */
   name: string;
 
@@ -533,7 +533,7 @@ export interface SchemaLicense {
   url?: string;
 }
 
-export interface ServerObject {
+interface ServerObject {
   /**
    * REQUIRED. A URL to the target host. This URL supports Server Variables and MAY be relative,
    * to indicate that the host location is relative to the location where the OpenAPI document is being served.
@@ -548,7 +548,7 @@ export interface ServerObject {
   variables?: { [variableName: string]: any };
 }
 
-export interface TagObject {
+interface TagObject {
   /** REQUIRED. The name of the tag. */
   name: string;
 
@@ -559,7 +559,7 @@ export interface TagObject {
   externalDocs?: ExternalDocs;
 }
 
-export interface ExternalDocs {
+interface ExternalDocs {
   /** A short description of the target documentation. CommonMark syntax MAY be used for rich text representation. */
   description?: string;
 
@@ -567,7 +567,7 @@ export interface ExternalDocs {
   url: string;
 }
 
-export interface SecuritySchemeObject {
+interface SecuritySchemeObject {
   /** REQUIRED. The type of the security scheme. */
   type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect';
 
@@ -602,7 +602,7 @@ export interface SecuritySchemeObject {
   openIdConnectUrl?: string;
 }
 
-export interface JsonSchemaProperties {
+interface JsonSchemaProperties {
   title?: number;
   multipleOf?: number;
   maximum?: number;
@@ -621,7 +621,7 @@ export interface JsonSchemaProperties {
   enum?: any[];
 }
 
-export interface ExtendedJsonSchemaProperties {
+interface ExtendedJsonSchemaProperties {
   type?: string;
   allOf?: SchemaObject[];
   oneOf?: SchemaObject[];
@@ -635,7 +635,7 @@ export interface ExtendedJsonSchemaProperties {
   default?: any;
 }
 
-export type Formats =
+type Formats =
   | 'int32'
   | 'int64'
   | 'float'

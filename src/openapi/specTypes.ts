@@ -1,49 +1,41 @@
-interface ClientOptions {
-  src: string;
-  out: string;
-  template: string;
-  baseUrl: string;
-  preferAny?: boolean;
-  servicePrefix?: string;
-  queryModels?: boolean;
-
-  dateFormat?: DateSupport;
-}
-
-interface FullAppOptions extends ClientOptions {
-  config: string;
-}
-
-type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
-interface ApiRequestData {
-  method: HttpMethod;
-  url: string;
-  headers: { [index: string]: string };
-  body: any;
-}
-
-interface ApiInfo {
-  version: string;
-  title: string;
-}
-
-interface ApiSpec {
-  swagger: string;
-  info: ApiInfo;
-  host?: string;
-  basePath?: string;
-  schemes?: string[];
-  securityDefinitions?: any;
+interface ApiSpec extends Omit<Schema, 'components'> {
   paths: any;
-  definitions: any;
-  accepts: string[];
-  contentTypes: string[];
+  components: ApiComponents;
+}
+
+interface ApiComponents {
+  /** An object to hold reusable Schema Objects. */
+  schemas?: SchemaObject[];
+
+  /** An object to hold reusable Response Objects. */
+  responses?: ResponseObject[];
+
+  /** An object to hold reusable Parameter Objects. */
+  parameters?: ParameterObject[];
+
+  /** An object to hold reusable Example Objects. */
+  examples?: ExampleObject[];
+
+  /** An object to hold reusable Request Body Objects. */
+  requestBodies?: RequestBodyObject[];
+
+  /** An object to hold reusable Header Objects. */
+  headers?: HeaderObject[];
+
+  /** An object to hold reusable Security Scheme Objects. */
+  securitySchemes?: SecuritySchemeObject[];
+
+  /** An object to hold reusable Link Objects. */
+  links?: LinkObject[];
+
+  /** An object to hold reusable Callback Objects. */
+  callbacks?: any[];
 }
 
 type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
-type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
+type Dict<T> = { [key: string]: T };
 
-interface ApiOperation {
+interface ApiOperation extends Omit<PathItemObject, 'parameters' | 'responses'> {
   id: string;
   summary: string;
   description: string;
@@ -52,10 +44,6 @@ interface ApiOperation {
   path: string;
   parameters: ApiOperationParam[];
   responses: ApiOperationResponse[];
-  security?: ApiOperationSecurity[];
-  accepts: string[];
-  contentTypes: string[];
-  tags?: string[];
 }
 
 interface ApiOperationParam extends ApiOperationParamBase {
@@ -63,7 +51,6 @@ interface ApiOperationParam extends ApiOperationParamBase {
   in: 'header' | 'path' | 'query' | 'body' | 'formData';
   description: string;
   required: boolean;
-  readonly?: boolean;
   allowEmptyValue: boolean;
   schema: object;
   'x-nullable'?: boolean;
@@ -101,14 +88,6 @@ interface ApiOperationParamBase {
   multipleOf: number;
 }
 
-interface ApiOperationParamGroups {
-  header?: any;
-  path?: any;
-  query?: any;
-  formData?: any;
-  body?: any;
-}
-
 interface ApiOperationResponse {
   code: string;
   description: string;
@@ -120,9 +99,4 @@ interface ApiOperationResponse {
 interface ApiOperationSecurity {
   id: string;
   scopes?: string[];
-}
-
-interface ApiRights {
-  query?: any;
-  headers?: any;
 }

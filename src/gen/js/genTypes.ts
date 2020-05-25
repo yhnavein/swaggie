@@ -20,7 +20,7 @@ function renderDefinitions(
   options: ClientOptions
 ): string[] {
   const defs = unwrapDefinitions({
-    ...(spec.definitions || {}),
+    ...(spec.components || {}),
     ...queryDefinitions,
   });
   const typeLines = [];

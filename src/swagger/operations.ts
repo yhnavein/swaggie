@@ -18,14 +18,14 @@ const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'p
  *    { "method": "POST", "path": "/api/heartbeat", ... },
  *  ]
  */
-export function getOperations(spec: ApiSpec): ApiOperation[] {
+export function getOperations(spec: Schema): ApiOperation[] {
   return getPaths(spec).reduce<ApiOperation[]>(
     (ops, pathInfo) => ops.concat(getPathOperations(pathInfo, spec)),
-    []
+    [],
   );
 }
 
-function getPaths(spec: ApiSpec): object[] {
+function getPaths(spec: Schema): object[] {
   return Object.keys(spec.paths || {}).map((path) => Object.assign({ path }, spec.paths[path]));
 }
 
@@ -64,22 +64,6 @@ function getPathOperation(method: HttpMethod, pathInfo, spec: ApiSpec): ApiOpera
   op.responses = getOperationResponses(op);
   op.security = getOperationSecurity(op, spec);
 
-  const operation: any = op;
-  if (operation.consumes) {
-    operation.contentTypes = operation.consumes;
-  }
-  if (operation.produces) {
-    operation.accepts = operation.produces;
-  }
-  delete operation.consumes;
-  delete operation.produces;
-
-  if (!op.contentTypes || !op.contentTypes.length) {
-    op.contentTypes = spec.contentTypes.slice();
-  }
-  if (!op.accepts || !op.accepts.length) {
-    op.accepts = spec.accepts.slice();
-  }
   return op as ApiOperation;
 }
 
