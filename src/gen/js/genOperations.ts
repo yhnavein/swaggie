@@ -11,13 +11,15 @@ import {
 } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
+import { ApiOperation, ApiOperationParam, ApiSpec } from '../../openapi/specTypes';
+import { ClientOptions } from '../../types';
 
 const MAX_QUERY_PARAMS: number = 1;
 
 export default function genOperations(
   spec: ApiSpec,
   operations: ApiOperation[],
-  options: ClientOptions
+  options: ClientOptions,
 ) {
   const groups = groupOperationsByGroupName(operations);
   let result = renderFile('baseClient.ejs', {
@@ -31,7 +33,7 @@ export default function genOperations(
     const [clientData, clientQueryDefinitions] = prepareClient(
       (options.servicePrefix || '') + name,
       group,
-      options
+      options,
     );
 
     result += renderFile('client.ejs', {
@@ -53,7 +55,7 @@ export default function genOperations(
 function prepareClient(
   name: string,
   operations: ApiOperation[],
-  options: ClientOptions
+  options: ClientOptions,
 ): [IServiceClient, IQueryDefinitions] {
   const [preparedOperations, queryDefinitions] = prepareOperations(operations, options);
   return [
@@ -69,7 +71,7 @@ function prepareClient(
 
 export function prepareOperations(
   operations: ApiOperation[],
-  options: ClientOptions
+  options: ClientOptions,
 ): [IApiOperation[], IQueryDefinitions] {
   const ops = fixDuplicateOperations(operations);
   const queryDefinitions = {} as IQueryDefinitions;
@@ -168,7 +170,7 @@ function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[]
 function getParams(
   params: ApiOperationParam[],
   options: ClientOptions,
-  where?: string[]
+  where?: string[],
 ): IOperationParam[] {
   if (!params || params.length < 1) {
     return [];
@@ -183,8 +185,8 @@ function getParams(
       optional:
         p.required === undefined || p.required === null
           ? p['x-nullable'] === undefined || p['x-nullable'] === null
-            ? true
-            : !!p['x-nullable']
+          ? true
+          : !!p['x-nullable']
           : !p.required,
       original: p,
     }));
@@ -194,7 +196,7 @@ export function renderOperationGroup(
   group: any[],
   func: any,
   spec: ApiSpec,
-  options: ClientOptions
+  options: ClientOptions,
 ): string[] {
   return group.map((op) => func.call(this, spec, op, options)).reduce((a, b) => a.concat(b));
 }
@@ -207,7 +209,7 @@ export function getParamName(name: string): string {
     name
       .split('.')
       .map((x) => camelCase(x))
-      .join('_')
+      .join('_'),
   );
 }
 
@@ -222,7 +224,7 @@ function makeSafeQueryNames(name: string): string {
 function addQueryModelToParams(
   params: IOperationParam[],
   queryParams: IOperationParam[],
-  queryParam: IOperationParam
+  queryParam: IOperationParam,
 ): [IOperationParam[], IOperationParam[]] {
   const filteredParams = params.filter((x) => !queryParams.find((y) => y.name === x.name));
   filteredParams.push(queryParam);
@@ -241,7 +243,7 @@ function addQueryModelToParams(
 function getQueryDefinition(
   queryParams: IOperationParam[],
   op: ApiOperation,
-  options: ClientOptions
+  options: ClientOptions,
 ): [IOperationParam, IQueryPropDefinition] {
   const queryParam = {
     originalName: `${op.id.replace('_', '')}Query`,
@@ -261,7 +263,7 @@ function getQueryDefinition(
         ...prev,
         [curr.name]: curr.original,
       }),
-      {}
+      {},
     ),
   } as IQueryPropDefinition;
 

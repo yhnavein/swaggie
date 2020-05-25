@@ -3,9 +3,9 @@ import chalk from 'chalk';
 import openApiConverter from 'swagger2openapi';
 
 import genJsCode from './gen/js';
-
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
+import { ClientOptions, FullAppOptions } from './types';
 
 export function runCodeGenerator(options: FullAppOptions): Promise<any> {
   return verifyOptions(options)

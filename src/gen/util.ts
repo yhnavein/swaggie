@@ -1,6 +1,7 @@
 import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
 import { dirname } from 'path';
 import { sync as mkdirSync } from 'mkdirp';
+import { ApiOperation, ApiOperationResponse } from '../openapi/specTypes';
 
 export function exists(filePath: string): Stats {
   try {

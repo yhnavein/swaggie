@@ -1,3 +1,5 @@
+import { ClientOptions } from '../../types';
+
 export const DOC = ' * ';
 export const DEFAULT_SP = '  ';
 export let SP = DEFAULT_SP;

@@ -1,4 +1,4 @@
-interface ClientOptions {
+export interface ClientOptions {
   src: string;
   out: string;
   template: string;
@@ -10,7 +10,7 @@ interface ClientOptions {
   dateFormat?: DateSupport;
 }
 
-interface FullAppOptions extends ClientOptions {
+export interface FullAppOptions extends ClientOptions {
   config: string;
 }
 

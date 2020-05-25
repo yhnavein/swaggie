@@ -1,3 +1,5 @@
+import { ApiOperation, ApiOperationResponse, ApiSpec, HttpMethod } from '../openapi/specTypes';
+
 const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
 
 /**
@@ -81,7 +83,7 @@ function getOperationResponses(op: any): ApiOperationResponse[] {
   });
 }
 
-function getOperationSecurity(op: any, spec: any): ApiOperationSecurity[] {
+function getOperationSecurity(op: any, spec: any): any[] {
   let security;
 
   if (op.security && op.security.length) {

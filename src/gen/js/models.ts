@@ -1,3 +1,5 @@
+import { ApiOperationParam } from '../../openapi/specTypes';
+
 export interface IApiOperation {
   returnType: string;
   method: string;

@@ -1,5 +1,6 @@
 import { sortBy } from 'lodash';
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
+import { ApiOperation } from '../../openapi/specTypes';
 
 describe('prepareOperations', () => {
   // TODO: For now we ignore custom content types

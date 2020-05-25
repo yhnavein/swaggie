@@ -1,5 +1,6 @@
 import YAML from 'js-yaml';
 import fetch from 'node-fetch';
+import { ApiSpec } from '../openapi/specTypes';
 
 export interface SpecOptions {
   /**

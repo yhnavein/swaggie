@@ -1,5 +1,6 @@
 import { camelCase } from 'lodash';
 import { renderFile } from '../templateManager';
+import { ClientOptions } from '../../types';
 
 export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): string {
   const files = [];

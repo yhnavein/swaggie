@@ -1,15 +1,16 @@
 import genTypes, { renderQueryStringParameters } from './genTypes';
+import { ApiSpec } from '../../openapi/specTypes';
 
 const emptySpec: ApiSpec = {
-  swagger: '2.0',
+  openapi: '3.0.0',
   info: {
     title: 'Some Api',
     version: 'v1',
   },
   paths: [],
-  definitions: [],
-  accepts: [],
-  contentTypes: [],
+  components: {
+    schemas: [],
+  },
 };
 
 describe('genTypes', () => {
@@ -31,7 +32,7 @@ describe('genTypes', () => {
               type: 'integer',
             },
           },
-          {} as any
+          {} as any,
         );
 
         expect(res).toBeDefined();
@@ -52,7 +53,7 @@ describe('genTypes', () => {
               },
             },
           },
-          {} as any
+          {} as any,
         );
 
         expect(res).toBeDefined();
@@ -73,7 +74,7 @@ describe('genTypes', () => {
               type: 'string',
             },
           },
-          {} as any
+          {} as any,
         );
 
         expect(res).toBeDefined();
@@ -94,7 +95,7 @@ describe('genTypes', () => {
             enum: [0, 1, 2, 3],
           },
         },
-        {} as any
+        {} as any,
       );
 
       expect(res).toBeDefined();
@@ -117,7 +118,7 @@ describe('genTypes', () => {
             enum: ['None', 'Password', 'External', 'Internal'],
           },
         },
-        {} as any
+        {} as any,
       );
 
       expect(res).toBeDefined();
@@ -147,7 +148,7 @@ describe('genTypes', () => {
             } as any,
           },
         },
-        {} as any
+        {} as any,
       );
 
       expect(res).toBeDefined();
@@ -174,7 +175,7 @@ describe('genTypes', () => {
             required: ['login', 'password'],
           },
         },
-        {} as any
+        {} as any,
       );
 
       expect(res).toBeDefined();

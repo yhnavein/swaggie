@@ -1,4 +1,5 @@
 import { getDocType, getTSParamType } from './support';
+import { ClientOptions } from '../../types';
 
 describe('getDocType', () => {
   it('empty', async () => {

@@ -1,9 +1,9 @@
-interface ApiSpec extends Omit<Schema, 'components'> {
+export interface ApiSpec extends Omit<Schema, 'components'> {
   paths: any;
   components: ApiComponents;
 }
 
-interface ApiComponents {
+export interface ApiComponents {
   /** An object to hold reusable Schema Objects. */
   schemas?: SchemaObject[];
 
@@ -32,10 +32,10 @@ interface ApiComponents {
   callbacks?: any[];
 }
 
-type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
-type Dict<T> = { [key: string]: T };
+export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
+export type Dict<T> = { [key: string]: T };
 
-interface ApiOperation extends Omit<PathItemObject, 'parameters' | 'responses'> {
+export interface ApiOperation extends Omit<PathItemObject, 'parameters' | 'responses'> {
   id: string;
   summary: string;
   description: string;
@@ -46,7 +46,7 @@ interface ApiOperation extends Omit<PathItemObject, 'parameters' | 'responses'> 
   responses: ApiOperationResponse[];
 }
 
-interface ApiOperationParam extends ApiOperationParamBase {
+export interface ApiOperationParam extends ApiOperationParamBase {
   name: string;
   in: 'header' | 'path' | 'query' | 'body' | 'formData';
   description: string;
@@ -88,15 +88,10 @@ interface ApiOperationParamBase {
   multipleOf: number;
 }
 
-interface ApiOperationResponse {
+export interface ApiOperationResponse {
   code: string;
   description: string;
   schema: object;
   headers: object;
   examples: object;
-}
-
-interface ApiOperationSecurity {
-  id: string;
-  scopes?: string[];
 }
