@@ -79,6 +79,7 @@ function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: strin
     .reduce((a, b) => a.concat(b), []);
 
   const optionalPropLines = optionalProps
+    .filter(p => !def.properties[p].readOnly)
     .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, options, typeToBeGeneric))
     .reduce((a, b) => a.concat(b), []);
 

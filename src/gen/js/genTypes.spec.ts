@@ -184,4 +184,33 @@ describe('genTypes', () => {
 }`);
     });
   });
+
+  describe('objects with read-only fields', () => {
+    it(`should ignore read-only fields`, () => {
+      const res = genTypes(
+        emptySpec,
+        {
+          PagedAndSortedQuery: {
+            properties: {
+              isPagingSpecified: {
+                readOnly: true,
+                type: 'boolean',
+              },
+              sortField: {
+                type: 'string',
+              },
+            } as any,
+            required: [],
+            type: 'object',
+          },
+        },
+        {} as any
+      );
+
+      expect(res).toBeDefined();
+      expect(res.trim()).toBe(`export interface PagedAndSortedQuery {
+  sortField?: string;
+}`);
+    });
+  });
 });

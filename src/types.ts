@@ -63,6 +63,7 @@ interface ApiOperationParam extends ApiOperationParamBase {
   in: 'header' | 'path' | 'query' | 'body' | 'formData';
   description: string;
   required: boolean;
+  readonly?: boolean;
   allowEmptyValue: boolean;
   schema: object;
   'x-nullable'?: boolean;
