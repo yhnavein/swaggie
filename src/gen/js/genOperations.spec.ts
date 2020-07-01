@@ -207,6 +207,41 @@ describe('prepareOperations', () => {
       expect(res[0].parameters.length).toBe(op.parameters.length);
     });
   });
+
+  it(`formdata array param should be serialized correctly as array`, () => {
+    const ops = [
+      {
+        id: 'getPetById',
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        method: 'get',
+        path: '/pet/{petId}',
+        parameters: [
+          {
+            type: 'array',
+            name: 'files',
+            in: 'formData',
+            collectionFormat: 'multi',
+            'x-nullable': true,
+            items: {
+              type: 'file',
+            },
+          },
+        ],
+        responses: [],
+        group: null,
+        accepts: ['application/json'],
+        contentTypes: ['application/x-www-form-urlencoded'],
+      },
+    ] as ApiOperation[];
+
+    const [res] = prepareOperations(ops, {} as any);
+
+    expect(res).toBeDefined();
+    expect(res[0]?.parameters[0]).toBeDefined();
+    expect(res[0].parameters[0].originalName).toBe('files');
+    expect(res[0].parameters[0].original.type).toBe('array');
+  });
 });
 
 describe('fixDuplicateOperations', () => {
