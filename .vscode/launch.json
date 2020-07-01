@@ -8,15 +8,10 @@
       "type": "node",
       "request": "launch",
       "name": "Debug swaggie",
-      "program": "${workspaceFolder}/src/cli.ts",
-      "preLaunchTask": "Build",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "program": "${workspaceFolder}/dist/cli.js",
       "cwd": "${workspaceFolder}",
       "protocol": "inspector",
-      "args": [
-        "-c",
-        "./test/api-test.json"
-      ]
+      "args": ["-c", "./test/api-test.json"]
     }
   ]
 }
