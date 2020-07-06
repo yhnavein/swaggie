@@ -6,6 +6,7 @@
   <%- name -%>(<% parameters.forEach(function(parameter) { -%>
   <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
     <% }); -%>
+  $config?: AxiosRequestConfig
   ): AxiosPromise<<%- returnType -%>> {
     let url = this.baseUrl + '<%- url -%>';
 
@@ -53,5 +54,6 @@
     <% }); -%>
       },
 <%_ } _%>
+      ...$config,
     });
   }
