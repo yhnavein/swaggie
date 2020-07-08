@@ -10,16 +10,8 @@
 
 import { IHttpService, IRequestShortcutConfig, IPromise } from 'angular';
 
-class ApiConfig {
-  constructor(public baseUrl: string) {}
-}
-
-class BaseService {
-  protected baseUrl: string;
-
-  constructor(protected $http: IHttpService, Api<%- servicePrefix -%>Config: ApiConfig) {
-    this.baseUrl = Api<%- servicePrefix -%>Config.baseUrl;
-  }
+abstract class BaseService {
+  constructor(protected readonly $http: IHttpService, public baseUrl: string) { }
 
   protected $get<T>(
     url: string,

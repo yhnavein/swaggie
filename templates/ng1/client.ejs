@@ -1,7 +1,7 @@
 export class <%- clientName -%>Service extends BaseService {
   /* @ngInject */
-  constructor($http: IHttpService, Api<%- servicePrefix -%>Config: ApiConfig) {
-    super($http, Api<%- servicePrefix -%>Config);
+  constructor($http: IHttpService, Api<%- servicePrefix -%>BaseUrl: string) {
+    super($http, Api<%- servicePrefix -%>BaseUrl);
   }
 
   <% operations.forEach(function(operation) { %>
