@@ -19,10 +19,10 @@ function renderDefinitions(
   queryDefinitions: IQueryDefinitions,
   options: ClientOptions
 ): string[] {
-  const defs = {
+  const defs = unwrapDefinitions({
     ...(spec.definitions || {}),
     ...queryDefinitions,
-  };
+  });
   const typeLines = [];
   const docLines = [];
   const nonGenericTypes = Object.keys(defs).filter((k) => k.indexOf('[') === -1);
@@ -79,7 +79,7 @@ function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: strin
     .reduce((a, b) => a.concat(b), []);
 
   const optionalPropLines = optionalProps
-    .filter(p => !def.properties[p].readOnly)
+    .filter((p) => !def.properties[p].readOnly)
     .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, options, typeToBeGeneric))
     .reduce((a, b) => a.concat(b), []);
 
@@ -211,4 +211,18 @@ function verifyAllOf(name: string, allOf: any[]) {
 function getDistinctGenericTypes(keys: string[]) {
   const sanitizedKeys = keys.map((k) => k.substring(0, k.indexOf('[')));
   return uniq(sanitizedKeys);
+}
+
+function unwrapDefinitions(definitions: any) {
+  const result: any = {};
+
+  for (const definitionKey of Object.keys(definitions)) {
+    const def = definitions[definitionKey];
+    if ('definitions' in def && typeof def.definitions === 'object') {
+      Object.assign(result, unwrapDefinitions(def.definitions));
+    }
+    result[definitionKey] = def;
+  }
+
+  return result;
 }
