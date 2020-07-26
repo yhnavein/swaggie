@@ -199,6 +199,9 @@ export function renderOperationGroup(
   return group.map((op) => func.call(this, spec, op, options)).reduce((a, b) => a.concat(b));
 }
 
+/**
+ * Escapes param names to more safe form
+ */
 export function getParamName(name: string): string {
   return escapeReservedWords(
     name
@@ -206,6 +209,14 @@ export function getParamName(name: string): string {
       .map((x) => camelCase(x))
       .join('_')
   );
+}
+
+/**
+ * Converts object notation to a safe one + escapes reserved words
+ * @example `a.b.c` -> `a?.b?.c`
+ */
+function makeSafeQueryNames(name: string): string {
+  return escapeReservedWords(name.replace(/\./g, '?.'));
 }
 
 function addQueryModelToParams(
@@ -218,7 +229,7 @@ function addQueryModelToParams(
 
   const updatedQueryParams = queryParams.map((x) => ({
     ...x,
-    name: `${queryParam.name}.${x.name}`,
+    name: `${queryParam.name}.${makeSafeQueryNames(x.originalName)}`,
   }));
 
   return [filteredParams, updatedQueryParams];
