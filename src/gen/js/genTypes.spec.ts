@@ -1,4 +1,4 @@
-import genTypes from './genTypes';
+import genTypes, { renderQueryStringParameters } from './genTypes';
 
 const emptySpec: ApiSpec = {
   swagger: '2.0',
@@ -214,3 +214,219 @@ describe('genTypes', () => {
     });
   });
 });
+
+describe('renderQueryStringParameters', () => {
+  it(`empty list should work fine`, () => {
+    const def = {
+      type: 'object',
+      required: [],
+      queryParam: true,
+      properties: {},
+    };
+    const res = renderQueryStringParameters(def, {} as any);
+
+    expect(res).toStrictEqual([]);
+  });
+
+  it(`one element without dots should work fine`, () => {
+    const def = {
+      type: 'object',
+      required: [],
+      queryParam: true,
+      properties: {
+        page: {
+          name: 'page',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+      },
+    };
+    const res = renderQueryStringParameters(def, {} as any);
+
+    expect(res).toBeDefined();
+    expect(res.length).toBe(1);
+    expect(res[0]).toContain('page?: number;');
+  });
+
+  it(`one element in dot notation should work fine`, () => {
+    const def = {
+      type: 'object',
+      required: [],
+      queryParam: true,
+      properties: {
+        parameters_page: {
+          name: 'parameters.page',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+      },
+    };
+    const res = renderQueryStringParameters(def, {} as any);
+
+    expect(res).toBeDefined();
+    expect(res.length).toBe(1);
+    expect(textOnly(res[0])).toBe(textOnly('parameters?: {page?: number; }'));
+  });
+
+  it(`two elements in dot notation should work fine`, () => {
+    const def = {
+      type: 'object',
+      required: [],
+      queryParam: true,
+      properties: {
+        parameters_page: {
+          name: 'parameters.page',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+        parameters_count: {
+          name: 'parameters.count',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+      },
+    };
+    const res = renderQueryStringParameters(def, {} as any);
+
+    expect(res).toBeDefined();
+    expect(textOnly(res[0])).toBe(textOnly('parameters?: {page?: number; count?: number; }'));
+  });
+
+  it(`four elements in dot notation should work fine`, () => {
+    const def = {
+      type: 'object',
+      required: [],
+      queryParam: true,
+      properties: {
+        parameters_page: {
+          name: 'parameters.page',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+        parameters_count: {
+          name: 'parameters.count',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+        else_page: {
+          name: 'else.page',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+        else_count: {
+          name: 'else.count',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+      },
+    };
+    const res = renderQueryStringParameters(def, {} as any);
+
+    expect(res).toBeDefined();
+    expect(res.length).toBe(2);
+    expect(textOnly(res[0])).toBe(textOnly('parameters?: {page?: number; count?: number; }'));
+    expect(textOnly(res[1])).toBe(textOnly('else?: {page?: number; count?: number; }'));
+  });
+
+  it(`crazy case #1`, () => {
+    const def = {
+      type: 'object',
+      required: [],
+      queryParam: true,
+      properties: {
+        parameters_filter_countryName: {
+          name: 'parameters.filter.countryName',
+          in: 'query',
+          required: false,
+          type: 'string',
+        },
+        parameters_filter_active: {
+          name: 'parameters.filter.active',
+          in: 'query',
+          required: false,
+          type: 'boolean',
+        },
+        parameters_sortField: {
+          name: 'parameters.sortField',
+          in: 'query',
+          required: false,
+          type: 'string',
+        },
+        parameters_sortDir: {
+          name: 'parameters.sortDir',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+          enum: ['Undefined', 'Asc', 'Desc'],
+          fullEnum: {
+            Undefined: 0,
+            Asc: 1,
+            Desc: 2,
+          },
+        },
+        parameters_page: {
+          name: 'parameters.page',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+        parameters_count: {
+          name: 'parameters.count',
+          in: 'query',
+          required: false,
+          type: 'integer',
+          format: 'int32',
+        },
+        test: {
+          name: 'test',
+          in: 'query',
+          required: true,
+          type: 'integer',
+          format: 'int32',
+        },
+      },
+    };
+    const res = renderQueryStringParameters(def, {} as any);
+
+    expect(res).toBeDefined();
+    expect(res.length).toBe(2);
+    expect(textOnly(res[0])).toBe(
+      textOnly(`parameters?: {
+filter?: {
+  countryName?: string;
+  active?: boolean;
+}
+  sortField?: string;
+  sortDir?: number;
+  page?: number;
+  count?: number;
+}`)
+    );
+    expect(textOnly(res[1])).toBe(textOnly('test: number;'));
+  });
+});
+
+function textOnly(content: string) {
+  if (!content) {
+    return null;
+  }
+  return content.replace(/\s+/g, '');
+}

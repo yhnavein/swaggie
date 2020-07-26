@@ -224,6 +224,9 @@ function addQueryModelToParams(
   return [filteredParams, updatedQueryParams];
 }
 
+/**
+ * Prepares a new parameter that exposes other client parameters
+ */
 function getQueryDefinition(
   queryParams: IOperationParam[],
   op: ApiOperation,
@@ -241,6 +244,7 @@ function getQueryDefinition(
   const queryParamDefinition = {
     type: 'object',
     required: [],
+    queryParam: true,
     properties: queryParams.reduce(
       (prev, curr) => ({
         ...prev,
