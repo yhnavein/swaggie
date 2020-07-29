@@ -21,12 +21,24 @@ describe('serializeQueryParam.angular1', () => {
     });
   });
 
-  function serializeQueryParam(obj: any, property: string) {
-    if (obj === null || obj === undefined || obj === '') return '';
-    if (obj instanceof Date) return property + '=' + encodeURIComponent(obj.toJSON());
-    if (typeof obj !== 'object' || Array.isArray(obj)) return property + '=' + encodeURIComponent(obj);
-    return Object.keys(obj)
-      .reduce((a: any, b) => a.push(encodeURIComponent(property + '.' + b) + '=' + encodeURIComponent(obj[b])) && a, [])
-      .join('&');
+  function serializeQueryParam(obj: any, property: string): string {
+    if (obj === null || obj === undefined || obj === '') {
+      return '';
+    } else if (obj instanceof Date) {
+      return property + '=' + encodeURIComponent(obj.toJSON());
+    } else if (typeof obj !== 'object' || Array.isArray(obj)) {
+      return property + '=' + encodeURIComponent(obj);
+    } else if (typeof obj === 'object') {
+      return Object.keys(obj)
+        .filter(key => !!serializeQueryParam(obj[key], property + '.' + key))
+        .reduce(
+          (a: any, b) =>
+            a.push(serializeQueryParam(obj[b], property + '.' + b)) && a,
+          []
+        )
+        .join('&');
+    } else {
+      return '';
+    }
   }
 });
