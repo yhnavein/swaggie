@@ -10,7 +10,7 @@ export class ApiServices {
 }
 
 function serializeQueryParam(obj: any, property: string) {
-  if (obj === null || obj === undefined) return '';
+  if (obj === null || obj === undefined || obj === '') return '';
   if (obj instanceof Date) return property + '=' + encodeURIComponent(obj.toJSON());
   if (typeof obj !== 'object' || Array.isArray(obj)) return property + '=' + encodeURIComponent(obj);
   return Object.keys(obj)
