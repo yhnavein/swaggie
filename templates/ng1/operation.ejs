@@ -18,9 +18,9 @@
   <% query.forEach(function(parameter) { -%>
   if (<%- parameter.name -%> !== undefined) {
     <%_ if(!!parameter.original && parameter.original.type === 'array') { _%>
-      <%- parameter.name -%>.forEach(item => { url += '<%- parameter.originalName -%>=' + serializeQueryParam(item) + "&"; });
+      <%- parameter.name -%>.forEach(item => { url += serializeQueryParam(item, '<%- parameter.originalName -%>') + "&"; });
     <%_ } else {_%>
-      url += '<%- parameter.originalName -%>=' + serializeQueryParam(<%- parameter.name -%>) + "&";
+      url += serializeQueryParam(<%- parameter.name -%>, '<%- parameter.originalName -%>') + "&";
     <%_ } _%>
     }
   <% }); -%>
