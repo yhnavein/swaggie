@@ -32,6 +32,7 @@ export interface IQueryPropDefinition {
   fullEnum?: any;
   description?: string;
   'x-enumNames'?: string[];
+  queryParam?: boolean;
 }
 
 export interface IQueryDefinitions {

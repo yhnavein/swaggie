@@ -1,6 +1,6 @@
 import { join } from '../util';
 import { DOC, SP, getDocType, getTSParamType } from './support';
-import { uniq } from 'lodash';
+import { uniq, set } from 'lodash';
 import { IQueryDefinitions } from './models';
 
 export default function genTypes(
@@ -74,20 +74,71 @@ function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: strin
   const requiredProps = props.filter((p) => !!~required.indexOf(p));
   const optionalProps = props.filter((p) => !~required.indexOf(p));
 
-  const requiredPropLines = requiredProps
-    .map((prop) => renderTsTypeProp(prop, def.properties[prop], true, options, typeToBeGeneric))
-    .reduce((a, b) => a.concat(b), []);
+  if (def.queryParam) {
+    const res = renderQueryStringParameters(def, options);
+    join(lines, res);
+  } else {
+    const requiredPropLines = requiredProps
+      .map((prop) => renderTsTypeProp(prop, def.properties[prop], true, options, typeToBeGeneric))
+      .reduce((a, b) => a.concat(b), []);
 
-  const optionalPropLines = optionalProps
-    .filter((p) => !def.properties[p].readOnly)
-    .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, options, typeToBeGeneric))
-    .reduce((a, b) => a.concat(b), []);
+    const optionalPropLines = optionalProps
+      .filter((p) => !def.properties[p].readOnly)
+      .map((prop) => renderTsTypeProp(prop, def.properties[prop], false, options, typeToBeGeneric))
+      .reduce((a, b) => a.concat(b), []);
 
-  join(lines, requiredPropLines);
-  join(lines, optionalPropLines);
+    join(lines, requiredPropLines);
+    join(lines, optionalPropLines);
+  }
   lines.push('}');
   lines.push('');
   return lines;
+}
+
+/**
+ * Types coming from query models are different and they need to support nesting. Examples:
+ * @example
+ * 'parameters.filter.name': string, 'parameters.filter.query': string
+ * Will need to become:
+ * @example
+ * {
+ *  parameters: {
+ *    filter: { name: string, query: string }
+ *  }
+ * }
+ */
+export function renderQueryStringParameters(def: any, options: ClientOptions): string[] {
+  const props = Object.keys(def.properties).map((e) => ({
+    key: e,
+    name: def.properties[e].name,
+    parts: def.properties[e].name.split('.'),
+  }));
+  const objNotation = {};
+  props.forEach((p) => set(objNotation, p.name, def.properties[p.key]));
+
+  return processQueryStringParameter(objNotation, null, options);
+}
+
+function processQueryStringParameter(
+  props: any,
+  containerName: string | null,
+  options: ClientOptions
+): string[] {
+  if (!props) {
+    return [];
+  }
+  if (!!props.in && !!props.name) {
+    const lastName = props.name.split('.').pop();
+    return renderTsTypeProp(lastName, props, props.required, options);
+  }
+  const arr = Object.keys(props).map((p) => {
+    return processQueryStringParameter(props[p], p, options).join('\n');
+  });
+
+  if (containerName) {
+    return [`${containerName}?: {`, ...arr, '}'];
+  }
+  return arr;
 }
 
 /** Basically only object and (x-)enum types are supported */
