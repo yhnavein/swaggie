@@ -1,3 +1,6 @@
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
 import * as ejs from 'ejs';
 import { loadAllTemplateFiles, renderFile } from './templateManager';
 
@@ -29,6 +32,26 @@ describe('loadAllTemplateFiles', () => {
       loadAllTemplateFiles(null);
     }).toThrowError('No template');
   });
+
+  it('should handle custom template', async () => {
+    const tempDir = `${os.tmpdir()}/custom-template`;
+
+    if (!fs.existsSync(tempDir)){
+      fs.mkdirSync(tempDir);
+    }
+
+    fs.copyFileSync(
+      path.join(__dirname, '..', '..', 'templates', 'fetch', 'client.ejs'),
+      path.join(tempDir, 'client.ejs')
+    );
+
+    loadAllTemplateFiles(tempDir)
+
+    expect(ejs.cache).toBeDefined();
+    expect(ejs.cache.get(GOOD_FILE)).toBeInstanceOf(Function);
+
+    fs.rmdirSync(tempDir, { recursive: true });
+  })
 
   it('actually clears EJS cache', async () => {
     loadAllTemplateFiles('axios');
