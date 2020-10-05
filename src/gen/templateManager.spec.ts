@@ -50,7 +50,8 @@ describe('loadAllTemplateFiles', () => {
     expect(ejs.cache).toBeDefined();
     expect(ejs.cache.get(GOOD_FILE)).toBeInstanceOf(Function);
 
-    fs.rmdirSync(tempDir, { recursive: true });
+    fs.unlinkSync(path.join(tempDir, 'client.ejs'));
+    fs.rmdirSync(tempDir);
   })
 
   it('actually clears EJS cache', async () => {
