@@ -84,15 +84,21 @@ Sample configuration looks like this:
 }
 ```
 
-### Bundled templates
+### Templates
 
-There are following templates bundled:
+The following templates are bundled with Swaggie:
 
 ```
 axios     Default template. Recommended for React / Vue / similar frameworks. Uses axios
 fetch     Template similar to axios, but uses fetch instead. Recommended for React / Vue / similar frameworks
 ng1       Template for Angular 1 (this is for the old one)
 ng2       Template for Angular 2+ (uses HttpClient, InjectionTokens, etc)
+```
+
+If you want to use your own template, you can use the path to your template for the `-t` parameter:
+
+```
+swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore --template ./my-swaggie-template/
 ```
 
 ### Code

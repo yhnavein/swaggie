@@ -7,7 +7,9 @@ export function loadAllTemplateFiles(templateName: string) {
   if (!templateName) {
     throw new Error(`No template name was provided`);
   }
-  const templatesDir = path.join(__dirname, '..', '..', 'templates', templateName);
+  const templatesDir = fs.existsSync(templateName)
+    ? templateName
+    : path.join(__dirname, '..', '..', 'templates', templateName);
   if (!fs.existsSync(templatesDir)) {
     throw new Error(
       `Could not found directory with the template (we tried ${templatesDir}). Template name is correct?`
