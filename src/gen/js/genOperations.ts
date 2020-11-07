@@ -1,4 +1,4 @@
-import { camelCase, last, orderBy, upperFirst } from 'lodash';
+import { camelCase, orderBy, upperFirst } from 'lodash';
 
 import { getTSParamType } from './support';
 import { groupOperationsByGroupName, getBestResponse, escapeReservedWords } from '../util';
@@ -98,7 +98,7 @@ export function prepareOperations(
         query: queryParams,
         formData: getParams(op.parameters, options, ['formData']),
         pathParams: getParams(op.parameters, options, ['path']),
-        body: last(getParams(op.parameters, options, ['body'])),
+        body: getParams(op.parameters, options, ['body']).pop(),
         headers: getHeaders(op, options),
       };
     }),
