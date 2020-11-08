@@ -1,25 +1,24 @@
 import fs from 'fs';
 import chalk from 'chalk';
 import openApiConverter from 'swagger2openapi';
+import { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import genJsCode from './gen/js';
-import { loadAllTemplateFiles } from './gen/templateManager';
-import { getOperations, resolveSpec } from './swagger';
 import { ClientOptions, FullAppOptions } from './types';
+import { loadSpecification } from './specLoader';
 
 export function runCodeGenerator(options: FullAppOptions): Promise<any> {
   return verifyOptions(options)
     .then(applyConfigFile)
     .then((options) =>
-      resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
+      loadSpecification(options.src)
         .then((spec) => verifyAndConvert(spec))
         .then((spec) => gen(spec, options))
         .then(() => {
           console.info(
-            chalk.bold.cyan(`Api from ${options.src} code generated into ${options.out}`),
+            chalk.bold.cyan(`Api from ${options.src} code generated into ${options.out}`)
           );
           return true;
-        }),
+        })
     );
 }
 
@@ -34,34 +33,40 @@ function verifyOptions(options: FullAppOptions): Promise<any> {
   }
 }
 
-export function verifyAndConvert(spec: any): Promise<Schema> {
-  if (!spec || !spec.swagger && !spec.openapi) {
-    return Promise.reject('Spec does not look like valid file! Supported are only OpenApi2/Swagger and OpenApi3');
+/** Loads spec file and verifies if it's a valid one. If it's Swagger it will convert it to OpenAPI3 */
+export function verifyAndConvert(spec: any): Promise<OA3.Document> {
+  if (!spec || (!spec.swagger && !spec.openapi)) {
+    return Promise.reject(
+      'Spec does not look like valid file! Supported are only OpenApi2/Swagger and OpenApi3'
+    );
   }
   if (spec.swagger) {
     console.info(
-      chalk.bold.yellow(`Loaded spec looks like the OpenApi2. Converting to OpenApi3...`),
+      chalk.bold.yellow(`Loaded spec looks like the OpenApi2. Converting to OpenApi3...`)
     );
     return new Promise((resolve, reject) => {
-      openApiConverter.convertObj(spec, {
-        patch: true,
-        warnOnly: true,
-      }, (err, convertedSpec) => {
-        if (err) {
-          return reject('Errors found when converting spec.');
+      openApiConverter.convertObj(
+        spec,
+        {
+          patch: true,
+          warnOnly: true,
+        },
+        (err, convertedSpec) => {
+          if (err) {
+            return reject('Errors found when converting spec.');
+          }
+          return resolve(convertedSpec.openapi);
         }
-        return resolve(convertedSpec.openapi);
-      });
+      );
     });
   }
   return Promise.resolve(spec);
 }
 
-function gen(spec: Schema, options: ClientOptions): Schema {
-  loadAllTemplateFiles(options.template || 'axios');
-
-  const operations = getOperations(spec);
-  return genJsCode(spec, operations, options);
+function gen(spec: OA3.Document, options: ClientOptions): void {
+  // loadAllTemplateFiles(options.template || 'axios');
+  // const operations = getOperations(spec);
+  // return genJsCode(spec, operations, options);
 }
 
 export function applyConfigFile(options: FullAppOptions): Promise<ClientOptions> {
@@ -80,7 +85,7 @@ export function applyConfigFile(options: FullAppOptions): Promise<ClientOptions>
         return resolve(Object.assign({}, parsedConfig, options));
       })
       .catch((ex) =>
-        reject('Could not correctly load config file. It does not exist or you cannot access it'),
+        reject('Could not correctly load config file. It does not exist or you cannot access it')
       );
   });
 }

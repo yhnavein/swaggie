@@ -2,8 +2,8 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-
 import { runCodeGenerator } from './index';
+
 
 const program = new Command();
 program
@@ -46,7 +46,7 @@ const options = program.opts() as FullAppOptions;
 
 runCodeGenerator(options).then(complete, error);
 
-function complete(spec: Schema) {
+function complete(spec: any) {
   process.exit(0);
 }
 

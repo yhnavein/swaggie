@@ -1,27 +1,16 @@
 import YAML from 'js-yaml';
 import fetch from 'node-fetch';
-import { ApiSpec } from '../openapi/specTypes';
 
-export interface SpecOptions {
-  /**
-   * A base ref string to ignore when expanding ref dependencies e.g. '#/definitions/'
-   */
-  ignoreRefType?: string;
-}
-
-export function resolveSpec(src: string | object, options?: SpecOptions): Promise<ApiSpec> {
-  if (!options) {
-    options = {};
-  }
-
+/** Either tries to load spec from given location or returns it further if it was already given */
+export function loadSpecification(src: string | object): Promise<any> {
   if (typeof src === 'string') {
-    return loadFile(src).then((spec) => formatSpec(spec, src, options));
+    return loadFile(src);
   } else {
-    return Promise.resolve(formatSpec(src as ApiSpec, null, options));
+    return Promise.resolve(src);
   }
 }
 
-function loadFile(src: string): Promise<ApiSpec | any> {
+function loadFile(src: string): Promise<any> {
   if (/^https?:\/\//im.test(src)) {
     return loadFromUrl(src);
   } else if (String(process) === '[object process]') {
@@ -39,16 +28,12 @@ function loadFromUrl(url: string) {
 
 function readLocalFile(filePath: string): Promise<string> {
   return new Promise((res, rej) =>
-    require('fs').readFile(filePath, 'utf8', (err, contents) => (err ? rej(err) : res(contents))),
+    require('fs').readFile(filePath, 'utf8', (err, contents) => (err ? rej(err) : res(contents)))
   );
 }
 
 function parseFileContents(contents: string, path: string): object {
   return /.ya?ml$/i.test(path) ? YAML.load(contents) : JSON.parse(contents);
-}
-
-function formatSpec(spec: ApiSpec, src?: string, options?: SpecOptions): ApiSpec {
-  return expandRefs(spec, spec, options) as ApiSpec;
 }
 
 /**
@@ -59,18 +44,18 @@ function formatSpec(spec: ApiSpec, src?: string, options?: SpecOptions): ApiSpec
  * @param {regexp=} refMatch an optional regex to match specific refs to resolve
  * @returns {object} the resolved data object
  */
-export function expandRefs(data: any, lookup: object, options: SpecOptions): any {
+function expandRefs(data: any, lookup: object): any {
   if (!data) {
     return data;
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => expandRefs(item, lookup, options));
+    return data.map((item) => expandRefs(item, lookup));
   } else if (typeof data === 'object') {
     if (dataCache.has(data)) {
       return data;
     }
-    if (data.$ref && !(options.ignoreRefType && data.$ref.startsWith(options.ignoreRefType))) {
+    if (data.$ref) {
       const resolved = expandRef(data.$ref, lookup);
       delete data.$ref;
       data = Object.assign({}, resolved, data);
@@ -78,7 +63,7 @@ export function expandRefs(data: any, lookup: object, options: SpecOptions): any
     dataCache.add(data);
 
     for (let name in data) {
-      data[name] = expandRefs(data[name], lookup, options);
+      data[name] = expandRefs(data[name], lookup);
     }
   }
   return data;
