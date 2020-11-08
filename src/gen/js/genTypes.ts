@@ -1,4 +1,3 @@
-import { uniq } from 'lodash';
 import { join } from '../util';
 import { DOC, SP, getDocType, getTSParamType } from './support';
 import { uniq, set } from 'lodash';
@@ -9,7 +8,7 @@ import { ClientOptions } from '../../types';
 export default function genTypes(
   spec: ApiSpec,
   queryDefinitions: IQueryDefinitions,
-  options: ClientOptions,
+  options: ClientOptions
 ) {
   const lines = [];
   join(lines, renderDefinitions(spec, queryDefinitions, options));
@@ -20,7 +19,7 @@ export default function genTypes(
 function renderDefinitions(
   spec: ApiSpec,
   queryDefinitions: IQueryDefinitions,
-  options: ClientOptions,
+  options: ClientOptions
 ): string[] {
   const defs = unwrapDefinitions({
     ...(spec.components || {}),
@@ -193,7 +192,7 @@ function renderTsTypeProp(
   info: any,
   required: boolean,
   options: ClientOptions,
-  typeToBeGeneric?: string,
+  typeToBeGeneric?: string
 ): string[] {
   const lines = [];
   let type = getTSParamType(info, options);
@@ -203,7 +202,7 @@ function renderTsTypeProp(
   if (info.description) {
     lines.push(`${SP}/**`);
     lines.push(
-      `${SP}${DOC}` + (info.description || '').trim().replace(/\n/g, `\n${SP}${DOC}${SP}`),
+      `${SP}${DOC}` + (info.description || '').trim().replace(/\n/g, `\n${SP}${DOC}${SP}`)
     );
     lines.push(`${SP} */`);
   }
@@ -253,7 +252,7 @@ function verifyAllOf(name: string, allOf: any[]) {
   if (!allOf || allOf.length !== 2) {
     console.log(allOf);
     throw new Error(
-      `Json schema allOf '${name}' must have two elements to be treated as inheritance`,
+      `Json schema allOf '${name}' must have two elements to be treated as inheritance`
     );
   }
   const ref = allOf[0];

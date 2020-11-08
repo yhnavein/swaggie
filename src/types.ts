@@ -14,7 +14,6 @@ export interface FullAppOptions extends ClientOptions {
   config: string;
 }
 
-type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
 interface ApiRequestData {
   method: HttpMethod;
   url: string;
