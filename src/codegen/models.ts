@@ -1,26 +1,17 @@
 import ts from 'typescript';
-import { OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3 as OA3 } from 'openapi-types';
 import _ from 'lodash';
 
-const _questionToken = ts.createToken(ts.SyntaxKind.QuestionToken);
+import {
+  modifiers,
+  questionToken,
+  isNullable,
+  keywordType,
+  isReference,
+  getReference,
+} from './common';
 
-function questionToken(condition?: boolean | null) {
-  return condition ? _questionToken : undefined;
-}
-
-const modifiers = {
-  export: ts.createModifier(ts.SyntaxKind.ExportKeyword),
-};
-export const keywordType = {
-  any: ts.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword),
-  number: ts.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
-  object: ts.createKeywordTypeNode(ts.SyntaxKind.ObjectKeyword),
-  string: ts.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-  boolean: ts.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword),
-  undefined: ts.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-  null: ts.createKeywordTypeNode(ts.SyntaxKind.NullKeyword as any),
-};
-
+/*
 export function genType(name: string, props: any[]): ts.InterfaceDeclaration {
   const fields = props.map((p) =>
     ts.createPropertySignature(
@@ -64,21 +55,15 @@ export function genType(name: string, props: any[]): ts.InterfaceDeclaration {
     ]
   );
 }
+*/
 
-function isNullable(schema: any) {
-  return !!(schema && schema.nullable);
-}
-
-function isReference(obj: any): obj is OpenAPIV3.ReferenceObject {
-  return obj && '$ref' in obj;
-}
 const aliases: ts.TypeAliasDeclaration[] = [];
 const refs: Record<string, ts.TypeReferenceNode> = {};
-function getRefAlias(obj: OpenAPIV3.ReferenceObject) {
+function getRefAlias(obj: OA3.ReferenceObject) {
   const { $ref } = obj;
   let ref = refs[$ref];
   if (!ref) {
-    const schema = resolve<OpenAPIV3.SchemaObject>(obj);
+    const schema = resolve<OA3.SchemaObject>(obj);
     const name = getUniqueAlias(_.upperFirst(schema.title || getRefBasename($ref)));
 
     ref = refs[$ref] = ts.createTypeReferenceNode(name, undefined);
@@ -90,9 +75,7 @@ function getRefAlias(obj: OpenAPIV3.ReferenceObject) {
   }
   return ref;
 }
-function getTypeFromSchema(
-  schema?: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
-): ts.TypeNode {
+function getTypeFromSchema(schema?: OA3.SchemaObject | OA3.ReferenceObject): ts.TypeNode {
   const type = getBaseTypeFromSchema(schema);
   return isNullable(schema) ? ts.createUnionTypeNode([type, keywordType.null]) : type;
 }
@@ -100,9 +83,7 @@ function getRefBasename(ref: string): string {
   return ref.replace(/.+\//, '');
 }
 
-function getBaseTypeFromSchema(
-  schema?: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
-): ts.TypeNode {
+function getBaseTypeFromSchema(schema?: OA3.SchemaObject | OA3.ReferenceObject): ts.TypeNode {
   if (!schema) return keywordType.any;
   if (isReference(schema)) {
     return getRefAlias(schema);
@@ -163,10 +144,10 @@ function getUniqueAlias(name: string) {
 }
 function getTypeFromProperties(
   props: {
-    [prop: string]: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
+    [prop: string]: OA3.SchemaObject | OA3.ReferenceObject;
   },
   required?: string[],
-  additionalProperties?: boolean | OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
+  additionalProperties?: boolean | OA3.SchemaObject | OA3.ReferenceObject
 ) {
   const members: ts.TypeElement[] = Object.keys(props).map((name) => {
     const schema = props[name];
@@ -187,44 +168,9 @@ function getTypeFromProperties(
   return ts.createTypeLiteralNode(members);
 }
 
-function resolve<T>(obj: T | OpenAPIV3.ReferenceObject) {
-  if (!isReference(obj)) return obj;
-  const ref = obj.$ref;
-  if (!ref.startsWith('#/')) {
-    throw new Error(
-      `External refs are not supported (${ref}). Make sure to call SwaggerParser.bundle() first.`
-    );
-  }
-  // return getReference(spec, ref) as T;
-}
-
-function resolveArray<T>(array?: (T | OpenAPIV3.ReferenceObject)[]) {
-  return array ? array.map(resolve) : [];
-}
-function getReference(spec: any, ref: string) {
-  const path = ref
-    .slice(2)
-    .split('/')
-    .map((s) => unescape(s.replace(/~1/g, '/').replace(/~0/g, '~')));
-
-  const ret = _.get(spec, path);
-  if (typeof ret === 'undefined') {
-    throw new Error(`Can't find ${path}`);
-  }
-  return ret;
-}
-/**
- * If the given object is a ReferenceObject, return the last part of its path.
- */
-function getReferenceName(obj: any) {
-  if (isReference(obj)) {
-    return _.camelCase(obj.$ref.split('/').slice(-1)[0]);
-  }
-}
-
-function getUnionType(
-  variants: (OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject)[],
-  discriminator?: OpenAPIV3.DiscriminatorObject
+export function getUnionType(
+  variants: (OA3.ReferenceObject | OA3.SchemaObject)[],
+  discriminator?: OA3.DiscriminatorObject
 ): ts.TypeNode {
   if (discriminator) {
     // oneOf + discriminator -> tagged union (polymorphism)
@@ -254,8 +200,8 @@ function getUnionType(
             }
             return !mappedValues.has(getRefBasename(variant.$ref));
           })
-          .map((schema) => [getRefBasename((schema as OpenAPIV3.ReferenceObject).$ref), schema]),
-      ] as [string, OpenAPIV3.ReferenceObject][]).map(([discriminatorValue, variant]) =>
+          .map((schema) => [getRefBasename((schema as OA3.ReferenceObject).$ref), schema]),
+      ] as [string, OA3.ReferenceObject][]).map(([discriminatorValue, variant]) =>
         // Yields: { [discriminator.propertyName]: discriminatorValue } & variant
         ts.createIntersectionTypeNode([
           ts.createTypeLiteralNode([
@@ -274,4 +220,22 @@ function getUnionType(
     // oneOf -> untagged union
     return ts.createUnionTypeNode(variants.map(getTypeFromSchema));
   }
+}
+
+function resolve<T>(obj: T | OA3.ReferenceObject) {
+  if (!isReference(obj)) return obj;
+  const ref = obj.$ref;
+  if (!ref.startsWith('#/')) {
+    throw new Error(
+      `External refs are not supported (${ref}). Make sure to call SwaggerParser.bundle() first.`
+    );
+  }
+  // return getReference(spec, ref) as T;
+}
+
+function resolveArray<T>(array?: (T | OA3.ReferenceObject)[]) {
+  return array ? array.map(resolve) : [];
+}
+export default function generateApi(spec: OA3.Document) {
+  const aliases: ts.TypeAliasDeclaration[] = [];
 }
