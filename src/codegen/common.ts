@@ -19,6 +19,7 @@ export const keywordType = {
   boolean: ts.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword),
   undefined: ts.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
   null: ts.createKeywordTypeNode(ts.SyntaxKind.NullKeyword as any),
+  void: ts.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
 };
 
 export function isNullable(schema: any) {

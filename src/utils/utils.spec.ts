@@ -1,4 +1,4 @@
-import { prepareOutputFilename } from './utils';
+import { escapeReservedWords, prepareOutputFilename } from './utils';
 
 describe('prepareOutputFilename', () => {
   [
@@ -17,5 +17,31 @@ describe('prepareOutputFilename', () => {
 
       expect(res).toBe(el.expected);
     });
+  });
+});
+
+describe('escapeReservedWords', () => {
+  it('handles null', () => {
+    const res = escapeReservedWords(null);
+
+    expect(res).toBe(null);
+  });
+
+  it('handles empty string', () => {
+    const res = escapeReservedWords('');
+
+    expect(res).toBe('');
+  });
+
+  it('handles safe word', () => {
+    const res = escapeReservedWords('Burrito');
+
+    expect(res).toBe('Burrito');
+  });
+
+  it('handles reserved word', () => {
+    const res = escapeReservedWords('return');
+
+    expect(res).toBe('_return');
   });
 });

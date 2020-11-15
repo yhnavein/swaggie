@@ -2,14 +2,7 @@ import ts from 'typescript';
 import { OpenAPIV3 as OA3 } from 'openapi-types';
 import _ from 'lodash';
 
-import {
-  modifiers,
-  questionToken,
-  isNullable,
-  keywordType,
-  isReference,
-  getReference,
-} from './common';
+import { modifiers, questionToken, isNullable, keywordType, isReference } from './common';
 
 /*
 export function genType(name: string, props: any[]): ts.InterfaceDeclaration {
@@ -59,6 +52,7 @@ export function genType(name: string, props: any[]): ts.InterfaceDeclaration {
 
 const aliases: ts.TypeAliasDeclaration[] = [];
 const refs: Record<string, ts.TypeReferenceNode> = {};
+
 function getRefAlias(obj: OA3.ReferenceObject) {
   const { $ref } = obj;
   let ref = refs[$ref];
@@ -75,15 +69,19 @@ function getRefAlias(obj: OA3.ReferenceObject) {
   }
   return ref;
 }
+
 function getTypeFromSchema(schema?: OA3.SchemaObject | OA3.ReferenceObject): ts.TypeNode {
   const type = getBaseTypeFromSchema(schema);
   return isNullable(schema) ? ts.createUnionTypeNode([type, keywordType.null]) : type;
 }
+
 function getRefBasename(ref: string): string {
   return ref.replace(/.+\//, '');
 }
 
-function getBaseTypeFromSchema(schema?: OA3.SchemaObject | OA3.ReferenceObject): ts.TypeNode {
+export function getBaseTypeFromSchema(
+  schema?: OA3.SchemaObject | OA3.ReferenceObject
+): ts.TypeNode {
   if (!schema) return keywordType.any;
   if (isReference(schema)) {
     return getRefAlias(schema);
@@ -130,6 +128,34 @@ function getBaseTypeFromSchema(schema?: OA3.SchemaObject | OA3.ReferenceObject):
   }
 
   return keywordType.any;
+}
+
+function supportDeepObjects(params: OA3.ParameterObject[]) {
+  const res: OA3.ParameterObject[] = [];
+  const merged: any = {};
+  params.forEach((p) => {
+    const m = /^(.+?)\[(.*?)\]/.exec(p.name);
+    if (!m) {
+      res.push(p);
+      return;
+    }
+    const [, name, prop] = m;
+    let obj = merged[name];
+    if (!obj) {
+      obj = merged[name] = {
+        name,
+        in: p.in,
+        style: 'deepObject',
+        schema: {
+          type: 'object',
+          properties: {},
+        },
+      };
+      res.push(obj);
+    }
+    obj.schema.properties[prop] = p.schema;
+  });
+  return res;
 }
 
 const typeAliases: Record<string, number> = {};
@@ -235,7 +261,4 @@ function resolve<T>(obj: T | OA3.ReferenceObject) {
 
 function resolveArray<T>(array?: (T | OA3.ReferenceObject)[]) {
   return array ? array.map(resolve) : [];
-}
-export default function generateApi(spec: OA3.Document) {
-  const aliases: ts.TypeAliasDeclaration[] = [];
 }

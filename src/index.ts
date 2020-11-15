@@ -3,8 +3,7 @@ import chalk from 'chalk';
 import openApiConverter from 'swagger2openapi';
 import { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { ClientOptions, FullAppOptions } from './types';
-import { loadSpecification } from './specLoader';
+import { ClientOptions, FullAppOptions, loadSpecification } from './utils';
 
 export function runCodeGenerator(options: FullAppOptions): Promise<any> {
   return verifyOptions(options)
