@@ -4,23 +4,28 @@ import _ from 'lodash';
 
 import { modifiers, questionToken, isNullable, keywordType, isReference } from './common';
 
-/*
-export function genType(name: string, props: any[]): ts.InterfaceDeclaration {
-  const fields = props.map((p) =>
-    ts.createPropertySignature(
+export function genType(name: string, component: ComponentWithExtensions): ts.InterfaceDeclaration {
+  const keys = Object.keys(component.properties || {});
+
+  const fields = keys.map((p) => {
+    const property = component.properties[p];
+    const type = getTypeFromSchema(property);
+    return ts.createPropertySignature(
       undefined,
-      ts.createIdentifier(p.name),
-      questionToken(p.nullable),
-      ts.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
+      ts.createIdentifier(p),
+      questionToken(false),
+      type,
       undefined
-    )
-  );
+    );
+  });
   return ts.createInterfaceDeclaration(
     undefined,
     [modifiers.export],
     ts.createIdentifier(name),
     undefined,
     undefined,
+    fields
+    /*
     [
       ts.createPropertySignature(
         undefined,
@@ -46,9 +51,13 @@ export function genType(name: string, props: any[]): ts.InterfaceDeclaration {
         undefined
       ),
     ]
+    */
   );
 }
-*/
+
+export function generateTypes(): ts.InterfaceDeclaration[] {
+  return [];
+}
 
 const aliases: ts.TypeAliasDeclaration[] = [];
 const refs: Record<string, ts.TypeReferenceNode> = {};
@@ -84,7 +93,8 @@ export function getBaseTypeFromSchema(
 ): ts.TypeNode {
   if (!schema) return keywordType.any;
   if (isReference(schema)) {
-    return getRefAlias(schema);
+    return keywordType.any;
+    // return getRefAlias(schema);
   }
 
   if (schema.oneOf) {
@@ -261,4 +271,11 @@ function resolve<T>(obj: T | OA3.ReferenceObject) {
 
 function resolveArray<T>(array?: (T | OA3.ReferenceObject)[]) {
   return array ? array.map(resolve) : [];
+}
+
+interface ComponentWithExtensions extends OA3.NonArraySchemaObject {
+  'x-abstract'?: boolean;
+  'x-nullable'?: boolean;
+  'x-enumFlags'?: boolean;
+  'x-enumNames'?: string[];
 }

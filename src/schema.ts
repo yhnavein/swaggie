@@ -9,26 +9,6 @@ export default function (spec: OA3.Document) {
     return spec.components.schemas;
   }
 
-  function getQueryModels(): Model[] {
-    Object.keys(spec.paths).map((key) => {
-      const el = spec.paths[key];
-      const queryParams = el.parameters!.filter((p: OA3.ParameterObject) => p.in === 'query');
-
-      if (!queryParams || queryParams.length <= 1) {
-        return null;
-      }
-
-      const params = queryParams.map((q: OA3.ParameterObject) => ({ name: q.name, ...q.schema }));
-      return {
-        name: ``,
-        type: 'object',
-        additionalProperties: false,
-        properties: params.reduce((obj, item) => Object.assign(obj, { [item.name]: item }), {}),
-      } as OA3.NonArraySchemaObject;
-    });
-    return [];
-  }
-
   function handleGenericTypes(): Model[] {
     return [];
   }

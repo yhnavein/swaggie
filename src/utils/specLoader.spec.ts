@@ -27,7 +27,7 @@ describe('loadSpecification', () => {
   });
 
   it('should resolve a YAML spec from local file', async () => {
-    const path = `${__dirname}/../test/petstore2.yml`;
+    const path = `${__dirname}/../../test/petstore2.yml`;
     const spec = await loadSpecification(path);
     expect(spec).toBeDefined();
     expect(spec.host).toBe('petstore.swagger.io');

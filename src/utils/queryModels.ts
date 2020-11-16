@@ -4,6 +4,7 @@ import { escapeReservedWords } from './';
 
 const verbs = ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH', 'TRACE'];
 
+// TODO: Merge with path-level parameters
 export function getQueryModels(spec: OA3.Document) {
   const res = Object.keys(spec.paths).map((key) => {
     const el = spec.paths[key];

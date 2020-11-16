@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { runCodeGenerator } from './index';
-
+import { FullAppOptions } from './utils';
 
 const program = new Command();
 program
