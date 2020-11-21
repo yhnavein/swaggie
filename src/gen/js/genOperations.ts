@@ -21,7 +21,6 @@ export default function genOperations(
 ) {
   const groups = groupOperationsByGroupName(operations);
   let result = renderFile('baseClient.ejs', {
-    reactContexts: options.reactHooks || false,
     servicePrefix: options.servicePrefix || '',
   });
   let queryDefinitions = {} as IQueryDefinitions;

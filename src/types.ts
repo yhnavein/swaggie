@@ -3,7 +3,6 @@ interface ClientOptions {
   out: string;
   template: string;
   baseUrl: string;
-  reactHooks: boolean;
   preferAny?: boolean;
   servicePrefix?: string;
   queryModels?: boolean;

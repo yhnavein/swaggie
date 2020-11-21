@@ -4,7 +4,6 @@
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "axios",
   "baseUrl": "https://google.pl",
-  "reactHooks": true,
   "preferAny": true,
   "servicePrefix": "Test",
   "queryModels": true,
