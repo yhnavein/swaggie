@@ -36,7 +36,7 @@ describe('loadAllTemplateFiles', () => {
   it('should handle custom template', async () => {
     const tempDir = `${os.tmpdir()}/custom-template`;
 
-    if (!fs.existsSync(tempDir)){
+    if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir);
     }
 
@@ -45,14 +45,14 @@ describe('loadAllTemplateFiles', () => {
       path.join(tempDir, 'client.ejs')
     );
 
-    loadAllTemplateFiles(tempDir)
+    loadAllTemplateFiles(tempDir);
 
     expect(ejs.cache).toBeDefined();
     expect(ejs.cache.get(GOOD_FILE)).toBeInstanceOf(Function);
 
     fs.unlinkSync(path.join(tempDir, 'client.ejs'));
     fs.rmdirSync(tempDir);
-  })
+  });
 
   it('actually clears EJS cache', async () => {
     loadAllTemplateFiles('axios');
@@ -73,16 +73,18 @@ describe('render', () => {
   it('should get existing template', async () => {
     const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
+      varName: 'test',
       baseUrl: null,
       operations: [],
     });
 
-    expect(templateFunction).toContain('TestClient');
+    expect(templateFunction).toContain('testClient');
   });
 
   it('should render template that is complex (multiple levels of includes)', async () => {
     const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
+      varName: 'test',
       baseUrl: null,
       operations: [
         {
@@ -100,7 +102,7 @@ describe('render', () => {
       ],
     });
 
-    expect(templateFunction).toContain('TestClient');
+    expect(templateFunction).toContain('testClient');
     expect(templateFunction).toContain('TestName');
   });
 });

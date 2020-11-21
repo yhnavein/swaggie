@@ -19,6 +19,7 @@ export interface IOperationParam {
 
 export interface IServiceClient {
   clientName: string;
+  varName: string;
   baseUrl?: string;
   operations: IApiOperation[];
 }

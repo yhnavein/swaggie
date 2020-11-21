@@ -8,7 +8,7 @@
     <% }); -%>
   $config?: AxiosRequestConfig
   ): AxiosPromise<<%- returnType -%>> {
-    let url = this.baseUrl + '<%- url -%>';
+    let url = '<%- url -%>';
 
 <%_ if(pathParams && pathParams.length > 0) {
   pathParams.forEach(function(parameter) { -%>
@@ -56,4 +56,4 @@
 <%_ } _%>
       ...$config,
     });
-  }
+  },

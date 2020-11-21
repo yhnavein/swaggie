@@ -60,6 +60,7 @@ function prepareClient(
   return [
     {
       clientName: name,
+      varName: camelCase(name),
       operations: preparedOperations,
       baseUrl: options.baseUrl,
     },
