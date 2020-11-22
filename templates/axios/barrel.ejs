@@ -7,3 +7,4 @@ function serializeQueryParam(obj: any) {
     .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
     .join('&');
 }
+

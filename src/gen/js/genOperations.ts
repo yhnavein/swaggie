@@ -22,6 +22,7 @@ export default function genOperations(
   const groups = groupOperationsByGroupName(operations);
   let result = renderFile('baseClient.ejs', {
     servicePrefix: options.servicePrefix || '',
+    baseUrl: options.baseUrl,
   });
   let queryDefinitions = {} as IQueryDefinitions;
 

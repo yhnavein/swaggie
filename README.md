@@ -88,7 +88,7 @@ The following templates are bundled with Swaggie:
 
 ```
 axios     Default template. Recommended for React / Vue / similar frameworks. Uses axios
-fetch     Template similar to axios, but uses fetch instead. Recommended for React / Vue / similar frameworks
+fetch     Template similar to axios, but with fetch API instead. Recommended for React / Vue / similar frameworks
 ng1       Template for Angular 1 (this is for the old one)
 ng2       Template for Angular 2+ (uses HttpClient, InjectionTokens, etc)
 ```
@@ -137,7 +137,7 @@ swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./api/petstore.ts && p
 // ./api/petstore.ts
 
 import Axios, { AxiosPromise } from 'axios';
-let axios = Axios.create({
+const axios = Axios.create({
   baseURL: '/api',
 });
 
@@ -183,7 +183,7 @@ If you are familiar with the client-code generators for the Swagger / OpenAPI st
 
 There are few issues with that tool that we wanted to address in the development of `swaggie`:
 
-- Very big package, which takes around **134 MB** of space. That's because NSwag is written in dotnet core (and distributed over NPM). Current NSwag stats:
+- Very big package, which takes around **130 MB** of space. That's because NSwag is written in dotnet core (and distributed over NPM). Current NSwag stats:
   ![nswag size](https://packagephobia.now.sh/badge?p=nswag)
 - Slow
 - Contributing to the NSwag codebase is quite hard and complicated (as the code generator is just one of many NSwag functionalities)

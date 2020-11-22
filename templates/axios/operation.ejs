@@ -1,7 +1,6 @@
   /**<% parameters.forEach(function(parameter) { %>
    * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
 <% }); %>
-   * @return Success
    */
   <%- name -%>(<% parameters.forEach(function(parameter) { -%>
   <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,

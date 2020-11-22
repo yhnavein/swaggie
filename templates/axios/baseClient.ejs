@@ -8,18 +8,9 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-import Axios, { AxiosPromise, AxiosRequestConfig } from "axios";
+import Axios, { AxiosPromise } from "axios";
 
-// default axios instance
-let axios = Axios.create({
-  baseURL: '/api',
+const axios = Axios.create({
+  baseURL: '<%- baseUrl || '' -%>',
 });
-
-/**
- * Execute this function if you need to customize axios instance
- * with a custom baseURL or other axios configuration
- */
-export function initializeApi(config: AxiosRequestConfig) {
-  axios = Axios.create(config);
-}
 

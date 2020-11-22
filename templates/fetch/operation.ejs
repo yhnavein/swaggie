@@ -1,13 +1,13 @@
   /**<% parameters.forEach(function(parameter) { %>
    * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
 <% }); %>
-   * @return Success
    */
   <%- name -%>(<% parameters.forEach(function(parameter) { -%>
   <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
     <% }); -%>
+    $config?: RequestInit
   ): Promise<<%- returnType -%>> {
-    let url = this.baseUrl + '<%- url -%>?';
+    let url = defaults.baseUrl + '<%- url -%>?';
 <%_ if(pathParams && pathParams.length > 0) {
   pathParams.forEach(function(parameter) { -%>
     url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
@@ -37,5 +37,6 @@
     <% }); -%>
       },
 <%_ } _%>
+      ...$config,
     }).then((response) => response.json() as Promise<<%- returnType -%>>);
-  }
+  },

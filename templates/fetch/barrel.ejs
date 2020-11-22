@@ -1,3 +1,4 @@
+
 function serializeQueryParam(obj: any) {
   if (obj === null || obj === undefined) return '';
   if (obj instanceof Date) return encodeURIComponent(obj.toJSON());
@@ -6,3 +7,4 @@ function serializeQueryParam(obj: any) {
     .reduce((a: any, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
     .join('&');
 }
+
