@@ -1,17 +1,3 @@
-<%_ if(reactContexts) { _%>
-
-export const clients = {
-  <%_ clients.forEach(function(client) { _%>
-    <%- client.varName %>: new <%- client.className %>(),
-  <%_ }); _%>
-};
-
-export const ClientContext = React.createContext(clients);
-
-export function useClient() {
-  return useContext(ClientContext);
-}
-<%_ } _%>
 
 function serializeQueryParam(obj: any) {
   if (obj === null || obj === undefined) return '';
@@ -21,3 +7,4 @@ function serializeQueryParam(obj: any) {
     .reduce((a: any, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
     .join('&');
 }
+

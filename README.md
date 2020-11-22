@@ -43,7 +43,6 @@ Options:
   -t, --template <string>  Template used forgenerating API client. Default: "axios"
   -o, --out <path>         The path to the file where the API would be generated
   -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
-  -r, --reactHooks <bool>  Generate additional context that can be consumed in your application more easily. Requires React Hooks. Default: false
   --preferAny              Use "any" type instead of "unknown". Default: false
   --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ''
   --queryModels <bool>     Generate models for query string instead list of parameters. Default: false
@@ -76,7 +75,6 @@ Sample configuration looks like this:
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "axios",
   "baseUrl": "/api",
-  "reactHooks": true,
   "preferAny": true,
   "servicePrefix": "",
   "queryModels": true,
@@ -90,7 +88,7 @@ The following templates are bundled with Swaggie:
 
 ```
 axios     Default template. Recommended for React / Vue / similar frameworks. Uses axios
-fetch     Template similar to axios, but uses fetch instead. Recommended for React / Vue / similar frameworks
+fetch     Template similar to axios, but with fetch API instead. Recommended for React / Vue / similar frameworks
 ng1       Template for Angular 1 (this is for the old one)
 ng2       Template for Angular 2+ (uses HttpClient, InjectionTokens, etc)
 ```
@@ -104,37 +102,24 @@ swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore --te
 ### Code
 
 ```javascript
-const swaggie = require('swaggie')
-swaggie.genCode({
-  src: 'http://petstore.swagger.io/v2/swagger.json',
-  out: './api/petstore.ts',
-  reactHooks: true
-})
-.then(complete, error)
+const swaggie = require('swaggie');
+swaggie
+  .genCode({
+    src: 'http://petstore.swagger.io/v2/swagger.json',
+    out: './api/petstore.ts',
+  })
+  .then(complete, error);
 
 function complete(spec) {
-  console.info('Service generation complete')
+  console.info('Service generation complete');
 }
 
 function error(e) {
-  console.error(e.toString())
+  console.error(e.toString());
 }
 ```
 
 ## Usage – Integrating into your project
-
-### Using React Hooks Contexts
-
-If you pass `-r` or `--reactHooks` parameter then additional React Contexts will be generated for you in the barrel file.
-
-With that consuming generated Clients can be as easy as:
-
-```javascript
-import { useClient } from '../api-client';
-
-export const YourLovelyComponent: React.FC = () => {
-  const { authClient, petClient } = useClient();
-```
 
 ## Example
 
@@ -151,21 +136,20 @@ swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./api/petstore.ts && p
 ```typescript
 // ./api/petstore.ts
 
-import axios, { AxiosPromise } from 'axios';
+import Axios, { AxiosPromise } from 'axios';
+const axios = Axios.create({
+  baseURL: '/api',
+});
 
-export class petClient {
-  private baseUrl: string;
+/** [...] **/
 
-  constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || '';
-  }
-
+export const petClient = {
   /**
    * @param petId
    * @return Success
    */
   getPetById(petId: number): AxiosPromise<Pet> {
-    let url = this.baseUrl + '/pet/{petId}';
+    let url = '/pet/{petId}';
 
     url = url.replace('{petId}', encodeURIComponent('' + petId));
 
@@ -173,10 +157,10 @@ export class petClient {
       url: url,
       method: 'GET',
     });
-  }
+  },
 
   // ... and other methods ...
-}
+};
 ```
 
 When we have that we can write some domain code and use this auto-generated classes:
@@ -184,11 +168,9 @@ When we have that we can write some domain code and use this auto-generated clas
 ```typescript
 // app.ts
 
-import {petClient} from './api/petClient';
+import { petClient } from './api/petClient';
 
-const petApi = new petClient();
-petApi.getPetById(123)
-  .then(pet => console.log('Pet: ', pet));
+petClient.getPetById(123).then((pet) => console.log('Pet: ', pet));
 ```
 
 If Petstore owners decide to remove method we use, then after running `swaggie` again it will no longer be present in the `petClient` class. This will result in the build error, which is very much appreciated at this stage.
@@ -201,9 +183,9 @@ If you are familiar with the client-code generators for the Swagger / OpenAPI st
 
 There are few issues with that tool that we wanted to address in the development of `swaggie`:
 
-* Very big package, which takes around **134 MB** of space. That's because NSwag is written in dotnet core (and distributed over NPM). Current NSwag stats:
-![nswag size](https://packagephobia.now.sh/badge?p=nswag)
-* Slow
-* Contributing to the NSwag codebase is quite hard and complicated (as the code generator is just one of many NSwag functionalities)
-* NSwag generates A LOT of code, which is not perfect as the generated code will be at some point part of the web app bundle. And we need to make it as small as possible
-* We plan to implement fun features in future and lightweight templates for other frontend frameworks, which is not feasible in NSwag
+- Very big package, which takes around **130 MB** of space. That's because NSwag is written in dotnet core (and distributed over NPM). Current NSwag stats:
+  ![nswag size](https://packagephobia.now.sh/badge?p=nswag)
+- Slow
+- Contributing to the NSwag codebase is quite hard and complicated (as the code generator is just one of many NSwag functionalities)
+- NSwag generates A LOT of code, which is not perfect as the generated code will be at some point part of the web app bundle. And we need to make it as small as possible
+- We plan to implement fun features in future and lightweight templates for other frontend frameworks, which is not feasible in NSwag

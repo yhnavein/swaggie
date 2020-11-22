@@ -28,7 +28,7 @@
         },
         "reactHooks": {
           "default": false,
-          "description": "Generate additional context that can be consumed in your application more easily. Requires React Hooks in your app.",
+          "description": "[OBSOLETE] This option will be removed in Swaggie v0.6",
           "type": "boolean"
         },
         "preferAny": {

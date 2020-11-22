@@ -74,7 +74,6 @@ describe('runCodeGenerator', () => {
     expect(conf).toBeDefined();
     expect(conf.baseUrl).toBe('https://google.pl');
     expect(conf.src).toBe('https://petstore.swagger.io/v2/swagger.json');
-    expect(conf.reactHooks).toBe(true);
   });
 
   it('makes inline parameters higher priority than from config file', async () => {
@@ -82,13 +81,11 @@ describe('runCodeGenerator', () => {
       config: './test/sample-config.json',
       baseUrl: 'https://wp.pl',
       src: './test/petstore.yml',
-      reactHooks: false,
     };
     const conf = await applyConfigFile(parameters as any);
     expect(conf).toBeDefined();
     expect(conf.baseUrl).toBe('https://wp.pl');
     expect(conf.src).toBe('./test/petstore.yml');
-    expect(conf.reactHooks).toBe(false);
   });
 
   it('fails when OpenAPI3 is provided', () => {

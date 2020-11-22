@@ -8,7 +8,9 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-<%_ if(reactContexts) { _%>
-import React, { useContext } from 'react';
-<%_ } _%>
-import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
+import Axios, { AxiosPromise, AxiosRequestConfig } from "axios";
+
+export const axios = Axios.create({
+  baseURL: '<%- baseUrl || '' -%>',
+});
+

@@ -8,6 +8,7 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-<%_ if(reactContexts) { _%>
-import React, { useContext } from 'react';
-<%_ } _%>
+export const defaults = {
+  baseUrl: '<%- baseUrl || '' -%>',
+};
+

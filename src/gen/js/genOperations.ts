@@ -21,8 +21,8 @@ export default function genOperations(
 ) {
   const groups = groupOperationsByGroupName(operations);
   let result = renderFile('baseClient.ejs', {
-    reactContexts: options.reactHooks || false,
     servicePrefix: options.servicePrefix || '',
+    baseUrl: options.baseUrl,
   });
   let queryDefinitions = {} as IQueryDefinitions;
 
@@ -60,6 +60,7 @@ function prepareClient(
   return [
     {
       clientName: name,
+      varName: camelCase(name),
       operations: preparedOperations,
       baseUrl: options.baseUrl,
     },

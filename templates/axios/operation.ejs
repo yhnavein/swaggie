@@ -1,14 +1,13 @@
   /**<% parameters.forEach(function(parameter) { %>
    * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
 <% }); %>
-   * @return Success
    */
   <%- name -%>(<% parameters.forEach(function(parameter) { -%>
   <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
     <% }); -%>
   $config?: AxiosRequestConfig
   ): AxiosPromise<<%- returnType -%>> {
-    let url = this.baseUrl + '<%- url -%>';
+    let url = '<%- url -%>';
 
 <%_ if(pathParams && pathParams.length > 0) {
   pathParams.forEach(function(parameter) { -%>
@@ -56,4 +55,4 @@
 <%_ } _%>
       ...$config,
     });
-  }
+  },

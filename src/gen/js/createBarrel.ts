@@ -10,7 +10,6 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
   }
 
   const viewData = {
-    reactContexts: clientOptions.reactHooks || false,
     servicePrefix: clientOptions.servicePrefix || '',
     clients: files
       .filter((c) => c)
