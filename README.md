@@ -4,7 +4,7 @@
 
 # Swaggie
 
-[![Build Status](https://travis-ci.org/yhnavein/swaggie.svg?branch=master)](https://travis-ci.org/yhnavein/swaggie)
+![NodeCI](https://github.com/yhnavein/swaggie/workflows/NodeCI/badge.svg)
 [![CircleCI](https://circleci.com/gh/yhnavein/swaggie.svg?style=svg)](https://circleci.com/gh/yhnavein/swaggie)
 ![Dependencies](https://img.shields.io/david/yhnavein/swaggie.svg)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/yhnavein/swaggie.svg)
