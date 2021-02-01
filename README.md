@@ -181,11 +181,13 @@ Without this approach, the error would be spotted by our end-user and he/she wou
 
 If you are familiar with the client-code generators for the Swagger / OpenAPI standards then you might wonder why `swaggie` is better than existing tools. Currently the most popular alternative is an open-source `NSwag`.
 
-There are few issues with that tool that we wanted to address in the development of `swaggie`:
+Quick comparison table:
 
-- Very big package, which takes around **130 MB** of space. That's because NSwag is written in dotnet core (and distributed over NPM). Current NSwag stats:
-  ![nswag size](https://packagephobia.now.sh/badge?p=nswag)
-- Slow
-- Contributing to the NSwag codebase is quite hard and complicated (as the code generator is just one of many NSwag functionalities)
-- NSwag generates A LOT of code, which is not perfect as the generated code will be at some point part of the web app bundle. And we need to make it as small as possible
-- We plan to implement fun features in future and lightweight templates for other frontend frameworks, which is not feasible in NSwag
+| swaggie                                                         | NSwag                                                       |
+| --------------------------------------------------------------- | ----------------------------------------------------------- |
+| - Written in node.js                                            | - Written in .NET                                           |
+| - Fast                                                          | - Slow                                                      |
+| - ![swaggie size](https://packagephobia.now.sh/badge?p=swaggie) | - ![nswag size](https://packagephobia.now.sh/badge?p=nswag) |
+| - Easy to contribute to                                         | - Contributing hard                                         |
+| - Lightweight                                                   | - Complicated templates                                     |
+| - Only features generating API clients for TS/JS                | - Many more features (but mostly for .NET apps)             |

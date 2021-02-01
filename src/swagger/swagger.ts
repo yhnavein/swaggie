@@ -43,7 +43,7 @@ function readLocalFile(filePath: string): Promise<string> {
 }
 
 function parseFileContents(contents: string, path: string): object {
-  return /.ya?ml$/i.test(path) ? YAML.safeLoad(contents) : JSON.parse(contents);
+  return /.ya?ml$/i.test(path) ? YAML.load(contents) : JSON.parse(contents);
 }
 
 function formatSpec(spec: ApiSpec, src?: string, options?: SpecOptions): ApiSpec {
