@@ -1,5 +1,6 @@
 import YAML from 'js-yaml';
-import httpClient from 'got';
+import fetch from 'node-fetch';
+// import httpClient from 'got';
 
 export interface SpecOptions {
   /**
@@ -31,8 +32,8 @@ function loadFile(src: string): Promise<ApiSpec | any> {
 }
 
 function loadFromUrl(url: string) {
-  return httpClient(url)
-    .then((resp) => resp.body)
+  return fetch(url)
+    .then((resp) => resp.text())
     .then((contents) => parseFileContents(contents, url));
 }
 
