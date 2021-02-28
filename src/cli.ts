@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 // tslint:disable: max-line-length
 
-import program from 'commander';
+import { Command } from 'commander';
 import chalk from 'chalk';
+
 import { runCodeGenerator } from './index';
 
-const args: any = program
+const program = new Command();
+program
   // tslint:disable-next-line:no-var-requires
   .version(require('../package.json').version)
   .option(
@@ -38,10 +40,13 @@ const args: any = program
   .option(
     '--queryModels',
     'Generate models for query string instead list of parameters. Default: false'
-  )
-  .parse(process.argv);
+  );
 
-runCodeGenerator(args).then(complete, error);
+program.parse(process.argv);
+
+const options = program.opts() as FullAppOptions;
+
+runCodeGenerator(options).then(complete, error);
 
 function complete(spec: ApiSpec) {
   process.exit(0);

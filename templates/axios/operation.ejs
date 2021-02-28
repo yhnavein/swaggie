@@ -19,7 +19,7 @@
   <%_ formData.forEach(function(parameter) { -%>
     if (!!<%- parameter.name -%>) {
     <%_ if(parameter.original && parameter.original.type === 'array') { -%>
-      <%- parameter.name -%>.forEach(f => formDataBody.append("<%- parameter.originalName -%>", f));
+      <%- parameter.name -%>.forEach((f: any) => formDataBody.append("<%- parameter.originalName -%>", f));
     <%_ } else { %>
       formDataBody.append("<%- parameter.originalName -%>", <%- parameter.name -%>);
     <%_ } %>

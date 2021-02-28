@@ -1,6 +1,7 @@
-import genJsCode from './gen/js';
 import fs from 'fs';
 import chalk from 'chalk';
+
+import genJsCode from './gen/js';
 
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
