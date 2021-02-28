@@ -1,6 +1,5 @@
 import YAML from 'js-yaml';
 import fetch from 'node-fetch';
-// import httpClient from 'got';
 
 export interface SpecOptions {
   /**
@@ -116,7 +115,6 @@ export function expandRefs(data: any, lookup: object, options: SpecOptions): any
     }
     dataCache.add(data);
 
-    // tslint:disable-next-line:forin prefer-const
     for (let name in data) {
       data[name] = expandRefs(data[name], lookup, options);
     }

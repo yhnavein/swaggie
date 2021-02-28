@@ -26,7 +26,6 @@ export default function genOperations(
   });
   let queryDefinitions = {} as IQueryDefinitions;
 
-  // tslint:disable-next-line:forin prefer-const
   for (let name in groups) {
     const group = groups[name];
     const [clientData, clientQueryDefinitions] = prepareClient(

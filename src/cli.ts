@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// tslint:disable: max-line-length
 
 import { Command } from 'commander';
 import chalk from 'chalk';
@@ -8,7 +7,6 @@ import { runCodeGenerator } from './index';
 
 const program = new Command();
 program
-  // tslint:disable-next-line:no-var-requires
   .version(require('../package.json').version)
   .option(
     '-c, --config <path>',
