@@ -1,5 +1,5 @@
 import YAML from 'js-yaml';
-import httpClient from 'got';
+import fetch from 'node-fetch';
 
 export interface SpecOptions {
   /**
@@ -31,8 +31,8 @@ function loadFile(src: string): Promise<ApiSpec | any> {
 }
 
 function loadFromUrl(url: string) {
-  return httpClient(url)
-    .then((resp) => resp.body)
+  return fetch(url)
+    .then((resp) => resp.text())
     .then((contents) => parseFileContents(contents, url));
 }
 
@@ -115,7 +115,6 @@ export function expandRefs(data: any, lookup: object, options: SpecOptions): any
     }
     dataCache.add(data);
 
-    // tslint:disable-next-line:forin prefer-const
     for (let name in data) {
       data[name] = expandRefs(data[name], lookup, options);
     }

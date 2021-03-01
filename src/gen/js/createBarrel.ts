@@ -4,7 +4,6 @@ import { renderFile } from '../templateManager';
 export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): string {
   const files = [];
 
-  // tslint:disable-next-line:forin prefer-const
   for (let name in clients) {
     files.push(name);
   }
