@@ -12,6 +12,7 @@ yarn.lock
 yarn-error.log
 package-lock.json
 swaggie.svg
+etsc.config.js
 
 .tmp/
 test/api*.json
