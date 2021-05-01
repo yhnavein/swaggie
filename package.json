@@ -23,7 +23,8 @@
     "swaggie": "dist/cli.js"
   },
   "scripts": {
-    "build": "sucrase ./src -d ./dist --transforms typescript,imports",
+    "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests",
+    "rm-tests": "find dist/ -name '*.spec.js' -type f -delete",
     "test": "jest --ci",
     "test:watch": "jest --watch"
   },
