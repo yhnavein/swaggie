@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
-  "out": "./dist/test1",
+  "out": "./.tmp/test1",
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "axios",
   "baseUrl": "https://google.pl",

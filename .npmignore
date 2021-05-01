@@ -12,4 +12,5 @@ yarn-error.log
 package-lock.json
 swaggie.svg
 
+.tmp/
 test/api*.json

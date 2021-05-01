@@ -11,7 +11,7 @@ describe('runCodeGenerator', () => {
 
   it('fails with only --out provided', () => {
     const parameters = {
-      out: './dist/test/',
+      out: './.tmp/test/',
     };
 
     return runCodeGenerator(parameters as any).catch((e) =>
@@ -32,7 +32,7 @@ describe('runCodeGenerator', () => {
   it('works with --out and --src provided', () => {
     const parameters = {
       src: 'http://petstore.swagger.io/v2/swagger.json',
-      out: './dist/test/',
+      out: './.tmp/test/',
     };
 
     return expect(runCodeGenerator(parameters as any)).resolves.toBeDefined();
