@@ -26,11 +26,6 @@
           "description": "Base URL that will be used as a default value in the clients",
           "type": "string"
         },
-        "reactHooks": {
-          "default": false,
-          "description": "[OBSOLETE] This option will be removed in Swaggie v0.6",
-          "type": "boolean"
-        },
         "preferAny": {
           "default": false,
           "description": "Use `any` type instead of `unknown`",

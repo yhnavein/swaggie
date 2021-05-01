@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
-  "out": "./dist/swagger-test/petstore.ts",
+  "out": "./.tmp/swagger-test/petstore.ts",
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "ng2",
   "preferAny": true,
