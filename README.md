@@ -177,6 +177,14 @@ If Petstore owners decide to remove method we use, then after running `swaggie` 
 
 Without this approach, the error would be spotted by our end-user and he/she would not appreciate it at all!
 
+## Server config
+
+You might wonder how to set up server to fully utilize Swaggie's features. For that I've added a `samples/` folder with sample configurations.
+
+[ASP.NET Core + Nswag](./samples/dotnetcore/nswag/README.md)
+
+Server is not necessary to use Swaggie. Swaggie cares only about the JSON file with the Open API spec, but for your development purpose you might want to have a server that can serve this file automatically from the actual endpoints.
+
 ## Notes
 
 If you are familiar with the client-code generators for the Swagger / OpenAPI standards then you might wonder why `swaggie` is better than existing tools. Currently the most popular alternative is an open-source `NSwag`.

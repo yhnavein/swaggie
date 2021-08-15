@@ -52,6 +52,9 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+# Dotnet
+obj/
+bin/
 
 # Custom
 dist/
