@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import chalk from 'chalk';
+import { red } from 'nanocolors';
 
 import { runCodeGenerator } from './index';
 
@@ -52,6 +52,6 @@ function complete(spec: ApiSpec) {
 
 function error(e) {
   const msg = e instanceof Error ? e.message : e;
-  console.error(chalk.red(msg));
+  console.error(red(msg));
   process.exit(1);
 }
