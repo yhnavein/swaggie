@@ -21,7 +21,7 @@
     <%_ if(parameter.original && parameter.original.type === 'array') { -%>
       <%- parameter.name -%>.forEach((f: any) => formDataBody.append("<%- parameter.originalName -%>", f));
     <%_ } else { %>
-      formDataBody.append("<%- parameter.originalName -%>", <%- parameter.name -%>);
+      formDataBody.append("<%- parameter.originalName -%>", <%- parameter.name -%><%- parameter.type !== 'string' ? '.toString()' : '' -%>);
     <%_ } %>
     }
 <% });

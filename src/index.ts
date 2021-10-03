@@ -1,5 +1,5 @@
 import fs from 'fs';
-import chalk from 'chalk';
+import { bold, cyan } from 'nanocolors';
 
 import genJsCode from './gen/js';
 
@@ -15,7 +15,7 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
         .then((spec) => gen(spec, options))
         .then(() => {
           console.info(
-            chalk.bold.cyan(`Api from ${options.src} code generated into ${options.out}`)
+            cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`)
           );
           return true;
         })
