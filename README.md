@@ -4,14 +4,15 @@
 
 # Swaggie
 
+![npm latest version](https://img.shields.io/npm/v/swaggie)
 ![NodeCI](https://github.com/yhnavein/swaggie/workflows/NodeCI/badge.svg)
 [![CircleCI](https://circleci.com/gh/yhnavein/swaggie.svg?style=svg)](https://circleci.com/gh/yhnavein/swaggie)
-![Dependencies](https://img.shields.io/david/yhnavein/swaggie.svg)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/yhnavein/swaggie.svg)
 ![npm downloads](https://img.shields.io/npm/dw/swaggie.svg)
-![npm latest version](https://img.shields.io/npm/v/swaggie)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
 ![npm install size](https://packagephobia.now.sh/badge?p=swaggie)
+
+<!-- ![Dependencies](https://img.shields.io/david/yhnavein/swaggie.svg) -->
 
 Generate ES6 or Typescript code from an OpenAPI 2.0 spec, so that accessing REST API resources from the client code is less error-prone, static-typed and just easier to use long-term.
 
@@ -183,7 +184,9 @@ You might wonder how to set up server to fully utilize Swaggie's features. For t
 
 [ASP.NET Core + Nswag](./samples/dotnetcore/nswag/README.md)
 
-Server is not necessary to use Swaggie. Swaggie cares only about the JSON file with the Open API spec, but for your development purpose you might want to have a server that can serve this file automatically from the actual endpoints.
+[ASP.NET Core + Swashbuckle](./samples/dotnetcore/swashbuckle/README.md)
+
+Server is not necessary to use Swaggie. Swaggie cares only about the JSON/yaml file with the Open API spec, but for your development purpose you might want to have a server that can serve this file automatically from the actual endpoints.
 
 ## Notes
 
