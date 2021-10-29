@@ -89,3 +89,11 @@ export interface UserViewModel {
   role?: UserRole;
 }
 ```
+
+## Auto generating Swagger on the build
+
+With Swashbuckle it is possible to generate Swagger JSON files automatically on the build.
+Whenever API is built Swagger definitions are regenerated and saved on the disk.
+Please take a look on the `PostBuild` task in `Swaggie.Swashbuckle/Swaggie.Swashbuckle.csproj` to see how it works.
+
+The benefits from this approach are that it's much faster and you don't have to have an API running to be able to use Swaggie.
