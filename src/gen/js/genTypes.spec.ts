@@ -82,7 +82,7 @@ describe('genTypes', () => {
     });
   });
 
-  describe('enums', () => {
+  describe('x-enums', () => {
     it(`should handle number-based x-enums correctly`, () => {
       const res = genTypes(
         emptySpec,

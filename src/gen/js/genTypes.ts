@@ -176,10 +176,11 @@ function renderTsInheritance(name: string, allOf: any[], options: ClientOptions)
   const ref = allOf[0];
   const parentName = ref.$ref.split('/').pop();
   const lines = renderTsType(name, allOf[1], options);
-  if (lines[0].startsWith('export interface')) {
-    lines.shift();
+  const interfaceLineIndex = lines.findIndex((l) => l.indexOf('export interface') === 0);
+  if (interfaceLineIndex > -1) {
+    // Let's replace generic interface definition with more specific one with inheritance info
+    lines[interfaceLineIndex] = `export interface ${name} extends ${parentName} {`;
   }
-  lines.unshift(`export interface ${name} extends ${parentName} {`);
   return lines;
 }
 
