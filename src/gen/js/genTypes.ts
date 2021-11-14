@@ -1,6 +1,6 @@
-import { join } from '../util';
-import { DOC, SP, getDocType, getTSParamType } from './support';
 import { uniq, set } from 'lodash';
+import { join } from '../util';
+import { getTSParamType } from './support';
 import { IQueryDefinitions } from './models';
 
 export default function genTypes(
@@ -56,10 +56,9 @@ function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: strin
 
   const lines = [];
   if (def.description) {
-    lines.push(`/**`);
-    lines.push(DOC + def.description.trim().replace(/\n/g, `\n${DOC}${SP}`));
-    lines.push(` */`);
+    lines.push(renderComment(def.description));
   }
+
   if (!!def['x-enumNames']) {
     lines.push(renderXEnumType(name, def));
     return lines;
@@ -90,8 +89,7 @@ function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: strin
     join(lines, requiredPropLines);
     join(lines, optionalPropLines);
   }
-  lines.push('}');
-  lines.push('');
+  lines.push('}\n');
   return lines;
 }
 
@@ -198,48 +196,11 @@ function renderTsTypeProp(
     type = type.replace(typeToBeGeneric, 'T');
   }
   if (info.description) {
-    lines.push(`${SP}/**`);
-    lines.push(
-      `${SP}${DOC}` + (info.description || '').trim().replace(/\n/g, `\n${SP}${DOC}${SP}`)
-    );
-    lines.push(`${SP} */`);
+    lines.push(renderComment(info.desciption));
   }
   const req = required ? '' : '?';
-  lines.push(`${SP}${prop}${req}: ${type};`);
-  return lines;
-}
+  lines.push(`  ${prop}${req}: ${type};`);
 
-function renderTypeDoc(name: string, def: any): string[] {
-  if (def.allOf) {
-    return renderDocInheritance(name, def.allOf);
-  }
-  if (def.type !== 'object') {
-    console.warn(`Unable to render ${name} ${def.type}, skipping.`);
-    return [];
-  }
-
-  const lines = ['/**', `${DOC}@typedef ${name}`];
-  const req = def.required || [];
-  const propLines = Object.keys(def.properties).map((prop) => {
-    const info = def.properties[prop];
-    const description = (info.description || '').trim().replace(/\n/g, `\n${DOC}${SP}`);
-    return `${DOC}@property {${getDocType(info)}} ${prop} ${description}`;
-  });
-  if (propLines.length) {
-    lines.push(`${DOC}`);
-  }
-  join(lines, propLines);
-  lines.push(' */');
-  lines.push('');
-  return lines;
-}
-
-function renderDocInheritance(name: string, allOf: any[]) {
-  verifyAllOf(name, allOf);
-  const ref = allOf[0];
-  const parentName = ref.$ref.split('/').pop();
-  const lines = renderTypeDoc(name, allOf[1]);
-  lines.splice(3, 0, `${DOC}@extends ${parentName}`);
   return lines;
 }
 
@@ -276,4 +237,18 @@ function unwrapDefinitions(definitions: any) {
   }
 
   return result;
+}
+
+export function renderComment(comment: string) {
+  if (!comment) {
+    return null;
+  }
+
+  const commentLines = comment.split('\n');
+
+  if (commentLines.length === 1) {
+    return '// ' + comment.trim();
+  }
+
+  return ' /**\n' + commentLines.map((line) => '  * ' + line.trim()).join('\n') + '\n  */';
 }

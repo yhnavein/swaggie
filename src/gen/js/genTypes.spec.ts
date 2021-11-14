@@ -1,4 +1,4 @@
-import genTypes, { renderQueryStringParameters } from './genTypes';
+import genTypes, { renderQueryStringParameters, renderComment } from './genTypes';
 
 const emptySpec: ApiSpec = {
   swagger: '2.0',
@@ -421,6 +421,58 @@ filter?: {
 }`)
     );
     expect(textOnly(res[1])).toBe(textOnly('test: number;'));
+  });
+});
+
+describe('renderComment', () => {
+  it(`it should render proper multiline comment`, () => {
+    const comment = `Quite a lenghty comment
+With at least two lines`;
+    const res = renderComment(comment);
+
+    expect(res).toEqual(` /**
+  * Quite a lenghty comment
+  * With at least two lines
+  */`);
+  });
+
+  it(`it should render proper multiline comment with trimming`, () => {
+    const comment = `   Quite a lenghty comment
+   With at least two lines    `;
+    const res = renderComment(comment);
+
+    expect(res).toEqual(` /**
+  * Quite a lenghty comment
+  * With at least two lines
+  */`);
+  });
+
+  it(`it should render proper one-line comment`, () => {
+    const comment = `One liner`;
+    const res = renderComment(comment);
+
+    expect(res).toEqual(`// One liner`);
+  });
+
+  it(`it should render proper one-line comment with trimming`, () => {
+    const comment = `   One liner   `;
+    const res = renderComment(comment);
+
+    expect(res).toEqual(`// One liner`);
+  });
+
+  it(`it should handle null comment`, () => {
+    const comment = null;
+    const res = renderComment(comment);
+
+    expect(res).toBeNull();
+  });
+
+  it(`it should handle empty comment`, () => {
+    const comment = '';
+    const res = renderComment(comment);
+
+    expect(res).toBeNull();
   });
 });
 
