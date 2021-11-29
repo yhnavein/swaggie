@@ -1,0 +1,14 @@
+export const <%- varName -%>Client = {
+  <% operations.forEach(function(operation) { %>
+<%- include('operation', operation); %>
+  <% }); %>
+};
+
+<% if(operations.some(function(o) { return o.method == 'GET'; })) { %>
+/** Custom SWR hooks for GET requests */
+  <% operations.forEach(function(operation) {
+  var customName = "use" + clientName + operation.name;
+  var swrOperation = Object.assign({ swrOpName: customName }, operation); %>
+<%- include('swrOperation', swrOperation); %>
+  <% }); %>
+<% } %>

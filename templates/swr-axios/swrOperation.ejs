@@ -1,0 +1,51 @@
+  /**<% parameters.forEach(function(parameter) { %>
+   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
+<% }); %>
+   */
+export function <%- swrOpName -%>(<% parameters.forEach(function(parameter) { -%>
+  <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
+    <% }); -%>
+  $config?: SwrConfig
+  ) {
+  let url = '<%- url -%>';
+  const { axios: $axiosConf, ...config } = $config || {};
+
+<%_ if(pathParams && pathParams.length > 0) {
+  pathParams.forEach(function(parameter) { -%>
+    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+<% });
+} _%>
+
+  const { data, error } = useSWR<<%- returnType -%>>(
+    url,
+    () => axios.request({
+      url: url,
+      method: '<%- method -%>',
+<%_ if(query && query.length > 0) { _%>
+      params: {
+        <% query.forEach(function(parameter) { -%>
+    '<%- parameter.originalName -%>': serializeQueryParam(<%- parameter.name -%>),
+    <% }); -%>
+      },
+<%_ } _%>
+<%_ if(headers && headers.length > 0) { _%>
+      headers: {
+        <% headers.forEach(function(parameter) { -%>
+    <%_ if (parameter.value) { _%>
+    '<%- parameter.originalName -%>': '<%- parameter.value -%>',
+    <%_ } else { _%>
+    '<%- parameter.originalName -%>': <%- parameter.name -%>,
+    <%_ } _%>
+    <% }); -%>
+      },
+<%_ } _%>
+    ...$axiosConf})
+    .then((resp) => resp.data),
+  config);
+
+  return {
+    data,
+    isLoading: !error && !data,
+    error: error,
+  };
+}
