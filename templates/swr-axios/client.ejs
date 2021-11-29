@@ -4,10 +4,15 @@ export const <%- varName -%>Client = {
   <% }); %>
 };
 
-<% if(operations.some(function(o) { return o.method == 'GET'; })) { %>
-/** Custom SWR hooks for GET requests */
-  <% operations.forEach(function(operation) {
-  var customName = "use" + clientName + operation.name;
+<% var getOperations = operations.filter(function(o) { return o.method == 'GET'; });
+if(getOperations.length > 0) { %>
+  <% getOperations.forEach(function(operation) {
+  var opName = operation.name;
+  if(opName.toLowerCase().startsWith("get")) {
+    opName = opName.substring(3);
+  }
+  opName[0] = opName[0].toUpperCase();
+  var customName = "use" + clientName + opName;
   var swrOperation = Object.assign({ swrOpName: customName }, operation); %>
 <%- include('swrOperation', swrOperation); %>
   <% }); %>
