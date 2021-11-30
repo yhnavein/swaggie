@@ -2,6 +2,7 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import * as ejs from 'ejs';
+import { expect } from 'chai';
 import { loadAllTemplateFiles, renderFile } from './templateManager';
 
 const GOOD_FILE = 'client.ejs';
@@ -11,26 +12,26 @@ describe('loadAllTemplateFiles', () => {
   it('should load all template files to the memory', async () => {
     loadAllTemplateFiles('axios');
 
-    expect(ejs.cache).toBeDefined();
-    expect(ejs.cache.get(GOOD_FILE)).toBeInstanceOf(Function);
+    expect(ejs.cache).to.be.ok;
+    expect(ejs.cache.get(GOOD_FILE)).to.be.a('function');
   });
 
   it('should handle loading wrong template', async () => {
     expect(() => {
       loadAllTemplateFiles('non-existent');
-    }).toThrowError('Could not found');
+    }).to.throw('Could not found');
   });
 
   it('should handle empty template name', async () => {
     expect(() => {
       loadAllTemplateFiles('');
-    }).toThrowError('No template');
+    }).to.throw('No template');
   });
 
   it('should handle null template', async () => {
     expect(() => {
       loadAllTemplateFiles(null);
-    }).toThrowError('No template');
+    }).to.throw('No template');
   });
 
   it('should handle custom template', async () => {
@@ -47,8 +48,8 @@ describe('loadAllTemplateFiles', () => {
 
     loadAllTemplateFiles(tempDir);
 
-    expect(ejs.cache).toBeDefined();
-    expect(ejs.cache.get(GOOD_FILE)).toBeInstanceOf(Function);
+    expect(ejs.cache).to.be.ok;
+    expect(ejs.cache.get(GOOD_FILE)).to.be.a('function');
 
     fs.unlinkSync(path.join(tempDir, 'client.ejs'));
     fs.rmdirSync(tempDir);
@@ -56,16 +57,16 @@ describe('loadAllTemplateFiles', () => {
 
   it('actually clears EJS cache', async () => {
     loadAllTemplateFiles('axios');
-    expect(ejs.cache.get(GOOD_FILE)).toBeDefined();
+    expect(ejs.cache.get(GOOD_FILE)).to.be.ok;
 
     ejs.clearCache();
 
-    expect(ejs.cache.get(GOOD_FILE)).not.toBeDefined();
+    expect(ejs.cache.get(GOOD_FILE)).not.to.be.ok;
   });
 });
 
 describe('render', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     ejs.clearCache();
     loadAllTemplateFiles('axios');
   });
@@ -78,7 +79,7 @@ describe('render', () => {
       operations: [],
     });
 
-    expect(templateFunction).toContain('testClient');
+    expect(templateFunction).to.contain('testClient');
   });
 
   it('should render template that is complex (multiple levels of includes)', async () => {
@@ -102,7 +103,7 @@ describe('render', () => {
       ],
     });
 
-    expect(templateFunction).toContain('testClient');
-    expect(templateFunction).toContain('TestName');
+    expect(templateFunction).to.contain('testClient');
+    expect(templateFunction).to.contain('TestName');
   });
 });

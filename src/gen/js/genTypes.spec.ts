@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import genTypes, { renderQueryStringParameters, renderComment } from './genTypes';
 
 const emptySpec: ApiSpec = {
@@ -16,7 +17,7 @@ describe('genTypes', () => {
   it(`empty definitions is handled properly`, () => {
     const res = genTypes(emptySpec, {}, {} as any);
 
-    expect(res).toBe('');
+    expect(res).to.be.equal('');
   });
 
   describe('enums', () => {
@@ -34,8 +35,8 @@ describe('genTypes', () => {
           {} as any
         );
 
-        expect(res).toBeDefined();
-        expect(res.trim()).toBe(`export type SomeEnum = 0 | 1;`);
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal(`export type SomeEnum = 0 | 1;`);
       });
 
       it(`NSwag's enum should be handled correctly`, () => {
@@ -55,8 +56,8 @@ describe('genTypes', () => {
           {} as any
         );
 
-        expect(res).toBeDefined();
-        expect(res.trim()).toBe(`export enum SomeEnum {
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal(`export enum SomeEnum {
   Active = 0,
   Disabled = 1,
 }`);
@@ -76,8 +77,8 @@ describe('genTypes', () => {
           {} as any
         );
 
-        expect(res).toBeDefined();
-        expect(res.trim()).toBe(`export type SomeEnum = 'Active' | 'Disabled';`);
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal(`export type SomeEnum = 'Active' | 'Disabled';`);
       });
     });
   });
@@ -97,8 +98,8 @@ describe('genTypes', () => {
         {} as any
       );
 
-      expect(res).toBeDefined();
-      expect(res.trim()).toBe(`export enum GrantType {
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(`export enum GrantType {
   None = 0,
   Password = 1,
   External = 2,
@@ -120,8 +121,8 @@ describe('genTypes', () => {
         {} as any
       );
 
-      expect(res).toBeDefined();
-      expect(res.trim()).toBe(`export enum GrantType {
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(`export enum GrantType {
   None = "None",
   Password = "Password",
   External = "External",
@@ -150,8 +151,8 @@ describe('genTypes', () => {
         {} as any
       );
 
-      expect(res).toBeDefined();
-      expect(res.trim()).toBe(`export interface AuthenticationData {
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(`export interface AuthenticationData {
   login?: string;
   password?: string;
 }`);
@@ -177,8 +178,8 @@ describe('genTypes', () => {
         {} as any
       );
 
-      expect(res).toBeDefined();
-      expect(res.trim()).toBe(`export interface AuthenticationData {
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(`export interface AuthenticationData {
   login: string;
   password: string;
 }`);
@@ -207,8 +208,8 @@ describe('genTypes', () => {
         {} as any
       );
 
-      expect(res).toBeDefined();
-      expect(res.trim()).toBe(`export interface PagedAndSortedQuery {
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(`export interface PagedAndSortedQuery {
   sortField?: string;
 }`);
     });
@@ -225,7 +226,7 @@ describe('renderQueryStringParameters', () => {
     };
     const res = renderQueryStringParameters(def, {} as any);
 
-    expect(res).toStrictEqual([]);
+    expect(res).to.deep.equal([]);
   });
 
   it(`one element without dots should work fine`, () => {
@@ -245,9 +246,9 @@ describe('renderQueryStringParameters', () => {
     };
     const res = renderQueryStringParameters(def, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res.length).toBe(1);
-    expect(res[0]).toContain('page?: number;');
+    expect(res).to.be.ok;
+    expect(res.length).to.eq(1);
+    expect(res[0]).to.contain('page?: number;');
   });
 
   it(`one element in dot notation should work fine`, () => {
@@ -267,9 +268,9 @@ describe('renderQueryStringParameters', () => {
     };
     const res = renderQueryStringParameters(def, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res.length).toBe(1);
-    expect(textOnly(res[0])).toBe(textOnly('parameters?: {page?: number; }'));
+    expect(res).to.be.ok;
+    expect(res.length).to.eq(1);
+    expect(textOnly(res[0])).to.be.equal(textOnly('parameters?: {page?: number; }'));
   });
 
   it(`two elements in dot notation should work fine`, () => {
@@ -296,8 +297,10 @@ describe('renderQueryStringParameters', () => {
     };
     const res = renderQueryStringParameters(def, {} as any);
 
-    expect(res).toBeDefined();
-    expect(textOnly(res[0])).toBe(textOnly('parameters?: {page?: number; count?: number; }'));
+    expect(res).to.be.ok;
+    expect(textOnly(res[0])).to.be.equal(
+      textOnly('parameters?: {page?: number; count?: number; }')
+    );
   });
 
   it(`four elements in dot notation should work fine`, () => {
@@ -338,10 +341,12 @@ describe('renderQueryStringParameters', () => {
     };
     const res = renderQueryStringParameters(def, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res.length).toBe(2);
-    expect(textOnly(res[0])).toBe(textOnly('parameters?: {page?: number; count?: number; }'));
-    expect(textOnly(res[1])).toBe(textOnly('else?: {page?: number; count?: number; }'));
+    expect(res).to.be.ok;
+    expect(res.length).to.eq(2);
+    expect(textOnly(res[0])).to.be.equal(
+      textOnly('parameters?: {page?: number; count?: number; }')
+    );
+    expect(textOnly(res[1])).to.be.equal(textOnly('else?: {page?: number; count?: number; }'));
   });
 
   it(`crazy case #1`, () => {
@@ -406,9 +411,9 @@ describe('renderQueryStringParameters', () => {
     };
     const res = renderQueryStringParameters(def, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res.length).toBe(2);
-    expect(textOnly(res[0])).toBe(
+    expect(res).to.be.ok;
+    expect(res.length).to.eq(2);
+    expect(textOnly(res[0])).to.be.equal(
       textOnly(`parameters?: {
 filter?: {
   countryName?: string;
@@ -420,7 +425,7 @@ filter?: {
   count?: number;
 }`)
     );
-    expect(textOnly(res[1])).toBe(textOnly('test: number;'));
+    expect(textOnly(res[1])).to.be.equal(textOnly('test: number;'));
   });
 });
 
@@ -430,7 +435,7 @@ describe('renderComment', () => {
 With at least two lines`;
     const res = renderComment(comment);
 
-    expect(res).toEqual(` /**
+    expect(res).to.be.equal(` /**
   * Quite a lenghty comment
   * With at least two lines
   */`);
@@ -441,7 +446,7 @@ With at least two lines`;
    With at least two lines    `;
     const res = renderComment(comment);
 
-    expect(res).toEqual(` /**
+    expect(res).to.be.equal(` /**
   * Quite a lenghty comment
   * With at least two lines
   */`);
@@ -451,28 +456,28 @@ With at least two lines`;
     const comment = `One liner`;
     const res = renderComment(comment);
 
-    expect(res).toEqual(`// One liner`);
+    expect(res).to.be.equal(`// One liner`);
   });
 
   it(`it should render proper one-line comment with trimming`, () => {
     const comment = `   One liner   `;
     const res = renderComment(comment);
 
-    expect(res).toEqual(`// One liner`);
+    expect(res).to.be.equal(`// One liner`);
   });
 
   it(`it should handle null comment`, () => {
     const comment = null;
     const res = renderComment(comment);
 
-    expect(res).toBeNull();
+    expect(res).to.be.null;
   });
 
   it(`it should handle empty comment`, () => {
     const comment = '';
     const res = renderComment(comment);
 
-    expect(res).toBeNull();
+    expect(res).to.be.null;
   });
 });
 

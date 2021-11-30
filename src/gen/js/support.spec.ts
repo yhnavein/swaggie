@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import { getTSParamType } from './support';
 
 describe('getTSParamType', () => {
@@ -9,7 +10,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('any');
+    expect(res).to.be.equal('any');
   });
 
   it('empty #2', async () => {
@@ -18,7 +19,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('unknown');
+    expect(res).to.be.equal('unknown');
   });
 
   it('empty #3', async () => {
@@ -27,7 +28,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('unknown');
+    expect(res).to.be.equal('unknown');
   });
 
   it('empty #3', async () => {
@@ -36,7 +37,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('unknown');
+    expect(res).to.be.equal('unknown');
   });
 
   it('file', async () => {
@@ -50,7 +51,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('File');
+    expect(res).to.be.equal('File');
   });
 
   it('enum with x-schema', async () => {
@@ -68,7 +69,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('SomeEnum');
+    expect(res).to.be.equal('SomeEnum');
   });
 
   it('array', async () => {
@@ -83,7 +84,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('Item[]');
+    expect(res).to.be.equal('Item[]');
   });
 
   it('reference #0', async () => {
@@ -94,7 +95,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('SomeItem');
+    expect(res).to.be.equal('SomeItem');
   });
 
   it('reference #1', async () => {
@@ -110,7 +111,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('SomeItem');
+    expect(res).to.be.equal('SomeItem');
   });
 
   it('reference #2', async () => {
@@ -126,7 +127,7 @@ describe('getTSParamType', () => {
 
     const res = getTSParamType(param, options);
 
-    expect(res).toBe('SomeItem');
+    expect(res).to.be.equal('SomeItem');
   });
 
   describe('responses', () => {
@@ -143,7 +144,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('PagingAndSortingParameters<Item>');
+      expect(res).to.be.equal('PagingAndSortingParameters<Item>');
     });
 
     it('string', async () => {
@@ -157,7 +158,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('string');
+      expect(res).to.be.equal('string');
     });
 
     it('date', async () => {
@@ -172,7 +173,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('Date');
+      expect(res).to.be.equal('Date');
     });
 
     it('date with dateFormatter = string', async () => {
@@ -187,7 +188,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('string');
+      expect(res).to.be.equal('string');
     });
 
     // Full enums are not implemented. This is to ensure that full enums won't break anything
@@ -208,7 +209,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('number');
+      expect(res).to.be.equal('number');
     });
 
     it('array > reference', async () => {
@@ -226,7 +227,7 @@ describe('getTSParamType', () => {
 
       const res = getTSParamType(param, options);
 
-      expect(res).toBe('Item[]');
+      expect(res).to.be.equal('Item[]');
     });
   });
 });

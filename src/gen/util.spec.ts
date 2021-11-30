@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import {
   groupOperationsByGroupName,
   escapeReservedWords,
@@ -11,7 +12,7 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).toMatchObject({});
+    expect(res).to.be.eql({});
   });
 
   it('handles empty array', async () => {
@@ -19,7 +20,7 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).toMatchObject({});
+    expect(res).to.be.eql({});
   });
 
   it('handles single operation', async () => {
@@ -49,9 +50,9 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).toBeDefined();
-    expect(res.HealthCheck).toBeDefined();
-    expect(res.HealthCheck.length).toBe(1);
+    expect(res).to.be.ok;
+    expect(res.HealthCheck).to.be.ok;
+    expect(res.HealthCheck.length).to.eq(1);
   });
 
   it('handles two different operations and the same group', async () => {
@@ -102,9 +103,9 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).toBeDefined();
-    expect(res.HealthCheck).toBeDefined();
-    expect(res.HealthCheck.length).toBe(2);
+    expect(res).to.be.ok;
+    expect(res.HealthCheck).to.be.ok;
+    expect(res.HealthCheck.length).to.eq(2);
   });
 
   it('handles two different operations and different groups', async () => {
@@ -155,11 +156,11 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).toBeDefined();
-    expect(res.HealthCheck).toBeDefined();
-    expect(res.HealthCheck.length).toBe(1);
-    expect(res.Illness).toBeDefined();
-    expect(res.Illness.length).toBe(1);
+    expect(res).to.be.ok;
+    expect(res.HealthCheck).to.be.ok;
+    expect(res.HealthCheck.length).to.eq(1);
+    expect(res.Illness).to.be.ok;
+    expect(res.Illness.length).to.eq(1);
   });
 });
 
@@ -167,25 +168,25 @@ describe('escapeReservedWords', () => {
   it('handles null', () => {
     const res = escapeReservedWords(null);
 
-    expect(res).toBe(null);
+    expect(res).to.be.equal(null);
   });
 
   it('handles empty string', () => {
     const res = escapeReservedWords('');
 
-    expect(res).toBe('');
+    expect(res).to.be.equal('');
   });
 
   it('handles safe word', () => {
     const res = escapeReservedWords('Burrito');
 
-    expect(res).toBe('Burrito');
+    expect(res).to.be.equal('Burrito');
   });
 
   it('handles reserved word', () => {
     const res = escapeReservedWords('return');
 
-    expect(res).toBe('_return');
+    expect(res).to.be.equal('_return');
   });
 });
 
@@ -204,7 +205,7 @@ describe('prepareOutputFilename', () => {
     it(`handles ${el.given}`, () => {
       const res = prepareOutputFilename(el.given);
 
-      expect(res).toBe(el.expected);
+      expect(res).to.be.equal(el.expected);
     });
   });
 });
@@ -217,7 +218,7 @@ describe('getBestResponse', () => {
 
     const res = getBestResponse(op as any);
 
-    expect(res).toBe(undefined);
+    expect(res).to.be.equal(undefined);
   });
 
   it('handles one response', () => {
@@ -227,7 +228,7 @@ describe('getBestResponse', () => {
 
     const res = getBestResponse(op as any);
 
-    expect(res).toMatchObject({ code: '300' });
+    expect(res).to.be.eql({ code: '300' });
   });
 
   it('handles multiple responses', () => {
@@ -237,7 +238,7 @@ describe('getBestResponse', () => {
 
     const res = getBestResponse(op as any);
 
-    expect(res).toMatchObject({ code: '200' });
+    expect(res).to.be.eql({ code: '200' });
   });
 
   // TODO: This one does not make sense at all!
@@ -250,6 +251,6 @@ describe('getBestResponse', () => {
 
     const res = getBestResponse(op as any);
 
-    expect(res).toMatchObject(first);
+    expect(res).to.be.eql(first);
   });
 });
