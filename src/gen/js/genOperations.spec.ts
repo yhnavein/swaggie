@@ -1,4 +1,5 @@
 import { sortBy } from 'lodash';
+import { expect } from 'chai';
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
 
 describe('prepareOperations', () => {
@@ -21,8 +22,8 @@ describe('prepareOperations', () => {
 
   //   const res = prepareOperations(ops, {} as any);
 
-  //   expect(res).toBeDefined();
-  //   expect(res[0].headers).toMatchObject([
+  //   expect(res).to.be.ok;
+  //   expect(res[0].headers).to.be.eql([
   //     {
   //       name: 'contentType',
   //       originalName: 'Content-Type',
@@ -50,8 +51,8 @@ describe('prepareOperations', () => {
 
     const [res] = prepareOperations(ops, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0].headers).toMatchObject([]);
+    expect(res).to.be.ok;
+    expect(res[0].headers).to.be.eql([]);
   });
 
   it(`operation's content type should be put in header + more headers in parameters`, () => {
@@ -83,14 +84,14 @@ describe('prepareOperations', () => {
 
     const [res] = prepareOperations(ops, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0].headers).toMatchObject([
+    expect(res).to.be.ok;
+    expect(res[0].headers[0]).to.be.deep.include(
       {
         name: 'someOther',
         originalName: 'Some-Other',
         type: 'string',
         optional: false,
-      },
+      }
       // TODO: For now we ignore custom content types
       // {
       //   name: 'contentType',
@@ -99,7 +100,7 @@ describe('prepareOperations', () => {
       //   optional: false,
       //   value: 'application/x-www-form-urlencoded',
       // },
-    ]);
+    );
   });
 
   it(`operation's param should be used instead of operation's default content types`, () => {
@@ -131,17 +132,15 @@ describe('prepareOperations', () => {
 
     const [res] = prepareOperations(ops, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0].headers).toBeDefined();
+    expect(res).to.be.ok;
+    expect(res[0].headers).to.be.ok;
     const orderedHeaders = sortBy(res[0].headers, 'name');
-    expect(orderedHeaders).toMatchObject([
-      {
-        name: 'contentType',
-        originalName: 'Content-Type',
-        type: 'string',
-        optional: false,
-      },
-    ]);
+    expect(orderedHeaders[0]).to.deep.include({
+      name: 'contentType',
+      originalName: 'Content-Type',
+      type: 'string',
+      optional: false,
+    });
   });
 
   describe('generate query model', () => {
@@ -185,26 +184,26 @@ describe('prepareOperations', () => {
 
       const [res, queryDefs] = prepareOperations([op], { queryModels: true } as any);
 
-      expect(queryDefs[expectedQueryType]).toBeDefined();
-      expect(queryDefs[expectedQueryType].type).toBe('object');
-      expect(queryDefs[expectedQueryType].properties).toMatchObject({
+      expect(queryDefs[expectedQueryType]).to.be.ok;
+      expect(queryDefs[expectedQueryType].type).to.be.equal('object');
+      expect(queryDefs[expectedQueryType].properties).to.be.eql({
         firstParameter: op.parameters[0],
         secondParameter: op.parameters[1],
         filter_anotherParameter: op.parameters[2],
       });
 
-      expect(res[0]).toBeDefined();
-      expect(res[0].parameters.length).toBe(1);
-      expect(res[0].parameters[0].name).toBe('petGetPetByIdQuery');
-      expect(res[0].parameters[0].type).toBe(expectedQueryType);
+      expect(res[0]).to.be.ok;
+      expect(res[0].parameters.length).to.be.equal(1);
+      expect(res[0].parameters[0].name).to.be.equal('petGetPetByIdQuery');
+      expect(res[0].parameters[0].type).to.be.equal(expectedQueryType);
     });
 
     it('query model should not be generated', () => {
       const [res, queryDef] = prepareOperations([op], {} as any);
 
-      expect(queryDef).toMatchObject({});
-      expect(res[0]).toBeDefined();
-      expect(res[0].parameters.length).toBe(op.parameters.length);
+      expect(queryDef).to.be.eql({});
+      expect(res[0]).to.be.ok;
+      expect(res[0].parameters.length).to.be.equal(op.parameters.length);
     });
   });
 
@@ -237,10 +236,10 @@ describe('prepareOperations', () => {
 
     const [res] = prepareOperations(ops, {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0]?.parameters[0]).toBeDefined();
-    expect(res[0].parameters[0].originalName).toBe('files');
-    expect(res[0].parameters[0].original.type).toBe('array');
+    expect(res).to.be.ok;
+    expect(res[0]?.parameters[0]).to.be.ok;
+    expect(res[0].parameters[0].originalName).to.be.equal('files');
+    expect(res[0].parameters[0].original.type).to.be.equal('array');
   });
 });
 
@@ -250,7 +249,7 @@ describe('fixDuplicateOperations', () => {
 
     const res = fixDuplicateOperations(ops);
 
-    expect(res).toMatchObject([]);
+    expect(res).to.be.eql([]);
   });
 
   it(`handle list with 1 item only`, () => {
@@ -272,7 +271,7 @@ describe('fixDuplicateOperations', () => {
     const res = fixDuplicateOperations(ops);
 
     // Basically it should be the same
-    expect(res).toMatchObject(ops);
+    expect(res).to.be.deep.equal(ops);
   });
 
   it(`handle 2 different operations`, () => {
@@ -306,7 +305,7 @@ describe('fixDuplicateOperations', () => {
     const res = fixDuplicateOperations(ops);
 
     // Basically it should be the same
-    expect(res).toMatchObject(ops);
+    expect(res).to.be.deep.equal(ops);
   });
 
   it(`handle 2 operations with the same id`, () => {
@@ -339,7 +338,7 @@ describe('fixDuplicateOperations', () => {
 
     const res = fixDuplicateOperations(ops);
 
-    expect(res[1].id).not.toBe(res[0].id);
+    expect(res[1].id).not.to.be.equal(res[0].id);
   });
 
   // TODO: If someone wants to adjust code to fix this issue, then please go ahead :)
@@ -389,8 +388,8 @@ describe('fixDuplicateOperations', () => {
     console.log('Ops', ops.map(e => e.id));
     console.log('Res', res.map(e => e.id));
 
-    expect(res[0].id).not.toBe(res[1].id);
-    expect(res[1].id).not.toBe(res[2].id);
+    expect(res[0].id).not.to.be.equal(res[1].id);
+    expect(res[1].id).not.to.be.equal(res[2].id);
   });
 */
 });
@@ -408,7 +407,7 @@ describe('getOperationName', () => {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = getOperationName(el.input.opId, el.input.group);
 
-      expect(res).toBe(el.expected);
+      expect(res).to.be.equal(el.expected);
     });
   });
 });
@@ -441,15 +440,13 @@ describe('x-schema extension', () => {
 
     const res = prepareOperations(ops as ApiOperation[], {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0][0].parameters).toMatchObject([
-      {
-        name: 'something',
-        originalName: 'something',
-        type: 'SomeType',
-        optional: true,
-      },
-    ]);
+    expect(res).to.be.ok;
+    expect(res[0][0].parameters[0]).to.be.deep.include({
+      name: 'something',
+      originalName: 'something',
+      type: 'SomeType',
+      optional: true,
+    });
   });
 
   it(`handle x-schema with enum in operation parameter`, () => {
@@ -480,15 +477,13 @@ describe('x-schema extension', () => {
 
     const res = prepareOperations(ops as ApiOperation[], {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0][0].parameters).toMatchObject([
-      {
-        name: 'something',
-        originalName: 'something',
-        type: 'SomeType',
-        optional: true,
-      },
-    ]);
+    expect(res).to.be.ok;
+    expect(res[0][0].parameters[0]).to.be.deep.include({
+      name: 'something',
+      originalName: 'something',
+      type: 'SomeType',
+      optional: true,
+    });
   });
 
   it(`handle x-nullable as false correctly`, () => {
@@ -520,15 +515,13 @@ describe('x-schema extension', () => {
 
     const res = prepareOperations(ops as ApiOperation[], {} as any);
 
-    expect(res).toBeDefined();
-    expect(res[0][0].parameters).toMatchObject([
-      {
-        name: 'something',
-        originalName: 'something',
-        type: 'SomeType',
-        optional: false,
-      },
-    ]);
+    expect(res).to.be.ok;
+    expect(res[0][0].parameters[0]).to.be.deep.include({
+      name: 'something',
+      originalName: 'something',
+      type: 'SomeType',
+      optional: false,
+    });
   });
 
   it(`handle x-nullable as true correctly`, () => {
@@ -560,15 +553,13 @@ describe('x-schema extension', () => {
 
     const [resOps, resDefs] = prepareOperations(ops as ApiOperation[], {} as any);
 
-    expect(resOps).toBeDefined();
-    expect(resDefs).toBeDefined();
-    expect(resOps[0].parameters).toMatchObject([
-      {
-        name: 'something',
-        originalName: 'something',
-        type: 'SomeType',
-        optional: true,
-      },
-    ]);
+    expect(resOps).to.be.ok;
+    expect(resDefs).to.be.ok;
+    expect(resOps[0].parameters[0]).to.be.deep.include({
+      name: 'something',
+      originalName: 'something',
+      type: 'SomeType',
+      optional: true,
+    });
   });
 });

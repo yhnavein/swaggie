@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 /** This file tests a code that will be generated and is hardcoded into the templates */
 
 function serializeQueryParam(obj: any, property: string): string {
@@ -50,7 +51,7 @@ describe('serializeQueryParam.angular1', () => {
     it(`should handle ${JSON.stringify(el.input)} with property ${el.property}`, () => {
       const res = serializeQueryParam(el.input, el.property);
 
-      expect(res).toBe(el.expected);
+      expect(res).to.be.equal(el.expected);
     });
   });
 });

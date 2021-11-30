@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 /** This file tests a code that will be generated and is hardcoded into the templates */
 
 describe('serializeQueryParam', () => {
@@ -16,7 +17,7 @@ describe('serializeQueryParam', () => {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = serializeQueryParam(el.input);
 
-      expect(res).toBe(el.expected);
+      expect(res).to.be.equal(el.expected);
     });
   });
 
@@ -46,14 +47,14 @@ describe('serializeQueryParam / axios', () => {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = serializeQueryParam(el.input);
 
-      expect(res).toBe(el.expected);
+      expect(res).to.eq(el.expected);
     });
   });
 
   it(`should handle array`, () => {
     const res = serializeQueryParam([1, 2, 3]);
 
-    expect(res.toString()).toBe([1, 2, 3].toString());
+    expect(res.toString()).to.be.equal([1, 2, 3].toString());
   });
 
   function serializeQueryParam(obj: any) {
