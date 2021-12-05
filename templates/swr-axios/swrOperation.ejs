@@ -8,7 +8,7 @@ export function <%- swrOpName -%>(<% parameters.forEach(function(parameter) { -%
   $config?: SwrConfig
   ) {
   let url = '<%- url -%>';
-  const { axios: $axiosConf, ...config } = $config || {};
+  const { axios: $axiosConf, key, ...config } = $config || {};
 
 <%_ if(pathParams && pathParams.length > 0) {
   pathParams.forEach(function(parameter) { -%>
@@ -16,8 +16,8 @@ export function <%- swrOpName -%>(<% parameters.forEach(function(parameter) { -%
 <% });
 } _%>
 
-  const { data, error } = useSWR<<%- returnType -%>>(
-    url,
+  const { data, error, mutate } = useSWR<<%- returnType -%>>(
+    key ?? url,
     () => axios.request({
       url: url,
       method: '<%- method -%>',
@@ -47,5 +47,6 @@ export function <%- swrOpName -%>(<% parameters.forEach(function(parameter) { -%
     data,
     isLoading: !error && !data,
     error: error,
+    mutate,
   };
 }

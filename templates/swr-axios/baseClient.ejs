@@ -9,12 +9,16 @@
 // ReSharper disable InconsistentNaming
 
 import Axios, { AxiosPromise, AxiosRequestConfig } from "axios";
-import useSWR, { SWRConfiguration } from 'swr';
+import useSWR, { SWRConfiguration, Key } from 'swr';
 
 export const axios = Axios.create({
   baseURL: '<%- baseUrl || '' -%>',
 });
 
 interface SwrConfig extends SWRConfiguration {
+  /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
+  key?: Key;
+
+  /* Configuration for axios fetcher */
   axios?: AxiosRequestConfig;
 }
