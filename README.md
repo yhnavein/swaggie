@@ -89,6 +89,7 @@ The following templates are bundled with Swaggie:
 
 ```
 axios     Default template. Recommended for React / Vue / similar frameworks. Uses axios
+swr-axios Template that embraces SRW for GET requests and as a fallback uses axios.
 fetch     Template similar to axios, but with fetch API instead. Recommended for React / Vue / similar frameworks
 ng1       Template for Angular 1 (this is for the old one)
 ng2       Template for Angular 2+ (uses HttpClient, InjectionTokens, etc)

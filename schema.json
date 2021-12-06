@@ -18,7 +18,7 @@
         "template": {
           "default": "axios",
           "description": "Template that will be used for generating the API client. You can reference bundled templates by name or provide path to the custom template as well",
-          "examples": ["axios", "fetch", "ng1", "ng2"],
+          "examples": ["axios", "swr-axios", "fetch", "ng1", "ng2"],
           "type": "string"
         },
         "baseUrl": {

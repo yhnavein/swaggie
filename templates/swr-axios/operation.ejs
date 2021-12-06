@@ -1,0 +1,58 @@
+  /**<% parameters.forEach(function(parameter) { %>
+   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
+<% }); %>
+   */
+  <%- name -%>(<% parameters.forEach(function(parameter) { -%>
+  <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
+    <% }); -%>
+  $config?: AxiosRequestConfig
+  ): AxiosPromise<<%- returnType -%>> {
+    let url = '<%- url -%>';
+
+<%_ if(pathParams && pathParams.length > 0) {
+  pathParams.forEach(function(parameter) { -%>
+    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+<% });
+} _%>
+<%_ if(formData && formData.length > 0) { _%>
+    const formDataBody = new FormData();
+  <%_ formData.forEach(function(parameter) { -%>
+    if (!!<%- parameter.name -%>) {
+    <%_ if(parameter.original && parameter.original.type === 'array') { -%>
+      <%- parameter.name -%>.forEach((f: any) => formDataBody.append("<%- parameter.originalName -%>", f));
+    <%_ } else { %>
+      formDataBody.append("<%- parameter.originalName -%>", <%- parameter.name -%><%- parameter.type !== 'string' && parameter.type !== 'File' && parameter.type !== 'Blob' ? '.toString()' : '' -%>);
+    <%_ } %>
+    }
+<% });
+} _%>
+
+    return axios.request<<%- returnType -%>>({
+      url: url,
+      method: '<%- method -%>',
+<%_ if(formData && formData.length > 0) { _%>
+      data: formDataBody,
+<%_ } else if(body) { _%>
+      data: <%- body.name -%>,
+<%_ } _%>
+<%_ if(query && query.length > 0) { _%>
+      params: {
+        <% query.forEach(function(parameter) { -%>
+    '<%- parameter.originalName -%>': serializeQueryParam(<%- parameter.name -%>),
+    <% }); -%>
+      },
+<%_ } _%>
+<%_ if(headers && headers.length > 0) { _%>
+      headers: {
+        <% headers.forEach(function(parameter) { -%>
+    <%_ if (parameter.value) { _%>
+    '<%- parameter.originalName -%>': '<%- parameter.value -%>',
+    <%_ } else { _%>
+    '<%- parameter.originalName -%>': <%- parameter.name -%>,
+    <%_ } _%>
+    <% }); -%>
+      },
+<%_ } _%>
+      ...$config,
+    });
+  },
