@@ -16,8 +16,16 @@ export function <%- swrOpName -%>(<% parameters.forEach(function(parameter) { -%
 <% });
 } _%>
 
+  let cacheUrl = url + '?';
+<%_ if(query && query.length > 0) { _%>
+  <% query.forEach(function(parameter) { -%>
+  if (!!<%- parameter.name -%>) {
+      cacheUrl += `<%- parameter.originalName -%>=${<%- parameter.name -%>}&`;
+    }
+  <% }); -%>
+<%_ } _%>
   const { data, error, mutate } = useSWR<<%- returnType -%>>(
-    key ?? url,
+    key ?? cacheUrl,
     () => axios.request({
       url: url,
       method: '<%- method -%>',
