@@ -5,7 +5,7 @@
 <% }); -%>
    */
 export function <%= it.swrOpName %>(<% it.parameters.forEach((parameter) => { %>
-  <%= parameter.name %>: <%= parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+  <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
     <% }); %>
   $config?: SwrConfig
   ) {
@@ -33,14 +33,14 @@ export function <%= it.swrOpName %>(<% it.parameters.forEach((parameter) => { %>
       method: '<%= it.method %>',
 <% if(it.query && it.query.length > 0) { _%>
       params: {
-        <% it.query.forEach(function(parameter) { %>
+        <% it.query.forEach((parameter) => { %>
     '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
     <% }); %>
       },
 <% } _%>
 <% if(it.headers && it.headers.length > 0) { _%>
       headers: {
-        <% it.headers.forEach(function(parameter) { %>
+        <% it.headers.forEach((parameter) => { %>
     <% if (parameter.value) { _%>
     '<%= parameter.originalName %>': '<%= parameter.value %>',
     <% } else { _%>

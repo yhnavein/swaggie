@@ -123,11 +123,30 @@ function error(e) {
 
 ## Usage – Integrating into your project
 
-## Example
-
 Let's assume that you have a [PetStore API](http://petstore.swagger.io/) as your REST API and you are developing a client app written in TypeScript that will consume this API.
 
-Instead of writing any code by hand for fetching particular resources, you could think that it might be possible to have this code generated for you somehow. And this is why this project exists.
+Instead of writing any code by hand for fetching particular resources, we will let Swaggie do it for us.
+
+> Please note that it's **recommended** to pipe Swaggie command to some prettifier like `prettier` or `dprint` to make the generated code look not only nice, but also persistent.
+> Because Swaggie relies on a templating engine, whitespaces are generally a mess, so they may change between versions.
+
+### Suggested prettiers
+
+[prettier](https://prettier.io/) - the most popular one
+
+```sh
+prettier ./FILE_PATH.ts --write
+```
+
+[dprint](https://dprint.dev/cli/) - the superfast one
+
+```sh
+dprint fmt ./FILE_PATH.ts
+```
+
+You are not limited to any of these, but in our examples we will use Prettier. Please remember that these tools needs to be installed first and they need a config file in your project.
+
+### Example
 
 Let's run `swaggie` against PetStore API and see what will happen:
 
