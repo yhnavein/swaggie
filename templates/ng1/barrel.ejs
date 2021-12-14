@@ -2,10 +2,10 @@ export class ApiServices {
   public static bootstrap(moduleName: string, baseUrl: string) {
     angular
       .module(moduleName)
-      .constant('Api<%- servicePrefix -%>BaseUrl', baseUrl)
-<%_ clients.forEach(function(client) { _%>
-      .service('<%- client.fileName %>Service', <%- client.fileName %>Service)
-<%_ }); _%>;
+      .constant('Api<%= it.servicePrefix -%>BaseUrl', baseUrl)
+<% it.clients.forEach((client) => { %>
+      .service('<%= client.fileName %>Service', <%= client.fileName %>Service)
+<% }); %>;
   }
 }
 

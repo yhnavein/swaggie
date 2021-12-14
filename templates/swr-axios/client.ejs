@@ -1,12 +1,13 @@
-export const <%- it.camelCaseName -%>Client = {
-  <% it.operations.forEach(function(operation) { %>
-<%- include('operation', operation); %>
+export const <%= it.camelCaseName -%>Client = {
+  <% it.operations.forEach((operation) => { %>
+<%~ include('operation.ejs', operation); %>
+
   <% }); %>
 };
 
-<% var getOperations = it.operations.filter(function(o) { return o.method == 'GET'; });
+<% var getOperations = it.operations.filter((o) => o.method === 'GET');
 if(getOperations.length > 0) { %>
-  <% getOperations.forEach(function(operation) {
+  <% getOperations.forEach((operation) => {
   var opName = operation.name;
   if(opName.toLowerCase().startsWith("get")) {
     opName = opName.substring(3);
@@ -14,6 +15,7 @@ if(getOperations.length > 0) { %>
   opName[0] = opName[0].toUpperCase();
   var customName = "use" + it.clientName + opName;
   var swrOperation = Object.assign({ swrOpName: customName }, operation); %>
-<%- include('swrOperation', swrOperation); %>
+<%~ include('swrOperation.ejs', swrOperation); %>
+
   <% }); %>
 <% } %>

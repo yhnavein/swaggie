@@ -1,10 +1,11 @@
-export class <%- clientName -%>Service extends BaseService {
+export class <%= it.clientName -%>Service extends BaseService {
   /* @ngInject */
-  constructor($http: IHttpService, Api<%- servicePrefix -%>BaseUrl: string) {
-    super($http, Api<%- servicePrefix -%>BaseUrl);
+  constructor($http: IHttpService, Api<%= it.servicePrefix -%>BaseUrl: string) {
+    super($http, Api<%= it.servicePrefix -%>BaseUrl);
   }
 
-  <% operations.forEach(function(operation) { %>
-<%- include('operation', operation); %>
+  <% it.operations.forEach((operation) => { %>
+<%~ include('operation.ejs', operation); %>
+
   <% }); %>
 }

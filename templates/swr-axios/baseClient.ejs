@@ -12,7 +12,7 @@ import Axios, { AxiosPromise, AxiosRequestConfig } from "axios";
 import useSWR, { SWRConfiguration, Key } from 'swr';
 
 export const axios = Axios.create({
-  baseURL: '<%- baseUrl || '' -%>',
+  baseURL: '<%= it.baseUrl || '' -%>',
 });
 
 interface SwrConfig extends SWRConfiguration {

@@ -1,13 +1,14 @@
   /**
 <% it.parameters.forEach((parameter) => { %>
    * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
-<% }); %>
+
+<% }); -%>
    */
   <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
-  <%= parameter.name %>: <%= parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+  <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
     <% }); %>
   $config?: AxiosRequestConfig
-  ): AxiosPromise<<%= it.returnType %>> {
+  ): AxiosPromise<<%~ it.returnType %>> {
     let url = '<%= it.url %>';
 
 <% if(it.pathParams && it.pathParams.length > 0) {
@@ -28,7 +29,7 @@
 <% });
 } %>
 
-    return axios.request<<%= it.returnType %>>({
+    return axios.request<<%~ it.returnType %>>({
       url: url,
       method: '<%= it.method %>',
 <% if(it.formData && it.formData.length > 0) { %>
