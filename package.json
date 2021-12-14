@@ -42,7 +42,7 @@
   ],
   "dependencies": {
     "commander": "^8.3.0",
-    "ejs": "^3.1.6",
+    "eta": "^1.12.3",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "mkdirp": "^1.0.3",
@@ -51,7 +51,6 @@
   },
   "devDependencies": {
     "@types/chai": "4.2.22",
-    "@types/ejs": "3.1.0",
     "@types/js-yaml": "4.0.5",
     "@types/lodash": "4.14.177",
     "@types/mkdirp": "^1.0.2",
