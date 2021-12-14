@@ -4,7 +4,7 @@ export const <%- it.camelCaseName -%>Client = {
   <% }); %>
 };
 
-<% var getOperations = operations.filter(function(o) { return o.method == 'GET'; });
+<% var getOperations = it.operations.filter(function(o) { return o.method == 'GET'; });
 if(getOperations.length > 0) { %>
   <% getOperations.forEach(function(operation) {
   var opName = operation.name;
@@ -12,7 +12,7 @@ if(getOperations.length > 0) { %>
     opName = opName.substring(3);
   }
   opName[0] = opName[0].toUpperCase();
-  var customName = "use" + clientName + opName;
+  var customName = "use" + it.clientName + opName;
   var swrOperation = Object.assign({ swrOpName: customName }, operation); %>
 <%- include('swrOperation', swrOperation); %>
   <% }); %>
