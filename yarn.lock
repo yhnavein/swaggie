@@ -31,13 +31,6 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.178.tgz#341f6d2247db528d4a13ddbb374bcdc80406f4f8"
   integrity sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==
 
-"@types/mkdirp@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/mkdirp/-/mkdirp-1.0.2.tgz#8d0bad7aa793abe551860be1f7ae7f3198c16666"
-  integrity sha512-o0K1tSO0Dx5X6xlU5F1D6625FawhC3dU3iqr25lluNv/+/QIVH8RLNEiVokgIZo+mz+87w/3Mkg/VvQS+J51fQ==
-  dependencies:
-    "@types/node" "*"
-
 "@types/mocha@9.0.0":
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-9.0.0.tgz#3205bcd15ada9bc681ac20bef64e9e6df88fd297"
@@ -441,11 +434,6 @@ minimatch@3.0.4, minimatch@^3.0.4:
   integrity sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==
   dependencies:
     brace-expansion "^1.1.7"
-
-mkdirp@^1.0.3:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
-  integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
 mocha@9.1.3:
   version "9.1.3"

@@ -1,6 +1,5 @@
-import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
+import { Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'fs';
 import { dirname } from 'path';
-import { sync as mkdirSync } from 'mkdirp';
 
 import { ApiOperation, ApiOperationResponse } from '../types';
 
@@ -12,10 +11,13 @@ export function exists(filePath: string): Stats {
   }
 }
 
-export function saveFile(filePath, contents) {
-  mkdirSync(dirname(filePath));
-
-  fsWriteFileSync(filePath, contents);
+export function saveFile(filePath: string, contents: string) {
+  mkdir(dirname(filePath), { recursive: true }, (err) => {
+    if (err) {
+      throw err;
+    }
+    fsWriteFileSync(filePath, contents);
+  });
 }
 
 export function groupOperationsByGroupName(operations) {

@@ -46,7 +46,6 @@
     "js-yaml": "^4.1.0",
     "lodash.camelcase": "^4.3.0",
     "lodash.set": "^4.3.2",
-    "mkdirp": "^1.0.3",
     "nanocolors": "^0.2.0",
     "node-fetch": "^2.6.3"
   },
@@ -55,7 +54,6 @@
     "@types/js-yaml": "4.0.5",
     "@types/lodash.camelcase": "4.3.6",
     "@types/lodash.set": "4.3.6",
-    "@types/mkdirp": "^1.0.2",
     "@types/mocha": "9.0.0",
     "@types/node-fetch": "2.5.3",
     "chai": "4.3.4",
