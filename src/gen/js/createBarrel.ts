@@ -1,7 +1,7 @@
 import { camelCase } from 'lodash';
 import { renderFile } from '../templateManager';
 
-export function generateBarrelFile(clients: any[], clientOptions: ClientOptions): string {
+export async function generateBarrelFile(clients: any[], clientOptions: ClientOptions) {
   const files = [];
 
   for (let name in clients) {
@@ -15,7 +15,7 @@ export function generateBarrelFile(clients: any[], clientOptions: ClientOptions)
       .map((c) => ({
         fileName: (clientOptions.servicePrefix || '') + c,
         className: (clientOptions.servicePrefix || '') + c + 'Client',
-        varName: camelCase((clientOptions.servicePrefix || '') + c + 'Client'),
+        camelCaseName: camelCase((clientOptions.servicePrefix || '') + c + 'Client'),
       })),
   };
 

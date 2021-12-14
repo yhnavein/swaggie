@@ -1,42 +1,44 @@
-  /**<% parameters.forEach(function(parameter) { %>
-   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
-<% }); %>
+  /**
+<% it.parameters.forEach((parameter) => { %>
+   * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
+
+<% }); -%>
    */
-  <%- name -%>(<% parameters.forEach(function(parameter) { -%>
-  <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
-    <% }); -%>
-    $config?: RequestInit
-  ): Promise<<%- returnType -%>> {
-    let url = defaults.baseUrl + '<%- url -%>?';
-<%_ if(pathParams && pathParams.length > 0) {
-  pathParams.forEach(function(parameter) { -%>
-    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+  <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
+<%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? '| null | undefined' : '' %>,
+    <% }); %>
+$config?: RequestInit
+  ): Promise<<%~ it.returnType %>> {
+    let url = defaults.baseUrl + '<%= it.url %>?';
+<% if(it.pathParams && it.pathParams.length > 0) {
+  it.pathParams.forEach((parameter) => { %>
+    url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
-} _%>
-<%_ if(query && query.length > 0) { _%>
-  <% query.forEach(function(parameter) { -%>
-  if (<%- parameter.name -%> !== undefined) {
-      <%_ if(!!parameter.original && parameter.original.type === 'array') { _%>
-        <%- parameter.name -%>.forEach(item => { url += '<%- parameter.originalName -%>=' + serializeQueryParam(item) + "&"; });
-      <%_ } else {_%>
-        url += '<%- parameter.originalName -%>=' + serializeQueryParam(<%- parameter.name -%>) + "&";
-      <%_ } _%>
-    }
-  <% }); -%>
-<%_ } _%>
+} %>
+<% if(it.query && it.query.length > 0) { %>
+  <% it.query.forEach((parameter) => { %>
+  if (<%= parameter.name %> !== undefined) {
+  <% if(!!parameter.original && parameter.original.type === 'array') { %>
+    <%= parameter.name %>.forEach(item => { url += '<%= parameter.originalName %>=' + serializeQueryParam(item) + "&"; });
+  <% } else {%>
+    url += '<%= parameter.originalName %>=' + serializeQueryParam(<%= parameter.name %>) + "&";
+  <% } %>
+  }
+  <% }); %>
+<% } %>
 
     return fetch(url, {
-      method: '<%- method -%>',
-<%_ if(body) { _%>
-      body: JSON.stringify(<%- body.name -%>),
-<%_ } _%>
-<%_ if(headers && headers.length > 0) { _%>
+      method: '<%= it.method %>',
+<% if(it.body) { %>
+      body: JSON.stringify(<%= it.body.name %>),
+<% } %>
+<% if(it.headers && it.headers.length > 0) { %>
       headers: {
-        <% headers.forEach(function(parameter) { -%>
-    '<%- parameter.originalName -%>': <%- parameter.name -%>,
-    <% }); -%>
-      },
-<%_ } _%>
+    <% it.headers.forEach((parameter) => { %>
+    '<%= parameter.originalName %>': <%= parameter.name %>,
+    <% }); %>
+  },
+<% } %>
       ...$config,
-    }).then((response) => response.json() as Promise<<%- returnType -%>>);
+    }).then((response) => response.json() as Promise<<%~ it.returnType %>>);
   },

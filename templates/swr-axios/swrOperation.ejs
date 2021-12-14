@@ -1,52 +1,55 @@
-  /**<% parameters.forEach(function(parameter) { %>
-   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
-<% }); %>
+/**
+<% it.parameters.forEach((parameter) => { %>
+   * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
+
+<% }); -%>
    */
-export function <%- swrOpName -%>(<% parameters.forEach(function(parameter) { -%>
-  <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
-    <% }); -%>
+export function <%= it.swrOpName %>(<% it.parameters.forEach((parameter) => { %>
+  <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+    <% }); %>
   $config?: SwrConfig
   ) {
-  let url = '<%- url -%>';
+  let url = '<%= it.url %>';
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-<%_ if(pathParams && pathParams.length > 0) {
-  pathParams.forEach(function(parameter) { -%>
-    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+<% if(it.pathParams && it.pathParams.length > 0) {
+  it.pathParams.forEach((parameter) => { %>
+  url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
-} _%>
+} %>
 
   let cacheUrl = url + '?';
-<%_ if(query && query.length > 0) { _%>
-  <% query.forEach(function(parameter) { -%>
-  if (!!<%- parameter.name -%>) {
-      cacheUrl += `<%- parameter.originalName -%>=${<%- parameter.name -%>}&`;
-    }
-  <% }); -%>
-<%_ } _%>
-  const { data, error, mutate } = useSWR<<%- returnType -%>>(
-    key ?? cacheUrl,
-    () => axios.request({
-      url: url,
-      method: '<%- method -%>',
-<%_ if(query && query.length > 0) { _%>
-      params: {
-        <% query.forEach(function(parameter) { -%>
-    '<%- parameter.originalName -%>': serializeQueryParam(<%- parameter.name -%>),
-    <% }); -%>
+<% if(it.query && it.query.length > 0) { %>
+  <% it.query.forEach((parameter) => { %>
+if (!!<%= parameter.name %>) {
+    cacheUrl += `<%= parameter.originalName %>=${<%= parameter.name %>}&`;
+  }
+
+  <% }); %>
+<% } %>
+const { data, error, mutate } = useSWR<<%~ it.returnType %>>(
+  key ?? cacheUrl,
+  () => axios.request({
+    url: url,
+    method: '<%= it.method %>',
+<% if(it.query && it.query.length > 0) { %>
+    params: {
+      <% it.query.forEach((parameter) => { %>
+  '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
+    <% }); %>
+  },
+<% } %>
+<% if(it.headers && it.headers.length > 0) { %>
+    headers: {
+      <% it.headers.forEach((parameter) => { %>
+    <% if (parameter.value) { %>
+    '<%= parameter.originalName %>': '<%= parameter.value %>',
+    <% } else { %>
+    '<%= parameter.originalName %>': <%= parameter.name %>,
+    <% } %>
+    <% }); %>
       },
-<%_ } _%>
-<%_ if(headers && headers.length > 0) { _%>
-      headers: {
-        <% headers.forEach(function(parameter) { -%>
-    <%_ if (parameter.value) { _%>
-    '<%- parameter.originalName -%>': '<%- parameter.value -%>',
-    <%_ } else { _%>
-    '<%- parameter.originalName -%>': <%- parameter.name -%>,
-    <%_ } _%>
-    <% }); -%>
-      },
-<%_ } _%>
+<% } %>
     ...$axiosConf})
     .then((resp) => resp.data),
   config);

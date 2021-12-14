@@ -19,7 +19,7 @@ export interface IOperationParam {
 
 export interface IServiceClient {
   clientName: string;
-  varName: string;
+  camelCaseName: string;
   baseUrl?: string;
   operations: IApiOperation[];
 }

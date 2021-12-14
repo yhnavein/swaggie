@@ -14,16 +14,16 @@ import { renderFile } from '../templateManager';
 
 const MAX_QUERY_PARAMS: number = 1;
 
-export default function genOperations(
+export default async function genOperations(
   spec: ApiSpec,
   operations: ApiOperation[],
   options: ClientOptions
-) {
+): Promise<[string, IQueryDefinitions]> {
   const groups = groupOperationsByGroupName(operations);
-  let result = renderFile('baseClient.ejs', {
+  let result = await renderFile('baseClient.ejs', {
     servicePrefix: options.servicePrefix || '',
     baseUrl: options.baseUrl,
-  });
+  }) || '';
   let queryDefinitions = {} as IQueryDefinitions;
 
   for (let name in groups) {
@@ -34,10 +34,12 @@ export default function genOperations(
       options
     );
 
-    result += renderFile('client.ejs', {
+    const renderedFile = await renderFile('client.ejs', {
       ...clientData,
       servicePrefix: options.servicePrefix || '',
     });
+
+    result += renderedFile || '';
 
     queryDefinitions = {
       ...queryDefinitions,
@@ -45,7 +47,7 @@ export default function genOperations(
     };
   }
 
-  result += generateBarrelFile(groups, options);
+  result += await generateBarrelFile(groups, options);
 
   return [result, queryDefinitions];
 }
@@ -59,7 +61,7 @@ function prepareClient(
   return [
     {
       clientName: name,
-      varName: camelCase(name),
+      camelCaseName: camelCase(name),
       operations: preparedOperations,
       baseUrl: options.baseUrl,
     },

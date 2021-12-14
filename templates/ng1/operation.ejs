@@ -1,35 +1,38 @@
-  /**<% parameters.forEach(function(parameter) { %>
-   * @param <%- parameter.name -%> <%- parameter.optional ? '(optional)' : '' -%> <%- parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' -%>
-<% }); %>
+  /**
+<% it.parameters.forEach((parameter) => { %>
+   * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
+
+<% }); -%>
    * @return Success
    */
-  <%- name -%>(<% parameters.forEach(function(parameter) { -%>
-  <%- parameter.name -%>: <%- parameter.type -%> <%- parameter.optional ? ' | null | undefined' : '' -%>,
-    <% }); -%>
-    config?: IRequestShortcutConfig
-  ): IPromise<<%- returnType -%>> {
-    let url = '<%- url -%>?';
-<%_ if(pathParams && pathParams.length > 0) {
-  pathParams.forEach(function(parameter) { -%>
-    url = url.replace('{<%- parameter.name -%>}', encodeURIComponent("" + <%- parameter.name -%>));
+  <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
+<%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+    <% }); %>
+config?: IRequestShortcutConfig
+  ): IPromise<<%~ it.returnType %>> {
+    let url = '<%= it.url %>?';
+<% if(it.pathParams && it.pathParams.length > 0) {
+  it.pathParams.forEach((parameter) => { %>
+    url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
-} _%>
-<%_ if(query && query.length > 0) { _%>
-  <% query.forEach(function(parameter) { -%>
-  if (<%- parameter.name -%> !== undefined) {
-    <%_ if(!!parameter.original && parameter.original.type === 'array') { _%>
-      <%- parameter.name -%>.forEach(item => { url += serializeQueryParam(item, '<%- parameter.originalName -%>') + "&"; });
-    <%_ } else {_%>
-      url += serializeQueryParam(<%- parameter.name -%>, '<%- parameter.originalName -%>') + "&";
-    <%_ } _%>
-    }
-  <% }); -%>
-<%_ } _%>
+} %>
+<% if(it.query && it.query.length > 0) { %>
+  <% it.query.forEach((parameter) => { %>
+  if (<%= parameter.name %> !== undefined) {
+  <% if(!!parameter.original && parameter.original.type === 'array') { %>
+    <%= parameter.name %>.forEach(item => { url += serializeQueryParam(item, '<%= parameter.originalName %>') + "&"; });
+  <% } else {%>
+    url += serializeQueryParam(<%= parameter.name %>, '<%= parameter.originalName %>') + "&";
+  <% } %>
+  }
+  <% }); %>
+<% } %>
 
-    return this.$<%- method.toLowerCase() -%>(
+    return this.$<%= it.method.toLowerCase() %>(
       url,
-<%_ if(['POST', 'PUT', 'PATCH'].includes(method)) { _%>
-      <%- body ? body.name : 'null' -%>,
-<%_ } _%>
-      config);
+<% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
+      <%= it.body ? it.body.name : 'null' %>,
+<% } %>
+      config
+    );
   }

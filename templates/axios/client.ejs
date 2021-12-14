@@ -1,6 +1,7 @@
-export const <%- varName -%>Client = {
-  <% operations.forEach(function(operation) { %>
-<%- include('operation', operation); %>
-  <% }); %>
+export const <%= it.camelCaseName %>Client = {
+  <% it.operations.forEach((operation) => { %>
+<%~ include('operation.ejs', operation); %>
+
+<% }); %>
 };
 

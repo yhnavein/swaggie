@@ -39,7 +39,7 @@ export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
   return Promise.resolve(spec);
 }
 
-function gen(spec: ApiSpec, options: ClientOptions): ApiSpec {
+function gen(spec: ApiSpec, options: ClientOptions): Promise<ApiSpec> {
   loadAllTemplateFiles(options.template || 'axios');
 
   const operations = getOperations(spec);
