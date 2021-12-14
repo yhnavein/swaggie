@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { red } from 'nanocolors';
 
 import { runCodeGenerator } from './index';
+import { ApiSpec, FullAppOptions } from './types';
 
 const program = new Command();
 program

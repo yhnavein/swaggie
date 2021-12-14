@@ -1,3 +1,11 @@
+import {
+  ApiOperation,
+  ApiOperationResponse,
+  ApiOperationSecurity,
+  ApiSpec,
+  HttpMethod,
+} from '../types';
+
 const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
 
 /**

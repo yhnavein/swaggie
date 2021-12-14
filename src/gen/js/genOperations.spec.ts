@@ -1,6 +1,7 @@
-import { sortBy } from 'lodash';
 import { expect } from 'chai';
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
+import { ApiOperation } from '../../types';
+import { orderBy } from '../util';
 
 describe('prepareOperations', () => {
   // TODO: For now we ignore custom content types
@@ -134,7 +135,7 @@ describe('prepareOperations', () => {
 
     expect(res).to.be.ok;
     expect(res[0].headers).to.be.ok;
-    const orderedHeaders = sortBy(res[0].headers, 'name');
+    const orderedHeaders = orderBy(res[0].headers, 'name');
     expect(orderedHeaders[0]).to.deep.include({
       name: 'contentType',
       originalName: 'Content-Type',
