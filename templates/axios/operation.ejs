@@ -5,12 +5,11 @@
 <% }); -%>
    */
   <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
-  <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+<%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? '| null | undefined' : '' %>,
     <% }); %>
-  $config?: AxiosRequestConfig
+$config?: AxiosRequestConfig
   ): AxiosPromise<<%~ it.returnType %>> {
     let url = '<%= it.url %>';
-
 <% if(it.pathParams && it.pathParams.length > 0) {
   it.pathParams.forEach((parameter) => { %>
     url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
@@ -39,21 +38,21 @@
 <% } %>
 <% if(it.query && it.query.length > 0) { %>
       params: {
-        <% it.query.forEach((parameter) => { %>
+    <% it.query.forEach((parameter) => { %>
     '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
     <% }); %>
-      },
+  },
 <% } %>
 <% if(it.headers && it.headers.length > 0) { %>
       headers: {
-        <% it.headers.forEach((parameter) => { %>
+  <% it.headers.forEach((parameter) => { %>
     <% if (parameter.value) { %>
-    '<%= parameter.originalName %>': '<%= parameter.value %>',
+  '<%= parameter.originalName %>': '<%= parameter.value %>',
     <% } else { %>
-    '<%= parameter.originalName %>': <%= parameter.name %>,
+  '<%= parameter.originalName %>': <%= parameter.name %>,
     <% } %>
-    <% }); %>
-      },
+  <% }); %>
+},
 <% } %>
       ...$config,
     });

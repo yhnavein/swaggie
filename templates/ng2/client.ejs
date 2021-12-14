@@ -8,9 +8,10 @@ export class <%= it.clientName -%>Service extends BaseService {
   ) {
     super(http, baseUrl);
   }
+
   <% it.operations.forEach((operation) => { %>
 <%~ include('operation.ejs', operation); %>
 
-  <% }); %>
+<% }); %>
 }
 

@@ -1,6 +1,6 @@
-  /**
+/**
 <% it.parameters.forEach((parameter) => { %>
-   * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name != parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
+   * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
 
 <% }); -%>
    */
@@ -14,41 +14,42 @@ export function <%= it.swrOpName %>(<% it.parameters.forEach((parameter) => { %>
 
 <% if(it.pathParams && it.pathParams.length > 0) {
   it.pathParams.forEach((parameter) => { %>
-    url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
+  url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
-} _%>
+} %>
 
   let cacheUrl = url + '?';
-<% if(it.query && it.query.length > 0) { _%>
+<% if(it.query && it.query.length > 0) { %>
   <% it.query.forEach((parameter) => { %>
-  if (!!<%= parameter.name %>) {
-      cacheUrl += `<%= parameter.originalName %>=${<%= parameter.name %>}&`;
-    }
+if (!!<%= parameter.name %>) {
+    cacheUrl += `<%= parameter.originalName %>=${<%= parameter.name %>}&`;
+  }
+
   <% }); %>
-<% } _%>
-  const { data, error, mutate } = useSWR<<%~ it.returnType %>>(
-    key ?? cacheUrl,
-    () => axios.request({
-      url: url,
-      method: '<%= it.method %>',
-<% if(it.query && it.query.length > 0) { _%>
-      params: {
-        <% it.query.forEach((parameter) => { %>
-    '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
+<% } %>
+const { data, error, mutate } = useSWR<<%~ it.returnType %>>(
+  key ?? cacheUrl,
+  () => axios.request({
+    url: url,
+    method: '<%= it.method %>',
+<% if(it.query && it.query.length > 0) { %>
+    params: {
+      <% it.query.forEach((parameter) => { %>
+  '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
     <% }); %>
-      },
-<% } _%>
-<% if(it.headers && it.headers.length > 0) { _%>
-      headers: {
-        <% it.headers.forEach((parameter) => { %>
-    <% if (parameter.value) { _%>
+  },
+<% } %>
+<% if(it.headers && it.headers.length > 0) { %>
+    headers: {
+      <% it.headers.forEach((parameter) => { %>
+    <% if (parameter.value) { %>
     '<%= parameter.originalName %>': '<%= parameter.value %>',
-    <% } else { _%>
+    <% } else { %>
     '<%= parameter.originalName %>': <%= parameter.name %>,
-    <% } _%>
+    <% } %>
     <% }); %>
       },
-<% } _%>
+<% } %>
     ...$axiosConf})
     .then((resp) => resp.data),
   config);

@@ -15,8 +15,8 @@
   it.pathParams.forEach((parameter) => { %>
     url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
-} _%>
-<% if(it.formData && it.formData.length > 0) { _%>
+} %>
+<% if(it.formData && it.formData.length > 0) { %>
     const formDataBody = new FormData();
   <% it.formData.forEach((parameter) => { %>
     if (!!<%= parameter.name %>) {
@@ -27,34 +27,34 @@
     <% } %>
     }
 <% });
-} _%>
+} %>
 
     return axios.request<<%~ it.returnType %>>({
       url: url,
       method: '<%= it.method %>',
-<% if(it.formData && it.formData.length > 0) { _%>
+<% if(it.formData && it.formData.length > 0) { %>
       data: formDataBody,
-<% } else if(it.body) { _%>
+<% } else if(it.body) { %>
       data: <%= it.body.name %>,
-<% } _%>
-<% if(it.query && it.query.length > 0) { _%>
+<% } %>
+<% if(it.query && it.query.length > 0) { %>
       params: {
         <% it.query.forEach((parameter) => { %>
     '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
     <% }); %>
       },
-<% } _%>
-<% if(it.headers && it.headers.length > 0) { _%>
+<% } %>
+<% if(it.headers && it.headers.length > 0) { %>
       headers: {
         <% it.headers.forEach((parameter) => { %>
-    <% if (parameter.value) { _%>
+    <% if (parameter.value) { %>
     '<%= parameter.originalName %>': '<%= parameter.value %>',
-    <% } else { _%>
+    <% } else { %>
     '<%= parameter.originalName %>': <%= parameter.name %>,
-    <% } _%>
+    <% } %>
     <% }); %>
       },
-<% } _%>
+<% } %>
       ...$config,
     });
   },
