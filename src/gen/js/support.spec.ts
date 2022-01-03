@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { ClientOptions } from '../../types';
 import { getTSParamType } from './support';
 
 describe('getTSParamType', () => {

@@ -1,6 +1,7 @@
-import { Stats, lstatSync, writeFileSync as fsWriteFileSync } from 'fs';
+import { Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'fs';
 import { dirname } from 'path';
-import { sync as mkdirSync } from 'mkdirp';
+
+import { ApiOperation, ApiOperationResponse } from '../types';
 
 export function exists(filePath: string): Stats {
   try {
@@ -10,10 +11,13 @@ export function exists(filePath: string): Stats {
   }
 }
 
-export function saveFile(filePath, contents) {
-  mkdirSync(dirname(filePath));
-
-  fsWriteFileSync(filePath, contents);
+export function saveFile(filePath: string, contents: string) {
+  mkdir(dirname(filePath), { recursive: true }, (err) => {
+    if (err) {
+      throw err;
+    }
+    fsWriteFileSync(filePath, contents);
+  });
 }
 
 export function groupOperationsByGroupName(operations) {
@@ -108,4 +112,26 @@ export function prepareOutputFilename(out: string): string {
     return out.replace(/[\/\\]$/i, '') + '/index.ts';
   }
   return out.replace(/[\\]/i, '/') + '.ts';
+}
+
+export function uniq<T>(arr?: T[]) {
+  if (!arr) {
+    return [];
+  }
+
+  return [...new Set(arr)];
+}
+
+export function orderBy<T>(arr: T[] | null | undefined, key: string) {
+  if (!arr) {
+    return [];
+  }
+
+  return arr.concat().sort(sortByKey(key));
+}
+
+const sortByKey = (key: string) => (a, b) => a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0;
+
+export function upperFirst(str?: string | null) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 }

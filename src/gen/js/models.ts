@@ -1,3 +1,5 @@
+import { ApiOperationParam } from '../../types';
+
 export interface IApiOperation {
   returnType: string;
   method: string;

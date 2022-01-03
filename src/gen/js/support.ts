@@ -1,3 +1,5 @@
+import { ClientOptions } from '../../types';
+
 export function getTSParamType(param: any, options: ClientOptions): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 

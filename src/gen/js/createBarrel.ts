@@ -1,4 +1,5 @@
-import { camelCase } from 'lodash';
+import camelCase from 'lodash.camelcase';
+import { ClientOptions } from '../../types';
 import { renderFile } from '../templateManager';
 
 export async function generateBarrelFile(clients: any[], clientOptions: ClientOptions) {

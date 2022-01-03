@@ -1,7 +1,13 @@
-import { camelCase, orderBy, upperFirst } from 'lodash';
+import camelCase from 'lodash.camelcase';
 
 import { getTSParamType } from './support';
-import { groupOperationsByGroupName, getBestResponse, escapeReservedWords } from '../util';
+import {
+  groupOperationsByGroupName,
+  getBestResponse,
+  escapeReservedWords,
+  orderBy,
+  upperFirst,
+} from '../util';
 import {
   IServiceClient,
   IApiOperation,
@@ -11,6 +17,7 @@ import {
 } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
+import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
 
 const MAX_QUERY_PARAMS: number = 1;
 
@@ -20,10 +27,11 @@ export default async function genOperations(
   options: ClientOptions
 ): Promise<[string, IQueryDefinitions]> {
   const groups = groupOperationsByGroupName(operations);
-  let result = await renderFile('baseClient.ejs', {
-    servicePrefix: options.servicePrefix || '',
-    baseUrl: options.baseUrl,
-  }) || '';
+  let result =
+    (await renderFile('baseClient.ejs', {
+      servicePrefix: options.servicePrefix || '',
+      baseUrl: options.baseUrl,
+    })) || '';
   let queryDefinitions = {} as IQueryDefinitions;
 
   for (let name in groups) {
@@ -118,7 +126,7 @@ export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation
   }
 
   const ops = operations.map((a) => Object.assign({}, a));
-  const results = orderBy(ops, (o) => o.id);
+  const results = orderBy(ops, 'id');
 
   let inc = 0;
   let prevOpId = results[0].id;

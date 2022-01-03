@@ -1,7 +1,8 @@
-import { uniq, set } from 'lodash';
-import { join } from '../util';
+import set from 'lodash.set';
+import { join, uniq } from '../util';
 import { getTSParamType } from './support';
 import { IQueryDefinitions } from './models';
+import { ApiSpec, ClientOptions } from '../../types';
 
 export default function genTypes(
   spec: ApiSpec,

@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { ApiSpec } from '../../types';
 import genTypes, { renderQueryStringParameters, renderComment } from './genTypes';
 
 const emptySpec: ApiSpec = {
