@@ -1,4 +1,4 @@
-import set from 'lodash.set';
+import { dset as set } from 'dset';
 import { join, uniq } from '../util';
 import { getTSParamType } from './support';
 import { IQueryDefinitions } from './models';

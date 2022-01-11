@@ -12,11 +12,15 @@ export function exists(filePath: string): Stats {
 }
 
 export function saveFile(filePath: string, contents: string) {
-  mkdir(dirname(filePath), { recursive: true }, (err) => {
-    if (err) {
-      throw err;
-    }
-    fsWriteFileSync(filePath, contents);
+  return new Promise((resolve, reject) => {
+    mkdir(dirname(filePath), { recursive: true }, (err) => {
+      if (err) {
+        reject(err);
+      }
+
+      fsWriteFileSync(filePath, contents);
+      resolve(true);
+    });
   });
 }
 

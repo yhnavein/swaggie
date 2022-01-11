@@ -1,4 +1,4 @@
-import camelCase from 'lodash.camelcase';
+import { camel } from 'case';
 
 import { getTSParamType } from './support';
 import {
@@ -69,7 +69,7 @@ function prepareClient(
   return [
     {
       clientName: name,
-      camelCaseName: camelCase(name),
+      camelCaseName: camel(name),
       operations: preparedOperations,
       baseUrl: options.baseUrl,
     },
@@ -150,7 +150,7 @@ export function getOperationName(opId: string, group?: string) {
     return opId;
   }
 
-  return camelCase(opId.replace(group + '_', ''));
+  return camel(opId.replace(group + '_', ''));
 }
 
 function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[] {
@@ -216,7 +216,7 @@ export function getParamName(name: string): string {
   return escapeReservedWords(
     name
       .split('.')
-      .map((x) => camelCase(x))
+      .map((x) => camel(x))
       .join('_')
   );
 }
