@@ -12,6 +12,7 @@ export default async function genCode(
   fileContents += genTypes(spec, queryDefinitions, options);
 
   const destFile = prepareOutputFilename(options.out);
-  saveFile(destFile, fileContents);
+  await saveFile(destFile, fileContents);
+
   return spec;
 }
