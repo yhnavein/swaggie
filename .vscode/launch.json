@@ -8,10 +8,11 @@
       "type": "node",
       "request": "launch",
       "name": "Debug swaggie",
-      "program": "${workspaceFolder}/dist/cli.js",
+      "program": "${workspaceFolder}/src/cli.ts",
       "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "sucrase/register"],
       "protocol": "inspector",
-      "args": ["-c", "./test/api-test.json"]
+      "args": ["-c", "./test/sample-config.json"]
     }
   ]
 }
