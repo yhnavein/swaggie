@@ -30,9 +30,30 @@ describe('runCodeGenerator', () => {
     );
   });
 
+  it('fails with only --input provided', () => {
+    const parameters = {
+      input: emptySwaggerInput,
+    };
+
+    return runCodeGenerator(parameters as any).catch((e) =>
+      expect(e).to.contain('You need to provide')
+    );
+  });
+
   it('works with --out and --src provided', () => {
     const parameters = {
       src: 'http://petstore.swagger.io/v2/swagger.json',
+      out: './.tmp/test/',
+    };
+
+    runCodeGenerator(parameters as any).then((res) => {
+      expect(res).to.be.ok;
+    });
+  });
+
+  it('works with --out and --input provided', () => {
+    const parameters = {
+      input: emptySwaggerInput,
       out: './.tmp/test/',
     };
 
@@ -110,3 +131,17 @@ describe('runCodeGenerator', () => {
       .finally(() => done());
   });
 });
+
+const emptySwaggerInput = `
+swagger: "2.0"
+host: petstore.swagger.io
+basePath: /v1
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+definitions:
+`;

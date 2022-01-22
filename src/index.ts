@@ -24,14 +24,15 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
 }
 
 function verifyOptions(options: FullAppOptions): Promise<any> {
-  try {
-    if (!options.config && (!options.src || !options.out)) {
-      return Promise.reject('You need to provide --config or --src and --out parameters');
-    }
-    return Promise.resolve(options);
-  } catch (e) {
-    return Promise.reject(e);
+  if (!options) {
+    return Promise.reject('Options were not provided');
   }
+  if (!options.config && ((!options.src && !options.input) || !options.out)) {
+    return Promise.reject(
+      'You need to provide either --config or --src/--input and --out parameters'
+    );
+  }
+  return Promise.resolve(options);
 }
 
 export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
