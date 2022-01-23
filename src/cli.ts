@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
+import { bold, cyan, red } from 'nanocolors';
 import { Command } from 'commander';
-import { red } from 'nanocolors';
 
 import { runCodeGenerator } from './index';
 import { ApiSpec, FullAppOptions } from './types';
@@ -48,6 +48,7 @@ const options = program.opts() as FullAppOptions;
 runCodeGenerator(options).then(complete, error);
 
 function complete(spec: ApiSpec) {
+  console.info(cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`));
   process.exit(0);
 }
 

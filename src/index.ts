@@ -1,8 +1,6 @@
 import fs from 'fs';
-import { bold, cyan } from 'nanocolors';
 
 import genJsCode from './gen/js';
-
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
 import { ApiSpec, ClientOptions, FullAppOptions } from './types';
@@ -14,12 +12,6 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
       resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
         .then((spec) => verifySpec(spec))
         .then((spec) => gen(spec, options))
-        .then(() => {
-          console.info(
-            cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`)
-          );
-          return true;
-        })
     );
 }
 
