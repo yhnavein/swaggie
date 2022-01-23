@@ -1,0 +1,34 @@
+site_name: 'Swaggie'
+site_description: 'Generate TypeScript code from Swagger definitions'
+site_author: 'Piotr Dąbrowski'
+
+docs_dir: 'docs/'
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: light blue
+    accent: blue
+  language: en
+  logo: assets/swaggie-logo.png
+  favicon: assets/swaggie-logo.png
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - toc.integrate
+
+markdown_extensions:
+  - admonition
+  - meta
+  - footnotes
+  - toc:
+      permalink: '#'
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+
+plugins:
+  - search

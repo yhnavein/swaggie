@@ -1,7 +1,3 @@
-<div style="text-align: center; margin: 0px auto 30px; max-width: 600px">
-  <img src="docs/docs/assets/swaggie.svg" alt="Swaggie logo" >
-</div>
-
 # Swaggie
 
 ![npm latest version](https://img.shields.io/npm/v/swaggie)
@@ -103,7 +99,7 @@ swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./client/petstore --te
 
 ### Code
 
-```javascript
+```js
 const swaggie = require('swaggie');
 swaggie
   .genCode({
@@ -154,7 +150,7 @@ Let's run `swaggie` against PetStore API and see what will happen:
 swaggie -s https://petstore.swagger.io/v2/swagger.json -o ./api/petstore.ts && prettier ./api/petstore.ts --write
 ```
 
-```typescript
+```ts
 // ./api/petstore.ts
 
 import Axios, { AxiosPromise } from 'axios';
@@ -186,7 +182,7 @@ export const petClient = {
 
 When we have that we can write some domain code and use this auto-generated classes:
 
-```typescript
+```ts
 // app.ts
 
 import { petClient } from './api/petClient';
