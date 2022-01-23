@@ -1,0 +1,25 @@
+{
+  "name": "swaggie-api",
+  "version": "0.3.0",
+  "description": "A swaggie API used by docs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "express": "^4.15.2",
+    "swaggie": "^0.7.3"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yhnavein/swaggie"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "license": "MIT"
+}
