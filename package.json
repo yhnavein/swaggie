@@ -19,12 +19,14 @@
     "node": ">=12.0.0"
   },
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "swaggie": "dist/cli.js"
   },
   "scripts": {
-    "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests",
+    "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests && npm run types",
     "rm-tests": "find dist/ -name '*.spec.js' -type f -delete",
+    "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
     "test": "mocha 'src/**/*.spec.ts'"
   },
   "files": [
