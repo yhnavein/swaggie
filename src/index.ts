@@ -5,6 +5,7 @@ import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
 import { ApiSpec, ClientOptions, FullAppOptions } from './types';
 
+/** Runs whole code generation process. @returns generated code */
 export function runCodeGenerator(options: FullAppOptions) {
   return verifyOptions(options)
     .then(applyConfigFile)
@@ -25,6 +26,7 @@ function verifyOptions(options: FullAppOptions) {
   return Promise.resolve(options);
 }
 
+/** Validates if the spec is correct and if is supported */
 export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
   if (!spec || !spec.swagger)
     return Promise.reject('Spec does not look like Swagger / OpenAPI 2! Open API 3 support is WIP');

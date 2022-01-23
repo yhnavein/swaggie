@@ -5,20 +5,21 @@ export interface ClientOptions {
    **/
   src: string | object;
   /** Path to the file which will contain generated TypeScript code */
-  out: string;
+  out?: string;
   /** Template to be used for generation */
-  template: string;
-  baseUrl: string;
+  template: Template;
+  baseUrl?: string;
   preferAny?: boolean;
   servicePrefix?: string;
+  /** Generate models for query string instead list of parameters */
   queryModels?: boolean;
-
+  /** How date should be handled. It does not do any special serialization */
   dateFormat?: DateSupport; // 'luxon', 'momentjs', etc
 }
 
 export interface FullAppOptions extends ClientOptions {
   /** Path to the configuration file that contains actual config tp be used */
-  config: string;
+  config?: string;
 }
 
 export interface ApiRequestData {
@@ -46,6 +47,7 @@ export interface ApiSpec {
   contentTypes: string[];
 }
 
+export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios';
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
 
