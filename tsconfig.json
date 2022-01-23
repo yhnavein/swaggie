@@ -4,6 +4,7 @@
     "rootDir": "./src",
     "target": "es2017",
     "module": "commonjs",
+    "declaration": true,
     "removeComments": false,
     "esModuleInterop": true,
     "sourceMap": false,

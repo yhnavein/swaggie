@@ -1,46 +1,39 @@
 import fs from 'fs';
-import { bold, cyan } from 'nanocolors';
 
 import genJsCode from './gen/js';
-
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
 import { ApiSpec, ClientOptions, FullAppOptions } from './types';
 
-export function runCodeGenerator(options: FullAppOptions): Promise<any> {
+/** Runs whole code generation process. @returns generated code */
+export function runCodeGenerator(options: FullAppOptions) {
   return verifyOptions(options)
     .then(applyConfigFile)
-    .then((options) =>
-      resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
+    .then((opts) =>
+      resolveSpec(opts.src, { ignoreRefType: '#/definitions/' })
         .then((spec) => verifySpec(spec))
-        .then((spec) => gen(spec, options))
-        .then(() => {
-          console.info(
-            cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`)
-          );
-          return true;
-        })
+        .then((spec) => gen(spec, opts))
     );
 }
 
-function verifyOptions(options: FullAppOptions): Promise<any> {
-  try {
-    if (!options.config && (!options.src || !options.out)) {
-      return Promise.reject('You need to provide --config or --src and --out parameters');
-    }
-    return Promise.resolve(options);
-  } catch (e) {
-    return Promise.reject(e);
+function verifyOptions(options: FullAppOptions) {
+  if (!options) {
+    return Promise.reject('Options were not provided');
   }
+  if (!!options.config === !!options.src) {
+    return Promise.reject('You need to provide either --config or --src parameters');
+  }
+  return Promise.resolve(options);
 }
 
+/** Validates if the spec is correct and if is supported */
 export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
   if (!spec || !spec.swagger)
     return Promise.reject('Spec does not look like Swagger / OpenAPI 2! Open API 3 support is WIP');
   return Promise.resolve(spec);
 }
 
-function gen(spec: ApiSpec, options: ClientOptions): Promise<ApiSpec> {
+function gen(spec: ApiSpec, options: ClientOptions): Promise<string> {
   loadAllTemplateFiles(options.template || 'axios');
 
   const operations = getOperations(spec);

@@ -20,9 +20,20 @@ describe('runCodeGenerator', () => {
     );
   });
 
-  it('fails with only --src provided', () => {
+  it('fails with both --config and --src provided', () => {
     const parameters = {
+      config: './test/sample-config.json',
       src: 'https://google.pl',
+    };
+
+    return runCodeGenerator(parameters as any).catch((e) =>
+      expect(e).to.contain('You need to provide')
+    );
+  });
+
+  it('fails when there is no --config or --src provided', () => {
+    const parameters = {
+      out: './.tmp/test/',
     };
 
     return runCodeGenerator(parameters as any).catch((e) =>

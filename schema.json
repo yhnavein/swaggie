@@ -8,7 +8,7 @@
       "description": "Main settings of the application",
       "properties": {
         "out": {
-          "description": "The path to the file where the API would be generated",
+          "description": "The path to the file where the API would be generated. Use stdout if left empty.",
           "type": "string"
         },
         "src": {
