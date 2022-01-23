@@ -1,6 +1,9 @@
 export interface ClientOptions {
-  /** Path or URL to the Swagger specification file (JSON or YAML) */
-  src: string;
+  /**
+   * Path or URL to the Swagger specification file (JSON or YAML).
+   * Alternatively you can provide parsed object here instead
+   **/
+  src: string | object;
   /** Path to the file which will contain generated TypeScript code */
   out: string;
   /** Template to be used for generation */
@@ -16,9 +19,6 @@ export interface ClientOptions {
 export interface FullAppOptions extends ClientOptions {
   /** Path to the configuration file that contains actual config tp be used */
   config: string;
-
-  /** Swagger specification provided as a direct input for Swagger */
-  input?: string;
 }
 
 export interface ApiRequestData {

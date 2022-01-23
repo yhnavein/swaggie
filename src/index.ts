@@ -8,10 +8,10 @@ import { ApiSpec, ClientOptions, FullAppOptions } from './types';
 export function runCodeGenerator(options: FullAppOptions) {
   return verifyOptions(options)
     .then(applyConfigFile)
-    .then((options) =>
-      resolveSpec(options.src, { ignoreRefType: '#/definitions/' })
+    .then((opts) =>
+      resolveSpec(opts.src, { ignoreRefType: '#/definitions/' })
         .then((spec) => verifySpec(spec))
-        .then((spec) => gen(spec, options))
+        .then((spec) => gen(spec, opts))
     );
 }
 
@@ -19,11 +19,8 @@ function verifyOptions(options: FullAppOptions) {
   if (!options) {
     return Promise.reject('Options were not provided');
   }
-  if (!options.config && !options.src && !options.input) {
-    return Promise.reject('You need to provide either --config or --src/--input parameters');
-  }
-  if (options.src && options.input) {
-    return Promise.reject('Please provide --src OR --input parameter');
+  if (!!options.config === !!options.src) {
+    return Promise.reject('You need to provide either --config or --src parameters');
   }
   return Promise.resolve(options);
 }

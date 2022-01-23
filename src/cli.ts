@@ -49,7 +49,8 @@ runCodeGenerator(options).then(complete, error);
 
 function complete(code: string) {
   if (options.out) {
-    console.info(cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`));
+    const from = typeof options.src === 'string' ? `from ${bold(options.src)} ` : '';
+    console.info(cyan(`Api ${from}code generated into ${bold(options.out)}`));
   } else {
     console.log(code);
   }
