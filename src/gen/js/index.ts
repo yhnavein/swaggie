@@ -7,12 +7,14 @@ export default async function genCode(
   spec: ApiSpec,
   operations: ApiOperation[],
   options: ClientOptions
-): Promise<ApiSpec> {
+): Promise<string> {
   let [fileContents, queryDefinitions] = await genOperations(spec, operations, options);
   fileContents += genTypes(spec, queryDefinitions, options);
 
-  const destFile = prepareOutputFilename(options.out);
-  await saveFile(destFile, fileContents);
+  if (options.out) {
+    const destFile = prepareOutputFilename(options.out);
+    await saveFile(destFile, fileContents);
+  }
 
-  return spec;
+  return fileContents;
 }

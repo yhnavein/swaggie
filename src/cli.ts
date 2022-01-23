@@ -4,7 +4,7 @@ import { bold, cyan, red } from 'nanocolors';
 import { Command } from 'commander';
 
 import { runCodeGenerator } from './index';
-import { ApiSpec, FullAppOptions } from './types';
+import { FullAppOptions } from './types';
 
 const program = new Command();
 program
@@ -23,7 +23,7 @@ program
   )
   .option(
     '-o, --out <filePath>',
-    'The path to the file where the API would be generated',
+    'The path to the file where the API would be generated. Use stdout if left empty',
     process.env.OPEN_API_OUT
   )
   .option(
@@ -47,8 +47,13 @@ const options = program.opts() as FullAppOptions;
 
 runCodeGenerator(options).then(complete, error);
 
-function complete(spec: ApiSpec) {
-  console.info(cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`));
+function complete(code: string) {
+  if (options.out) {
+    console.info(cyan(`Api from ${bold(options.src)} code generated into ${bold(options.out)}`));
+  } else {
+    console.log(code);
+  }
+
   process.exit(0);
 }
 

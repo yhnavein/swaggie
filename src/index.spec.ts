@@ -20,23 +20,24 @@ describe('runCodeGenerator', () => {
     );
   });
 
-  it('fails with only --src provided', () => {
+  it('works with only --src provided', () => {
     const parameters = {
-      src: 'https://google.pl',
+      src: 'http://petstore.swagger.io/v2/swagger.json',
     };
 
-    return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('You need to provide')
-    );
+    return runCodeGenerator(parameters as any).then((res) => {
+      expect(res).to.be.ok;
+    });
   });
 
-  it('fails with only --input provided', () => {
+  it('fails with both --input and --src provided', () => {
     const parameters = {
+      src: 'https://google.pl',
       input: emptySwaggerInput,
     };
 
     return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('You need to provide')
+      expect(e).to.contain('--src OR --input')
     );
   });
 

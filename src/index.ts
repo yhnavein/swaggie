@@ -5,7 +5,7 @@ import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
 import { ApiSpec, ClientOptions, FullAppOptions } from './types';
 
-export function runCodeGenerator(options: FullAppOptions): Promise<any> {
+export function runCodeGenerator(options: FullAppOptions) {
   return verifyOptions(options)
     .then(applyConfigFile)
     .then((options) =>
@@ -15,14 +15,15 @@ export function runCodeGenerator(options: FullAppOptions): Promise<any> {
     );
 }
 
-function verifyOptions(options: FullAppOptions): Promise<any> {
+function verifyOptions(options: FullAppOptions) {
   if (!options) {
     return Promise.reject('Options were not provided');
   }
-  if (!options.config && ((!options.src && !options.input) || !options.out)) {
-    return Promise.reject(
-      'You need to provide either --config or --src/--input and --out parameters'
-    );
+  if (!options.config && !options.src && !options.input) {
+    return Promise.reject('You need to provide either --config or --src/--input parameters');
+  }
+  if (options.src && options.input) {
+    return Promise.reject('Please provide --src OR --input parameter');
   }
   return Promise.resolve(options);
 }
@@ -33,7 +34,7 @@ export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
   return Promise.resolve(spec);
 }
 
-function gen(spec: ApiSpec, options: ClientOptions): Promise<ApiSpec> {
+function gen(spec: ApiSpec, options: ClientOptions): Promise<string> {
   loadAllTemplateFiles(options.template || 'axios');
 
   const operations = getOperations(spec);
