@@ -13,6 +13,7 @@ export function runCodeGenerator(options: FullAppOptions) {
       resolveSpec(opts.src, { ignoreRefType: '#/definitions/' })
         .then((spec) => verifySpec(spec))
         .then((spec) => gen(spec, opts))
+        .then((code) => [code, opts] as CodeGenResult)
     );
 }
 
@@ -66,3 +67,5 @@ function readFile(filePath: string): Promise<string> {
     return fs.readFile(filePath, 'utf8', (err, contents) => (err ? rej(err) : res(contents)));
   });
 }
+
+export type CodeGenResult = [string, ClientOptions];
