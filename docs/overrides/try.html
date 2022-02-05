@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+<!-- Render hero under tabs -->
+{% block tabs %} {{ super() }}
+
+<div id="try-it" class="md-typeset">
+  <div class="spec">Spec</div>
+  <div class="options">
+    Options
+    <select class="md-select">
+      <option>Option 1</option>
+      <option>Option 2</option>
+      <option>Option 3</option>
+    </select>
+    <button class="md-button md-button--primary">Generate</button>
+  </div>
+  <div class="result">Result</div>
+</div>
+
+{% endblock %}
+
+<!-- Content -->
+{% block content %}{% endblock %} {% block scripts %} {{ super() }}
+
+<!-- Extra JavaScript (can't be set in mkdocs.yml due to content hash) -->
+<script src="{{ 'overrides/assets/javascripts/bundle.js' | url }}"></script>
+{% endblock %}
+
+<!-- Application footer -->
+{% block footer %}{% endblock %}

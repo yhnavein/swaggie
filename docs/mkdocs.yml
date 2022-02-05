@@ -6,6 +6,7 @@ docs_dir: 'docs/'
 
 theme:
   name: material
+  custom_dir: overrides
   palette:
     scheme: slate
     primary: light blue
@@ -32,3 +33,6 @@ markdown_extensions:
 
 plugins:
   - search
+
+extra_css:
+  - try-it.css

@@ -1,0 +1,15 @@
+#try-it {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+#try-it .spec {
+  flex: 2;
+}
+#try-it .options {
+  flex: 1;
+}
+#try-it .result {
+  flex: 2;
+}
