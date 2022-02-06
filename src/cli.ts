@@ -3,7 +3,7 @@
 import { bold, cyan, red } from 'nanocolors';
 import { Command } from 'commander';
 
-import { runCodeGenerator } from './index';
+import { CodeGenResult, runCodeGenerator } from './index';
 import { FullAppOptions } from './types';
 
 const program = new Command();
@@ -47,10 +47,10 @@ const options = program.opts() as FullAppOptions;
 
 runCodeGenerator(options).then(complete, error);
 
-function complete(code: string) {
-  if (options.out) {
-    const from = typeof options.src === 'string' ? `from ${bold(options.src)} ` : '';
-    console.info(cyan(`Api ${from}code generated into ${bold(options.out)}`));
+function complete([code, opts]: CodeGenResult) {
+  if (opts.out) {
+    const from = typeof opts.src === 'string' ? `from ${bold(opts.src)} ` : '';
+    console.info(cyan(`Api ${from}code generated into ${bold(opts.out)}`));
   } else {
     console.log(code);
   }
