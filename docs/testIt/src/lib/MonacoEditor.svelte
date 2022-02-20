@@ -8,7 +8,7 @@
   import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 
   let divEl: HTMLDivElement = null;
-  let editor: monaco.editor.IStandaloneCodeEditor;
+  export let editor: monaco.editor.IStandaloneCodeEditor;
   let Monaco;
 
   onMount(async () => {
@@ -54,8 +54,10 @@
 
 <style>
   .h-screen {
-    height: 600px;
+    height: 100%;
+    min-height: 400px;
     width: 50%;
     min-width: 400px;
+    width: 100%;
   }
 </style>
