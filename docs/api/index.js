@@ -1,9 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const { runCodeGenerator } = require('swaggie');
 const PORT = process.env.PORT || 5000;
 
 express()
+  .use(cors())
   .use(bodyParser.json({ limit: '10mb' }))
   .get('/', (req, res) => res.send('Nothing is here'))
   .post('/generate', generator)
