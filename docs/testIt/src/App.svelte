@@ -16,7 +16,10 @@
       },
       method: 'POST',
       body: sourceContents,
-    })
+    }).then(res => res.text())
+      .then(res => {
+        dest.setValue(res);
+      });
   }
 </script>
 
@@ -25,8 +28,8 @@
     <OptsForm on:message={handleGenerate} />
   </div>
   <div class="editors">
-    <div><Monaco bind:editor={source} /></div>
-    <div><Monaco bind:editor={dest} /></div>
+    <div><Monaco bind:editor={source} language="json" /></div>
+    <div><Monaco bind:editor={dest} language="typescript" /></div>
   </div>
 </main>
 

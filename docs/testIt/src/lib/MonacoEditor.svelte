@@ -9,6 +9,8 @@
 
   let divEl: HTMLDivElement = null;
   export let editor: monaco.editor.IStandaloneCodeEditor;
+  export let initialText: string = '';
+  export let language: string = 'json';
   let Monaco;
 
   onMount(async () => {
@@ -33,8 +35,8 @@
 
     Monaco = await import('monaco-editor');
     editor = Monaco.editor.create(divEl, {
-      value: `{ "test": true }`,
-      language: 'json',
+      value: initialText,
+      language: language,
       theme: 'vs-dark',
       options: {
         minimap: {
