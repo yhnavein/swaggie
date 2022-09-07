@@ -6,7 +6,6 @@
 
 ![npm latest version](https://img.shields.io/npm/v/swaggie)
 ![NodeCI](https://github.com/yhnavein/swaggie/workflows/NodeCI/badge.svg)
-[![CircleCI](https://circleci.com/gh/yhnavein/swaggie.svg?style=svg)](https://circleci.com/gh/yhnavein/swaggie)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/yhnavein/swaggie.svg)
 ![npm downloads](https://img.shields.io/npm/dw/swaggie.svg)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)

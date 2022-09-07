@@ -1,7 +1,13 @@
 import { expect } from 'chai';
+import fs from 'fs';
+import * as fetch from 'node-fetch';
+import { Response } from 'node-fetch';
+import sinon from 'sinon';
 import { runCodeGenerator, applyConfigFile, verifySpec } from './index';
 
 describe('runCodeGenerator', () => {
+  afterEach(sinon.restore);
+
   it('fails with no parameters provided', () => {
     const parameters = {};
 
@@ -74,6 +80,12 @@ describe('runCodeGenerator', () => {
   });
 
   it('works with proper --config provided', (done) => {
+    const stub = sinon.stub(fetch, 'default');
+    const response = fs.readFileSync(`${__dirname}/../test/petstore-v2.json`, {
+      encoding: 'utf-8',
+    });
+    stub.returns(new Promise((resolve) => resolve(new Response(response))));
+
     const parameters = {
       config: './test/sample-config.json',
     };

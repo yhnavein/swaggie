@@ -1,13 +1,26 @@
 import { expect } from 'chai';
+import fs from 'fs';
+import * as fetch from 'node-fetch';
+import { Response } from 'node-fetch';
+import sinon from 'sinon';
 import { resolveSpec } from './swagger';
 
+// URLs are not used to fetch anything. We are faking responses through SinonJS
 const petstore2 = {
   json: 'http://petstore.swagger.io/v2/swagger.json',
-  yaml: 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/yaml/petstore.yaml',
+  yaml: 'http://petstore.swagger.io/v2/swagger.yaml',
 };
 
 describe('resolveSpec', () => {
+  afterEach(sinon.restore);
+
   it('should resolve a JSON spec from url', async () => {
+    const stub = sinon.stub(fetch, 'default');
+    const response = fs.readFileSync(`${__dirname}/../../test/petstore-v2.json`, {
+      encoding: 'utf-8',
+    });
+    stub.returns(new Promise((resolve) => resolve(new Response(response))));
+
     const spec = await resolveSpec(petstore2.json);
     expect(spec).to.be.ok;
     expect(spec.host).to.be.equal('petstore.swagger.io');
@@ -18,6 +31,12 @@ describe('resolveSpec', () => {
   });
 
   it('should resolve a YAML spec from url', async () => {
+    const stub = sinon.stub(fetch, 'default');
+    const response = fs.readFileSync(`${__dirname}/../../test/petstore.yml`, {
+      encoding: 'utf-8',
+    });
+    stub.returns(new Promise((resolve) => resolve(new Response(response))));
+
     const spec = await resolveSpec(petstore2.yaml);
     expect(spec).to.be.ok;
     expect(spec.host).to.be.equal('petstore.swagger.io');
