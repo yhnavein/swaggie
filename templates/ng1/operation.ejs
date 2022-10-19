@@ -49,7 +49,7 @@
 <% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
   <% if(it.formData && it.formData.length > 0) { %>
         formDataBody,
-  <% } else if(it.body) { %>
+  <% } else { %>
       <%= it.body ? it.body.name : 'null' %>,
   <% } %>
 <% } %>
