@@ -4,7 +4,7 @@
 
 <% }); -%>
 */
-<%= it.name %>(
+export const <%= it.name %> = (
 {
 <% it.parameters.forEach((parameter) => { %>
 <%= parameter.name %>,
@@ -14,7 +14,7 @@
 <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? '| null | undefined' : '' %>,
 <% }); %>},
 $config?: AxiosRequestConfig
-): AxiosPromise<<%~ it.returnType %>> {
+): AxiosPromise<<%~ it.returnType %>> => {
   let url = '<%= it.url %>';
   <% if(it.pathParams && it.pathParams.length > 0) {
   it.pathParams.forEach((parameter) => { %>
