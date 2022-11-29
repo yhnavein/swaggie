@@ -1,0 +1,10 @@
+
+function serializeQueryParam(obj: any) {
+  if (obj === null || obj === undefined) return '';
+  if (obj instanceof Date) return obj.toJSON();
+  if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  return Object.keys(obj)
+    .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
+    .join('&');
+}
+
