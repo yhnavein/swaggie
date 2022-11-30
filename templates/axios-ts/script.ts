@@ -3,14 +3,15 @@
  * @Author: qifeng qifeng@carbonstop.net
  * @Date: 2022-11-29 15:28:23
  * @LastEditors: qifeng qifeng@carbonstop.net
- * @LastEditTime: 2022-11-29 18:45:03
+ * @LastEditTime: 2022-11-30 20:28:37
  */
 
-const { execSync } = require('child_process');
-import config from './configs';
-import { getSpecifiedFiles, readFile, writeFile } from './file';
 import * as _ from 'lodash';
 import * as path from 'path';
+import config from './configs';
+import { getSpecifiedFiles, readFile, writeFile } from './file';
+
+const { execSync } = require('child_process');
 
 const { basePath, templatePath, swaggerJsonUrls } = config;
 
@@ -25,17 +26,15 @@ const output = (msg: string) => {
 };
 
 const generateSdkPath = (fullPath: string) => {
-  const pathname = new URL(fullPath).pathname;
-  return _.camelCase(pathname.split('/'));
+  const { pathname } = new URL(fullPath);
+  return _.camelCase(pathname.replaceAll('/', ' '));
 };
 
 /** 生成sdk 文件 */
 swaggerJsonUrls.forEach((url) => {
   output(`generate sdk from ${url}`);
   const fileName = generateSdkPath(url);
-  execSync(
-    `ts-node ./src/cli.ts -s ${url}  -o ${path.join(basePath, fileName)} -t ${templatePath} `
-  );
+  execSync(`swaggie -s ${url}  -o ${path.join(basePath, fileName)} -t ${templatePath} `);
 });
 
 /** 读取sdk 文件, 清除不支持的符号类型 */

@@ -17,10 +17,10 @@ export const <%= it.name %> = (
 <% }); %>},
 $config?: AxiosRequestConfig
 ): AxiosPromise<<%~ it.returnType %>> => {
-  let url = '<%= it.url %>';
+  let backendApiUrl = '<%= it.apiBasePath + it.url %>';
   <% if(it.pathParams && it.pathParams.length > 0) {
   it.pathParams.forEach((parameter) => { %>
-  url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
+  url = backendApiUrl.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
   <% });
 } %>
   <% if(it.formData && it.formData.length > 0) { %>
@@ -37,7 +37,7 @@ $config?: AxiosRequestConfig
 } %>
 
   return axios.request<<%~ it.returnType %>>({
-    url: url,
+    url: backendApiUrl,
     method: '<%= it.method %>',
     <% if(it.formData && it.formData.length > 0) { %>
     data: formDataBody,
