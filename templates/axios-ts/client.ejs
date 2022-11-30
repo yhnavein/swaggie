@@ -1,6 +1,6 @@
 <% it.operations.forEach((operation) => { %>
 
-<%~ include('operation.ejs', operation); %>
+<%~ include('operation.ejs', {...operation,apiBasePath:it.apiBasePath}); %>
 
 
 <% }); %>

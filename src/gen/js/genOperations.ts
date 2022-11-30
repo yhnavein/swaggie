@@ -44,6 +44,7 @@ export default async function genOperations(
 
     const renderedFile = await renderFile('client.ejs', {
       ...clientData,
+      apiBasePath: spec?.basePath || '',
       servicePrefix: options.servicePrefix || '',
     });
 
@@ -61,8 +62,11 @@ export default async function genOperations(
 }
 
 function prepareClient(
+  // controllers
   name: string,
+  // all request
   operations: ApiOperation[],
+  // input script options
   options: ClientOptions
 ): [IServiceClient, IQueryDefinitions] {
   const [preparedOperations, queryDefinitions] = prepareOperations(operations, options);
@@ -100,6 +104,8 @@ export function prepareOperations(
       }
 
       return {
+        //FIXME -  summary is not here . i think it should has
+        summary: op.summary || '',
         returnType: respType,
         method: op.method.toUpperCase(),
         name: getOperationName(op.id, op.group),

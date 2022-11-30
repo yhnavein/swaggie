@@ -1,4 +1,6 @@
 /**
+* @description <%= it?.summary %>
+
 <% it.parameters.forEach((parameter) => { %>
 * @param <%= `{${parameter?.original?.type || 'any'}}`.padEnd(10, ' ') %> <%= `[${parameter.name}]`.padEnd(15, ' ') %> <%= parameter.optional ? ' ' : '[required]' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %> <%= parameter?.original?.description || '' %>
 
