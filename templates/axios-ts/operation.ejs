@@ -43,11 +43,11 @@ $config?: AxiosRequestConfig
     data: <%= it.body.name %>,
     <% } %>
     <% if(it.query && it.query.length > 0) { %>
-    params: {
+    params: serializeQueryParam({
     <% it.query.forEach((parameter) => { %>
-    '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
+    '<%= parameter.originalName %>': <%= parameter.name %>,
     <% }); %>
-    },
+    }),
     <% } %>
     <% if(it.headers && it.headers.length > 0) { %>
     headers: {
@@ -63,4 +63,4 @@ $config?: AxiosRequestConfig
     WAITING_REPLACED_BASE_URL
     ...$config,
     });
-    },
+    };
