@@ -81,7 +81,7 @@ describe('prepareOperations', () => {
         accepts: ['application/json'],
         contentTypes: ['application/x-www-form-urlencoded'],
       },
-    ] as ApiOperation[];
+    ] as unknown as ApiOperation[];
 
     const [res] = prepareOperations(ops, {} as any);
 
@@ -129,7 +129,7 @@ describe('prepareOperations', () => {
         accepts: ['application/json'],
         contentTypes: ['application/x-www-form-urlencoded'],
       },
-    ] as ApiOperation[];
+    ] as unknown as ApiOperation[];
 
     const [res] = prepareOperations(ops, {} as any);
 
@@ -178,7 +178,7 @@ describe('prepareOperations', () => {
       group: 'Pet',
       accepts: ['application/json'],
       contentTypes: [],
-    } as ApiOperation;
+    } as unknown as ApiOperation;
 
     it('query model should be generated instead array of params', () => {
       const expectedQueryType = 'IGetPetByIdFromPetServiceQuery';
@@ -233,7 +233,7 @@ describe('prepareOperations', () => {
         accepts: ['application/json'],
         contentTypes: ['application/x-www-form-urlencoded'],
       },
-    ] as ApiOperation[];
+    ] as unknown as ApiOperation[];
 
     const [res] = prepareOperations(ops, {} as any);
 
@@ -439,7 +439,7 @@ describe('x-schema extension', () => {
       },
     ];
 
-    const res = prepareOperations(ops as ApiOperation[], {} as any);
+    const res = prepareOperations(ops as unknown as ApiOperation[], {} as any);
 
     expect(res).to.be.ok;
     expect(res[0][0].parameters[0]).to.be.deep.include({
@@ -476,7 +476,7 @@ describe('x-schema extension', () => {
       },
     ];
 
-    const res = prepareOperations(ops as ApiOperation[], {} as any);
+    const res = prepareOperations(ops as unknown as ApiOperation[], {} as any);
 
     expect(res).to.be.ok;
     expect(res[0][0].parameters[0]).to.be.deep.include({
@@ -514,7 +514,7 @@ describe('x-schema extension', () => {
       },
     ];
 
-    const res = prepareOperations(ops as ApiOperation[], {} as any);
+    const res = prepareOperations(ops as unknown as ApiOperation[], {} as any);
 
     expect(res).to.be.ok;
     expect(res[0][0].parameters[0]).to.be.deep.include({
@@ -552,7 +552,7 @@ describe('x-schema extension', () => {
       },
     ];
 
-    const [resOps, resDefs] = prepareOperations(ops as ApiOperation[], {} as any);
+    const [resOps, resDefs] = prepareOperations(ops as unknown as ApiOperation[], {} as any);
 
     expect(resOps).to.be.ok;
     expect(resDefs).to.be.ok;

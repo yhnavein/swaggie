@@ -26,7 +26,10 @@ describe('serializeQueryParam', () => {
     if (obj instanceof Date) return encodeURIComponent(obj.toJSON());
     if (typeof obj !== 'object' || Array.isArray(obj)) return encodeURIComponent(obj);
     return Object.keys(obj)
-      .reduce((a, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
+      .reduce<any>(
+        (a, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a,
+        []
+      )
       .join('&');
   }
 });
@@ -62,7 +65,7 @@ describe('serializeQueryParam / axios', () => {
     if (obj instanceof Date) return obj.toJSON();
     if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
     return Object.keys(obj)
-      .reduce((a, b) => a.push(b + '=' + obj[b]) && a, [])
+      .reduce<any>((a, b) => a.push(b + '=' + obj[b]) && a, [])
       .join('&');
   }
 });
