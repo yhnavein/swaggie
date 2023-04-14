@@ -241,7 +241,7 @@ function unwrapDefinitions(definitions: any) {
   return result;
 }
 
-export function renderComment(comment: string) {
+export function renderComment(comment: string | null) {
   if (!comment) {
     return null;
   }

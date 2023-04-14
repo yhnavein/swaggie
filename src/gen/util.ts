@@ -94,7 +94,7 @@ const reservedWords = [
   'yield',
 ];
 
-export function escapeReservedWords(name: string): string {
+export function escapeReservedWords(name: string | null): string {
   let escapedName = name;
 
   if (reservedWords.indexOf(name) >= 0) {
@@ -104,7 +104,7 @@ export function escapeReservedWords(name: string): string {
 }
 
 /** This method tries to fix potentially wrong out parameter given from commandline */
-export function prepareOutputFilename(out: string): string {
+export function prepareOutputFilename(out: string | null): string {
   if (!out) {
     return null;
   }

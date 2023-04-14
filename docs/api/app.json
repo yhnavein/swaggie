@@ -1,8 +1,0 @@
-{
-  "name": "Swaggie API for Docs",
-  "description": "A swaggie API used for demonstation purposes",
-  "repository": "https://github.com/yhnavein/swaggie",
-  "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/main/public/node.svg",
-  "keywords": ["node", "express", "heroku"],
-  "image": "heroku/nodejs"
-}

@@ -95,17 +95,17 @@ describe('getPathOperation', () => {
 
     const listPets = operations.find((op) => op.id === 'listPets');
     expect(listPets).to.be.ok;
-    expect(listPets.method).to.be.equal('get');
-    expect(listPets.path).to.be.equal('/pets');
-    expect(listPets.tags).to.be.ok;
-    expect(listPets.tags[0]).to.be.equal('pets');
-    expect(listPets.responses).to.be.ok;
-    expect(listPets.responses.length).to.eq(2);
+    expect(listPets?.method).to.be.equal('get');
+    expect(listPets?.path).to.be.equal('/pets');
+    expect(listPets?.tags).to.be.ok;
+    expect(listPets?.tags?.[0]).to.be.equal('pets');
+    expect(listPets?.responses).to.be.ok;
+    expect(listPets?.responses.length).to.eq(2);
 
-    const res200 = listPets.responses.find((res) => res.code === '200');
+    const res200 = listPets?.responses.find((res) => res.code === '200');
     expect(res200).to.be.ok;
-    expect(res200.headers['x-next'].type).to.be.equal('string');
-    const resDefault = listPets.responses.find((res) => res.code === 'default');
+    expect(res200?.headers['x-next'].type).to.be.equal('string');
+    const resDefault = listPets?.responses.find((res) => res.code === 'default');
     expect(resDefault).to.be.ok;
   });
 });

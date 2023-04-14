@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import * as Eta from 'eta';
 
-export function loadAllTemplateFiles(templateName: string) {
+export function loadAllTemplateFiles(templateName: string | null) {
   if (!templateName) {
     throw new Error(`No template name was provided`);
   }
