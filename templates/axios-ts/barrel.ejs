@@ -1,0 +1,10 @@
+function serializeQueryParam(obj?: Record<string, any>) {
+  if (obj === null || typeof obj !== 'object') return '';
+  // if (obj instanceof Date) return obj.toJSON();
+  // if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  let newObj: Record<string, any> = {};
+    Object.entries(obj).forEach(([k, val]) => {
+    if (val) newObj[k] = val;
+    });
+    return newObj;
+    }
