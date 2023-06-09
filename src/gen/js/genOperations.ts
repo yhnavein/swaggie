@@ -148,7 +148,7 @@ export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation
   return results;
 }
 
-export function getOperationName(opId: string, group?: string) {
+export function getOperationName(opId: string | null, group?: string | null) {
   if (!opId) {
     return '';
   }

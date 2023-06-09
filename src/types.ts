@@ -56,7 +56,7 @@ export interface ApiOperation {
   summary: string;
   description: string;
   method: HttpMethod;
-  group: string;
+  group: string | null;
   path: string;
   parameters: ApiOperationParam[];
   responses: ApiOperationResponse[];

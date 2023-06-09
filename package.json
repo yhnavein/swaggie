@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "0.7.6",
+  "version": "0.8.0",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -16,7 +16,7 @@
     "url": "https://github.com/yhnavein/swaggie/issues"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.0.0"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -45,26 +45,26 @@
   ],
   "dependencies": {
     "case": "^1.6.3",
-    "commander": "^8.3.0",
+    "commander": "^10.0.0",
     "dset": "^3.1.2",
-    "eta": "^1.12.3",
+    "eta": "^2.0.1",
     "js-yaml": "^4.1.0",
     "nanocolors": "^0.2.0",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "@types/chai": "4.3.3",
+    "@types/chai": "4.3.4",
     "@types/js-yaml": "4.0.5",
-    "@types/mocha": "10.0.0",
-    "@types/node-fetch": "2.5.12",
+    "@types/mocha": "10.0.1",
+    "@types/node-fetch": "2.6.3",
     "@types/sinon": "^10.0.13",
-    "chai": "4.3.6",
     "lodash": "^4.17.21",
-    "mocha": "10.1.0",
     "prettier": "^2.8.0",
-    "sinon": "^14.0.1",
-    "sucrase": "3.28.0",
     "ts-node": "^10.9.1",
-    "typescript": "4.8.4"
+    "chai": "4.3.7",
+    "mocha": "10.2.0",
+    "sinon": "^15.0.3",
+    "sucrase": "3.32.0",
+    "typescript": "5.0.4"
   }
 }
