@@ -1,4 +1,4 @@
-  /**
+/**
 <% it.parameters.forEach((parameter) => { %>
    * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
 
@@ -17,6 +17,18 @@ config?: any
     url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
 } %>
+<% if(it.formData && it.formData.length > 0) { %>
+    const formDataBody = new FormData();
+<% it.formData.forEach((parameter) => { %>
+    if (!!<%= parameter.name %>) {
+  <% if(parameter.original && parameter.original.type === 'array') { %>
+    <%= parameter.name %>.forEach((f: any) => formDataBody.append("<%= parameter.originalName %>", f));
+  <% } else { %>
+    formDataBody.append("<%= parameter.originalName %>", <%= parameter.name %><%= parameter.type !== 'string' && parameter.type !== 'File' && parameter.type !== 'Blob' ? '.toString()' : '' %>);
+  <% } %>
+  }
+<% });
+} %>
 <% if(it.query && it.query.length > 0) { %>
   <% it.query.forEach((parameter) => { %>
   if (<%= parameter.name %> !== undefined) {
@@ -32,7 +44,7 @@ config?: any
     return this.$<%= it.method.toLowerCase() %>(
       url,
 <% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
-      <%= it.body ? it.body.name : 'null' %>,
+      <%= it.body ? it.body.name : (it.formData && it.formData.length > 0) ? 'formDataBody' : 'null' %>,
 <% } %>
       config
     );
