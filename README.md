@@ -137,7 +137,7 @@ Instead of writing any code by hand for fetching particular resources, we will l
 prettier ./FILE_PATH.ts --write
 ```
 
-[dprint](https://dprint.dev/cli/) - the superfast one
+[dprint](https://dprint.dev/cli/) - the super fast one
 
 ```sh
 dprint fmt ./FILE_PATH.ts
@@ -215,7 +215,7 @@ Quick comparison table:
 
 | swaggie                                                         | NSwag                                                       |
 | --------------------------------------------------------------- | ----------------------------------------------------------- |
-| - Written in node.js                                            | - Written in .NET                                           |
+| - Written in node.js + TypeScript                                            | - Written in .NET                                           |
 | - Fast                                                          | - Slow                                                      |
 | - ![swaggie size](https://packagephobia.now.sh/badge?p=swaggie) | - ![nswag size](https://packagephobia.now.sh/badge?p=nswag) |
 | - Easy to contribute to                                         | - Contributing hard                                         |
