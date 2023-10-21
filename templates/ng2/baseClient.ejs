@@ -11,54 +11,54 @@
 
 import { Observable, throwError as _observableThrow, of as _observableOf } from "rxjs";
 import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
-import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/httpClient";
 
 export const <%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL = new InjectionToken<string>("<%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL");
 
 abstract class BaseService {
-  private http: HttpClient;
+  private httpClient: HttpClient;
   private baseUrl: string;
 
   constructor(
-    @Inject(HttpClient) http: HttpClient,
+    @Inject(HttpClient) httpClient: HttpClient,
     @Optional() @Inject(<%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL) baseUrl?: string
   ) {
-    this.http = http;
+    this.httpClient = httpClient;
     this.baseUrl = baseUrl ? baseUrl : '';
   }
 
   protected $get<T>(url: string, options?: any): Observable<T> {
-    return this.http
+    return this.httpClient
       .get<T>(this.baseUrl + url, options)
       .pipe((response: any) => response);
   }
 
   protected $getAll<T>(url: string, options?: any): Observable<T[]> {
-    return this.http
+    return this.httpClient
       .get<T[]>(this.baseUrl + url, options)
       .pipe((response: any) => response);
   }
 
   protected $delete<T>(url: string, options?: any): Observable<T> {
-    return this.http
+    return this.httpClient
       .delete(this.baseUrl + url, options)
       .pipe((response: any) => response);
   }
 
   protected $post(url: string, data: any, options?: any): Observable<any> {
-    return this.http
+    return this.httpClient
       .post(this.baseUrl + url, data, options)
       .pipe((response: any) => response);
   }
 
   protected $patch<T>(url: string, data: any, options?: any): Observable<T> {
-    return this.http
+    return this.httpClient
       .patch(this.baseUrl + url, data, options)
       .pipe((response: any) => response);
   }
 
   protected $put(url: string, data: any, options?: any): Observable<any> {
-    return this.http
+    return this.httpClient
       .put(this.baseUrl + url, data, options)
       .pipe((response: any) => response);
   }
