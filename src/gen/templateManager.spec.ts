@@ -31,7 +31,7 @@ describe('loadAllTemplateFiles', () => {
   it('should load template file to the memory', async () => {
     loadAllTemplateFiles('axios');
 
-    const cachedTemplate = Eta.templates.get("client.ejs")
+    const cachedTemplate = Eta.templates.get('client.ejs');
     expect(cachedTemplate).to.be.a('function');
   });
 });
@@ -78,7 +78,6 @@ describe('render', () => {
   });
 });
 
-
 describe('custom templates', () => {
   const tempDir = `${os.tmpdir()}/custom-template`;
 
@@ -89,14 +88,14 @@ describe('custom templates', () => {
 
     fs.copyFileSync(
       path.join(__dirname, '..', '..', 'templates', 'fetch', 'client.ejs'),
-      path.join(tempDir, 'client.ejs'),
+      path.join(tempDir, 'client.ejs')
     );
 
     loadAllTemplateFiles(tempDir);
   });
 
-  it('should handle custom template', async () => {
-    const templateFunction = await renderFile('client.ejs', {
+  it('should handle custom template', () => {
+    const templateFunction = renderFile('client.ejs', {
       clientName: 'Test',
       camelCaseName: 'test',
       baseUrl: null,
