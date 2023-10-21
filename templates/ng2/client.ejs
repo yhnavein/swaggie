@@ -3,10 +3,10 @@
 })
 export class <%= it.clientName -%>Service extends BaseService {
   constructor(
-    @Inject(HttpClient) http: HttpClient,
+    @Inject(HttpClient) httpClient: HttpClient,
     @Optional() @Inject(<%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL) baseUrl?: string
   ) {
-    super(http, baseUrl);
+    super(httpClient, baseUrl);
   }
 
   <% it.operations.forEach((operation) => { %>
