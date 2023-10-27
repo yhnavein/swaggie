@@ -11,7 +11,7 @@
 
 import { Observable, throwError as _observableThrow, of as _observableOf } from "rxjs";
 import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
-import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/httpClient";
+import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/http";
 
 export const <%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL = new InjectionToken<string>("<%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL");
 
