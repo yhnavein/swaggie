@@ -1,0 +1,5 @@
+{
+  "extension": ["js", "ts"],
+  "require": ["sucrase/register"],
+  "spec": ["src/**/*.spec.ts", "test/**/*.spec.ts"]
+}
