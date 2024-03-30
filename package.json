@@ -27,12 +27,9 @@
     "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests && npm run types",
     "rm-tests": "find dist/ -name '*.spec.js' -type f -delete",
     "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
-    "test": "mocha '{src,test}/**/*.spec.ts'"
+    "test": "mocha"
   },
-  "files": [
-    "dist",
-    "templates"
-  ],
+  "files": ["dist", "templates"],
   "keywords": [
     "swagger",
     "swagger 2.0",
@@ -52,15 +49,15 @@
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "@types/chai": "4.3.9",
-    "@types/js-yaml": "4.0.8",
-    "@types/mocha": "10.0.3",
-    "@types/node-fetch": "2.6.7",
-    "@types/sinon": "^10.0.20",
-    "chai": "4.3.10",
-    "mocha": "10.2.0",
-    "sinon": "^17.0.1",
-    "sucrase": "3.34.0",
-    "typescript": "5.2.2"
+    "@types/chai": "4.3.14",
+    "@types/js-yaml": "4.0.9",
+    "@types/mocha": "10.0.6",
+    "@types/node-fetch": "2.6.11",
+    "@types/sinon": "17.0.3",
+    "chai": "4.4.1",
+    "mocha": "10.4.0",
+    "sinon": "17.0.1",
+    "sucrase": "3.35.0",
+    "typescript": "5.4.3"
   }
 }
