@@ -1,15 +1,12 @@
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
-import * as Eta from 'eta';
 import { expect } from 'chai';
 import { loadAllTemplateFiles, renderFile } from './templateManager';
 
 const GOOD_FILE = 'client.ejs';
 
 describe('loadAllTemplateFiles', () => {
-  beforeEach(() => Eta.templates.reset());
-
   it('should handle loading wrong template', async () => {
     expect(() => {
       loadAllTemplateFiles('non-existent');
@@ -27,13 +24,6 @@ describe('loadAllTemplateFiles', () => {
       loadAllTemplateFiles(null);
     }).to.throw('No template');
   });
-
-  it('should load template file to the memory', async () => {
-    loadAllTemplateFiles('axios');
-
-    const cachedTemplate = Eta.templates.get('client.ejs');
-    expect(cachedTemplate).to.be.a('function');
-  });
 });
 
 describe('render', () => {
@@ -41,8 +31,8 @@ describe('render', () => {
     loadAllTemplateFiles('axios');
   });
 
-  it('should get existing template', async () => {
-    const templateFunction = await renderFile(GOOD_FILE, {
+  it('should get existing template', () => {
+    const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
       camelCaseName: 'test',
       baseUrl: null,
@@ -52,8 +42,8 @@ describe('render', () => {
     expect(templateFunction).to.contain('testClient');
   });
 
-  it('should render template that is complex (multiple levels of includes)', async () => {
-    const templateFunction = await renderFile(GOOD_FILE, {
+  it('should render template that is complex (multiple levels of includes)', () => {
+    const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
       camelCaseName: 'test',
       baseUrl: null,

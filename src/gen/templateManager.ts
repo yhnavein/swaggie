@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import * as Eta from 'eta';
+import { Eta } from 'eta';
+
+let engine: Eta;
 
 export function loadAllTemplateFiles(templateName: string | null) {
   if (!templateName) {
@@ -16,16 +18,9 @@ export function loadAllTemplateFiles(templateName: string | null) {
       `Could not found directory with the template (we tried ${templatesDir}). Template name is correct?`
     );
   }
-  const templates = fs.readdirSync(templatesDir);
-
-  templates.forEach((t) => {
-    const filePath = path.join(templatesDir, t);
-    const file = fs.readFileSync(filePath, 'utf8');
-    Eta.templates.define(t, Eta.compile(file));
-  });
+  engine = new Eta({ views: templatesDir });
 }
 
 export function renderFile(templateFile: string, data: object = {}) {
-  const template = Eta.templates.get(templateFile);
-  return Eta.render(template, data);
+  return engine.render(templateFile, data);
 }
