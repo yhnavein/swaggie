@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -16,7 +16,7 @@
     "url": "https://github.com/yhnavein/swaggie/issues"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,10 +29,7 @@
     "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
     "test": "mocha"
   },
-  "files": [
-    "dist",
-    "templates"
-  ],
+  "files": ["dist", "templates"],
   "keywords": [
     "swagger",
     "swagger 2.0",
