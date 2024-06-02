@@ -88,6 +88,7 @@ The following templates are bundled with Swaggie:
 
 ```
 axios     Default template. Recommended for React / Vue / similar frameworks. Uses axios
+xior      Lightweight and modern alternative to axios. Uses [xior](https://github.com/suhaotian/xior#intro)
 swr-axios Template that embraces SRW for GET requests and as a fallback uses axios.
 fetch     Template similar to axios, but with fetch API instead. Recommended for React / Vue / similar frameworks
 ng1       Template for Angular 1 (this is for the old one)
@@ -126,7 +127,7 @@ Let's assume that you have a [PetStore API](http://petstore.swagger.io/) as your
 
 Instead of writing any code by hand for fetching particular resources, we will let Swaggie do it for us.
 
-> Please note that it's **recommended** to pipe Swaggie command to some prettifier like `prettier` or `dprint` to make the generated code look not only nice, but also persistent.
+> Please note that it's **recommended** to pipe Swaggie command to some prettifier like `prettier`, `biome` or `dprint` to make the generated code look not only nice, but also persistent.
 > Because Swaggie relies on a templating engine, whitespaces are generally a mess, so they may change between versions.
 
 ### Suggested prettiers
@@ -137,10 +138,10 @@ Instead of writing any code by hand for fetching particular resources, we will l
 prettier ./FILE_PATH.ts --write
 ```
 
-[dprint](https://dprint.dev/cli/) - the super fast one
+[biome](https://biomejs.dev) - the super fast one
 
 ```sh
-dprint fmt ./FILE_PATH.ts
+biome check ./FILE_PATH.ts --apply-unsafe
 ```
 
 You are not limited to any of these, but in our examples we will use Prettier. Please remember that these tools needs to be installed first and they need a config file in your project.
