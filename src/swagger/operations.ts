@@ -2,7 +2,6 @@ import type {
   ApiOperation,
   ApiOperationResponse,
   ApiOperationSecurity,
-  ApiSpec,
   HttpMethod,
 } from '../types';
 
@@ -92,7 +91,7 @@ function getPathOperation(method: HttpMethod, pathInfo, spec: ApiSpec): ApiOpera
 }
 
 function getOperationGroupName(op: any): string {
-  let name = op.tags && op.tags.length ? op.tags[0] : 'default';
+  let name = op.tags?.length ? op.tags[0] : 'default';
   name = name.replace(/[^$_a-z0-9]+/gi, '');
   return name.replace(/^[0-9]+/m, '');
 }

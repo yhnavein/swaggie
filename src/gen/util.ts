@@ -1,5 +1,5 @@
-import { type Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'fs';
-import { dirname } from 'path';
+import { type Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 import type { ApiOperation, ApiOperationResponse } from '../types';
 
@@ -46,61 +46,15 @@ export function getBestResponse(op: ApiOperation): ApiOperationResponse {
   const NOT_FOUND = 100000;
   const lowestCode = op.responses.reduce((code, resp) => {
     const responseCode = Number.parseInt(resp.code, 10);
-    if (isNaN(responseCode) || responseCode >= code) {
+    if (Number.isNaN(responseCode) || responseCode >= code) {
       return code;
-    } else {
-      return responseCode;
     }
+    return responseCode;
   }, NOT_FOUND);
 
   return lowestCode === NOT_FOUND
     ? op.responses[0]
     : op.responses.find((resp) => resp.code === lowestCode.toString());
-}
-
-const reservedWords = [
-  'break',
-  'case',
-  'catch',
-  'class',
-  'const',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'export',
-  'extends',
-  'finally',
-  'for',
-  'function',
-  'if',
-  'import',
-  'in',
-  'instanceof',
-  'new',
-  'return',
-  'super',
-  'switch',
-  'this',
-  'throw',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
-  'with',
-  'yield',
-];
-
-export function escapeReservedWords(name: string | null): string {
-  let escapedName = name;
-
-  if (reservedWords.indexOf(name) >= 0) {
-    escapedName = '_' + name;
-  }
-  return escapedName;
 }
 
 /** This method tries to fix potentially wrong out parameter given from commandline */

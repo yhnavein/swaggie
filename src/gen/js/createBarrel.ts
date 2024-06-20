@@ -15,8 +15,8 @@ export async function generateBarrelFile(clients: any[], clientOptions: ClientOp
       .filter((c) => c)
       .map((c) => ({
         fileName: (clientOptions.servicePrefix || '') + c,
-        className: (clientOptions.servicePrefix || '') + c + 'Client',
-        camelCaseName: camel((clientOptions.servicePrefix || '') + c + 'Client'),
+        className: `${(clientOptions.servicePrefix || '') + c}Client`,
+        camelCaseName: camel(`${(clientOptions.servicePrefix || '') + c}Client`),
       })),
   };
 

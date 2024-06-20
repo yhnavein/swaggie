@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
-import { ApiOperation } from '../../types';
+import type { ApiOperation } from '../../types';
 import { orderBy } from '../util';
 
 describe('prepareOperations', () => {
@@ -183,7 +183,9 @@ describe('prepareOperations', () => {
     it('query model should be generated instead array of params', () => {
       const expectedQueryType = 'IGetPetByIdFromPetServiceQuery';
 
-      const [res, queryDefs] = prepareOperations([op], { queryModels: true } as any);
+      const [res, queryDefs] = prepareOperations([op], {
+        queryModels: true,
+      } as any);
 
       expect(queryDefs[expectedQueryType]).to.be.ok;
       expect(queryDefs[expectedQueryType].type).to.be.equal('object');
@@ -403,7 +405,10 @@ describe('getOperationName', () => {
     { input: { opId: '', group: 'group' }, expected: '' },
     { input: { opId: null, group: null }, expected: '' },
     { input: { opId: '', group: '' }, expected: '' },
-    { input: { opId: 'Test_GetPetStory', group: 'Test' }, expected: 'getPetStory' },
+    {
+      input: { opId: 'Test_GetPetStory', group: 'Test' },
+      expected: 'getPetStory',
+    },
   ].forEach((el) => {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = getOperationName(el.input.opId, el.input.group);

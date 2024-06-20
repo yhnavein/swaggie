@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { resolveSpec } from './swagger';
 import { getOperations } from './operations';
+import { loadSpecDocument } from '../utils/documentLoader';
 
 describe('getPathOperation', () => {
   it('should handle empty operation list', () => {
@@ -87,8 +87,8 @@ describe('getPathOperation', () => {
   });
 
   it('should parse operations from spec [PetStore Example]', async () => {
-    const path = `${__dirname}/../../test/petstore.yml`;
-    const spec = await resolveSpec(path);
+    const path = `${__dirname}/../../test/petstore-v3.yml`;
+    const spec = await loadSpecDocument(path);
     const operations = getOperations(spec);
     expect(operations).to.be.ok;
     expect(operations.length).to.eq(3);

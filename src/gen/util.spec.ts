@@ -1,10 +1,5 @@
 import { expect } from 'chai';
-import {
-  groupOperationsByGroupName,
-  escapeReservedWords,
-  getBestResponse,
-  prepareOutputFilename,
-} from './util';
+import { groupOperationsByGroupName, getBestResponse, prepareOutputFilename } from './util';
 
 describe('groupOperationsByGroupName', () => {
   it('handles null', async () => {
@@ -161,32 +156,6 @@ describe('groupOperationsByGroupName', () => {
     expect(res.HealthCheck.length).to.eq(1);
     expect(res.Illness).to.be.ok;
     expect(res.Illness.length).to.eq(1);
-  });
-});
-
-describe('escapeReservedWords', () => {
-  it('handles null', () => {
-    const res = escapeReservedWords(null);
-
-    expect(res).to.be.equal(null);
-  });
-
-  it('handles empty string', () => {
-    const res = escapeReservedWords('');
-
-    expect(res).to.be.equal('');
-  });
-
-  it('handles safe word', () => {
-    const res = escapeReservedWords('Burrito');
-
-    expect(res).to.be.equal('Burrito');
-  });
-
-  it('handles reserved word', () => {
-    const res = escapeReservedWords('return');
-
-    expect(res).to.be.equal('_return');
   });
 });
 

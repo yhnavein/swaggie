@@ -1,13 +1,7 @@
 import { camel } from 'case';
 
 import { getTSParamType } from './support';
-import {
-  groupOperationsByGroupName,
-  getBestResponse,
-  escapeReservedWords,
-  orderBy,
-  upperFirst,
-} from '../util';
+import { groupOperationsByGroupName, getBestResponse, orderBy, upperFirst } from '../util';
 import type {
   IServiceClient,
   IApiOperation,
@@ -18,6 +12,7 @@ import type {
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
 import type { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
+import { escapeReservedWords } from '../../utils';
 
 const MAX_QUERY_PARAMS: number = 1;
 
@@ -150,7 +145,7 @@ export function getOperationName(opId: string | null, group?: string | null) {
     return opId;
   }
 
-  return camel(opId.replace(group + '_', ''));
+  return camel(opId.replace(`${group}_`, ''));
 }
 
 function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[] {

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
   "out": "./.tmp/test1",
-  "src": "https://petstore.swagger.io/v2/swagger.json",
+  "src": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json",
   "template": "axios",
   "baseUrl": "https://google.pl",
   "preferAny": true,

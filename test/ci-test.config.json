@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
   "out": "./.tmp/ci-test/petstore.ts",
-  "src": "./test/petstore-v2.json",
+  "src": "./test/petstore-v3.json",
   "template": "axios",
   "preferAny": true,
   "queryModels": true,

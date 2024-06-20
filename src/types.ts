@@ -22,31 +22,6 @@ export interface FullAppOptions extends ClientOptions {
   config?: string;
 }
 
-export interface ApiRequestData {
-  method: HttpMethod;
-  url: string;
-  headers: { [index: string]: string };
-  body: any;
-}
-
-export interface ApiInfo {
-  version: string;
-  title: string;
-}
-
-export interface ApiSpec {
-  swagger: string;
-  info: ApiInfo;
-  host?: string;
-  basePath?: string;
-  schemes?: string[];
-  securityDefinitions?: any;
-  paths: any;
-  definitions: any;
-  accepts: string[];
-  contentTypes: string[];
-}
-
 export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior';
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
@@ -128,9 +103,4 @@ export interface ApiOperationResponse {
 export interface ApiOperationSecurity {
   id: string;
   scopes?: string[];
-}
-
-export interface ApiRights {
-  query?: any;
-  headers?: any;
 }

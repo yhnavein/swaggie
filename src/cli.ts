@@ -43,7 +43,7 @@ program
 
 program.parse(process.argv);
 
-const options = program.opts() as FullAppOptions;
+const options = program.opts<FullAppOptions>();
 
 runCodeGenerator(options).then(complete, error);
 

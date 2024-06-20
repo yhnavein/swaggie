@@ -1,9 +1,9 @@
 import { expect } from 'chai';
-import fs from 'fs';
+import fs from 'node:fs';
 import * as fetch from 'node-fetch';
 import { Response } from 'node-fetch';
 import sinon from 'sinon';
-import { runCodeGenerator, applyConfigFile, verifySpec } from './index';
+import { runCodeGenerator, applyConfigFile } from './index';
 
 describe('runCodeGenerator', () => {
   afterEach(sinon.restore);
@@ -71,7 +71,7 @@ describe('runCodeGenerator', () => {
 
   it('fails when --config provided and the JSON file is wrong', () => {
     const parameters = {
-      config: './test/petstore.yml',
+      config: './test/petstore-v3.yml',
     };
 
     return runCodeGenerator(parameters as any).catch((e) =>
@@ -81,7 +81,7 @@ describe('runCodeGenerator', () => {
 
   it('works with proper --config provided', (done) => {
     const stub = sinon.stub(fetch, 'default');
-    const response = fs.readFileSync(`${__dirname}/../test/petstore-v2.json`, {
+    const response = fs.readFileSync(`${__dirname}/../test/petstore-v3.json`, {
       encoding: 'utf-8',
     });
     stub.returns(new Promise((resolve) => resolve(new Response(response))));
@@ -111,25 +111,11 @@ describe('runCodeGenerator', () => {
     const parameters = {
       config: './test/sample-config.json',
       baseUrl: 'https://wp.pl',
-      src: './test/petstore.yml',
+      src: './test/petstore-v3.yml',
     };
     const conf = await applyConfigFile(parameters as any);
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://wp.pl');
-    expect(conf.src).to.be.equal('./test/petstore.yml');
-  });
-
-  it('fails when OpenAPI3 is provided', (done) => {
-    const res = verifySpec({
-      openapi: '3.0.2',
-      paths: {},
-    } as any);
-
-    res
-      .then(() => {})
-      .catch((e) => {
-        expect(e).to.contain('Spec does not look like');
-      })
-      .finally(() => done());
+    expect(conf.src).to.be.equal('./test/petstore-v3.yml');
   });
 });

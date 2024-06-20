@@ -17,6 +17,6 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="dotnet tool restore" />
-    <Exec EnvironmentVariables="ASPNETCORE_ENVIRONMENT=dev" Command="dotnet swagger tofile --serializeasv2 --output bin/api.json $(OutputPath)\$(AssemblyName).dll v1 " />
+    <Exec EnvironmentVariables="ASPNETCORE_ENVIRONMENT=dev" Command="dotnet swagger tofile --output bin/api.json $(OutputPath)\$(AssemblyName).dll v1 " />
   </Target>
 </Project>
