@@ -3,7 +3,7 @@ import { resolveSpec } from './swagger';
 import { getOperations } from './operations';
 
 describe('getPathOperation', () => {
-  it('handles empty operation list', () => {
+  it('should handle empty operation list', () => {
     const spec = {
       swagger: '2.0',
       paths: {},
@@ -16,7 +16,7 @@ describe('getPathOperation', () => {
     expect(res.length).to.eq(0);
   });
 
-  it('handles one operation list', () => {
+  it('should handle one operation list', () => {
     const spec = {
       swagger: '2.0',
       paths: {
@@ -57,7 +57,7 @@ describe('getPathOperation', () => {
     expect(res).to.be.eql(validResp);
   });
 
-  it('handles additional content types', () => {
+  it('should handle additional content types', () => {
     const spec = {
       swagger: '2.0',
       paths: {
@@ -86,7 +86,7 @@ describe('getPathOperation', () => {
     expect(res[0].contentTypes).to.be.eql(['application/x-www-form-urlencoded']);
   });
 
-  it('[PerStore Example] should parse operations from spec', async () => {
+  it('should parse operations from spec [PetStore Example]', async () => {
     const path = `${__dirname}/../../test/petstore.yml`;
     const spec = await resolveSpec(path);
     const operations = getOperations(spec);

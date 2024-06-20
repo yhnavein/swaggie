@@ -1,4 +1,4 @@
-import { ApiOperationParam } from '../../types';
+import type { ApiOperationParam } from '../../types';
 
 export interface IApiOperation {
   returnType: string;

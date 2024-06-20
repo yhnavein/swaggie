@@ -4,22 +4,26 @@ import { expect } from 'chai';
 function serializeQueryParam(obj: any, property: string): string {
   if (obj === null || obj === undefined || obj === '') {
     return '';
-  } else if (obj instanceof Date) {
-    return property + '=' + encodeURIComponent(obj.toJSON());
-  } else if (Array.isArray(obj)) {
+  }
+  if (obj instanceof Date) {
+    return `${property}=${encodeURIComponent(obj.toJSON())}`;
+  }
+  if (Array.isArray(obj)) {
     return Object.values(obj)
       .map((value) => `${property}[]=${value}`)
       .join('&');
-  } else if (typeof obj !== 'object') {
-    return property + '=' + encodeURIComponent(obj);
-  } else if (typeof obj === 'object') {
-    return Object.keys(obj)
-      .filter((key) => !!serializeQueryParam(obj[key], property + '.' + key))
-      .reduce((a: any, b) => a.push(serializeQueryParam(obj[b], property + '.' + b)) && a, [])
-      .join('&');
-  } else {
-    return '';
   }
+  if (typeof obj !== 'object') {
+    return `${property}=${encodeURIComponent(obj)}`;
+  }
+  if (typeof obj === 'object') {
+    return Object.keys(obj)
+      .filter((key) => !!serializeQueryParam(obj[key], `${property}.${key}`))
+      .reduce((a: any, b) => a.push(serializeQueryParam(obj[b], `${property}.${b}`)) && a, [])
+      .join('&');
+  }
+
+  return '';
 }
 
 describe('serializeQueryParam.angular1', () => {

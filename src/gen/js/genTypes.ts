@@ -1,8 +1,8 @@
 import { dset as set } from 'dset';
 import { join, uniq } from '../util';
 import { getTSParamType } from './support';
-import { IQueryDefinitions } from './models';
-import { ApiSpec, ClientOptions } from '../../types';
+import type { IQueryDefinitions } from './models';
+import type { ApiSpec, ClientOptions } from '../../types';
 
 export default function genTypes(
   spec: ApiSpec,
@@ -60,10 +60,11 @@ function renderTsType(name, def, options: ClientOptions, typeToBeGeneric?: strin
     lines.push(renderComment(def.description));
   }
 
-  if (!!def['x-enumNames']) {
+  if (def['x-enumNames']) {
     lines.push(renderXEnumType(name, def));
     return lines;
-  } else if (!!def.enum) {
+  }
+  if (def.enum) {
     lines.push(renderEnumType(name, def));
     return lines;
   }
@@ -164,12 +165,10 @@ function renderEnumType(name: string, def: any) {
     return `export enum ${name} {
 ${enumKeys.join('\n')}
 }\n`;
-  } else {
-    const values = (def.enum as any[])
-      .map((v) => (typeof v === 'number' ? v : `'${v}'`))
-      .join(' | ');
-    return `export type ${name} = ${values};\n`;
   }
+
+  const values = (def.enum as any[]).map((v) => (typeof v === 'number' ? v : `'${v}'`)).join(' | ');
+  return `export type ${name} = ${values};\n`;
 }
 
 function renderTsInheritance(name: string, allOf: any[], options: ClientOptions) {
@@ -249,8 +248,8 @@ export function renderComment(comment: string | null) {
   const commentLines = comment.split('\n');
 
   if (commentLines.length === 1) {
-    return '// ' + comment.trim();
+    return `// ${comment.trim()}`;
   }
 
-  return ' /**\n' + commentLines.map((line) => '  * ' + line.trim()).join('\n') + '\n  */';
+  return ` /**\n${commentLines.map((line) => `  * ${line.trim()}`).join('\n')}\n  */`;
 }

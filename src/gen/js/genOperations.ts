@@ -8,7 +8,7 @@ import {
   orderBy,
   upperFirst,
 } from '../util';
-import {
+import type {
   IServiceClient,
   IApiOperation,
   IOperationParam,
@@ -17,7 +17,7 @@ import {
 } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
-import { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
+import type { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
 
 const MAX_QUERY_PARAMS: number = 1;
 
@@ -34,7 +34,7 @@ export default async function genOperations(
     })) || '';
   let queryDefinitions = {} as IQueryDefinitions;
 
-  for (let name in groups) {
+  for (const name in groups) {
     const group = groups[name];
     const [clientData, clientQueryDefinitions] = prepareClient(
       (options.servicePrefix || '') + name,

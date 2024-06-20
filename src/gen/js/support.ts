@@ -1,4 +1,4 @@
-import { ClientOptions } from '../../types';
+import type { ClientOptions } from '../../types';
 
 export function getTSParamType(param: any, options: ClientOptions): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
@@ -9,49 +9,57 @@ export function getTSParamType(param: any, options: ClientOptions): string {
   if (param.enum && !param['x-schema'] && !param.fullEnum) {
     if (!param.type || param.type === 'string') {
       return `'${param.enum.join(`'|'`)}'`;
-    } else if (param.type === 'integer' || param.type === 'number') {
-      return `${param.enum.join(`|`)}`;
+    }
+    if (param.type === 'integer' || param.type === 'number') {
+      return `${param.enum.join('|')}`;
     }
   }
   if (param.$ref) {
     const type = param.$ref.split('/').pop();
     return handleGenerics(type);
-  } else if (param.schema) {
+  }
+  if (param.schema) {
     return getTSParamType(param.schema, options);
-  } else if (param['x-schema']) {
+  }
+  if (param['x-schema']) {
     return getTSParamType(param['x-schema'], options);
-  } else if (param.type === 'array') {
+  }
+  if (param.type === 'array') {
     if (param.items.type) {
       if (param.items.enum) {
         return `(${getTSParamType(param.items, options)})[]`;
-      } else {
-        return getTSParamType(param.items, options) + '[]';
       }
-    } else if (param.items.$ref) {
-      const type = param.items.$ref.split('/').pop();
-      return handleGenerics(type) + '[]';
-    } else {
-      return unknownType + '[]';
+      return `${getTSParamType(param.items, options)}[]`;
     }
-  } else if (param.type === 'object') {
+    if (param.items.$ref) {
+      const type = param.items.$ref.split('/').pop();
+      return `${handleGenerics(type)}[]`;
+    }
+    return `${unknownType}[]`;
+  }
+  if (param.type === 'object') {
     if (param.additionalProperties) {
       const extraProps = param.additionalProperties;
       return `{ [key: string]: ${getTSParamType(extraProps, options)} }`;
     }
     return unknownType;
-  } else if (param.type === 'integer' || param.type === 'number') {
-    return 'number';
-  } else if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
-    return options.dateFormat === 'string' ? 'string' : 'Date';
-  } else if (param.type === 'string') {
-    return 'string';
-  } else if (param.type === 'file') {
-    return 'File';
-  } else if (param.type === 'boolean') {
-    return 'boolean';
-  } else {
-    return unknownType;
   }
+  if (param.type === 'integer' || param.type === 'number') {
+    return 'number';
+  }
+  if (param.type === 'string' && (param.format === 'date-time' || param.format === 'date')) {
+    return options.dateFormat === 'string' ? 'string' : 'Date';
+  }
+  if (param.type === 'string') {
+    return 'string';
+  }
+  if (param.type === 'file') {
+    return 'File';
+  }
+  if (param.type === 'boolean') {
+    return 'boolean';
+  }
+  return unknownType;
 }
 
 function handleGenerics(type: string) {

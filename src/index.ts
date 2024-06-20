@@ -3,7 +3,7 @@ import fs from 'fs';
 import genJsCode from './gen/js';
 import { loadAllTemplateFiles } from './gen/templateManager';
 import { getOperations, resolveSpec } from './swagger';
-import { ApiSpec, ClientOptions, FullAppOptions } from './types';
+import type { ApiSpec, ClientOptions, FullAppOptions } from './types';
 
 /** Runs whole code generation process. @returns generated code */
 export function runCodeGenerator(options: FullAppOptions) {

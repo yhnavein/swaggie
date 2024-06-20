@@ -1,7 +1,7 @@
 import genOperations from './genOperations';
 import genTypes from './genTypes';
 import { saveFile, prepareOutputFilename } from '../util';
-import { ApiOperation, ApiSpec, ClientOptions } from '../../types';
+import type { ApiOperation, ApiSpec, ClientOptions } from '../../types';
 
 export default async function genCode(
   spec: ApiSpec,

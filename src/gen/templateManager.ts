@@ -6,7 +6,7 @@ let engine: Eta;
 
 export function loadAllTemplateFiles(templateName: string | null) {
   if (!templateName) {
-    throw new Error(`No template name was provided`);
+    throw new Error('No template name was provided');
   }
 
   const templatesDir = fs.existsSync(templateName)

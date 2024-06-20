@@ -3,8 +3,8 @@
 import { bold, cyan, red } from 'nanocolors';
 import { Command } from 'commander';
 
-import { CodeGenResult, runCodeGenerator } from './index';
-import { FullAppOptions } from './types';
+import { type CodeGenResult, runCodeGenerator } from './index';
+import type { FullAppOptions } from './types';
 
 const program = new Command();
 program

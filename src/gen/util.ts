@@ -1,7 +1,7 @@
-import { Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'fs';
+import { type Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'fs';
 import { dirname } from 'path';
 
-import { ApiOperation, ApiOperationResponse } from '../types';
+import type { ApiOperation, ApiOperationResponse } from '../types';
 
 export function exists(filePath: string): Stats {
   try {
@@ -45,7 +45,7 @@ export function join(parent: string[], child: string[]): string[] {
 export function getBestResponse(op: ApiOperation): ApiOperationResponse {
   const NOT_FOUND = 100000;
   const lowestCode = op.responses.reduce((code, resp) => {
-    const responseCode = parseInt(resp.code, 10);
+    const responseCode = Number.parseInt(resp.code, 10);
     if (isNaN(responseCode) || responseCode >= code) {
       return code;
     } else {

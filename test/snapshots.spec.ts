@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import fs from 'fs';
 import { runCodeGenerator } from '../src/index';
-import { FullAppOptions, Template } from '../src/types';
+import type { FullAppOptions, Template } from '../src/types';
 
 const templates: Template[] = ['axios', 'xior', 'swr-axios', 'fetch', 'ng1', 'ng2'];
 

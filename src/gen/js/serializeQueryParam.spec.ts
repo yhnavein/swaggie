@@ -54,7 +54,7 @@ describe('serializeQueryParam / axios', () => {
     });
   });
 
-  it(`should handle array`, () => {
+  it('should handle array', () => {
     const res = serializeQueryParam([1, 2, 3]);
 
     expect(res.toString()).to.be.equal([1, 2, 3].toString());

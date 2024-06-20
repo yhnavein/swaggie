@@ -1,6 +1,6 @@
 import YAML from 'js-yaml';
 import fetch from 'node-fetch';
-import { ApiSpec } from '../types';
+import type { ApiSpec } from '../types';
 
 export interface SpecOptions {
   /**
@@ -16,19 +16,19 @@ export function resolveSpec(src: string | object, options?: SpecOptions): Promis
 
   if (typeof src === 'string') {
     return loadFile(src).then((spec) => formatSpec(spec, src, options));
-  } else {
-    return Promise.resolve(formatSpec(src as ApiSpec, null, options));
   }
+  return Promise.resolve(formatSpec(src as ApiSpec, null, options));
 }
 
 function loadFile(src: string): Promise<ApiSpec | any> {
   if (/^https?:\/\//im.test(src)) {
     return loadFromUrl(src);
-  } else if (String(process) === '[object process]') {
-    return readLocalFile(src).then((contents) => parseFileContents(contents, src));
-  } else {
-    throw new Error(`Unable to load api at '${src}'`);
   }
+  if (String(process) === '[object process]') {
+    return readLocalFile(src).then((contents) => parseFileContents(contents, src));
+  }
+
+  throw new Error(`Unable to load api at '${src}'`);
 }
 
 function loadFromUrl(url: string) {
@@ -105,7 +105,8 @@ export function expandRefs(data: any, lookup: object, options: SpecOptions): any
 
   if (Array.isArray(data)) {
     return data.map((item) => expandRefs(item, lookup, options));
-  } else if (typeof data === 'object') {
+  }
+  if (typeof data === 'object') {
     if (dataCache.has(data)) {
       return data;
     }
@@ -116,7 +117,7 @@ export function expandRefs(data: any, lookup: object, options: SpecOptions): any
     }
     dataCache.add(data);
 
-    for (let name in data) {
+    for (const name in data) {
       data[name] = expandRefs(data[name], lookup, options);
     }
   }

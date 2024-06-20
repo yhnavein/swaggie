@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ApiSpec } from '../../types';
+import type { ApiSpec } from '../../types';
 import genTypes, { renderQueryStringParameters, renderComment } from './genTypes';
 
 const emptySpec: ApiSpec = {
@@ -15,7 +15,7 @@ const emptySpec: ApiSpec = {
 };
 
 describe('genTypes', () => {
-  it(`empty definitions is handled properly`, () => {
+  it('should handle empty definitions properly', () => {
     const res = genTypes(emptySpec, {}, {} as any);
 
     expect(res).to.be.equal('');
@@ -23,7 +23,7 @@ describe('genTypes', () => {
 
   describe('enums', () => {
     describe('int-serialized simple enums', () => {
-      it(`Swashbuckle's enum should be handled correctly`, () => {
+      it(`should handle Swashbuckle's enum correctly`, () => {
         const res = genTypes(
           emptySpec,
           {
@@ -37,10 +37,10 @@ describe('genTypes', () => {
         );
 
         expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal(`export type SomeEnum = 0 | 1;`);
+        expect(res.trim()).to.be.equal('export type SomeEnum = 0 | 1;');
       });
 
-      it(`NSwag's enum should be handled correctly`, () => {
+      it(`should handle NSwag's enum correctly`, () => {
         const res = genTypes(
           emptySpec,
           {
@@ -66,7 +66,7 @@ describe('genTypes', () => {
     });
 
     describe('string-serialized simple enums', () => {
-      it(`Swashbuckle's enum should be handled correctly`, () => {
+      it(`should handle Swashbuckle's enum correctly`, () => {
         const res = genTypes(
           emptySpec,
           {
@@ -85,7 +85,7 @@ describe('genTypes', () => {
   });
 
   describe('x-enums', () => {
-    it(`should handle number-based x-enums correctly`, () => {
+    it('should handle number-based x-enums correctly', () => {
       const res = genTypes(
         emptySpec,
         {
@@ -108,7 +108,7 @@ describe('genTypes', () => {
 }`);
     });
 
-    it(`should handle string-based x-enums correctly`, () => {
+    it('should handle string-based x-enums correctly', () => {
       const res = genTypes(
         emptySpec,
         {
@@ -133,7 +133,7 @@ describe('genTypes', () => {
   });
 
   describe('normal objects', () => {
-    it(`should handle obj with no required fields`, () => {
+    it('should handle obj with no required fields', () => {
       const res = genTypes(
         emptySpec,
         {
@@ -159,7 +159,7 @@ describe('genTypes', () => {
 }`);
     });
 
-    it(`should handle obj with all required fields`, () => {
+    it('should handle obj with all required fields', () => {
       const res = genTypes(
         emptySpec,
         {
@@ -188,7 +188,7 @@ describe('genTypes', () => {
   });
 
   describe('objects with read-only fields', () => {
-    it(`should ignore read-only fields`, () => {
+    it('should ignore read-only fields', () => {
       const res = genTypes(
         emptySpec,
         {
@@ -218,7 +218,7 @@ describe('genTypes', () => {
 });
 
 describe('renderQueryStringParameters', () => {
-  it(`empty list should work fine`, () => {
+  it('should handle empty list correctly', () => {
     const def = {
       type: 'object',
       required: [],
@@ -230,7 +230,7 @@ describe('renderQueryStringParameters', () => {
     expect(res).to.deep.equal([]);
   });
 
-  it(`one element without dots should work fine`, () => {
+  it('should handle one element without dots', () => {
     const def = {
       type: 'object',
       required: [],
@@ -252,7 +252,7 @@ describe('renderQueryStringParameters', () => {
     expect(res[0]).to.contain('page?: number;');
   });
 
-  it(`one element in dot notation should work fine`, () => {
+  it('should handle one element in a dot notation', () => {
     const def = {
       type: 'object',
       required: [],
@@ -274,7 +274,7 @@ describe('renderQueryStringParameters', () => {
     expect(textOnly(res[0])).to.be.equal(textOnly('parameters?: {page?: number; }'));
   });
 
-  it(`two elements in dot notation should work fine`, () => {
+  it('should handle two elements in a dot notation', () => {
     const def = {
       type: 'object',
       required: [],
@@ -304,7 +304,7 @@ describe('renderQueryStringParameters', () => {
     );
   });
 
-  it(`four elements in dot notation should work fine`, () => {
+  it('should handle four elements in a dot notation', () => {
     const def = {
       type: 'object',
       required: [],
@@ -350,7 +350,7 @@ describe('renderQueryStringParameters', () => {
     expect(textOnly(res[1])).to.be.equal(textOnly('else?: {page?: number; count?: number; }'));
   });
 
-  it(`crazy case #1`, () => {
+  it('crazy case #1', () => {
     const def = {
       type: 'object',
       required: [],
@@ -431,7 +431,7 @@ filter?: {
 });
 
 describe('renderComment', () => {
-  it(`it should render proper multiline comment`, () => {
+  it('should render proper multiline comment', () => {
     const comment = `Quite a lenghty comment
 With at least two lines`;
     const res = renderComment(comment);
@@ -442,7 +442,7 @@ With at least two lines`;
   */`);
   });
 
-  it(`it should render proper multiline comment with trimming`, () => {
+  it('should render proper multiline comment with trimming', () => {
     const comment = `   Quite a lenghty comment
    With at least two lines    `;
     const res = renderComment(comment);
@@ -453,28 +453,28 @@ With at least two lines`;
   */`);
   });
 
-  it(`it should render proper one-line comment`, () => {
-    const comment = `One liner`;
+  it('should render proper one-line comment', () => {
+    const comment = 'One liner';
     const res = renderComment(comment);
 
-    expect(res).to.be.equal(`// One liner`);
+    expect(res).to.be.equal('// One liner');
   });
 
-  it(`it should render proper one-line comment with trimming`, () => {
-    const comment = `   One liner   `;
+  it('should render proper one-line comment with trimming', () => {
+    const comment = '   One liner   ';
     const res = renderComment(comment);
 
-    expect(res).to.be.equal(`// One liner`);
+    expect(res).to.be.equal('// One liner');
   });
 
-  it(`it should handle null comment`, () => {
+  it('should handle null comment', () => {
     const comment = null;
     const res = renderComment(comment);
 
     expect(res).to.be.null;
   });
 
-  it(`it should handle empty comment`, () => {
+  it('should handle empty comment', () => {
     const comment = '';
     const res = renderComment(comment);
 
