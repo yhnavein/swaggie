@@ -9,69 +9,68 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
-namespace Swaggie.Swashbuckle
+namespace Swaggie.Swashbuckle;
+
+public class Startup
 {
-  public class Startup
+  private readonly bool _isProduction;
+
+  public Startup(IWebHostEnvironment env)
   {
-    private readonly bool _isProduction;
+    _isProduction = env.IsProduction();
+  }
 
-    public Startup(IWebHostEnvironment env)
+  // This method gets called by the runtime. Use this method to add services to the container
+  public void ConfigureServices(IServiceCollection services)
+  {
+    services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
+    JsonConvert.DefaultSettings = () => new JsonSerializerSettings
     {
-      _isProduction = env.IsProduction();
+      // Automatically converts DotNetNames to jsFriendlyNames
+      ContractResolver = new CamelCasePropertyNamesContractResolver()
+    };
+
+    services.AddControllers()
+      .AddNewtonsoftJson(x =>
+      {
+        // Ignores potential reference loop problems
+        x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+
+        // Serializes dotnet enums to strings (you can remove it if you prefer numbers instead)
+        x.SerializerSettings.Converters.Add(new StringEnumConverter());
+      });
+
+    services.AddHttpContextAccessor();
+
+    if (!_isProduction)
+    {
+      services.AddSwaggerGen(c =>
+      {
+        c.CustomOperationIds(e =>
+          $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sample Api", Version = "v1" });
+      });
+      services.AddSwaggerGenNewtonsoftSupport();
+    }
+  }
+
+  // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
+  public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+    IHostApplicationLifetime appLifetime)
+  {
+    if (!_isProduction)
+    {
+      app.UseDeveloperExceptionPage();
     }
 
-    // This method gets called by the runtime. Use this method to add services to the container
-    public void ConfigureServices(IServiceCollection services)
+    app.UseRouting();
+
+    if (!_isProduction)
     {
-      services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
-      JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-      {
-        // Automatically converts DotNetNames to jsFriendlyNames
-        ContractResolver = new CamelCasePropertyNamesContractResolver()
-      };
-
-      services.AddControllers()
-        .AddNewtonsoftJson(x =>
-        {
-          // Ignores potential reference loop problems
-          x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-          // Serializes dotnet enums to strings (you can remove it if you prefer numbers instead)
-          x.SerializerSettings.Converters.Add(new StringEnumConverter());
-        });
-
-      services.AddHttpContextAccessor();
-
-      if (!_isProduction)
-      {
-        services.AddSwaggerGen(c =>
-        {
-          c.CustomOperationIds(e =>
-            $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
-          c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sample Api", Version = "v1" });
-        });
-        services.AddSwaggerGenNewtonsoftSupport();
-      }
+      app.UseSwagger(c => c.SerializeAsV2 = true);
+      app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Sample Api"); });
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
-      IHostApplicationLifetime appLifetime)
-    {
-      if (!_isProduction)
-      {
-        app.UseDeveloperExceptionPage();
-      }
-
-      app.UseRouting();
-
-      if (!_isProduction)
-      {
-        app.UseSwagger(c => c.SerializeAsV2 = true);
-        app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Sample Api"); });
-      }
-
-      app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-    }
+    app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
   }
 }

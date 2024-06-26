@@ -1,20 +1,19 @@
 ﻿using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Swaggie.Nswag
-{
-  public class Program
-  {
-    public static void Main(string[] args)
-    {
-      var host = new WebHostBuilder()
-        .UseKestrel()
-        .UseContentRoot(Directory.GetCurrentDirectory())
-        .UseStartup<Startup>()
-        .UseUrls("http://127.0.0.1:12345")
-        .Build();
+namespace Swaggie.Nswag;
 
-      host.Run();
-    }
+public class Program
+{
+  public static void Main(string[] args)
+  {
+    var host = new WebHostBuilder()
+      .UseKestrel()
+      .UseContentRoot(Directory.GetCurrentDirectory())
+      .UseStartup<Startup>()
+      .UseUrls("http://127.0.0.1:12345")
+      .Build();
+
+    host.Run();
   }
 }
