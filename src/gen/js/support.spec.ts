@@ -1,106 +1,68 @@
 import { expect } from 'chai';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import type { ClientOptions } from '../../types';
-import { getTSParamType } from './support';
+import { getParameterType } from './support';
 
-describe('getTSParamType', () => {
-  it('empty #1', async () => {
-    const param = null;
-    const options = {
-      preferAny: true,
-    } as any;
+describe('getParameterType', () => {
+  describe('empty cases', () => {
+    const testCases = [
+      { param: null, options: { preferAny: true }, expected: 'any' },
+      { param: undefined, options: {}, expected: 'unknown' },
+      { param: {}, options: {}, expected: 'unknown' },
+      { param: [], options: {}, expected: 'unknown' },
+      { param: [], options: { preferAny: true }, expected: 'any' },
+      {
+        param: { name: 'a', in: 'query' } as OA3.ParameterObject,
+        options: {},
+        expected: 'unknown',
+      },
+    ];
 
-    const res = getTSParamType(param, options);
+    for (const { param, options, expected } of testCases) {
+      it(`should process ${param} correctly`, async () => {
+        const res = getParameterType(param as any, options);
 
-    expect(res).to.be.equal('any');
-  });
-
-  it('empty #2', async () => {
-    const param = null;
-    const options = {} as any;
-
-    const res = getTSParamType(param, options);
-
-    expect(res).to.be.equal('unknown');
-  });
-
-  it('empty #3', async () => {
-    const param = null;
-    const options = {} as any;
-
-    const res = getTSParamType(param, options);
-
-    expect(res).to.be.equal('unknown');
-  });
-
-  it('empty #3', async () => {
-    const param = [];
-    const options = {} as any;
-
-    const res = getTSParamType(param, options);
-
-    expect(res).to.be.equal('unknown');
+        expect(res).to.be.equal(expected);
+      });
+    }
   });
 
   it('file', async () => {
-    const param = {
+    const param: OA3.ParameterObject = {
       name: 'attachment',
       in: 'body',
       required: false,
-      type: 'file',
+      schema: {
+        type: 'string',
+        format: 'binary',
+      },
     };
-    const options = {} as any;
+    const options = {};
 
-    const res = getTSParamType(param, options);
+    const res = getParameterType(param, options);
 
     expect(res).to.be.equal('File');
   });
 
-  it('enum with x-schema', async () => {
-    const param = {
-      type: 'integer',
-      name: 'SomeEnum',
+  it('array with a reference type', async () => {
+    const param: OA3.ParameterObject = {
+      name: 'items',
       in: 'query',
-      'x-schema': {
-        $ref: '#/definitions/SomeEnum',
-      },
-      'x-nullable': false,
-      enum: [1, 2],
-    };
-    const options = {} as any;
-
-    const res = getTSParamType(param, options);
-
-    expect(res).to.be.equal('SomeEnum');
-  });
-
-  it('array', async () => {
-    const param = {
-      uniqueItems: false,
-      type: 'array',
-      items: {
-        $ref: '#/definitions/Item',
+      schema: {
+        type: 'array',
+        items: {
+          $ref: '#/definitions/Item',
+        },
       },
     };
-    const options = {} as any;
 
-    const res = getTSParamType(param, options);
+    const res = getParameterType(param, {});
 
     expect(res).to.be.equal('Item[]');
   });
 
-  it('reference #0', async () => {
-    const param = {
-      $ref: '#/definitions/SomeItem',
-    };
-    const options = {} as any;
-
-    const res = getTSParamType(param, options);
-
-    expect(res).to.be.equal('SomeItem');
-  });
-
   it('reference #1', async () => {
-    const param = {
+    const param: OA3.ParameterObject = {
       name: 'something',
       in: 'body',
       required: false,
@@ -108,32 +70,16 @@ describe('getTSParamType', () => {
         $ref: '#/definitions/SomeItem',
       },
     };
-    const options = {} as any;
+    const options = {};
 
-    const res = getTSParamType(param, options);
-
-    expect(res).to.be.equal('SomeItem');
-  });
-
-  it('reference #2', async () => {
-    const param = {
-      name: 'something',
-      in: 'body',
-      required: false,
-      schema: {
-        $ref: '#/definitions/SomeItem',
-      },
-    };
-    const options = {} as any;
-
-    const res = getTSParamType(param, options);
+    const res = getParameterType(param, options);
 
     expect(res).to.be.equal('SomeItem');
   });
 
   describe('responses', () => {
     it('generics', async () => {
-      const param = {
+      const param: OA3.ParameterObject = {
         name: 'query',
         in: 'body',
         required: false,
@@ -141,92 +87,77 @@ describe('getTSParamType', () => {
           $ref: '#/definitions/PagingAndSortingParameters[Item]',
         },
       };
-      const options = {} as any;
+      const options = {};
 
-      const res = getTSParamType(param, options);
+      const res = getParameterType(param, options);
 
       expect(res).to.be.equal('PagingAndSortingParameters<Item>');
     });
 
     it('string', async () => {
-      const param = {
+      const param: OA3.ParameterObject = {
         name: 'title',
         in: 'query',
         required: false,
-        type: 'string',
+        schema: {
+          type: 'string',
+        },
       };
-      const options = {} as any;
+      const options = {};
 
-      const res = getTSParamType(param, options);
+      const res = getParameterType(param, options);
 
       expect(res).to.be.equal('string');
     });
 
     it('date', async () => {
-      const param = {
+      const param: OA3.ParameterObject = {
         name: 'dateFrom',
         in: 'query',
         required: false,
-        type: 'string',
-        format: 'date-time',
+        schema: {
+          type: 'string',
+          format: 'date-time',
+        },
       };
-      const options = {} as any;
+      const options = {};
 
-      const res = getTSParamType(param, options);
+      const res = getParameterType(param, options);
 
       expect(res).to.be.equal('Date');
     });
 
     it('date with dateFormatter = string', async () => {
-      const param = {
+      const param: OA3.ParameterObject = {
         name: 'dateFrom',
         in: 'query',
         required: false,
-        type: 'string',
-        format: 'date-time',
+        schema: {
+          type: 'string',
+          format: 'date-time',
+        },
       };
       const options = { dateFormat: 'string' } as ClientOptions;
 
-      const res = getTSParamType(param, options);
+      const res = getParameterType(param, options);
 
       expect(res).to.be.equal('string');
     });
 
-    // Full enums are not implemented. This is to ensure that full enums won't break anything
-    it('enum', async () => {
-      const param = {
-        name: 'documentType',
-        in: 'path',
-        required: true,
-        type: 'integer',
-        format: 'int32',
-        enum: ['Active', 'Disabled'],
-        fullEnum: {
-          Active: 0,
-          Disabled: 1,
-        },
-      };
-      const options = {} as any;
-
-      const res = getTSParamType(param, options);
-
-      expect(res).to.be.equal('number');
-    });
-
     it('array > reference', async () => {
-      const param = {
-        description: 'Success',
+      const param: OA3.ParameterObject = {
+        name: 'items',
+        in: 'query',
         schema: {
-          uniqueItems: false,
           type: 'array',
           items: {
             $ref: '#/definitions/Item',
           },
         },
       };
-      const options = {} as any;
+      const options = {};
 
-      const res = getTSParamType(param, options);
+      const res = getParameterType(param, options);
 
       expect(res).to.be.equal('Item[]');
     });

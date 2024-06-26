@@ -1,6 +1,6 @@
 import { dset as set } from 'dset';
 import { join, uniq } from '../util';
-import { getTSParamType } from './support';
+import { getParameterType } from './support';
 import type { IQueryDefinitions } from './models';
 import type { ApiSpec, ClientOptions } from '../../types';
 
@@ -192,7 +192,7 @@ function renderTsTypeProp(
   typeToBeGeneric?: string
 ): string[] {
   const lines = [];
-  let type = getTSParamType(info, options);
+  let type = getParameterType(info, options);
   if (typeToBeGeneric && type.indexOf(typeToBeGeneric) === 0) {
     type = type.replace(typeToBeGeneric, 'T');
   }

@@ -1,6 +1,6 @@
 import { camel } from 'case';
 
-import { getTSParamType } from './support';
+import { getParameterType } from './support';
 import { groupOperationsByGroupName, getBestResponse, orderBy, upperFirst } from '../util';
 import type {
   IServiceClient,
@@ -82,7 +82,7 @@ export function prepareOperations(
   return [
     ops.map((op) => {
       const response = getBestResponse(op);
-      const respType = getTSParamType(response, options);
+      const respType = getParameterType(response, options);
 
       let queryParams = getParams(op.parameters, options, ['query']);
       let params = getParams(op.parameters, options);
@@ -184,7 +184,7 @@ function getParams(
     .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
-      type: getTSParamType(p, options),
+      type: getParameterType(p, options),
       optional:
         p.required === undefined || p.required === null
           ? p['x-nullable'] === undefined || p['x-nullable'] === null

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 /** This file tests a code that will be generated and is hardcoded into the templates */
 
 describe('serializeQueryParam', () => {
-  [
+  const testCases = [
     { input: '', expected: '' },
     { input: null, expected: '' },
     { input: undefined, expected: '' },
@@ -13,13 +13,15 @@ describe('serializeQueryParam', () => {
     { input: { a: 1, b: [1, 2, 3, 'test'] }, expected: 'a=1&b=1%2C2%2C3%2Ctest' },
     { input: [1, 2, 3], expected: '1%2C2%2C3' },
     { input: new Date('2020-04-16T00:00:00.000Z'), expected: '2020-04-16T00%3A00%3A00.000Z' },
-  ].forEach((el) => {
+  ];
+
+  for (const el of testCases) {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = serializeQueryParam(el.input);
 
       expect(res).to.be.equal(el.expected);
     });
-  });
+  }
 
   function serializeQueryParam(obj: any) {
     if (obj === null || obj === undefined) return '';
@@ -27,7 +29,7 @@ describe('serializeQueryParam', () => {
     if (typeof obj !== 'object' || Array.isArray(obj)) return encodeURIComponent(obj);
     return Object.keys(obj)
       .reduce<any>(
-        (a, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a,
+        (a, b) => a.push(`${encodeURIComponent(b)}=${encodeURIComponent(obj[b])}`) && a,
         []
       )
       .join('&');
@@ -36,7 +38,7 @@ describe('serializeQueryParam', () => {
 
 /** This is different, because we don't need to encode parameters for axios as axios is doing it on its own */
 describe('serializeQueryParam / axios', () => {
-  [
+  for (const el of [
     { input: '', expected: '' },
     { input: null, expected: '' },
     { input: undefined, expected: '' },
@@ -46,13 +48,13 @@ describe('serializeQueryParam / axios', () => {
     { input: { a: 1, b: 'test' }, expected: 'a=1&b=test' },
     { input: { a: 1, b: [1, 2, 3, 'test'] }, expected: 'a=1&b=1,2,3,test' },
     { input: new Date('2020-04-16T00:00:00.000Z'), expected: '2020-04-16T00:00:00.000Z' },
-  ].forEach((el) => {
+  ]) {
     it(`should handle ${JSON.stringify(el.input)}`, () => {
       const res = serializeQueryParam(el.input);
 
       expect(res).to.eq(el.expected);
     });
-  });
+  }
 
   it('should handle array', () => {
     const res = serializeQueryParam([1, 2, 3]);
@@ -65,7 +67,7 @@ describe('serializeQueryParam / axios', () => {
     if (obj instanceof Date) return obj.toJSON();
     if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
     return Object.keys(obj)
-      .reduce<any>((a, b) => a.push(b + '=' + obj[b]) && a, [])
+      .reduce<any>((a, b) => a.push(`${b}=${obj[b]}`) && a, [])
       .join('&');
   }
 });

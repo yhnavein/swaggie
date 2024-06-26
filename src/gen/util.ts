@@ -1,7 +1,8 @@
 import { type Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import type { ApiOperation, ApiOperationResponse } from '../types';
+import type { ApiOperationResponse } from '../types';
 
 export function exists(filePath: string): Stats {
   try {
@@ -42,19 +43,30 @@ export function join(parent: string[], child: string[]): string[] {
   return parent;
 }
 
-export function getBestResponse(op: ApiOperation): ApiOperationResponse {
+/**
+ * Operations in OpenAPI can have multiple responses, but
+ * we are interested in the one that is the most common for
+ * a standard success response. And we need the content of it.
+ * Content is per media type and we need to choose only one.
+ * We will try to get the first one that is JSON or plain text.
+ * Other media types are not supported at this time.
+ * @returns Response or reference of the success response
+ */
+export function getBestResponse(op: OA3.OperationObject) {
   const NOT_FOUND = 100000;
-  const lowestCode = op.responses.reduce((code, resp) => {
-    const responseCode = Number.parseInt(resp.code, 10);
-    if (Number.isNaN(responseCode) || responseCode >= code) {
-      return code;
-    }
-    return responseCode;
-  }, NOT_FOUND);
+  const lowestCode = Object.keys(op.responses).sort().shift() ?? NOT_FOUND;
 
-  return lowestCode === NOT_FOUND
-    ? op.responses[0]
-    : op.responses.find((resp) => resp.code === lowestCode.toString());
+  const resp = lowestCode === NOT_FOUND ? op.responses[0] : op.responses[lowestCode.toString()];
+
+  if (resp && 'content' in resp) {
+    return (
+      resp.content['application/json'] ??
+      resp.content['text/json'] ??
+      resp.content['text/plain'] ??
+      null
+    );
+  }
+  return null;
 }
 
 /** This method tries to fix potentially wrong out parameter given from commandline */
@@ -67,9 +79,9 @@ export function prepareOutputFilename(out: string | null): string {
     return out.replace(/[\\]/i, '/');
   }
   if (/[\/\\]$/i.test(out)) {
-    return out.replace(/[\/\\]$/i, '') + '/index.ts';
+    return `${out.replace(/[\/\\]$/i, '')}/index.ts`;
   }
-  return out.replace(/[\\]/i, '/') + '.ts';
+  return `${out.replace(/[\\]/i, '/')}.ts`;
 }
 
 export function uniq<T>(arr?: T[]) {

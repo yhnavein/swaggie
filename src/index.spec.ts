@@ -8,43 +8,51 @@ import { runCodeGenerator, applyConfigFile } from './index';
 describe('runCodeGenerator', () => {
   afterEach(sinon.restore);
 
-  it('fails with no parameters provided', () => {
+  it('fails with no parameters provided', async () => {
     const parameters = {};
 
-    return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('You need to provide')
-    );
+    try {
+      return await runCodeGenerator(parameters as any);
+    } catch (e) {
+      return expect(e.message).to.contain('You need to provide');
+    }
   });
 
-  it('fails with only --out provided', () => {
+  it('fails with only --out provided', async () => {
     const parameters = {
       out: './.tmp/test/',
     };
 
-    return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('You need to provide')
-    );
+    try {
+      return await runCodeGenerator(parameters as any);
+    } catch (e) {
+      return expect(e.message).to.contain('You need to provide');
+    }
   });
 
-  it('fails with both --config and --src provided', () => {
+  it('fails with both --config and --src provided', async () => {
     const parameters = {
       config: './test/sample-config.json',
       src: 'https://google.pl',
     };
 
-    return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('You need to provide')
-    );
+    try {
+      return await runCodeGenerator(parameters as any);
+    } catch (e) {
+      return expect(e.message).to.contain('You need to provide');
+    }
   });
 
-  it('fails when there is no --config or --src provided', () => {
+  it('fails when there is no --config or --src provided', async () => {
     const parameters = {
       out: './.tmp/test/',
     };
 
-    return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('You need to provide')
-    );
+    try {
+      await runCodeGenerator(parameters as any);
+    } catch (e) {
+      return expect(e.message).to.contain('You need to provide');
+    }
   });
 
   it('works with --out and --src provided', () => {
@@ -104,7 +112,9 @@ describe('runCodeGenerator', () => {
     const conf = await applyConfigFile(parameters as any);
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://google.pl');
-    expect(conf.src).to.be.equal('https://petstore.swagger.io/v2/swagger.json');
+    expect(conf.src).to.be.equal(
+      'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json'
+    );
   });
 
   it('makes inline parameters higher priority than from config file', async () => {

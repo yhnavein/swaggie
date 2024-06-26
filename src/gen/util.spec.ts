@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { groupOperationsByGroupName, getBestResponse, prepareOutputFilename } from './util';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 describe('groupOperationsByGroupName', () => {
   it('handles null', async () => {
@@ -160,7 +161,7 @@ describe('groupOperationsByGroupName', () => {
 });
 
 describe('prepareOutputFilename', () => {
-  [
+  for (const { given, expected } of [
     { given: null, expected: null },
     { given: 'api.ts', expected: 'api.ts' },
     { given: 'api', expected: 'api.ts' },
@@ -170,56 +171,104 @@ describe('prepareOutputFilename', () => {
     { given: 'api//api.ts', expected: 'api//api.ts' },
     { given: 'api\\api.ts', expected: 'api/api.ts' },
     { given: 'api/api/', expected: 'api/api/index.ts' },
-  ].forEach((el) => {
-    it(`handles ${el.given}`, () => {
-      const res = prepareOutputFilename(el.given);
+  ]) {
+    it(`handles "${given}" correctly`, () => {
+      const res = prepareOutputFilename(given);
 
-      expect(res).to.be.equal(el.expected);
+      expect(res).to.be.equal(expected);
     });
-  });
+  }
 });
 
 describe('getBestResponse', () => {
   it('handles no responses', () => {
-    const op = {
-      responses: [],
+    const op: OA3.OperationObject = {
+      responses: {},
     };
 
-    const res = getBestResponse(op as any);
+    const res = getBestResponse(op);
 
-    expect(res).to.be.equal(undefined);
+    expect(res).to.be.equal(null);
   });
 
-  it('handles one response', () => {
-    const op = {
-      responses: [{ code: '300' }],
+  it('handles 200 response with text/plain media type', () => {
+    const op: OA3.OperationObject = {
+      responses: {
+        '200': {
+          description: 'Success',
+          content: {
+            'text/plain': {
+              schema: {
+                $ref: '#/components/schemas/TestObject',
+              },
+            },
+          },
+        },
+      },
     };
 
-    const res = getBestResponse(op as any);
+    const res = getBestResponse(op);
 
-    expect(res).to.be.eql({ code: '300' });
+    expect(res).to.be.eql({
+      schema: {
+        $ref: '#/components/schemas/TestObject',
+      },
+    });
+  });
+
+  it('handles 201 response with unsupported media type', () => {
+    const op: OA3.OperationObject = {
+      responses: {
+        '201': {
+          description: 'Success',
+          content: {
+            'application/octet-stream': {
+              schema: {
+                $ref: '#/components/schemas/TestObject',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const res = getBestResponse(op);
+
+    expect(res).to.be.eql(null);
   });
 
   it('handles multiple responses', () => {
-    const op = {
-      responses: [{ code: '404' }, { code: '200' }],
+    const op: OA3.OperationObject = {
+      responses: {
+        '301': {
+          description: 'Moved Permanently',
+          content: {
+            'text/plain': {
+              schema: {
+                $ref: '#/components/schemas/Wrong',
+              },
+            },
+          },
+        },
+        '203': {
+          description: 'Success',
+          content: {
+            'text/plain': {
+              schema: {
+                $ref: '#/components/schemas/TestObject',
+              },
+            },
+          },
+        },
+      },
     };
 
-    const res = getBestResponse(op as any);
+    const res = getBestResponse(op);
 
-    expect(res).to.be.eql({ code: '200' });
-  });
-
-  // TODO: This one does not make sense at all!
-  it('handles response without code (WTF?)', () => {
-    const first = { something: '404' };
-    const second = { something: '200' };
-    const op = {
-      responses: [first, second],
-    };
-
-    const res = getBestResponse(op as any);
-
-    expect(res).to.be.eql(first);
+    expect(res).to.be.eql({
+      schema: {
+        $ref: '#/components/schemas/TestObject',
+      },
+    });
   });
 });

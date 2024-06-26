@@ -26,21 +26,6 @@ export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior';
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
 
-export interface ApiOperation {
-  id: string;
-  summary: string;
-  description: string;
-  method: HttpMethod;
-  group: string | null;
-  path: string;
-  parameters: ApiOperationParam[];
-  responses: ApiOperationResponse[];
-  security?: ApiOperationSecurity[];
-  accepts: string[];
-  contentTypes: string[];
-  tags?: string[];
-}
-
 export interface ApiOperationParam extends ApiOperationParamBase {
   name: string;
   in: 'header' | 'path' | 'query' | 'body' | 'formData';

@@ -27,7 +27,7 @@ function serializeQueryParam(obj: any, property: string): string {
 }
 
 describe('serializeQueryParam.angular1', () => {
-  [
+  const testCases = [
     { input: '', property: 'page', expected: '' },
     { input: null, property: 'page', expected: '' },
     { input: undefined, property: 'page', expected: '' },
@@ -51,11 +51,13 @@ describe('serializeQueryParam.angular1', () => {
       property: 'filter',
       expected: 'filter.name=John&filter.agentId=7',
     },
-  ].forEach((el) => {
+  ];
+
+  for (const el of testCases) {
     it(`should handle ${JSON.stringify(el.input)} with property ${el.property}`, () => {
       const res = serializeQueryParam(el.input, el.property);
 
       expect(res).to.be.equal(el.expected);
     });
-  });
+  }
 });
