@@ -6,6 +6,5 @@
   "baseUrl": "https://google.pl",
   "preferAny": true,
   "servicePrefix": "Test",
-  "queryModels": true,
   "dateFormat": "string"
 }

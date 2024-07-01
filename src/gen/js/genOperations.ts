@@ -1,136 +1,106 @@
 import { camel } from 'case';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getParameterType } from './support';
-import { groupOperationsByGroupName, getBestResponse, orderBy, upperFirst } from '../util';
-import type {
-  IServiceClient,
-  IApiOperation,
-  IOperationParam,
-  IQueryDefinitions,
-  IQueryPropDefinition,
-} from './models';
+import { groupOperationsByGroupName, getBestResponse, orderBy } from '../util';
+import type { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
-import type { ApiSpec, ApiOperation, ClientOptions, ApiOperationParam } from '../../types';
+import type { ApiOperation, ClientOptions } from '../../types';
 import { escapeReservedWords } from '../../utils';
 
-const MAX_QUERY_PARAMS: number = 1;
-
 export default async function genOperations(
-  spec: ApiSpec,
+  spec: OA3.Document,
   operations: ApiOperation[],
   options: ClientOptions
-): Promise<[string, IQueryDefinitions]> {
+): Promise<string> {
   const groups = groupOperationsByGroupName(operations);
   let result =
-    (await renderFile('baseClient.ejs', {
+    renderFile('baseClient.ejs', {
       servicePrefix: options.servicePrefix || '',
       baseUrl: options.baseUrl,
-    })) || '';
-  let queryDefinitions = {} as IQueryDefinitions;
+    }) || '';
 
   for (const name in groups) {
     const group = groups[name];
-    const [clientData, clientQueryDefinitions] = prepareClient(
-      (options.servicePrefix || '') + name,
-      group,
-      options
-    );
+    const clientData = prepareClient((options.servicePrefix ?? '') + name, group, options);
 
-    const renderedFile = await renderFile('client.ejs', {
+    const renderedFile = renderFile('client.ejs', {
       ...clientData,
       servicePrefix: options.servicePrefix || '',
     });
 
     result += renderedFile || '';
-
-    queryDefinitions = {
-      ...queryDefinitions,
-      ...clientQueryDefinitions,
-    };
   }
 
-  result += await generateBarrelFile(groups, options);
+  result += generateBarrelFile(groups, options);
 
-  return [result, queryDefinitions];
+  return result;
 }
 
 function prepareClient(
   name: string,
-  operations: ApiOperation[],
+  operations: OA3.OperationObject[],
   options: ClientOptions
-): [IServiceClient, IQueryDefinitions] {
-  const [preparedOperations, queryDefinitions] = prepareOperations(operations, options);
-  return [
-    {
-      clientName: name,
-      camelCaseName: camel(name),
-      operations: preparedOperations,
-      baseUrl: options.baseUrl,
-    },
-    queryDefinitions,
-  ];
+): IServiceClient {
+  const preparedOperations = prepareOperations(operations, options);
+
+  return {
+    clientName: name,
+    camelCaseName: camel(name),
+    operations: preparedOperations,
+    baseUrl: options.baseUrl,
+  };
 }
 
 export function prepareOperations(
-  operations: ApiOperation[],
+  operations: OA3.OperationObject[],
   options: ClientOptions
-): [IApiOperation[], IQueryDefinitions] {
+): IApiOperation[] {
   const ops = fixDuplicateOperations(operations);
-  const queryDefinitions = {} as IQueryDefinitions;
 
-  return [
-    ops.map((op) => {
-      const response = getBestResponse(op);
-      const respType = getParameterType(response, options);
+  return ops.map((op) => {
+    const response = getBestResponse(op);
+    const respType = getParameterType(response, options);
 
-      let queryParams = getParams(op.parameters, options, ['query']);
-      let params = getParams(op.parameters, options);
+    const queryParams = getParams(op.parameters, options, ['query']);
+    const params = getParams(op.parameters, options);
 
-      if (options.queryModels && queryParams.length > MAX_QUERY_PARAMS) {
-        const [newQueryParam, queryParamDefinition] = getQueryDefinition(queryParams, op, options);
-
-        [params, queryParams] = addQueryModelToParams(params, queryParams, newQueryParam);
-        queryDefinitions[newQueryParam.type] = queryParamDefinition;
-      }
-
-      return {
-        returnType: respType,
-        method: op.method.toUpperCase(),
-        name: getOperationName(op.id, op.group),
-        url: op.path,
-        parameters: params,
-        query: queryParams,
-        formData: getParams(op.parameters, options, ['formData']),
-        pathParams: getParams(op.parameters, options, ['path']),
-        body: getParams(op.parameters, options, ['body']).pop(),
-        headers: getHeaders(op, options),
-      };
-    }),
-    queryDefinitions,
-  ];
+    return {
+      returnType: respType,
+      method: op.method.toUpperCase(),
+      name: getOperationName(op.operationId, op.group),
+      url: op.path,
+      parameters: params,
+      query: queryParams,
+      formData: getParams(op.parameters, options, ['formData']),
+      pathParams: getParams(op.parameters, options, ['path']),
+      body: getParams(op.parameters, options, ['body']).pop(),
+      headers: getHeaders(op, options),
+    };
+  });
 }
 
 /**
  * We will add numbers to the duplicated operation names to avoid breaking code
  * @param operations
  */
-export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
+export function fixDuplicateOperations(operations: OA3.OperationObject[]): OA3.OperationObject[] {
   if (!operations || operations.length < 2) {
     return operations;
   }
 
   const ops = operations.map((a) => Object.assign({}, a));
-  const results = orderBy(ops, 'id');
+  const results = orderBy(ops, 'operationId');
 
   let inc = 0;
-  let prevOpId = results[0].id;
+  let prevOpId = results[0].operationId;
   for (let i = 1; i < results.length; i++) {
-    if (results[i].id === prevOpId) {
-      results[i].id += (++inc).toString();
+    if (results[i].operationId === prevOpId) {
+      results[i].operationId += (++inc).toString();
     } else {
       inc = 0;
-      prevOpId = results[i].id;
+      prevOpId = results[i].operationId;
     }
   }
 
@@ -148,7 +118,7 @@ export function getOperationName(opId: string | null, group?: string | null) {
   return camel(opId.replace(`${group}_`, ''));
 }
 
-function getHeaders(op: ApiOperation, options: ClientOptions): IOperationParam[] {
+function getHeaders(op: OA3.OperationObject, options: ClientOptions): IOperationParam[] {
   const headersFromParams = getParams(op.parameters, options, ['header']);
   // TODO: At some point there may be need for a new param to add implicitly default content types
   // TODO: At this time content-type support was not essential to move forward with this functionality
@@ -214,61 +184,4 @@ export function getParamName(name: string): string {
       .map((x) => camel(x))
       .join('_')
   );
-}
-
-/**
- * Converts object notation to a safe one + escapes reserved words
- * @example `a.b.c` -> `a?.b?.c`
- */
-function makeSafeQueryNames(name: string): string {
-  return escapeReservedWords(name.replace(/\./g, '?.'));
-}
-
-function addQueryModelToParams(
-  params: IOperationParam[],
-  queryParams: IOperationParam[],
-  queryParam: IOperationParam
-): [IOperationParam[], IOperationParam[]] {
-  const filteredParams = params.filter((x) => !queryParams.find((y) => y.name === x.name));
-  filteredParams.push(queryParam);
-
-  const updatedQueryParams = queryParams.map((x) => ({
-    ...x,
-    name: `${queryParam.name}.${makeSafeQueryNames(x.originalName)}`,
-  }));
-
-  return [filteredParams, updatedQueryParams];
-}
-
-/**
- * Prepares a new parameter that exposes other client parameters
- */
-function getQueryDefinition(
-  queryParams: IOperationParam[],
-  op: ApiOperation,
-  options: ClientOptions
-): [IOperationParam, IQueryPropDefinition] {
-  const queryParam = {
-    originalName: `${op.id.replace('_', '')}Query`,
-    name: getParamName(`${op.id.replace('_', '')}Query`),
-    type: `I${upperFirst(getOperationName(op.id, op.group))}From${options.servicePrefix || ''}${
-      op.group
-    }ServiceQuery`,
-    optional: false,
-  } as IOperationParam;
-
-  const queryParamDefinition = {
-    type: 'object',
-    required: [],
-    queryParam: true,
-    properties: queryParams.reduce(
-      (prev, curr) => ({
-        ...prev,
-        [curr.name]: curr.original,
-      }),
-      {}
-    ),
-  } as IQueryPropDefinition;
-
-  return [queryParam, queryParamDefinition];
 }

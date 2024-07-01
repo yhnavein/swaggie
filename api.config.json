@@ -4,6 +4,5 @@
   "src": "https://petstore.swagger.io/v2/swagger.json",
   "template": "ng2",
   "preferAny": true,
-  "queryModels": true,
   "dateFormat": "string"
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,8 +43,11 @@ public class Startup
 
     if (!_isProduction)
     {
+      services.AddEndpointsApiExplorer();
       services.AddSwaggerGen(c =>
       {
+        c.SchemaGeneratorOptions.UseOneOfForPolymorphism = true;
+        c.OperationFilter<FromQueryModelFilter>();
         c.CustomOperationIds(e =>
           $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sample Api", Version = "v1" });
@@ -67,10 +69,18 @@ public class Startup
 
     if (!_isProduction)
     {
-      app.UseSwagger(c => c.SerializeAsV2 = true);
-      app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Sample Api"); });
+      app.UseSwagger();
+      app.UseSwaggerUI(c =>
+      {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sample Api");
+        c.RoutePrefix = "swagger";
+      });
     }
 
-    app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+    app.UseEndpoints(endpoints =>
+    {
+      endpoints.MapControllers();
+      endpoints.MapSwagger();
+    });
   }
 }

@@ -41,10 +41,10 @@ function gen(spec: OA3.Document, options: ClientOptions): Promise<string> {
   return genJsCode(spec, operations, options);
 }
 
-export async function applyConfigFile(options: FullAppOptions): Promise<ClientOptions> {
+export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<ClientOptions> {
   try {
     if (!options.config) {
-      return options;
+      return options as ClientOptions;
     }
 
     const configUrl = options.config;

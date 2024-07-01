@@ -1,14 +1,11 @@
 import { expect } from 'chai';
 import { getOperations } from './operations';
 import { loadSpecDocument } from '../utils/documentLoader';
+import { getDocument } from '../utils';
 
 describe('getPathOperation', () => {
   it('should handle empty operation list', () => {
-    const spec = {
-      swagger: '2.0',
-      paths: {},
-      definitions: {},
-    };
+    const spec = getDocument();
 
     const res = getOperations(spec as any);
 
@@ -17,14 +14,12 @@ describe('getPathOperation', () => {
   });
 
   it('should handle one operation list', () => {
-    const spec = {
-      swagger: '2.0',
+    const spec = getDocument({
       paths: {
         '/api/heartbeat': {
           get: {
             tags: ['System'],
             operationId: 'ApiHeartbeatGet',
-            produces: ['application/json'],
             responses: {
               '200': {
                 description: 'Service is available.',
@@ -33,16 +28,12 @@ describe('getPathOperation', () => {
           },
         },
       },
-      definitions: {},
-      contentTypes: [],
-      accepts: [],
-    };
+    });
 
     const res = getOperations(spec as any);
 
     const validResp = [
       {
-        accepts: ['application/json'],
         contentTypes: [],
         group: 'System',
         id: 'ApiHeartbeatGet',
@@ -50,40 +41,10 @@ describe('getPathOperation', () => {
         parameters: [],
         path: '/api/heartbeat',
         responses: [{ code: '200', description: 'Service is available.' }],
-        security: undefined,
         tags: ['System'],
       },
     ];
     expect(res).to.be.eql(validResp);
-  });
-
-  it('should handle additional content types', () => {
-    const spec = {
-      swagger: '2.0',
-      paths: {
-        '/api/heartbeat': {
-          post: {
-            tags: ['System'],
-            operationId: 'ApiHeartbeatGet',
-            produces: ['application/json'],
-            consumes: ['application/x-www-form-urlencoded'],
-            responses: {
-              '200': {
-                description: 'Service is available.',
-              },
-            },
-          },
-        },
-      },
-      definitions: {},
-      contentTypes: [],
-      accepts: [],
-    };
-
-    const res = getOperations(spec as any);
-
-    expect(res).to.be.ok;
-    expect(res[0].contentTypes).to.be.eql(['application/x-www-form-urlencoded']);
   });
 
   it('should parse operations from spec [PetStore Example]', async () => {

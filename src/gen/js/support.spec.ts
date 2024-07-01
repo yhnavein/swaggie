@@ -77,23 +77,26 @@ describe('getParameterType', () => {
     expect(res).to.be.equal('SomeItem');
   });
 
-  describe('responses', () => {
-    it('generics', async () => {
-      const param: OA3.ParameterObject = {
-        name: 'query',
-        in: 'body',
-        required: false,
-        schema: {
-          $ref: '#/definitions/PagingAndSortingParameters[Item]',
+  it('inline enums', async () => {
+    const param: OA3.ParameterObject = {
+      name: 'Roles',
+      in: 'query',
+      schema: {
+        type: 'array',
+        items: {
+          enum: ['Admin', 'User', 'Guest'],
+          type: 'string',
         },
-      };
-      const options = {};
+      },
+    };
+    const options = {};
 
-      const res = getParameterType(param, options);
+    const res = getParameterType(param, options);
 
-      expect(res).to.be.equal('PagingAndSortingParameters<Item>');
-    });
+    expect(res).to.be.equal(`("Admin" | "User" | "Guest")[]`);
+  });
 
+  describe('responses', () => {
     it('string', async () => {
       const param: OA3.ParameterObject = {
         name: 'title',

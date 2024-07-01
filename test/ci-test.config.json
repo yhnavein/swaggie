@@ -4,6 +4,5 @@
   "src": "./test/petstore-v3.json",
   "template": "axios",
   "preferAny": true,
-  "queryModels": true,
   "dateFormat": "string"
 }

@@ -1,8 +1,7 @@
 import { type Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
-
-import type { ApiOperationResponse } from '../types';
+import type { ApiOperation } from '../types';
 
 export function exists(filePath: string): Stats {
   try {
@@ -25,7 +24,7 @@ export function saveFile(filePath: string, contents: string) {
   });
 }
 
-export function groupOperationsByGroupName(operations) {
+export function groupOperationsByGroupName(operations: ApiOperation[]) {
   if (!operations) {
     return {};
   }
@@ -36,11 +35,6 @@ export function groupOperationsByGroupName(operations) {
     groups[op.group].push(op);
     return groups;
   }, {});
-}
-
-export function join(parent: string[], child: string[]): string[] {
-  parent.push.apply(parent, child);
-  return parent;
 }
 
 /**
@@ -82,14 +76,6 @@ export function prepareOutputFilename(out: string | null): string {
     return `${out.replace(/[\/\\]$/i, '')}/index.ts`;
   }
   return `${out.replace(/[\\]/i, '/')}.ts`;
-}
-
-export function uniq<T>(arr?: T[]) {
-  if (!arr) {
-    return [];
-  }
-
-  return [...new Set(arr)];
 }
 
 export function orderBy<T>(arr: T[] | null | undefined, key: string) {

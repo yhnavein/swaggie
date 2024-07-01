@@ -26,7 +26,7 @@ export function getParameterType(
   return getTypeFromSchema(param.schema, options);
 }
 
-function getTypeFromSchema(
+export function getTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject,
   options: Partial<ClientOptions>
 ): string {
@@ -36,8 +36,7 @@ function getTypeFromSchema(
     return unknownType;
   }
   if ('$ref' in schema) {
-    const type = schema.$ref.split('/').pop();
-    return handleGenerics(type || unknownType);
+    return schema.$ref.split('/').pop();
   }
 
   if (schema.type === 'array') {
@@ -55,6 +54,9 @@ function getTypeFromSchema(
     }
     return unknownType;
   }
+  if ('enum' in schema) {
+    return `(${schema.enum.map((v) => JSON.stringify(v)).join(' | ')})`;
+  }
   if (schema.type === 'integer' || schema.type === 'number') {
     return 'number';
   }
@@ -68,14 +70,4 @@ function getTypeFromSchema(
     return 'boolean';
   }
   return unknownType;
-}
-
-function handleGenerics(type: string) {
-  if (!/^\w+\[\w+\]/.test(type)) {
-    return type;
-  }
-
-  // const fixedType = type.replace(/\[/g, '<').replace(/\]/g, '>');
-  const parts = type.split('[');
-  return parts.join('<').replace(/\]/g, '>');
 }

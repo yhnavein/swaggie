@@ -1,12 +1,13 @@
 import { expect } from 'chai';
-import fs from 'fs';
+import fs from 'node:fs';
+
 import { runCodeGenerator } from '../src/index';
 import type { FullAppOptions, Template } from '../src/types';
 
 const templates: Template[] = ['axios', 'xior', 'swr-axios', 'fetch', 'ng1', 'ng2'];
 
 describe('petstore snapshots', () => {
-  templates.forEach((template) => {
+  for (const template of templates) {
     it(`should match existing ${template} snapshot`, async () => {
       const snapshotFile = `./test/snapshots/${template}.ts`;
       const parameters: FullAppOptions = {
@@ -26,5 +27,5 @@ describe('petstore snapshots', () => {
         expect(existingSnapshot).to.equal(generatedCode);
       }
     });
-  });
+  }
 });

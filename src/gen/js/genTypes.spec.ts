@@ -1,142 +1,191 @@
 import { expect } from 'chai';
-import type { ApiSpec } from '../../types';
-import genTypes, { renderQueryStringParameters, renderComment } from './genTypes';
+import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-const emptySpec: ApiSpec = {
-  swagger: '2.0',
-  info: {
-    title: 'Some Api',
-    version: 'v1',
-  },
-  paths: [],
-  definitions: [],
-  accepts: [],
-  contentTypes: [],
-};
+import genTypes, { renderComment } from './genTypes';
+import { getClientOptions, getDocument } from '../../utils';
 
 describe('genTypes', () => {
-  it('should handle empty definitions properly', () => {
-    const res = genTypes(emptySpec, {}, {} as any);
+  const opts = getClientOptions();
+
+  it('should handle empty components properly', () => {
+    const res = genTypes(getDocument({ components: {} }), opts);
 
     expect(res).to.be.equal('');
   });
 
+  it('should handle empty components schemas properly', () => {
+    const res = genTypes(getDocument({ components: { schemas: {} } }), opts);
+
+    expect(res).to.be.equal('');
+  });
+
+  it('should handle schema with reference only', () => {
+    const res = genTypes(
+      prepareSchemas({
+        A: {
+          $ref: '#/components/schemas/B',
+        },
+        B: {
+          type: 'string',
+        },
+      }),
+      opts
+    );
+
+    expect(res).to.be.ok;
+    expect(res.trim()).to.be.equal(
+      `export type A = B;
+export interface B {
+}`
+    );
+  });
+
   describe('enums', () => {
-    describe('int-serialized simple enums', () => {
-      it(`should handle Swashbuckle's enum correctly`, () => {
-        const res = genTypes(
-          emptySpec,
-          {
-            SomeEnum: {
-              format: 'int32',
-              enum: [0, 1],
-              type: 'integer',
-            },
-          },
-          {} as any
-        );
-
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal('export type SomeEnum = 0 | 1;');
-      });
-
-      it(`should handle NSwag's enum correctly`, () => {
-        const res = genTypes(
-          emptySpec,
-          {
-            SomeEnum: {
-              type: 'integer',
-              format: 'int32',
-              enum: ['Active', 'Disabled'],
-              fullEnum: {
-                Active: 0,
-                Disabled: 1,
-              },
-            },
-          },
-          {} as any
-        );
-
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal(`export enum SomeEnum {
-  Active = 0,
-  Disabled = 1,
-}`);
-      });
-    });
-
-    describe('string-serialized simple enums', () => {
-      it(`should handle Swashbuckle's enum correctly`, () => {
-        const res = genTypes(
-          emptySpec,
-          {
-            SomeEnum: {
-              enum: ['Active', 'Disabled'],
-              type: 'string',
-            },
-          },
-          {} as any
-        );
-
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal(`export type SomeEnum = 'Active' | 'Disabled';`);
-      });
-    });
-  });
-
-  describe('x-enums', () => {
-    it('should handle number-based x-enums correctly', () => {
+    it('should handle simple enums correctly', () => {
       const res = genTypes(
-        emptySpec,
-        {
-          GrantType: {
+        prepareSchemas({
+          SimpleEnum: {
             type: 'integer',
-            description: '',
-            'x-enumNames': ['None', 'Password', 'External', 'Internal'],
-            enum: [0, 1, 2, 3],
+            format: 'int32',
+            enum: [0, 1],
           },
-        },
-        {} as any
-      );
-
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(`export enum GrantType {
-  None = 0,
-  Password = 1,
-  External = 2,
-  Internal = 3,
-}`);
-    });
-
-    it('should handle string-based x-enums correctly', () => {
-      const res = genTypes(
-        emptySpec,
-        {
-          GrantType: {
+          StringEnum: {
             type: 'string',
-            description: '',
-            'x-enumNames': ['None', 'Password', 'External', 'Internal'],
-            enum: ['None', 'Password', 'External', 'Internal'],
+            description: 'Feature is activated or not',
+            enum: ['Active', 'Disabled'],
           },
-        },
-        {} as any
+        }),
+        opts
       );
 
       expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(`export enum GrantType {
-  None = "None",
-  Password = "Password",
-  External = "External",
-  Internal = "Internal",
-}`);
+      expect(res.trim()).to.be.equal(
+        `export type SimpleEnum = 0 | 1;
+
+// Feature is activated or not
+export type StringEnum = "Active" | "Disabled";`
+      );
     });
+
+    it('should handle extended enums correctly', () => {
+      const res = genTypes(
+        prepareSchemas({
+          XEnums: {
+            type: 'integer',
+            format: 'int32',
+            enum: [2, 1, 0],
+            'x-enumNames': ['High', 'Medium', 'Low'],
+          },
+          XEnumVarnames: {
+            type: 'integer',
+            format: 'int32',
+            enum: [2, 1, 0],
+            'x-enum-varnames': ['High', 'Medium', 'Low'],
+          },
+          XEnumsString: {
+            type: 'string',
+            enum: ['L', 'M', 'S'],
+            description: 'How big the feature is',
+            'x-enumNames': ['Large', 'Medium', 'Small'],
+          },
+        }),
+        opts
+      );
+
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(
+        `export enum XEnums {
+  High = 2,
+  Medium = 1,
+  Low = 0,
+}
+
+export enum XEnumVarnames {
+  High = 2,
+  Medium = 1,
+  Low = 0,
+}
+
+// How big the feature is
+export enum XEnumsString {
+  Large = "L",
+  Medium = "M",
+  Small = "S",
+}`
+      );
+    });
+
+    it('should handle OpenApi 3.1 enums', () => {
+      const res = genTypes(
+        prepareSchemas({
+          Priority: {
+            type: 'integer',
+            format: 'int32',
+            oneOf: [
+              { title: 'High', const: 2, description: 'High priority' },
+              { title: 'Medium', const: 1, description: 'Medium priority' },
+              { title: 'Low', const: 0, description: 'Low priority' },
+            ],
+          },
+          Size: {
+            type: 'string',
+            description: 'How big the feature is',
+            oneOf: [
+              { title: 'Large', const: 'L', description: 'Large size' },
+              { title: 'Medium', const: 'M', description: 'Medium size' },
+              { title: 'Small', const: 'S', description: 'Small size' },
+            ],
+          },
+        }),
+        opts
+      );
+
+      expect(res).to.be.ok;
+      expect(res.trim()).to.be.equal(
+        `export enum Priority {
+  High = 2,
+  Medium = 1,
+  Low = 0,
+}
+
+// How big the feature is
+export enum Size {
+  Large = "L",
+  Medium = "M",
+  Small = "S",
+}`
+      );
+    });
+
+    //     it("should handle NSwag's enum correctly", () => {
+    //       const res = genTypes(
+    //         getDocument(),
+    //         {
+    //           SomeEnum: {
+    //             type: 'integer',
+    //             format: 'int32',
+    //             enum: ['Active', 'Disabled'],
+    //             fullEnum: {
+    //               Active: 0,
+    //               Disabled: 1,
+    //             },
+    //           },
+    //         },
+    //         {} as any
+    //       );
+
+    //       expect(res).to.be.ok;
+    //       expect(res.trim()).to.be.equal(`export enum SomeEnum {
+    //   Active = 0,
+    //   Disabled = 1,
+    // }`);
+    //     });
   });
 
-  describe('normal objects', () => {
+  describe('objects', () => {
     it('should handle obj with no required fields', () => {
       const res = genTypes(
-        emptySpec,
-        {
+        prepareSchemas({
           AuthenticationData: {
             type: 'object',
             properties: {
@@ -146,302 +195,197 @@ describe('genTypes', () => {
               password: {
                 type: 'string',
               },
-            } as any,
+            },
           },
-        },
-        {} as any
+          Empty: {
+            type: 'object',
+          },
+        }),
+        opts
       );
 
       expect(res).to.be.ok;
       expect(res.trim()).to.be.equal(`export interface AuthenticationData {
   login?: string;
-  password?: string;
+  password?: string;}
+
+export interface Empty {
 }`);
     });
 
-    it('should handle obj with all required fields', () => {
+    it('should handle obj with required fields', () => {
       const res = genTypes(
-        emptySpec,
-        {
+        prepareSchemas({
           AuthenticationData: {
             type: 'object',
+            required: ['login', 'password'],
             properties: {
               login: {
+                // ReadOnly or WriteOnly are not yet supported
+                // As we don't have a way to distinguish how dev will use
+                // generated types in his app
+                readOnly: true,
                 type: 'string',
               },
               password: {
+                writeOnly: true,
                 type: 'string',
               },
-            } as any,
-            required: ['login', 'password'],
+              rememberMe: {
+                type: 'boolean',
+              },
+            },
           },
-        },
-        {} as any
+        }),
+        opts
       );
 
       expect(res).to.be.ok;
       expect(res.trim()).to.be.equal(`export interface AuthenticationData {
   login: string;
   password: string;
-}`);
+  rememberMe?: boolean;}`);
     });
   });
 
-  describe('objects with read-only fields', () => {
-    it('should ignore read-only fields', () => {
-      const res = genTypes(
-        emptySpec,
-        {
-          PagedAndSortedQuery: {
-            properties: {
-              isPagingSpecified: {
-                readOnly: true,
-                type: 'boolean',
-              },
-              sortField: {
-                type: 'string',
-              },
-            } as any,
-            required: [],
-            type: 'object',
-          },
-        },
-        {} as any
-      );
+  describe('inheritance', () => {
+    describe('allOf', () => {
+      it('should handle 2 allOf correctly (most common case)', () => {
+        const res = genTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              allOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    rememberMe: {
+                      type: 'boolean',
+                    },
+                  },
+                },
+                { $ref: '#/components/schemas/BasicAuth' },
+              ],
+            },
+          }),
+          opts
+        );
 
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(`export interface PagedAndSortedQuery {
-  sortField?: string;
-}`);
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal(`export interface AuthenticationData extends BasicAuth {
+  rememberMe?: boolean;}`);
+      });
+
+      it('should handle many allOf correctly', () => {
+        const res = genTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              allOf: [
+                { $ref: '#/components/schemas/LoginPart' },
+                { $ref: '#/components/schemas/PasswordPart' },
+                {
+                  type: 'object',
+                  required: ['rememberMe'],
+                  properties: {
+                    rememberMe: {
+                      type: 'boolean',
+                    },
+                  },
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    signForSpam: {
+                      type: 'boolean',
+                    },
+                  },
+                },
+              ],
+            },
+          }),
+          opts
+        );
+
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be
+          .equal(`export interface AuthenticationData extends LoginPart, PasswordPart {
+  rememberMe: boolean;
+  signForSpam?: boolean;}`);
+      });
     });
-  });
-});
 
-describe('renderQueryStringParameters', () => {
-  it('should handle empty list correctly', () => {
-    const def = {
-      type: 'object',
-      required: [],
-      queryParam: true,
-      properties: {},
-    };
-    const res = renderQueryStringParameters(def, {} as any);
+    // Use of `anyOf` and `oneOf` is implemented in the same and very simple way
+    // We just list all the types in the union. This is close enough to the truth
+    // and should be convenient for the end user of Swaggie.
 
-    expect(res).to.deep.equal([]);
-  });
+    describe('anyOf', () => {
+      it('should handle 1 anyOf with reference correctly', () => {
+        const res = genTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              anyOf: [{ $ref: '#/components/schemas/BasicAuth' }],
+            },
+          }),
+          opts
+        );
 
-  it('should handle one element without dots', () => {
-    const def = {
-      type: 'object',
-      required: [],
-      queryParam: true,
-      properties: {
-        page: {
-          name: 'page',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-      },
-    };
-    const res = renderQueryStringParameters(def, {} as any);
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth;');
+      });
 
-    expect(res).to.be.ok;
-    expect(res.length).to.eq(1);
-    expect(res[0]).to.contain('page?: number;');
-  });
+      it('should handle 2 anyOfs with reference correctly', () => {
+        const res = genTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              anyOf: [
+                { $ref: '#/components/schemas/BasicAuth' },
+                { $ref: '#/components/schemas/OAuth2' },
+              ],
+            },
+          }),
+          opts
+        );
 
-  it('should handle one element in a dot notation', () => {
-    const def = {
-      type: 'object',
-      required: [],
-      queryParam: true,
-      properties: {
-        parameters_page: {
-          name: 'parameters.page',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-      },
-    };
-    const res = renderQueryStringParameters(def, {} as any);
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth | OAuth2;');
+      });
+    });
 
-    expect(res).to.be.ok;
-    expect(res.length).to.eq(1);
-    expect(textOnly(res[0])).to.be.equal(textOnly('parameters?: {page?: number; }'));
-  });
+    describe('oneOf', () => {
+      it('should handle 1 anyOf with reference correctly', () => {
+        const res = genTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              oneOf: [{ $ref: '#/components/schemas/BasicAuth' }],
+            },
+          }),
+          opts
+        );
 
-  it('should handle two elements in a dot notation', () => {
-    const def = {
-      type: 'object',
-      required: [],
-      queryParam: true,
-      properties: {
-        parameters_page: {
-          name: 'parameters.page',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-        parameters_count: {
-          name: 'parameters.count',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-      },
-    };
-    const res = renderQueryStringParameters(def, {} as any);
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth;');
+      });
 
-    expect(res).to.be.ok;
-    expect(textOnly(res[0])).to.be.equal(
-      textOnly('parameters?: {page?: number; count?: number; }')
-    );
-  });
+      it('should handle 2 anyOfs with reference correctly', () => {
+        const res = genTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              oneOf: [
+                { $ref: '#/components/schemas/BasicAuth' },
+                { $ref: '#/components/schemas/OAuth2' },
+              ],
+            },
+          }),
+          opts
+        );
 
-  it('should handle four elements in a dot notation', () => {
-    const def = {
-      type: 'object',
-      required: [],
-      queryParam: true,
-      properties: {
-        parameters_page: {
-          name: 'parameters.page',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-        parameters_count: {
-          name: 'parameters.count',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-        else_page: {
-          name: 'else.page',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-        else_count: {
-          name: 'else.count',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-      },
-    };
-    const res = renderQueryStringParameters(def, {} as any);
-
-    expect(res).to.be.ok;
-    expect(res.length).to.eq(2);
-    expect(textOnly(res[0])).to.be.equal(
-      textOnly('parameters?: {page?: number; count?: number; }')
-    );
-    expect(textOnly(res[1])).to.be.equal(textOnly('else?: {page?: number; count?: number; }'));
-  });
-
-  it('crazy case #1', () => {
-    const def = {
-      type: 'object',
-      required: [],
-      queryParam: true,
-      properties: {
-        parameters_filter_countryName: {
-          name: 'parameters.filter.countryName',
-          in: 'query',
-          required: false,
-          type: 'string',
-        },
-        parameters_filter_active: {
-          name: 'parameters.filter.active',
-          in: 'query',
-          required: false,
-          type: 'boolean',
-        },
-        parameters_sortField: {
-          name: 'parameters.sortField',
-          in: 'query',
-          required: false,
-          type: 'string',
-        },
-        parameters_sortDir: {
-          name: 'parameters.sortDir',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-          enum: ['Undefined', 'Asc', 'Desc'],
-          fullEnum: {
-            Undefined: 0,
-            Asc: 1,
-            Desc: 2,
-          },
-        },
-        parameters_page: {
-          name: 'parameters.page',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-        parameters_count: {
-          name: 'parameters.count',
-          in: 'query',
-          required: false,
-          type: 'integer',
-          format: 'int32',
-        },
-        test: {
-          name: 'test',
-          in: 'query',
-          required: true,
-          type: 'integer',
-          format: 'int32',
-        },
-      },
-    };
-    const res = renderQueryStringParameters(def, {} as any);
-
-    expect(res).to.be.ok;
-    expect(res.length).to.eq(2);
-    expect(textOnly(res[0])).to.be.equal(
-      textOnly(`parameters?: {
-filter?: {
-  countryName?: string;
-  active?: boolean;
-}
-  sortField?: string;
-  sortDir?: number;
-  page?: number;
-  count?: number;
-}`)
-    );
-    expect(textOnly(res[1])).to.be.equal(textOnly('test: number;'));
+        expect(res).to.be.ok;
+        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth | OAuth2;');
+      });
+    });
   });
 });
 
 describe('renderComment', () => {
-  it('should render proper multiline comment', () => {
-    const comment = `Quite a lenghty comment
-With at least two lines`;
-    const res = renderComment(comment);
-
-    expect(res).to.be.equal(` /**
-  * Quite a lenghty comment
-  * With at least two lines
-  */`);
-  });
-
   it('should render proper multiline comment with trimming', () => {
     const comment = `   Quite a lenghty comment
    With at least two lines    `;
@@ -453,38 +397,41 @@ With at least two lines`;
   */`);
   });
 
-  it('should render proper one-line comment', () => {
-    const comment = 'One liner';
-    const res = renderComment(comment);
+  const testCases = [
+    {
+      comment: 'One liner',
+      expected: '// One liner',
+    },
+    {
+      comment: '   One liner   ',
+      expected: '// One liner',
+    },
+    {
+      comment: null,
+      expected: null,
+    },
+    {
+      comment: '',
+      expected: null,
+    },
+  ];
 
-    expect(res).to.be.equal('// One liner');
-  });
+  for (const { comment, expected } of testCases) {
+    it(`should render proper comment for "${comment}"`, () => {
+      const res = renderComment(comment);
 
-  it('should render proper one-line comment with trimming', () => {
-    const comment = '   One liner   ';
-    const res = renderComment(comment);
-
-    expect(res).to.be.equal('// One liner');
-  });
-
-  it('should handle null comment', () => {
-    const comment = null;
-    const res = renderComment(comment);
-
-    expect(res).to.be.null;
-  });
-
-  it('should handle empty comment', () => {
-    const comment = '';
-    const res = renderComment(comment);
-
-    expect(res).to.be.null;
-  });
+      expect(res).to.be.equal(expected);
+    });
+  }
 });
 
-function textOnly(content: string) {
-  if (!content) {
-    return null;
-  }
-  return content.replace(/\s+/g, '');
+type ExtendedSchema = {
+  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: any });
+};
+function prepareSchemas(schemas: ExtendedSchema) {
+  return getDocument({
+    components: {
+      schemas: schemas as OA3.ComponentsObject['schemas'],
+    },
+  });
 }

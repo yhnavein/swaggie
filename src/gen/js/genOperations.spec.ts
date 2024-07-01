@@ -35,20 +35,18 @@ describe('prepareOperations', () => {
   // });
 
   it(`operation's empty header list should be handled correctly`, () => {
-    const ops = [
+    const ops: ApiOperation[] = [
       {
-        id: 'getPetById',
+        operationId: 'getPetById',
         summary: 'Find pet by ID',
         description: 'Returns a single pet',
         method: 'get',
         path: '/pet/{petId}',
         parameters: [],
-        responses: [],
+        responses: {},
         group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
       },
-    ] as ApiOperation[];
+    ];
 
     const [res] = prepareOperations(ops, {} as any);
 
@@ -179,38 +177,9 @@ describe('prepareOperations', () => {
       accepts: ['application/json'],
       contentTypes: [],
     } as unknown as ApiOperation;
-
-    it('query model should be generated instead array of params', () => {
-      const expectedQueryType = 'IGetPetByIdFromPetServiceQuery';
-
-      const [res, queryDefs] = prepareOperations([op], {
-        queryModels: true,
-      } as any);
-
-      expect(queryDefs[expectedQueryType]).to.be.ok;
-      expect(queryDefs[expectedQueryType].type).to.be.equal('object');
-      expect(queryDefs[expectedQueryType].properties).to.be.eql({
-        firstParameter: op.parameters[0],
-        secondParameter: op.parameters[1],
-        filter_anotherParameter: op.parameters[2],
-      });
-
-      expect(res[0]).to.be.ok;
-      expect(res[0].parameters.length).to.be.equal(1);
-      expect(res[0].parameters[0].name).to.be.equal('petGetPetByIdQuery');
-      expect(res[0].parameters[0].type).to.be.equal(expectedQueryType);
-    });
-
-    it('query model should not be generated', () => {
-      const [res, queryDef] = prepareOperations([op], {} as any);
-
-      expect(queryDef).to.be.eql({});
-      expect(res[0]).to.be.ok;
-      expect(res[0].parameters.length).to.be.equal(op.parameters.length);
-    });
   });
 
-  it(`formdata array param should be serialized correctly as array`, () => {
+  it('formdata array param should be serialized correctly as array', () => {
     const ops = [
       {
         id: 'getPetById',
@@ -247,7 +216,7 @@ describe('prepareOperations', () => {
 });
 
 describe('fixDuplicateOperations', () => {
-  it(`handle empty list`, () => {
+  it('handle empty list', () => {
     const ops = [];
 
     const res = fixDuplicateOperations(ops);
@@ -277,33 +246,29 @@ describe('fixDuplicateOperations', () => {
     expect(res).to.be.deep.equal(ops);
   });
 
-  it(`handle 2 different operations`, () => {
-    const ops = [
+  it('handle 2 different operations', () => {
+    const ops: ApiOperation[] = [
       {
-        id: 'getPetById',
+        operationId: 'getPetById',
         summary: 'Find pet by ID',
         description: 'Returns a single pet',
         method: 'get',
         path: '/pet/{petId}',
         parameters: [],
-        responses: [],
+        responses: {},
         group: null,
-        accepts: ['application/json'],
-        contentTypes: ['application/x-www-form-urlencoded'],
       },
       {
-        id: 'somethingElse',
+        operationId: 'somethingElse',
         summary: 'Random',
         description: 'Random',
         method: 'get',
         path: '/pet/{petId}',
         parameters: [],
-        responses: [],
+        responses: {},
         group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
       },
-    ] as ApiOperation[];
+    ];
 
     const res = fixDuplicateOperations(ops);
 
@@ -311,8 +276,8 @@ describe('fixDuplicateOperations', () => {
     expect(res).to.be.deep.equal(ops);
   });
 
-  it(`handle 2 operations with the same id`, () => {
-    const ops = [
+  it('handle 2 operations with the same id', () => {
+    const ops: ApiOperation[] = [
       {
         id: 'getPetById',
         summary: 'Find pet by ID',
@@ -320,10 +285,7 @@ describe('fixDuplicateOperations', () => {
         method: 'get',
         path: '/pet/{petId}',
         parameters: [],
-        responses: [],
         group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
       },
       {
         id: 'getPetById',
@@ -332,12 +294,9 @@ describe('fixDuplicateOperations', () => {
         method: 'post',
         path: '/pet/{petId}',
         parameters: [],
-        responses: [],
         group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
       },
-    ] as ApiOperation[];
+    ];
 
     const res = fixDuplicateOperations(ops);
 
@@ -414,158 +373,6 @@ describe('getOperationName', () => {
       const res = getOperationName(el.input.opId, el.input.group);
 
       expect(res).to.be.equal(el.expected);
-    });
-  });
-});
-
-describe('x-schema extension', () => {
-  it(`handle x-schema simple case in operation parameter`, () => {
-    const ops = [
-      {
-        id: 'getPetById',
-        summary: 'Find pet by ID',
-        description: 'Returns a single pet',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [
-          {
-            type: 'object',
-            name: 'something',
-            in: 'query',
-            'x-schema': {
-              $ref: '#/definitions/SomeType',
-            },
-          },
-        ],
-        responses: [],
-        group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
-      },
-    ];
-
-    const res = prepareOperations(ops as unknown as ApiOperation[], {} as any);
-
-    expect(res).to.be.ok;
-    expect(res[0][0].parameters[0]).to.be.deep.include({
-      name: 'something',
-      originalName: 'something',
-      type: 'SomeType',
-      optional: true,
-    });
-  });
-
-  it(`handle x-schema with enum in operation parameter`, () => {
-    const ops = [
-      {
-        id: 'getPetById',
-        summary: 'Find pet by ID',
-        description: 'Returns a single pet',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [
-          {
-            type: 'integer',
-            name: 'something',
-            in: 'query',
-            'x-schema': {
-              $ref: '#/definitions/SomeType',
-            },
-            enum: [1, 2],
-          },
-        ],
-        responses: [],
-        group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
-      },
-    ];
-
-    const res = prepareOperations(ops as unknown as ApiOperation[], {} as any);
-
-    expect(res).to.be.ok;
-    expect(res[0][0].parameters[0]).to.be.deep.include({
-      name: 'something',
-      originalName: 'something',
-      type: 'SomeType',
-      optional: true,
-    });
-  });
-
-  it(`handle x-nullable as false correctly`, () => {
-    const ops = [
-      {
-        id: 'getPetById',
-        summary: 'Find pet by ID',
-        description: 'Returns a single pet',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [
-          {
-            type: 'integer',
-            name: 'something',
-            in: 'query',
-            'x-schema': {
-              $ref: '#/definitions/SomeType',
-            },
-            'x-nullable': false,
-            enum: [1, 2],
-          },
-        ],
-        responses: [],
-        group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
-      },
-    ];
-
-    const res = prepareOperations(ops as unknown as ApiOperation[], {} as any);
-
-    expect(res).to.be.ok;
-    expect(res[0][0].parameters[0]).to.be.deep.include({
-      name: 'something',
-      originalName: 'something',
-      type: 'SomeType',
-      optional: false,
-    });
-  });
-
-  it(`handle x-nullable as true correctly`, () => {
-    const ops = [
-      {
-        id: 'getPetById',
-        summary: 'Find pet by ID',
-        description: 'Returns a single pet',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [
-          {
-            type: 'integer',
-            name: 'something',
-            in: 'query',
-            'x-schema': {
-              $ref: '#/definitions/SomeType',
-            },
-            'x-nullable': true,
-            enum: [1, 2],
-          },
-        ],
-        responses: [],
-        group: null,
-        accepts: ['application/json'],
-        contentTypes: [],
-      },
-    ];
-
-    const [resOps, resDefs] = prepareOperations(ops as unknown as ApiOperation[], {} as any);
-
-    expect(resOps).to.be.ok;
-    expect(resDefs).to.be.ok;
-    expect(resOps[0].parameters[0]).to.be.deep.include({
-      name: 'something',
-      originalName: 'something',
-      type: 'SomeType',
-      optional: true,
     });
   });
 });

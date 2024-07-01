@@ -35,10 +35,6 @@ program
   .option(
     '--servicePrefix <string>',
     'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""'
-  )
-  .option(
-    '--queryModels',
-    'Generate models for query string instead list of parameters. Default: false'
   );
 
 program.parse(process.argv);
@@ -58,7 +54,7 @@ function complete([code, opts]: CodeGenResult) {
   process.exit(0);
 }
 
-function error(e) {
+function error(e: any) {
   const msg = e instanceof Error ? e.message : e;
   console.error(red(msg));
   process.exit(1);

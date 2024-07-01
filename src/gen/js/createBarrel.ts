@@ -2,7 +2,7 @@ import { camel } from 'case';
 import type { ClientOptions } from '../../types';
 import { renderFile } from '../templateManager';
 
-export async function generateBarrelFile(clients: any[], clientOptions: ClientOptions) {
+export function generateBarrelFile(clients: any[], clientOptions: ClientOptions) {
   const files = [];
 
   for (const name in clients) {

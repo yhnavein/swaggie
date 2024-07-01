@@ -3,13 +3,6 @@ import fs from 'node:fs';
 import fetch from 'node-fetch';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-export interface SpecOptions {
-  /**
-   * A base ref string to ignore when expanding ref dependencies e.g. '#/definitions/'
-   */
-  ignoreRefType?: string;
-}
-
 export async function loadSpecDocument(src: string | object): Promise<OA3.Document> {
   if (typeof src === 'string') {
     return await loadFile(src);

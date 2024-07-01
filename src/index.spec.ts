@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import * as fetch from 'node-fetch';
 import { Response } from 'node-fetch';
 import sinon from 'sinon';
-import { runCodeGenerator, applyConfigFile } from './index';
+
+import { runCodeGenerator, applyConfigFile } from './';
 
 describe('runCodeGenerator', () => {
   afterEach(sinon.restore);
@@ -109,7 +110,7 @@ describe('runCodeGenerator', () => {
     const parameters = {
       config: './test/sample-config.json',
     };
-    const conf = await applyConfigFile(parameters as any);
+    const conf = await applyConfigFile(parameters);
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://google.pl');
     expect(conf.src).to.be.equal(
@@ -123,7 +124,7 @@ describe('runCodeGenerator', () => {
       baseUrl: 'https://wp.pl',
       src: './test/petstore-v3.yml',
     };
-    const conf = await applyConfigFile(parameters as any);
+    const conf = await applyConfigFile(parameters);
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://wp.pl');
     expect(conf.src).to.be.equal('./test/petstore-v3.yml');

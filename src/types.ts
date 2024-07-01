@@ -1,3 +1,5 @@
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
+
 export interface ClientOptions {
   /**
    * Path or URL to the Swagger specification file (JSON or YAML).
@@ -11,8 +13,6 @@ export interface ClientOptions {
   baseUrl?: string;
   preferAny?: boolean;
   servicePrefix?: string;
-  /** Generate models for query string instead list of parameters */
-  queryModels?: boolean;
   /** How date should be handled. It does not do any special serialization */
   dateFormat?: DateSupport; // 'luxon', 'momentjs', etc
 }
@@ -25,18 +25,6 @@ export interface FullAppOptions extends ClientOptions {
 export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior';
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
-
-export interface ApiOperationParam extends ApiOperationParamBase {
-  name: string;
-  in: 'header' | 'path' | 'query' | 'body' | 'formData';
-  description: string;
-  required: boolean;
-  readonly?: boolean;
-  allowEmptyValue: boolean;
-  schema: object;
-  'x-nullable'?: boolean;
-  'x-schema'?: object;
-}
 
 type CollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes' | 'multi';
 
@@ -75,6 +63,15 @@ export interface ApiOperationParamGroups {
   query?: any;
   formData?: any;
   body?: any;
+}
+
+/**
+ * Local type that represent Operation as understood by Swaggie
+ **/
+export interface ApiOperation extends OA3.OperationObject {
+  method: HttpMethod;
+  path: string;
+  group: string;
 }
 
 export interface ApiOperationResponse {

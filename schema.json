@@ -38,11 +38,6 @@
           "description": "Use `any` type instead of `unknown`",
           "type": "boolean"
         },
-        "queryModels": {
-          "default": false,
-          "description": "Generate models for query string instead list of parameters",
-          "type": "boolean"
-        },
         "servicePrefix": {
           "default": "",
           "description": "Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions",

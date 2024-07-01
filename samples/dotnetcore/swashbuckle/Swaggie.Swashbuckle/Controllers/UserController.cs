@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Swaggie.Swashbuckle.Controllers;
 
@@ -31,6 +34,43 @@ public class UserController : Controller
     return Ok(users);
   }
 
+  [HttpGet("filter")]
+  [Produces(typeof(PagedResult<UserViewModel>))]
+  public IActionResult FilterUsers([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery] Dictionary<string, int> someDict)
+  {
+    Console.WriteLine(JsonConvert.SerializeObject(filter));
+    Console.WriteLine(JsonConvert.SerializeObject(secondFilter));
+    var allUsers = new[]
+    {
+      new UserViewModel
+      {
+        Name = "Ann Bobcat", Id = 1, Email = "ann.b@test.org", Role = UserRole.Admin
+      },
+      new UserViewModel
+      {
+        Name = "Bob Johnson", Id = 2, Email = "bob.j@test.org", Role = UserRole.User
+      }
+    };
+
+    if (filter == null)
+    {
+      return Ok(allUsers);
+    }
+
+    var users = allUsers
+      .Where(u => filter.Roles.Count > 0 || filter.Roles.Contains(u.Role))
+      // Rest of the filtering logic
+      .ToList();
+
+    var result = new PagedResult<UserViewModel>
+    {
+      Items = users,
+      TotalCount = users.Count
+    };
+
+    return Ok(result);
+  }
+
   [HttpPost("")]
   [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status201Created)]
   public IActionResult CreateUser([FromBody] UserViewModel user)
@@ -38,7 +78,7 @@ public class UserController : Controller
     return Created("some-url", user);
   }
 
-  [HttpDelete("{id}")]
+  [HttpDelete("{id:long}")]
   [Produces(typeof(void))]
   public IActionResult DeleteUser([FromRoute] long id)
   {
@@ -55,6 +95,61 @@ public class UserViewModel
   public string Email { get; set; }
 
   public UserRole Role { get; set; }
+
+  [Required]
+  public Dictionary<int, string> SomeDict { get; set; } = new();
+
+  public PagedResult<string> AuditEvents { get; set; } = new();
+}
+
+public class UserFilter
+{
+  /// <summary>
+  /// Name of the user. Can be partial name match
+  /// </summary>
+  public string Name { get; set; }
+
+  /// <summary>
+  /// Ids of the users
+  /// </summary>
+  public List<long> Ids { get; set; } = new();
+
+  /// <summary>
+  /// User's email. Can be partial match
+  /// </summary>
+  public string Email { get; set; }
+
+  /// <summary>
+  /// Search by user role(s)
+  /// </summary>
+  public List<UserRole> Roles { get; set; } = new();
+
+  public UserLog UserLog { get; set; } = new();
+}
+
+public class PagedResult<T>
+{
+  public IList<T> Items { get; set; }
+
+  public int TotalCount { get; set; }
+}
+
+public class UserLog
+{
+  /// <summary>
+  /// Who created user. Can be partial name match
+  /// </summary>
+  public string CreatedBy { get; set; }
+
+  /// <summary>
+  /// From date for user creation
+  /// </summary>
+  public DateTime DateFrom { get; set; }
+
+  /// <summary>
+  /// End date for user creation
+  /// </summary>
+  public DateTime DateTo { get; set; }
 }
 
 public enum UserRole
@@ -63,4 +158,3 @@ public enum UserRole
   User = 1,
   Guest = 2
 }
-
