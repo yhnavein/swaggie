@@ -47,22 +47,42 @@ function renderType(
     result.push(renderEnumType(name, schema));
     return result.join('\n');
   }
-  if ('oneOf' in schema && schema.type !== 'object') {
+
+  // OpenAPI 3.1 enums support. We need to check if the schema is an object and has a oneOf property
+  if ('oneOf' in schema && schema.type !== 'object' && schema.type) {
     result.push(renderOpenApi31Enum(name, schema));
     return result.join('\n');
   }
 
-  const extensions = getTypeExtensions(schema);
-  result.push(`export interface ${name} ${extensions}{`);
-
   if ('allOf' in schema) {
-    const mergedSchema = getMergedAllOfObjects(schema);
+    const types = getCompositeTypes(schema);
+    const extensions = types ? `extends ${types.join(', ')} ` : '';
+    result.push(`export interface ${name} ${extensions}{`);
+
+    const mergedSchema = getMergedCompositeObjects(schema);
     result.push(generateObjectTypeContents(mergedSchema, options));
+  } else if ('oneOf' in schema || 'anyOf' in schema) {
+    const typeDefinition = getTypesFromAnyOrOneOf(schema, options);
+    result.push(`export type ${name} = ${typeDefinition};`);
+
+    return `${result.join('\n')}\n`;
   } else {
+    result.push(`export interface ${name} {`);
     result.push(generateObjectTypeContents(schema, options));
   }
 
   return `${result.join('\n')}}\n`;
+}
+
+function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions) {
+  const types = getCompositeTypes(schema);
+  const mergedSchema = getMergedCompositeObjects(schema);
+  const typeContents = generateObjectTypeContents(mergedSchema, options);
+  if (typeContents) {
+    types.push(`{ ${typeContents} }`);
+  }
+
+  return types.join(' | ');
 }
 
 function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOptions) {
@@ -95,6 +115,9 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
   return `${res}}\n`;
 }
 
+/**
+ * Render simple enum types (just a union of values)
+ */
 function renderEnumType(name: string, def: OA3.SchemaObject) {
   const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
   return `export type ${name} = ${values};\n`;
@@ -113,18 +136,6 @@ function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
 
   return `${res}}\n`;
 }
-
-// function renderTsInheritance(name: string, allOf: any[], options: ClientOptions) {
-//   const ref = allOf[0];
-//   const parentName = ref.$ref.split('/').pop();
-//   const lines = renderTsType(name, allOf[1], options);
-//   const interfaceLineIndex = lines.findIndex((l) => l.indexOf('export interface') === 0);
-//   if (interfaceLineIndex > -1) {
-//     // Let's replace generic interface definition with more specific one with inheritance info
-//     lines[interfaceLineIndex] = `export interface ${name} extends ${parentName} {`;
-//   }
-//   return lines;
-// }
 
 function renderTsTypeProp(
   prop: string,
@@ -158,19 +169,26 @@ export function renderComment(comment: string | null) {
   return ` /**\n${commentLines.map((line) => `  * ${line.trim()}`).join('\n')}\n  */`;
 }
 
-function getTypeExtensions(schema: OA3.SchemaObject) {
-  if ('allOf' in schema) {
-    const refs = schema.allOf
+/**
+ * Returns a string with the types that the given schema extends.
+ * It uses the `allOf`, `oneOf` or `anyOf` properties to determine the types.
+ * If the schema has no composite types, it returns an empty string.
+ * If there are more than one composite types, it analyzes only the first one.
+ */
+function getCompositeTypes(schema: OA3.SchemaObject) {
+  const composite = schema.allOf || schema.oneOf || schema.anyOf || [];
+  if (composite) {
+    return composite
       .filter((v) => '$ref' in v)
       .map((s: OA3.ReferenceObject) => s.$ref.split('/').pop());
-    return `extends ${refs.join(', ')} `;
   }
 
-  return '';
+  return [];
 }
 
-function getMergedAllOfObjects(schema: OA3.SchemaObject) {
-  const subSchemas = schema.allOf.filter((v) => !('$ref' in v));
+function getMergedCompositeObjects(schema: OA3.SchemaObject) {
+  const composite = schema.allOf || schema.oneOf || schema.anyOf || [];
+  const subSchemas = composite.filter((v) => !('$ref' in v));
 
   return deepMerge({}, ...subSchemas);
 }

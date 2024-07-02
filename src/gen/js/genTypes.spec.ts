@@ -32,11 +32,10 @@ describe('genTypes', () => {
       opts
     );
 
-    expect(res).to.be.ok;
-    expect(res.trim()).to.be.equal(
-      `export type A = B;
-export interface B {
-}`
+    expect(res).to.equalWI(
+      `
+export type A = B;
+export interface B {}`
     );
   });
 
@@ -58,9 +57,9 @@ export interface B {
         opts
       );
 
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(
-        `export type SimpleEnum = 0 | 1;
+      expect(res).to.equalWI(
+        `
+export type SimpleEnum = 0 | 1;
 
 // Feature is activated or not
 export type StringEnum = "Active" | "Disabled";`
@@ -92,9 +91,9 @@ export type StringEnum = "Active" | "Disabled";`
         opts
       );
 
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(
-        `export enum XEnums {
+      expect(res).to.equalWI(
+        `
+export enum XEnums {
   High = 2,
   Medium = 1,
   Low = 0,
@@ -140,9 +139,9 @@ export enum XEnumsString {
         opts
       );
 
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(
-        `export enum Priority {
+      expect(res).to.equalWI(
+        `
+export enum Priority {
   High = 2,
   Medium = 1,
   Low = 0,
@@ -174,8 +173,7 @@ export enum Size {
     //         {} as any
     //       );
 
-    //       expect(res).to.be.ok;
-    //       expect(res.trim()).to.be.equal(`export enum SomeEnum {
+    //       expect(res).to.be.equal(`export enum SomeEnum {
     //   Active = 0,
     //   Disabled = 1,
     // }`);
@@ -204,13 +202,14 @@ export enum Size {
         opts
       );
 
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(`export interface AuthenticationData {
+      expect(res).to.equalWI(`
+export interface AuthenticationData {
   login?: string;
-  password?: string;}
+  password?: string;
+}
 
-export interface Empty {
-}`);
+export interface Empty {}
+`);
     });
 
     it('should handle obj with required fields', () => {
@@ -240,11 +239,12 @@ export interface Empty {
         opts
       );
 
-      expect(res).to.be.ok;
-      expect(res.trim()).to.be.equal(`export interface AuthenticationData {
+      expect(res).to.equalWI(`
+export interface AuthenticationData {
   login: string;
   password: string;
-  rememberMe?: boolean;}`);
+  rememberMe?: boolean;
+}`);
     });
   });
 
@@ -270,9 +270,10 @@ export interface Empty {
           opts
         );
 
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal(`export interface AuthenticationData extends BasicAuth {
-  rememberMe?: boolean;}`);
+        expect(res).to.equalWI(`
+export interface AuthenticationData extends BasicAuth {
+  rememberMe?: boolean;
+}`);
       });
 
       it('should handle many allOf correctly', () => {
@@ -305,11 +306,11 @@ export interface Empty {
           opts
         );
 
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be
-          .equal(`export interface AuthenticationData extends LoginPart, PasswordPart {
+        expect(res).to.equalWI(`
+export interface AuthenticationData extends LoginPart, PasswordPart {
   rememberMe: boolean;
-  signForSpam?: boolean;}`);
+  signForSpam?: boolean;
+}`);
       });
     });
 
@@ -317,71 +318,63 @@ export interface Empty {
     // We just list all the types in the union. This is close enough to the truth
     // and should be convenient for the end user of Swaggie.
 
-    describe('anyOf', () => {
-      it('should handle 1 anyOf with reference correctly', () => {
-        const res = genTypes(
-          prepareSchemas({
-            AuthenticationData: {
-              anyOf: [{ $ref: '#/components/schemas/BasicAuth' }],
-            },
-          }),
-          opts
-        );
+    for (const type of ['anyOf', 'oneOf']) {
+      describe(type, () => {
+        it(`should handle 1 ${type} with reference correctly`, () => {
+          const res = genTypes(
+            prepareSchemas({
+              AuthenticationData: {
+                [type]: [{ $ref: '#/components/schemas/BasicAuth' }],
+              },
+            }),
+            opts
+          );
 
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth;');
+          expect(res).to.equalWI('export type AuthenticationData = BasicAuth;');
+        });
+
+        it(`should handle 2 of ${type} with reference correctly`, () => {
+          const res = genTypes(
+            prepareSchemas({
+              AuthenticationData: {
+                [type]: [
+                  { $ref: '#/components/schemas/BasicAuth' },
+                  { $ref: '#/components/schemas/OAuth2' },
+                ],
+              },
+            }),
+            opts
+          );
+
+          expect(res).to.equalWI('export type AuthenticationData = BasicAuth | OAuth2;');
+        });
+
+        it(`should handle ${type} with reference and schema correctly`, () => {
+          const res = genTypes(
+            prepareSchemas({
+              AuthenticationData: {
+                [type]: [
+                  { $ref: '#/components/schemas/BasicAuth' },
+                  {
+                    type: 'object',
+                    properties: {
+                      token: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                ],
+              },
+            }),
+            opts
+          );
+
+          expect(res).to.equalWI(
+            'export type AuthenticationData = BasicAuth | { token?: string; };'
+          );
+        });
       });
-
-      it('should handle 2 anyOfs with reference correctly', () => {
-        const res = genTypes(
-          prepareSchemas({
-            AuthenticationData: {
-              anyOf: [
-                { $ref: '#/components/schemas/BasicAuth' },
-                { $ref: '#/components/schemas/OAuth2' },
-              ],
-            },
-          }),
-          opts
-        );
-
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth | OAuth2;');
-      });
-    });
-
-    describe('oneOf', () => {
-      it('should handle 1 anyOf with reference correctly', () => {
-        const res = genTypes(
-          prepareSchemas({
-            AuthenticationData: {
-              oneOf: [{ $ref: '#/components/schemas/BasicAuth' }],
-            },
-          }),
-          opts
-        );
-
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth;');
-      });
-
-      it('should handle 2 anyOfs with reference correctly', () => {
-        const res = genTypes(
-          prepareSchemas({
-            AuthenticationData: {
-              oneOf: [
-                { $ref: '#/components/schemas/BasicAuth' },
-                { $ref: '#/components/schemas/OAuth2' },
-              ],
-            },
-          }),
-          opts
-        );
-
-        expect(res).to.be.ok;
-        expect(res.trim()).to.be.equal('export type AuthenticationData = BasicAuth | OAuth2;');
-      });
-    });
+    }
   });
 });
 
