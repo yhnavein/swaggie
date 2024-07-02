@@ -3,17 +3,17 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getParameterType } from './support';
 import { groupOperationsByGroupName, getBestResponse, orderBy } from '../util';
-import type { IServiceClient, IApiOperation, IOperationParam } from './models';
 import { generateBarrelFile } from './createBarrel';
 import { renderFile } from '../templateManager';
 import type { ApiOperation, ClientOptions } from '../../types';
 import { escapeReservedWords } from '../../utils';
+import { getOperations } from '../../swagger';
 
 export default async function genOperations(
   spec: OA3.Document,
-  operations: ApiOperation[],
   options: ClientOptions
 ): Promise<string> {
+  const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   let result =
     renderFile('baseClient.ejs', {
@@ -40,9 +40,9 @@ export default async function genOperations(
 
 function prepareClient(
   name: string,
-  operations: OA3.OperationObject[],
+  operations: ApiOperation[],
   options: ClientOptions
-): IServiceClient {
+): ClientData {
   const preparedOperations = prepareOperations(operations, options);
 
   return {
@@ -54,38 +54,38 @@ function prepareClient(
 }
 
 export function prepareOperations(
-  operations: OA3.OperationObject[],
+  operations: ApiOperation[],
   options: ClientOptions
-): IApiOperation[] {
+): IOperation[] {
   const ops = fixDuplicateOperations(operations);
 
   return ops.map((op) => {
-    const response = getBestResponse(op);
-    const respType = getParameterType(response, options);
+    const responseObject = getBestResponse(op);
+    const returnType = getParameterType(responseObject, options);
 
-    const queryParams = getParams(op.parameters, options, ['query']);
-    const params = getParams(op.parameters, options);
+    const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
+    const params = getParams(op.parameters as OA3.ParameterObject[], options);
 
     return {
-      returnType: respType,
+      returnType,
       method: op.method.toUpperCase(),
       name: getOperationName(op.operationId, op.group),
       url: op.path,
       parameters: params,
       query: queryParams,
-      formData: getParams(op.parameters, options, ['formData']),
-      pathParams: getParams(op.parameters, options, ['path']),
-      body: getParams(op.parameters, options, ['body']).pop(),
-      headers: getHeaders(op, options),
+      pathParams: getParams(op.parameters as OA3.ParameterObject[], options, ['path']),
+      body: op.requestBody as OA3.RequestBodyObject,
+      headers: getParams(op.parameters as OA3.ParameterObject[], options, ['header']),
     };
   });
 }
 
 /**
- * We will add numbers to the duplicated operation names to avoid breaking code
- * @param operations
+ * Let's add numbers to the duplicated operation names to avoid breaking code.
+ * Duplicated operation names are not allowed by the OpenAPI spec, but in the real world
+ * it can happen very easily and we need to handle it gracefully.
  */
-export function fixDuplicateOperations(operations: OA3.OperationObject[]): OA3.OperationObject[] {
+export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
   if (!operations || operations.length < 2) {
     return operations;
   }
@@ -118,30 +118,8 @@ export function getOperationName(opId: string | null, group?: string | null) {
   return camel(opId.replace(`${group}_`, ''));
 }
 
-function getHeaders(op: OA3.OperationObject, options: ClientOptions): IOperationParam[] {
-  const headersFromParams = getParams(op.parameters, options, ['header']);
-  // TODO: At some point there may be need for a new param to add implicitly default content types
-  // TODO: At this time content-type support was not essential to move forward with this functionality
-  // It needs to be reviewed
-
-  // if (
-  //   op.contentTypes.length > 0 &&
-  //   headersFromParams.filter((p) => p.originalName.toLowerCase() === 'content-type').length === 0
-  // ) {
-  //   headersFromParams.push({
-  //     name: 'contentType',
-  //     optional: false,
-  //     originalName: 'Content-Type',
-  //     type: 'string',
-  //     value: op.contentTypes.join(', '),
-  //   });
-  // }
-
-  return headersFromParams;
-}
-
 function getParams(
-  params: ApiOperationParam[],
+  params: OA3.ParameterObject[],
   options: ClientOptions,
   where?: string[]
 ): IOperationParam[] {
@@ -150,17 +128,12 @@ function getParams(
   }
 
   return params
-    .filter((p) => !where || where.indexOf(p.in) > -1)
+    .filter((p) => !where || where.includes(p.in))
     .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
       type: getParameterType(p, options),
-      optional:
-        p.required === undefined || p.required === null
-          ? p['x-nullable'] === undefined || p['x-nullable'] === null
-            ? true
-            : !!p['x-nullable']
-          : !p.required,
+      optional: p.required === undefined || p.required === null ? true : !p.required,
       original: p,
     }));
 }
@@ -168,7 +141,7 @@ function getParams(
 export function renderOperationGroup(
   group: any[],
   func: any,
-  spec: ApiSpec,
+  spec: OA3.Document,
   options: ClientOptions
 ): string[] {
   return group.map((op) => func.call(this, spec, op, options)).reduce((a, b) => a.concat(b));
@@ -184,4 +157,30 @@ export function getParamName(name: string): string {
       .map((x) => camel(x))
       .join('_')
   );
+}
+
+interface ClientData {
+  clientName: string;
+  camelCaseName: string;
+  operations: IOperation[];
+  baseUrl: string;
+}
+
+interface IOperation {
+  returnType: string;
+  method: string;
+  name: string;
+  url: string;
+  parameters: IOperationParam[];
+  query: IOperationParam[];
+  pathParams: IOperationParam[];
+  body: OA3.RequestBodyObject;
+  headers: IOperationParam[];
+}
+
+interface IOperationParam {
+  originalName: string;
+  name: string;
+  type: string;
+  optional: boolean;
 }

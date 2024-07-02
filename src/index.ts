@@ -37,8 +37,7 @@ function verifyOptions(options: FullAppOptions) {
 function gen(spec: OA3.Document, options: ClientOptions): Promise<string> {
   loadAllTemplateFiles(options.template || 'axios');
 
-  const operations = getOperations(spec);
-  return genJsCode(spec, operations, options);
+  return genJsCode(spec, options);
 }
 
 export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<ClientOptions> {

@@ -1,8 +1,12 @@
 import { camel } from 'case';
-import type { ClientOptions } from '../../types';
+import type { ApiOperation, ClientOptions } from '../../types';
 import { renderFile } from '../templateManager';
 
-export function generateBarrelFile(clients: any[], clientOptions: ClientOptions) {
+type ClientGroups = {
+  [key: string]: ApiOperation[];
+};
+
+export function generateBarrelFile(clients: ClientGroups, clientOptions: ClientOptions) {
   const files = [];
 
   for (const name in clients) {

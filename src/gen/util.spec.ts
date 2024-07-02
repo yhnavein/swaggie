@@ -1,40 +1,40 @@
 import { expect } from 'chai';
-import { groupOperationsByGroupName, getBestResponse, prepareOutputFilename } from './util';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
+import { groupOperationsByGroupName, getBestResponse, prepareOutputFilename } from './util';
+import type { ApiOperation } from '../types';
+
 describe('groupOperationsByGroupName', () => {
-  it('handles null', async () => {
-    const def = null;
+  const testCases = [
+    { input: [], expected: {} },
+    { input: null, expected: {} },
+    { input: undefined, expected: {} },
+  ];
+  for (const { input, expected } of testCases) {
+    it(`should handle ${input} as input`, async () => {
+      const res = groupOperationsByGroupName(input);
 
-    const res = groupOperationsByGroupName(def);
-
-    expect(res).to.be.eql({});
-  });
-
-  it('handles empty array', async () => {
-    const def = [];
-
-    const res = groupOperationsByGroupName(def);
-
-    expect(res).to.be.eql({});
-  });
+      expect(res).to.deep.equal(expected);
+    });
+  }
 
   it('handles single operation', async () => {
-    const def = [
+    const def: ApiOperation[] = [
       {
-        consumes: [],
-        id: 'HealthCheck_PerformAllChecks',
-        method: 'GET',
+        operationId: 'HealthCheck_PerformAllChecks',
+        method: 'get',
         group: 'HealthCheck',
+        path: '/healthcheck',
         parameters: [
           {
             in: 'query',
             name: 'token',
             required: false,
-            type: 'string',
+            schema: {
+              type: 'string',
+            },
           },
         ],
-        produces: [],
         responses: {
           '200': {
             description: 'Success',
@@ -52,21 +52,22 @@ describe('groupOperationsByGroupName', () => {
   });
 
   it('handles two different operations and the same group', async () => {
-    const def = [
+    const def: ApiOperation[] = [
       {
-        consumes: [],
-        id: 'HealthCheck_PerformAllChecks',
-        method: 'GET',
+        operationId: 'HealthCheck_PerformAllChecks',
+        method: 'get',
         group: 'HealthCheck',
+        path: '/healthcheck',
         parameters: [
           {
             in: 'query',
             name: 'token',
             required: false,
-            type: 'string',
+            schema: {
+              type: 'string',
+            },
           },
         ],
-        produces: [],
         responses: {
           '200': {
             description: 'Success',
@@ -75,19 +76,20 @@ describe('groupOperationsByGroupName', () => {
         tags: ['HealthCheck'],
       },
       {
-        consumes: [],
-        id: 'HealthCheck_SomethingElse',
-        method: 'GET',
+        operationId: 'HealthCheck_SomethingElse',
+        method: 'post',
         group: 'HealthCheck',
+        path: '/healthcheck',
         parameters: [
           {
             in: 'query',
             name: 'token',
             required: false,
-            type: 'string',
+            schema: {
+              type: 'string',
+            },
           },
         ],
-        produces: [],
         responses: {
           '200': {
             description: 'Success',
@@ -105,21 +107,22 @@ describe('groupOperationsByGroupName', () => {
   });
 
   it('handles two different operations and different groups', async () => {
-    const def = [
+    const def: ApiOperation[] = [
       {
-        consumes: [],
-        id: 'HealthCheck_PerformAllChecks',
-        method: 'GET',
+        operationId: 'HealthCheck_PerformAllChecks',
+        method: 'get',
         group: 'HealthCheck',
+        path: '/healthcheck',
         parameters: [
           {
             in: 'query',
             name: 'token',
             required: false,
-            type: 'string',
+            schema: {
+              type: 'string',
+            },
           },
         ],
-        produces: [],
         responses: {
           '200': {
             description: 'Success',
@@ -128,19 +131,20 @@ describe('groupOperationsByGroupName', () => {
         tags: ['HealthCheck'],
       },
       {
-        consumes: [],
-        id: 'Illness_SomethingElse',
-        method: 'GET',
+        operationId: 'Illness_SomethingElse',
+        method: 'get',
         group: 'Illness',
+        path: '/illness',
         parameters: [
           {
             in: 'query',
             name: 'token',
             required: false,
-            type: 'string',
+            schema: {
+              type: 'string',
+            },
           },
         ],
-        produces: [],
         responses: {
           '200': {
             description: 'Success',

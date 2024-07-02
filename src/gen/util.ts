@@ -1,6 +1,7 @@
 import { type Stats, lstatSync, mkdir, writeFileSync as fsWriteFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
+
 import type { ApiOperation } from '../types';
 
 export function exists(filePath: string): Stats {
@@ -24,11 +25,17 @@ export function saveFile(filePath: string, contents: string) {
   });
 }
 
+/**
+ * Operations list contains tags, which can be used to group them.
+ * The grouping allows us to generate multiple client classes dedicated
+ * to a specific group of operations.
+ */
 export function groupOperationsByGroupName(operations: ApiOperation[]) {
   if (!operations) {
     return {};
   }
-  return operations.reduce((groups, op) => {
+
+  return operations.reduce<{ [key: string]: ApiOperation[] }>((groups, op) => {
     if (!groups[op.group]) {
       groups[op.group] = [];
     }

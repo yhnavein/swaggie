@@ -1,5 +1,11 @@
 module.exports = () => ({
-  files: ['test/chai-extensions.ts', 'src/**/*.ts', '!src/**/*.spec.ts'],
+  files: [
+    'test/chai-extensions.ts',
+    'src/**/*.ts',
+    'test/*.json',
+    'test/*.yml',
+    '!src/**/*.spec.ts'
+  ],
   require: [],
 
   tests: ['src/**/*.spec.ts'],

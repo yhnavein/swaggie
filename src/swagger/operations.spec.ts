@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 import { getOperations } from './operations';
-import { loadSpecDocument } from '../utils/documentLoader';
 import { getDocument } from '../utils';
+import type { ApiOperation } from '../types';
 
-describe('getPathOperation', () => {
+describe('getOperations', () => {
   it('should handle empty operation list', () => {
-    const spec = getDocument();
+    const res = getOperations(getDocument());
 
-    const res = getOperations(spec as any);
-
-    expect(res).to.be.ok;
     expect(res.length).to.eq(0);
   });
 
@@ -30,43 +27,140 @@ describe('getPathOperation', () => {
       },
     });
 
-    const res = getOperations(spec as any);
+    const res = getOperations(spec);
 
-    const validResp = [
+    const validResp: ApiOperation[] = [
       {
-        contentTypes: [],
         group: 'System',
-        id: 'ApiHeartbeatGet',
+        operationId: 'ApiHeartbeatGet',
         method: 'get',
         parameters: [],
         path: '/api/heartbeat',
-        responses: [{ code: '200', description: 'Service is available.' }],
+        responses: { 200: { description: 'Service is available.' } },
         tags: ['System'],
       },
     ];
-    expect(res).to.be.eql(validResp);
+    expect(res).to.deep.equal(validResp);
   });
 
-  it('should parse operations from spec [PetStore Example]', async () => {
-    const path = `${__dirname}/../../test/petstore-v3.yml`;
-    const spec = await loadSpecDocument(path);
-    const operations = getOperations(spec);
-    expect(operations).to.be.ok;
-    expect(operations.length).to.eq(3);
+  it('should handle empty operationId or tags', () => {
+    const spec = getDocument({
+      paths: {
+        '/api/heartbeat': {},
+        '/api/pokemon': {
+          get: {
+            tags: ['Pokemon'],
+            operationId: null,
+            responses: {
+              '200': { $ref: '#/components/responses/PokemonList' },
+            },
+          },
+          post: {
+            tags: [],
+            operationId: null,
+            responses: {},
+          },
+          patch: {
+            operationId: 'pokePatch',
+            responses: {},
+          },
+        },
+      },
+    });
 
-    const listPets = operations.find((op) => op.id === 'listPets');
-    expect(listPets).to.be.ok;
-    expect(listPets?.method).to.be.equal('get');
-    expect(listPets?.path).to.be.equal('/pets');
-    expect(listPets?.tags).to.be.ok;
-    expect(listPets?.tags?.[0]).to.be.equal('pets');
-    expect(listPets?.responses).to.be.ok;
-    expect(listPets?.responses.length).to.eq(2);
+    const res = getOperations(spec);
 
-    const res200 = listPets?.responses.find((res) => res.code === '200');
-    expect(res200).to.be.ok;
-    expect(res200?.headers['x-next'].type).to.be.equal('string');
-    const resDefault = listPets?.responses.find((res) => res.code === 'default');
-    expect(resDefault).to.be.ok;
+    const validResp: ApiOperation[] = [
+      {
+        group: 'Pokemon',
+        // id will be generated as sanitized method + path when it's not defined
+        operationId: 'getApiPokemon',
+        method: 'get',
+        parameters: [],
+        path: '/api/pokemon',
+        responses: { 200: { $ref: '#/components/responses/PokemonList' } },
+        tags: ['Pokemon'],
+      },
+      {
+        group: 'default',
+        // id will be generated as sanitized method + path when it's not defined
+        operationId: 'postApiPokemon',
+        method: 'post',
+        parameters: [],
+        path: '/api/pokemon',
+        responses: {},
+        tags: [],
+      },
+      {
+        group: 'default',
+        operationId: 'pokePatch',
+        method: 'patch',
+        parameters: [],
+        path: '/api/pokemon',
+        responses: {},
+      },
+    ];
+    expect(res).to.deep.equal(validResp);
   });
+
+  // TODO: Test path inheritance
+  // it('should handle inheritance of parameters', () => {
+  //   const spec = getDocument({
+  //     paths: {
+  //       '/api/heartbeat': {},
+  //       '/api/pokemon': {
+  //         get: {
+  //           tags: ['Pokemon'],
+  //           operationId: null,
+  //           responses: {
+  //             '200': { $ref: '#/components/responses/PokemonList' },
+  //           },
+  //         },
+  //         post: {
+  //           tags: [],
+  //           operationId: null,
+  //           responses: {},
+  //         },
+  //         patch: {
+  //           operationId: 'pokePatch',
+  //           responses: {},
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   const res = getOperations(spec);
+
+  //   const validResp: ApiOperation[] = [
+  //     {
+  //       group: 'Pokemon',
+  //       // id will be generated as sanitized method + path when it's not defined
+  //       operationId: 'getApiPokemon',
+  //       method: 'get',
+  //       parameters: [],
+  //       path: '/api/pokemon',
+  //       responses: { 200: { $ref: '#/components/responses/PokemonList' } },
+  //       tags: ['Pokemon'],
+  //     },
+  //     {
+  //       group: 'default',
+  //       // id will be generated as sanitized method + path when it's not defined
+  //       operationId: 'postApiPokemon',
+  //       method: 'post',
+  //       parameters: [],
+  //       path: '/api/pokemon',
+  //       responses: {},
+  //       tags: [],
+  //     },
+  //     {
+  //       group: 'default',
+  //       operationId: 'pokePatch',
+  //       method: 'patch',
+  //       parameters: [],
+  //       path: '/api/pokemon',
+  //       responses: {},
+  //     },
+  //   ];
+  //   expect(res).to.deep.equal(validResp);
+  // });
 });

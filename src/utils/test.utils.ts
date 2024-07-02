@@ -19,6 +19,10 @@ export function getDocument(document: Partial<OA3.Document> = {}): OA3.Document 
   };
 }
 
+/**
+ * Returns a valid ClientOptions object with the minimal required fields.
+ * And it allows to easily override any of the fields.
+ */
 export function getClientOptions(opts: Partial<ClientOptions> = {}): ClientOptions {
   return {
     src: 'http://example.com/swagger.json',
