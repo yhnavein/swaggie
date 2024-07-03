@@ -1,25 +1,29 @@
 import { expect } from 'chai';
-import fs from 'node:fs';
-import * as fetch from 'node-fetch';
-import { Response } from 'node-fetch';
-import sinon from 'sinon';
+import { MockAgent, setGlobalDispatcher } from 'undici';
+
 import { loadSpecDocument } from './documentLoader';
+import { mockRequest } from './test.utils';
 
 // URLs are not used to fetch anything. We are faking responses through SinonJS
 const petstore3 = {
-  json: 'http://petstore.swagger.io/v3/swagger.json',
-  yaml: 'http://petstore.swagger.io/v3/swagger.yaml',
+  json: 'https://petstore.swagger.io/v3/swagger.json',
+  yaml: 'https://petstore.swagger.io/v3/swagger.yaml',
 };
 
 describe('loadSpecDocument', () => {
-  afterEach(sinon.restore);
+  let mockAgent: MockAgent;
+
+  beforeEach(() => {
+    // Create a new MockAgent
+    mockAgent = new MockAgent();
+    // Make sure that we don't actually make real requests
+    mockAgent.disableNetConnect();
+    // Set the mocked agent as the global dispatcher
+    setGlobalDispatcher(mockAgent);
+  });
 
   it('should resolve a JSON spec from url', async () => {
-    const stub = sinon.stub(fetch, 'default');
-    const response = fs.readFileSync(`${__dirname}/../../test/petstore-v3.json`, {
-      encoding: 'utf-8',
-    });
-    stub.returns(new Promise((resolve) => resolve(new Response(response))));
+    mockRequest(mockAgent, petstore3.json, 'petstore-v3.json');
 
     const spec = await loadSpecDocument(petstore3.json);
     expect(spec).to.be.ok;
@@ -27,11 +31,7 @@ describe('loadSpecDocument', () => {
   });
 
   it('should resolve a YAML spec from url', async () => {
-    const stub = sinon.stub(fetch, 'default');
-    const response = fs.readFileSync(`${__dirname}/../../test/petstore-v3.yml`, {
-      encoding: 'utf-8',
-    });
-    stub.returns(new Promise((resolve) => resolve(new Response(response))));
+    mockRequest(mockAgent, petstore3.yaml, 'petstore-v3.yml');
 
     const spec = await loadSpecDocument(petstore3.yaml);
     expect(spec).to.be.ok;

@@ -1,7 +1,7 @@
-import YAML from 'js-yaml';
 import fs from 'node:fs';
-import fetch from 'node-fetch';
+import YAML from 'js-yaml';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
+import { request } from 'undici';
 
 export async function loadSpecDocument(src: string | object): Promise<OA3.Document> {
   if (typeof src === 'string') {
@@ -21,10 +21,10 @@ function loadFile(src: string): Promise<OA3.Document | any> {
   throw new Error(`Unable to load api at '${src}'`);
 }
 
-function loadFromUrl(url: string) {
-  return fetch(url)
-    .then((resp) => resp.text())
-    .then((contents) => parseFileContents(contents, url));
+async function loadFromUrl(url: string) {
+  const { body } = await request(url);
+  const contents = await body.text();
+  return parseFileContents(contents, url);
 }
 
 function readLocalFile(filePath: string) {

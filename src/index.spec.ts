@@ -1,13 +1,20 @@
 import { expect } from 'chai';
-import fs from 'node:fs';
-import * as fetch from 'node-fetch';
-import { Response } from 'node-fetch';
-import sinon from 'sinon';
+import { MockAgent, setGlobalDispatcher } from 'undici';
 
 import { runCodeGenerator, applyConfigFile } from './';
+import { mockRequest } from './utils';
 
 describe('runCodeGenerator', () => {
-  afterEach(sinon.restore);
+  let mockAgent: MockAgent;
+
+  beforeEach(() => {
+    // Create a new MockAgent
+    mockAgent = new MockAgent();
+    // Make sure that we don't actually make real requests
+    mockAgent.disableNetConnect();
+    // Set the mocked agent as the global dispatcher
+    setGlobalDispatcher(mockAgent);
+  });
 
   it('fails with no parameters provided', async () => {
     const parameters = {};
@@ -91,11 +98,11 @@ describe('runCodeGenerator', () => {
   });
 
   it('works with proper --config provided', async () => {
-    const stub = sinon.stub(fetch, 'default');
-    const response = fs.readFileSync(`${__dirname}/../test/petstore-v3.json`, {
-      encoding: 'utf-8',
-    });
-    stub.returns(new Promise((resolve) => resolve(new Response(response))));
+    mockRequest(
+      mockAgent,
+      'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json',
+      'petstore-v3.json'
+    );
 
     const parameters = {
       config: './test/sample-config.json',

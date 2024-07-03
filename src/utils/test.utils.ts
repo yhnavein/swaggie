@@ -1,4 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
+import type { MockAgent } from 'undici';
+
 import type { ClientOptions } from '../types';
 
 /**
@@ -30,4 +34,27 @@ export function getClientOptions(opts: Partial<ClientOptions> = {}): ClientOptio
     template: 'xior',
     ...opts,
   };
+}
+
+/**
+ * Utility that will set up a mock response for a given URL
+ * @param mockAgent Agent that will be used to intercept the request
+ * @param url Full URL to intercept
+ * @param responseFileName Filename that contains the response. It will be loaded from the test folder
+ */
+export function mockRequest(mockAgent: MockAgent, url: string, responseFileName: string) {
+  const urlObject = new URL(url);
+  const mockPool = mockAgent.get(urlObject.origin);
+
+  const response = fs.readFileSync(path.join(__dirname, '..', '..', 'test', responseFileName), {
+    encoding: 'utf-8',
+  });
+
+  // Set up the mock response
+  mockPool
+    .intercept({
+      path: urlObject.pathname,
+      method: 'GET',
+    })
+    .reply(200, response);
 }
