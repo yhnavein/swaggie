@@ -11,7 +11,7 @@ describe('petstore snapshots', () => {
     it(`should match existing ${template} snapshot`, async () => {
       const snapshotFile = `./test/snapshots/${template}.ts`;
       const parameters: FullAppOptions = {
-        src: './test/petstore-v3.json',
+        src: './test/petstore-v3.yml',
         out: './.tmp/test/',
         template,
       };

@@ -29,11 +29,11 @@ export const petClient = {
    */
   addPet(  body: Pet ,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+  ): AxiosPromise<Pet> {
     let url = '/pet';
 
 
-    return axios.request<unknown>({
+    return axios.request<Pet>({
       url: url,
       method: 'POST',
       data: body,
@@ -64,9 +64,9 @@ export const petClient = {
   },
 
     /**
-   * @param status  
+   * @param status (optional) 
    */
-  findPetsByStatus(  status: ('available'|'pending'|'sold')[] ,
+  findPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     let url = '/pet/findByStatus';
@@ -83,9 +83,9 @@ export const petClient = {
   },
 
     /**
-   * @param tags  
+   * @param tags (optional) 
    */
-  findPetsByTags(  tags: string[] ,
+  findPetsByTags(  tags: string[]  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     let url = '/pet/findByTags';
@@ -123,11 +123,11 @@ export const petClient = {
    */
   updatePet(  body: Pet ,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+  ): AxiosPromise<Pet> {
     let url = '/pet';
 
 
-    return axios.request<unknown>({
+    return axios.request<Pet>({
       url: url,
       method: 'PUT',
       data: body,
@@ -148,18 +148,14 @@ export const petClient = {
     let url = '/pet/{petId}';
 
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!name) {
-          formDataBody.append("name", name);
-        }
-    if (!!status) {
-          formDataBody.append("status", status);
-        }
 
     return axios.request<unknown>({
       url: url,
       method: 'POST',
-      data: formDataBody,
+      params: {
+            'name': serializeQueryParam(name),
+        'status': serializeQueryParam(status),
+          },
       ...$config,
     });
   },
@@ -167,28 +163,21 @@ export const petClient = {
     /**
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    */
   uploadFile(  petId: number ,
       additionalMetadata: string  | null | undefined,
-      file: File  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<ApiResponse> {
     let url = '/pet/{petId}/uploadImage';
 
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!additionalMetadata) {
-          formDataBody.append("additionalMetadata", additionalMetadata);
-        }
-    if (!!file) {
-          formDataBody.append("file", file);
-        }
 
     return axios.request<ApiResponse>({
       url: url,
       method: 'POST',
-      data: formDataBody,
+      params: {
+            'additionalMetadata': serializeQueryParam(additionalMetadata),
+          },
       ...$config,
     });
   },
@@ -196,9 +185,9 @@ export const petClient = {
   };
 
   /**
-   * @param status  
+   * @param status (optional) 
    */
-export function usepetfindPetsByStatus(  status: ('available'|'pending'|'sold')[] ,
+export function usepetfindPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
       $config?: SwrConfig
   ) {
   let url = '/pet/findByStatus';
@@ -231,9 +220,9 @@ export function usepetfindPetsByStatus(  status: ('available'|'pending'|'sold')[
 }
 
   /**
-   * @param tags  
+   * @param tags (optional) 
    */
-export function usepetfindPetsByTags(  tags: string[] ,
+export function usepetfindPetsByTags(  tags: string[]  | null | undefined,
       $config?: SwrConfig
   ) {
   let url = '/pet/findByTags';
@@ -344,9 +333,9 @@ const { data, error, mutate } = useSWR<Pet>(
   },
 
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  placeOrder(  body: Order ,
+  placeOrder(  body: Order  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
     let url = '/store/order';
@@ -419,15 +408,15 @@ const { data, error, mutate } = useSWR<Order>(
 
   export const userClient = {
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUser(  body: User ,
+  createUser(  body: User  | null | undefined,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+  ): AxiosPromise<User> {
     let url = '/user';
 
 
-    return axios.request<unknown>({
+    return axios.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -436,32 +425,15 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUsersWithArrayInput(  body: User[] ,
+  createUsersWithListInput(  body: User[]  | null | undefined,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    let url = '/user/createWithArray';
-
-
-    return axios.request<unknown>({
-      url: url,
-      method: 'POST',
-      data: body,
-      ...$config,
-    });
-  },
-
-    /**
-   * @param body  
-   */
-  createUsersWithListInput(  body: User[] ,
-      $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+  ): AxiosPromise<User> {
     let url = '/user/createWithList';
 
 
-    return axios.request<unknown>({
+    return axios.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -504,11 +476,11 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-  loginUser(  username: string ,
-      password: string ,
+  loginUser(  username: string  | null | undefined,
+      password: string  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<string> {
     let url = '/user/login';
@@ -540,11 +512,11 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    */
-  updateUser(  username: string ,
-      body: User ,
+  updateUser(  body: User  | null | undefined,
+      username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     let url = '/user/{username}';
@@ -591,11 +563,11 @@ const { data, error, mutate } = useSWR<User>(
 }
 
   /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-export function useuserloginUser(  username: string ,
-      password: string ,
+export function useuserloginUser(  username: string  | null | undefined,
+      password: string  | null | undefined,
       $config?: SwrConfig
   ) {
   let url = '/user/login';
@@ -667,41 +639,29 @@ function serializeQueryParam(obj: any) {
     .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
     .join('&');
 }
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
-
-export interface Category {
-  id?: number;
-  name?: string;
-}
-
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
-
-  status?: 'available'|'pending'|'sold';
-}
-
-export interface Tag {
-  id?: number;
-  name?: string;
-}
-
 export interface Order {
   id?: number;
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -711,6 +671,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

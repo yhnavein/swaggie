@@ -82,7 +82,7 @@ export class petService extends BaseService {
   addPet(
     body: Pet,
     config?: any
-  ): Observable<unknown> {
+  ): Observable<Pet> {
     let url = '/pet?';
 
     return this.$post(
@@ -112,16 +112,16 @@ export class petService extends BaseService {
   }
 
 /**
-   * @param status  
+   * @param status (optional) 
    * @return Success
    */
   findPetsByStatus(
-    status: ('available'|'pending'|'sold')[],
+    status: ("available" | "pending" | "sold") | null | undefined,
     config?: any
   ): Observable<Pet[]> {
     let url = '/pet/findByStatus?';
     if (status !== undefined) {
-      status.forEach(item => { url += 'status=' + encodeURIComponent("" + item) + "&"; });
+      url += 'status=' + encodeURIComponent("" + status) + "&";
     }
   
     return this.$get(
@@ -131,16 +131,16 @@ export class petService extends BaseService {
   }
 
 /**
-   * @param tags  
+   * @param tags (optional) 
    * @return Success
    */
   findPetsByTags(
-    tags: string[],
+    tags: string[] | null | undefined,
     config?: any
   ): Observable<Pet[]> {
     let url = '/pet/findByTags?';
     if (tags !== undefined) {
-      tags.forEach(item => { url += 'tags=' + encodeURIComponent("" + item) + "&"; });
+      url += 'tags=' + encodeURIComponent("" + tags) + "&";
     }
   
     return this.$get(
@@ -173,7 +173,7 @@ export class petService extends BaseService {
   updatePet(
     body: Pet,
     config?: any
-  ): Observable<unknown> {
+  ): Observable<Pet> {
     let url = '/pet?';
 
     return this.$put(
@@ -197,17 +197,16 @@ export class petService extends BaseService {
   ): Observable<unknown> {
     let url = '/pet/{petId}?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-    if (!!name) {
-      formDataBody.append("name", name);
+    if (name !== undefined) {
+      url += 'name=' + encodeURIComponent("" + name) + "&";
     }
-    if (!!status) {
-      formDataBody.append("status", status);
+    if (status !== undefined) {
+      url += 'status=' + encodeURIComponent("" + status) + "&";
     }
-
+  
     return this.$post(
       url,
-      formDataBody,
+      null,
       config
     );
   }
@@ -215,28 +214,22 @@ export class petService extends BaseService {
 /**
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    * @return Success
    */
   uploadFile(
     petId: number,
     additionalMetadata: string | null | undefined,
-    file: File | null | undefined,
     config?: any
   ): Observable<ApiResponse> {
     let url = '/pet/{petId}/uploadImage?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-    if (!!additionalMetadata) {
-      formDataBody.append("additionalMetadata", additionalMetadata);
+    if (additionalMetadata !== undefined) {
+      url += 'additionalMetadata=' + encodeURIComponent("" + additionalMetadata) + "&";
     }
-    if (!!file) {
-      formDataBody.append("file", file);
-    }
-
+  
     return this.$post(
       url,
-      formDataBody,
+      null,
       config
     );
   }
@@ -303,11 +296,11 @@ export class storeService extends BaseService {
   }
 
 /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
   placeOrder(
-    body: Order,
+    body: Order | null | undefined,
     config?: any
   ): Observable<Order> {
     let url = '/store/order?';
@@ -333,13 +326,13 @@ export class userService extends BaseService {
   }
 
   /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
   createUser(
-    body: User,
+    body: User | null | undefined,
     config?: any
-  ): Observable<unknown> {
+  ): Observable<User> {
     let url = '/user?';
 
     return this.$post(
@@ -350,30 +343,13 @@ export class userService extends BaseService {
   }
 
 /**
-   * @param body  
-   * @return Success
-   */
-  createUsersWithArrayInput(
-    body: User[],
-    config?: any
-  ): Observable<unknown> {
-    let url = '/user/createWithArray?';
-
-    return this.$post(
-      url,
-      body,
-      config
-    );
-  }
-
-/**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
   createUsersWithListInput(
-    body: User[],
+    body: User[] | null | undefined,
     config?: any
-  ): Observable<unknown> {
+  ): Observable<User> {
     let url = '/user/createWithList?';
 
     return this.$post(
@@ -418,13 +394,13 @@ export class userService extends BaseService {
   }
 
 /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    * @return Success
    */
   loginUser(
-    username: string,
-    password: string,
+    username: string | null | undefined,
+    password: string | null | undefined,
     config?: any
   ): Observable<string> {
     let url = '/user/login?';
@@ -456,13 +432,13 @@ export class userService extends BaseService {
   }
 
 /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    * @return Success
    */
   updateUser(
+    body: User | null | undefined,
     username: string,
-    body: User,
     config?: any
   ): Observable<unknown> {
     let url = '/user/{username}?';
@@ -477,41 +453,29 @@ export class userService extends BaseService {
 
 }
 
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
-
-export interface Category {
-  id?: number;
-  name?: string;
-}
-
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
-
-  status?: 'available'|'pending'|'sold';
-}
-
-export interface Tag {
-  id?: number;
-  name?: string;
-}
-
 export interface Order {
   id?: number;
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -521,6 +485,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

@@ -8,6 +8,7 @@
     "./test/test-setup.ts"
   ],
   "spec": [
-    "src/**/*.spec.ts"
+    "src/**/*.spec.ts",
+    "test/*.spec.ts"
   ]
 }

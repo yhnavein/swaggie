@@ -19,14 +19,14 @@ export const petClient = {
    */
   addPet(body: Pet ,
     $config?: RequestInit
-  ): Promise<unknown> {
+  ): Promise<Pet> {
     let url = defaults.baseUrl + '/pet?';
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    }).then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -50,14 +50,14 @@ export const petClient = {
   },
 
   /**
-   * @param status  
+   * @param status (optional) 
    */
-  findPetsByStatus(status: ('available'|'pending'|'sold')[] ,
+  findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
     $config?: RequestInit
   ): Promise<Pet[]> {
     let url = defaults.baseUrl + '/pet/findByStatus?';
     if (status !== undefined) {
-      status.forEach(item => { url += 'status=' + serializeQueryParam(item) + "&"; });
+      url += 'status=' + serializeQueryParam(status) + "&";
     }
   
     return fetch(url, {
@@ -67,14 +67,14 @@ export const petClient = {
   },
 
   /**
-   * @param tags  
+   * @param tags (optional) 
    */
-  findPetsByTags(tags: string[] ,
+  findPetsByTags(tags: string[] | null | undefined,
     $config?: RequestInit
   ): Promise<Pet[]> {
     let url = defaults.baseUrl + '/pet/findByTags?';
     if (tags !== undefined) {
-      tags.forEach(item => { url += 'tags=' + serializeQueryParam(item) + "&"; });
+      url += 'tags=' + serializeQueryParam(tags) + "&";
     }
   
     return fetch(url, {
@@ -103,14 +103,14 @@ export const petClient = {
    */
   updatePet(body: Pet ,
     $config?: RequestInit
-  ): Promise<unknown> {
+  ): Promise<Pet> {
     let url = defaults.baseUrl + '/pet?';
 
     return fetch(url, {
       method: 'PUT',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    }).then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -125,7 +125,13 @@ export const petClient = {
   ): Promise<unknown> {
     let url = defaults.baseUrl + '/pet/{petId}?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-
+    if (name !== undefined) {
+      url += 'name=' + serializeQueryParam(name) + "&";
+    }
+    if (status !== undefined) {
+      url += 'status=' + serializeQueryParam(status) + "&";
+    }
+  
     return fetch(url, {
       method: 'POST',
       ...$config,
@@ -135,16 +141,17 @@ export const petClient = {
   /**
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    */
   uploadFile(petId: number ,
     additionalMetadata: string | null | undefined,
-    file: File | null | undefined,
     $config?: RequestInit
   ): Promise<ApiResponse> {
     let url = defaults.baseUrl + '/pet/{petId}/uploadImage?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-
+    if (additionalMetadata !== undefined) {
+      url += 'additionalMetadata=' + serializeQueryParam(additionalMetadata) + "&";
+    }
+  
     return fetch(url, {
       method: 'POST',
       ...$config,
@@ -196,9 +203,9 @@ export const storeClient = {
   },
 
   /**
-   * @param body  
+   * @param body (optional) 
    */
-  placeOrder(body: Order ,
+  placeOrder(body: Order | null | undefined,
     $config?: RequestInit
   ): Promise<Order> {
     let url = defaults.baseUrl + '/store/order?';
@@ -213,48 +220,33 @@ export const storeClient = {
 };
 export const userClient = {
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUser(body: User ,
+  createUser(body: User | null | undefined,
     $config?: RequestInit
-  ): Promise<unknown> {
+  ): Promise<User> {
     let url = defaults.baseUrl + '/user?';
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    }).then((response) => response.json() as Promise<User>);
   },
 
   /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUsersWithArrayInput(body: User[] ,
+  createUsersWithListInput(body: User[] | null | undefined,
     $config?: RequestInit
-  ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/createWithArray?';
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
-  },
-
-  /**
-   * @param body  
-   */
-  createUsersWithListInput(body: User[] ,
-    $config?: RequestInit
-  ): Promise<unknown> {
+  ): Promise<User> {
     let url = defaults.baseUrl + '/user/createWithList?';
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    }).then((response) => response.json() as Promise<User>);
   },
 
   /**
@@ -288,11 +280,11 @@ export const userClient = {
   },
 
   /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-  loginUser(username: string ,
-    password: string ,
+  loginUser(username: string | null | undefined,
+    password: string | null | undefined,
     $config?: RequestInit
   ): Promise<string> {
     let url = defaults.baseUrl + '/user/login?';
@@ -322,11 +314,11 @@ export const userClient = {
   },
 
   /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    */
-  updateUser(username: string ,
-    body: User ,
+  updateUser(body: User | null | undefined,
+    username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
     let url = defaults.baseUrl + '/user/{username}?';
@@ -350,41 +342,29 @@ function serializeQueryParam(obj: any) {
     .join('&');
 }
 
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
-
-export interface Category {
-  id?: number;
-  name?: string;
-}
-
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
-
-  status?: 'available'|'pending'|'sold';
-}
-
-export interface Tag {
-  id?: number;
-  name?: string;
-}
-
 export interface Order {
   id?: number;
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -394,6 +374,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

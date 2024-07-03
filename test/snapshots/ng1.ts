@@ -134,7 +134,7 @@ export class petService extends BaseService {
    */
   addPet(body: Pet ,
         config?: IRequestShortcutConfig
-  ): IPromise<unknown> {
+  ): IPromise<Pet> {
     let url = '/pet?';
 
     return this.$post(
@@ -163,15 +163,15 @@ export class petService extends BaseService {
   }
 
   /**
-   * @param status  
+   * @param status (optional) 
    * @return Success
    */
-  findPetsByStatus(status: ('available'|'pending'|'sold')[] ,
+  findPetsByStatus(status: ("available" | "pending" | "sold")  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
     let url = '/pet/findByStatus?';
     if (status !== undefined) {
-      status.forEach(item => { url += serializeQueryParam(item, 'status') + "&"; });
+      url += serializeQueryParam(status, 'status') + "&";
     }
   
     return this.$get(
@@ -181,15 +181,15 @@ export class petService extends BaseService {
   }
 
   /**
-   * @param tags  
+   * @param tags (optional) 
    * @return Success
    */
-  findPetsByTags(tags: string[] ,
+  findPetsByTags(tags: string[]  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
     let url = '/pet/findByTags?';
     if (tags !== undefined) {
-      tags.forEach(item => { url += serializeQueryParam(item, 'tags') + "&"; });
+      url += serializeQueryParam(tags, 'tags') + "&";
     }
   
     return this.$get(
@@ -220,7 +220,7 @@ export class petService extends BaseService {
    */
   updatePet(body: Pet ,
         config?: IRequestShortcutConfig
-  ): IPromise<unknown> {
+  ): IPromise<Pet> {
     let url = '/pet?';
 
     return this.$put(
@@ -239,21 +239,20 @@ export class petService extends BaseService {
   updatePetWithForm(petId: number ,
     name: string  | null | undefined,
     status: string  | null | undefined,
-        config: IRequestShortcutConfig = {headers: {'Content-Type': undefined}}
+        config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/pet/{petId}?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!name) {
-          formDataBody.append("name", name);
-        }
-    if (!!status) {
-          formDataBody.append("status", status);
-        }
-
+    if (name !== undefined) {
+      url += serializeQueryParam(name, 'name') + "&";
+    }
+    if (status !== undefined) {
+      url += serializeQueryParam(status, 'status') + "&";
+    }
+  
     return this.$post(
       url,
-          formDataBody,
+        null,
         config
     );
   }
@@ -261,27 +260,21 @@ export class petService extends BaseService {
   /**
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    * @return Success
    */
   uploadFile(petId: number ,
     additionalMetadata: string  | null | undefined,
-    file: File  | null | undefined,
-        config: IRequestShortcutConfig = {headers: {'Content-Type': undefined}}
+        config?: IRequestShortcutConfig
   ): IPromise<ApiResponse> {
     let url = '/pet/{petId}/uploadImage?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!additionalMetadata) {
-          formDataBody.append("additionalMetadata", additionalMetadata);
-        }
-    if (!!file) {
-          formDataBody.append("file", file);
-        }
-
+    if (additionalMetadata !== undefined) {
+      url += serializeQueryParam(additionalMetadata, 'additionalMetadata') + "&";
+    }
+  
     return this.$post(
       url,
-          formDataBody,
+        null,
         config
     );
   }
@@ -340,10 +333,10 @@ export class storeService extends BaseService {
   }
 
   /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
-  placeOrder(body: Order ,
+  placeOrder(body: Order  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<Order> {
     let url = '/store/order?';
@@ -364,12 +357,12 @@ export class userService extends BaseService {
   }
 
     /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
-  createUser(body: User ,
+  createUser(body: User  | null | undefined,
         config?: IRequestShortcutConfig
-  ): IPromise<unknown> {
+  ): IPromise<User> {
     let url = '/user?';
 
     return this.$post(
@@ -380,28 +373,12 @@ export class userService extends BaseService {
   }
 
   /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
-  createUsersWithArrayInput(body: User[] ,
+  createUsersWithListInput(body: User[]  | null | undefined,
         config?: IRequestShortcutConfig
-  ): IPromise<unknown> {
-    let url = '/user/createWithArray?';
-
-    return this.$post(
-      url,
-        body,
-        config
-    );
-  }
-
-  /**
-   * @param body  
-   * @return Success
-   */
-  createUsersWithListInput(body: User[] ,
-        config?: IRequestShortcutConfig
-  ): IPromise<unknown> {
+  ): IPromise<User> {
     let url = '/user/createWithList?';
 
     return this.$post(
@@ -444,12 +421,12 @@ export class userService extends BaseService {
   }
 
   /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    * @return Success
    */
-  loginUser(username: string ,
-    password: string ,
+  loginUser(username: string  | null | undefined,
+    password: string  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<string> {
     let url = '/user/login?';
@@ -480,12 +457,12 @@ export class userService extends BaseService {
   }
 
   /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    * @return Success
    */
-  updateUser(username: string ,
-    body: User ,
+  updateUser(body: User  | null | undefined,
+    username: string ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/user/{username}?';
@@ -536,41 +513,29 @@ function serializeQueryParam(obj: any, property: string): string {
     return '';
   }
 }
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
-
-export interface Category {
-  id?: number;
-  name?: string;
-}
-
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
-
-  status?: 'available'|'pending'|'sold';
-}
-
-export interface Tag {
-  id?: number;
-  name?: string;
-}
-
 export interface Order {
   id?: number;
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -580,6 +545,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}
