@@ -3,7 +3,6 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import genJsCode from './gen/js';
 import { loadAllTemplateFiles } from './gen/templateManager';
-import { getOperations } from './swagger';
 import type { ClientOptions, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec } from './utils';
 
@@ -11,7 +10,7 @@ import { loadSpecDocument, verifyDocumentSpec } from './utils';
  * Runs the whole code generation process.
  * @returns `CodeGenResult`
  **/
-export async function runCodeGenerator(options: FullAppOptions): Promise<CodeGenResult> {
+export async function runCodeGenerator(options: Partial<FullAppOptions>): Promise<CodeGenResult> {
   try {
     verifyOptions(options);
     const opts = await applyConfigFile(options);
@@ -25,7 +24,7 @@ export async function runCodeGenerator(options: FullAppOptions): Promise<CodeGen
   }
 }
 
-function verifyOptions(options: FullAppOptions) {
+function verifyOptions(options: Partial<FullAppOptions>) {
   if (!options) {
     throw new Error('Options were not provided');
   }

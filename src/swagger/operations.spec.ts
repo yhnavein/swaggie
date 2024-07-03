@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { getOperations } from './operations';
 import { getDocument } from '../utils';
 import type { ApiOperation } from '../types';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 describe('getOperations', () => {
   it('should handle empty operation list', () => {
@@ -103,64 +104,100 @@ describe('getOperations', () => {
     expect(res).to.deep.equal(validResp);
   });
 
-  // TODO: Test path inheritance
-  // it('should handle inheritance of parameters', () => {
-  //   const spec = getDocument({
-  //     paths: {
-  //       '/api/heartbeat': {},
-  //       '/api/pokemon': {
-  //         get: {
-  //           tags: ['Pokemon'],
-  //           operationId: null,
-  //           responses: {
-  //             '200': { $ref: '#/components/responses/PokemonList' },
-  //           },
-  //         },
-  //         post: {
-  //           tags: [],
-  //           operationId: null,
-  //           responses: {},
-  //         },
-  //         patch: {
-  //           operationId: 'pokePatch',
-  //           responses: {},
-  //         },
-  //       },
-  //     },
-  //   });
+  it('should handle inheritance of parameters', () => {
+    const inheritedParams: OA3.ParameterObject[] = [
+      {
+        name: 'limit',
+        in: 'query',
+        schema: { type: 'integer' },
+      },
+      {
+        name: 'offset',
+        in: 'query',
+        schema: { type: 'integer' },
+      },
+      {
+        name: 'filter',
+        in: 'query',
+        schema: { $ref: '#/components/schemas/Filter' },
+      },
+    ];
 
-  //   const res = getOperations(spec);
+    const spec = getDocument({
+      paths: {
+        '/api/pokemon': {
+          get: {
+            operationId: 'A',
+            parameters: [],
+            responses: {},
+          },
+          post: {
+            operationId: 'B',
+            responses: {},
+          },
+          patch: {
+            operationId: 'C',
+            parameters: [
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'number', format: 'int32' },
+              },
+              {
+                name: 'sort',
+                in: 'query',
+                schema: { $ref: '#/components/schemas/Sort' },
+              },
+            ],
+            responses: {},
+          },
+          // parameters that should be inherited by all operations above
+          parameters: inheritedParams,
+        },
+      },
+    });
 
-  //   const validResp: ApiOperation[] = [
-  //     {
-  //       group: 'Pokemon',
-  //       // id will be generated as sanitized method + path when it's not defined
-  //       operationId: 'getApiPokemon',
-  //       method: 'get',
-  //       parameters: [],
-  //       path: '/api/pokemon',
-  //       responses: { 200: { $ref: '#/components/responses/PokemonList' } },
-  //       tags: ['Pokemon'],
-  //     },
-  //     {
-  //       group: 'default',
-  //       // id will be generated as sanitized method + path when it's not defined
-  //       operationId: 'postApiPokemon',
-  //       method: 'post',
-  //       parameters: [],
-  //       path: '/api/pokemon',
-  //       responses: {},
-  //       tags: [],
-  //     },
-  //     {
-  //       group: 'default',
-  //       operationId: 'pokePatch',
-  //       method: 'patch',
-  //       parameters: [],
-  //       path: '/api/pokemon',
-  //       responses: {},
-  //     },
-  //   ];
-  //   expect(res).to.deep.equal(validResp);
-  // });
+    const res = getOperations(spec);
+
+    const validResp: ApiOperation[] = [
+      {
+        group: 'default',
+        operationId: 'A',
+        method: 'get',
+        parameters: inheritedParams,
+        path: '/api/pokemon',
+        responses: {},
+      },
+      {
+        group: 'default',
+        operationId: 'B',
+        method: 'post',
+        parameters: inheritedParams,
+        path: '/api/pokemon',
+        responses: {},
+      },
+      {
+        group: 'default',
+        operationId: 'C',
+        method: 'patch',
+        parameters: [
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'number', format: 'int32' },
+          },
+          {
+            name: 'sort',
+            in: 'query',
+            schema: { $ref: '#/components/schemas/Sort' },
+          },
+          inheritedParams[1],
+          inheritedParams[2],
+        ],
+        path: '/api/pokemon',
+        responses: {},
+      },
+    ];
+    expect(res).to.deep.equal(validResp);
+  });
 });

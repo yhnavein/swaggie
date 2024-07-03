@@ -46,14 +46,9 @@ export function getTypeFromSchema(
     return `${unknownType}[]`;
   }
   if (schema.type === 'object') {
-    if (schema.additionalProperties) {
-      const extraProps = schema.additionalProperties;
-      return `{ [key: string]: ${
-        extraProps === true ? 'any' : getTypeFromSchema(extraProps, options)
-      } }`;
-    }
-    return unknownType;
+    return getTypeFromObject(schema, options);
   }
+
   if ('enum' in schema) {
     return `(${schema.enum.map((v) => JSON.stringify(v)).join(' | ')})`;
   }
@@ -69,5 +64,34 @@ export function getTypeFromSchema(
   if (schema.type === 'boolean') {
     return 'boolean';
   }
+  return unknownType;
+}
+
+function getTypeFromObject(schema: OA3.SchemaObject, options: Partial<ClientOptions>): string {
+  const unknownType = options.preferAny ? 'any' : 'unknown';
+
+  if (schema.additionalProperties) {
+    const extraProps = schema.additionalProperties;
+    return `{ [key: string]: ${
+      extraProps === true ? 'any' : getTypeFromSchema(extraProps, options)
+    } }`;
+  }
+
+  if (schema.properties) {
+    const props = Object.keys(schema.properties);
+    const required = schema.required || [];
+    const result: string[] = [];
+
+    for (const prop of props) {
+      const propDefinition = schema.properties[prop];
+      const isRequired = required.includes(prop);
+      result.push(
+        `${prop}${isRequired ? '' : '?'}: ${getTypeFromSchema(propDefinition, options)};`
+      );
+    }
+
+    return `{ ${result.join('\n')} }`;
+  }
+
   return unknownType;
 }

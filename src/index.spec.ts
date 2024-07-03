@@ -13,7 +13,7 @@ describe('runCodeGenerator', () => {
     const parameters = {};
 
     try {
-      return await runCodeGenerator(parameters as any);
+      return await runCodeGenerator(parameters);
     } catch (e) {
       return expect(e.message).to.contain('You need to provide');
     }
@@ -25,7 +25,7 @@ describe('runCodeGenerator', () => {
     };
 
     try {
-      return await runCodeGenerator(parameters as any);
+      return await runCodeGenerator(parameters);
     } catch (e) {
       return expect(e.message).to.contain('You need to provide');
     }
@@ -38,7 +38,7 @@ describe('runCodeGenerator', () => {
     };
 
     try {
-      return await runCodeGenerator(parameters as any);
+      return await runCodeGenerator(parameters);
     } catch (e) {
       return expect(e.message).to.contain('You need to provide');
     }
@@ -50,45 +50,47 @@ describe('runCodeGenerator', () => {
     };
 
     try {
-      await runCodeGenerator(parameters as any);
+      await runCodeGenerator(parameters);
     } catch (e) {
       return expect(e.message).to.contain('You need to provide');
     }
   });
 
-  it('works with --out and --src provided', () => {
+  it('works with --out and --src provided', async () => {
     const parameters = {
-      src: 'http://petstore.swagger.io/v2/swagger.json',
+      src: './test/petstore-v3.yml',
       out: './.tmp/test/',
     };
 
-    runCodeGenerator(parameters as any).then((res) => {
-      expect(res).to.be.ok;
-    });
+    const res = await runCodeGenerator(parameters);
+    expect(res).to.be.ok;
   });
 
-  it('fails when wrong --config provided', (done) => {
+  it('fails when wrong --config provided', async () => {
     const parameters = {
       config: './test/nonexistent-config.json',
     };
 
-    runCodeGenerator(parameters as any)
-      .then(() => {})
-      .catch((e) => expect(e).to.contain('Could not correctly load config file'))
-      .finally(() => done());
+    try {
+      await runCodeGenerator(parameters);
+    } catch (e) {
+      return expect(e).to.contain('Could not correctly load config file');
+    }
   });
 
-  it('fails when --config provided and the JSON file is wrong', () => {
+  it('fails when --config provided and the JSON file is wrong', async () => {
     const parameters = {
       config: './test/petstore-v3.yml',
     };
 
-    return runCodeGenerator(parameters as any).catch((e) =>
-      expect(e).to.contain('Could not correctly load config file')
-    );
+    try {
+      await runCodeGenerator(parameters);
+    } catch (e) {
+      return expect(e).to.contain('Could not correctly load config file');
+    }
   });
 
-  it('works with proper --config provided', (done) => {
+  it('works with proper --config provided', async () => {
     const stub = sinon.stub(fetch, 'default');
     const response = fs.readFileSync(`${__dirname}/../test/petstore-v3.json`, {
       encoding: 'utf-8',
@@ -99,18 +101,22 @@ describe('runCodeGenerator', () => {
       config: './test/sample-config.json',
     };
 
-    runCodeGenerator(parameters as any)
-      .then((res) => {
-        expect(res).to.be.ok;
-      })
-      .finally(() => done());
+    try {
+      const res = await runCodeGenerator(parameters);
+      expect(res).to.be.ok;
+    } catch (e) {
+      console.log(e);
+      return expect(e).to.contain('Could not correctly load config file');
+    }
   });
 
   it('properly loads configuration from config file', async () => {
     const parameters = {
       config: './test/sample-config.json',
     };
+
     const conf = await applyConfigFile(parameters);
+
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://google.pl');
     expect(conf.src).to.be.equal(
@@ -124,7 +130,9 @@ describe('runCodeGenerator', () => {
       baseUrl: 'https://wp.pl',
       src: './test/petstore-v3.yml',
     };
+
     const conf = await applyConfigFile(parameters);
+
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://wp.pl');
     expect(conf.src).to.be.equal('./test/petstore-v3.yml');

@@ -248,6 +248,95 @@ export interface AuthenticationData {
     });
   });
 
+  describe('arrays', () => {
+    it('should handle simple array cases', () => {
+      const res = genTypes(
+        prepareSchemas({
+          StringArray: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          EmptyArray: {
+            type: 'array',
+            items: {},
+          },
+          ObjectArray: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/UserViewModel',
+            },
+          },
+        }),
+        opts
+      );
+
+      expect(res).to.equalWI(`
+export type StringArray = string[];
+export type EmptyArray = unknown[];
+export type ObjectArray = UserViewModel[];
+`);
+    });
+
+    it('should handle different array types as properties', () => {
+      const res = genTypes(
+        prepareSchemas({
+          ComplexObject: {
+            type: 'object',
+            required: ['roles', 'ids'],
+            properties: {
+              roles: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+              ids: {
+                type: 'array',
+                items: {
+                  format: 'int32',
+                  type: 'number',
+                },
+              },
+              inlineGroups: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  required: ['id'],
+                  properties: {
+                    name: {
+                      type: 'string',
+                    },
+                    id: {
+                      format: 'int32',
+                      type: 'number',
+                    },
+                  },
+                },
+              },
+              groups: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/Group',
+                },
+              },
+            },
+          },
+        }),
+        opts
+      );
+
+      expect(res).to.equalWI(`
+export interface ComplexObject {
+  roles: string[];
+  ids: number[];
+  inlineGroups?: { name?: string; id: number; }[];
+  groups?: Group[];
+}`);
+    });
+  });
+
   describe('inheritance', () => {
     describe('allOf', () => {
       it('should handle 2 allOf correctly (most common case)', () => {
@@ -419,7 +508,7 @@ describe('renderComment', () => {
 });
 
 type ExtendedSchema = {
-  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: any });
+  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: object });
 };
 function prepareSchemas(schemas: ExtendedSchema) {
   return getDocument({

@@ -66,6 +66,11 @@ function renderType(
     result.push(`export type ${name} = ${typeDefinition};`);
 
     return `${result.join('\n')}\n`;
+  } else if (schema.type === 'array') {
+    // This case is quite rare but is definitely possible that a schema definition is
+    // an array of something. In this case it's just a type reference
+    result.push(`export type ${name} = ${generateItemsType(schema.items, options)}[];`);
+    return result.join('\n');
   } else {
     result.push(`export interface ${name} {`);
     result.push(generateObjectTypeContents(schema, options));
@@ -97,6 +102,17 @@ function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOpt
   }
 
   return result.join('\n');
+}
+
+function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: ClientOptions) {
+  const fallbackType = options.preferAny ? 'any' : 'unknown';
+
+  if ('$ref' in schema) {
+    return schema.$ref.split('/').pop() ?? fallbackType;
+  }
+
+  // Schema object is not supported at the moment, but it can be added if needed
+  return schema.type ?? fallbackType;
 }
 
 /**
@@ -193,7 +209,7 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject) {
   return deepMerge({}, ...subSchemas);
 }
 
-function isObject(item: any): item is Record<string, any> {
+function isObject(item?: object): item is Record<string, object> {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
 function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {

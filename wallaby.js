@@ -4,6 +4,7 @@ module.exports = () => ({
     'src/**/*.ts',
     'test/*.json',
     'test/*.yml',
+    'templates/**/*.ejs',
     '!src/**/*.spec.ts'
   ],
   require: [],

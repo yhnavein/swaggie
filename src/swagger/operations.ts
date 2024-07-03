@@ -83,6 +83,7 @@ function getPathOperation(
   );
 
   // if there's no explicit operationId given, create one based on the method and path
+  // and make it normalized for further usage
   if (!op.operationId) {
     op.operationId = (method + pathInfo.path)
       .replace(/[\/{(?\/{)\-]([^{.])/g, (_, m) => m.toUpperCase())
