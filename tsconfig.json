@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "sourceMap": false,
     "newLine": "lf",
+    "noEmit": true,
     "skipLibCheck": true
   },
   "exclude": ["node_modules", "dist", "coverage", "test/snapshots"]

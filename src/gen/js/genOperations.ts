@@ -63,8 +63,18 @@ export function prepareOperations(
     const responseObject = getBestResponse(op);
     const returnType = getParameterType(responseObject, options);
 
+    const body = getRequestBody(op.requestBody);
     const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
     const params = getParams(op.parameters as OA3.ParameterObject[], options);
+
+    if (body) {
+      params.unshift(body);
+    }
+
+    // If all parameters have 'x-position' defined, sort them by it
+    if (params.every((p) => p.original['x-position'])) {
+      params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
+    }
 
     return {
       returnType,
@@ -74,7 +84,7 @@ export function prepareOperations(
       parameters: params,
       query: queryParams,
       pathParams: getParams(op.parameters as OA3.ParameterObject[], options, ['path']),
-      body: op.requestBody as OA3.RequestBodyObject,
+      body,
       headers: getParams(op.parameters as OA3.ParameterObject[], options, ['header']),
     };
   });
@@ -159,6 +169,29 @@ export function getParamName(name: string): string {
   );
 }
 
+function getRequestBody(
+  reqBody: OA3.ReferenceObject | OA3.RequestBodyObject
+): IOperationParam | null {
+  if (reqBody && 'content' in reqBody) {
+    const bodyContent =
+      reqBody.content['application/json'] ??
+      reqBody.content['text/json'] ??
+      reqBody.content['text/plain'] ??
+      null;
+
+    if (bodyContent) {
+      return {
+        originalName: reqBody['x-name'] ?? 'body',
+        name: getParamName(reqBody['x-name'] ?? 'body'),
+        type: getParameterType(bodyContent, {}),
+        optional: !reqBody.required,
+        original: reqBody,
+      };
+    }
+  }
+  return null;
+}
+
 interface ClientData {
   clientName: string;
   camelCaseName: string;
@@ -174,7 +207,7 @@ interface IOperation {
   parameters: IOperationParam[];
   query: IOperationParam[];
   pathParams: IOperationParam[];
-  body: OA3.RequestBodyObject;
+  body: IOperationParam;
   headers: IOperationParam[];
 }
 
@@ -183,4 +216,5 @@ interface IOperationParam {
   name: string;
   type: string;
   optional: boolean;
+  original: OA3.ParameterObject | OA3.RequestBodyObject;
 }

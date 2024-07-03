@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import { getTypeFromSchema } from './support';
+import { getCompositeTypes, getTypeFromSchema } from './support';
 import type { ClientOptions } from '../../types';
 
 /**
@@ -183,23 +183,6 @@ export function renderComment(comment: string | null) {
   }
 
   return ` /**\n${commentLines.map((line) => `  * ${line.trim()}`).join('\n')}\n  */`;
-}
-
-/**
- * Returns a string with the types that the given schema extends.
- * It uses the `allOf`, `oneOf` or `anyOf` properties to determine the types.
- * If the schema has no composite types, it returns an empty string.
- * If there are more than one composite types, it analyzes only the first one.
- */
-function getCompositeTypes(schema: OA3.SchemaObject) {
-  const composite = schema.allOf || schema.oneOf || schema.anyOf || [];
-  if (composite) {
-    return composite
-      .filter((v) => '$ref' in v)
-      .map((s: OA3.ReferenceObject) => s.$ref.split('/').pop());
-  }
-
-  return [];
 }
 
 function getMergedCompositeObjects(schema: OA3.SchemaObject) {

@@ -39,6 +39,10 @@ export function getTypeFromSchema(
     return schema.$ref.split('/').pop();
   }
 
+  if ('allOf' in schema || 'oneOf' in schema || 'anyOf' in schema) {
+    return getTypeFromComposites(schema, options);
+  }
+
   if (schema.type === 'array') {
     if (schema.items) {
       return `${getTypeFromSchema(schema.items, options)}[]`;
@@ -94,4 +98,38 @@ function getTypeFromObject(schema: OA3.SchemaObject, options: Partial<ClientOpti
   }
 
   return unknownType;
+}
+
+/**
+ * Simplified way of extracting correct type from `anyOf`, `oneOf` or `allOf` schema.
+ * For now we support only reference objects and in those composites (most common case)
+ */
+function getTypeFromComposites(schema: OA3.SchemaObject, options: Partial<ClientOptions>): string {
+  const unknownType = options.preferAny ? 'any' : 'unknown';
+
+  const types = getCompositeTypes(schema);
+
+  if (types.length === 0) {
+    return unknownType;
+  }
+
+  return schema.allOf ? types.join(' & ') : types.join(' | ');
+}
+
+/**
+ * Returns a string with the types that the given schema extends.
+ * It uses the `allOf`, `oneOf` or `anyOf` properties to determine the types.
+ * If the schema has no composite types, it returns an empty string.
+ * If there are more than one composite types, then `allOf` is preferred
+ * over `oneOf` and `anyOf`. Only first type is considered.
+ */
+export function getCompositeTypes(schema: OA3.SchemaObject) {
+  const composite = schema.allOf || schema.oneOf || schema.anyOf || [];
+  if (composite) {
+    return composite
+      .filter((v) => '$ref' in v)
+      .map((s: OA3.ReferenceObject) => s.$ref.split('/').pop());
+  }
+
+  return [];
 }

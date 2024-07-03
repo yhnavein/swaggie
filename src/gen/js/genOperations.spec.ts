@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
 import type { ApiOperation } from '../../types';
 import { getClientOptions } from '../../utils';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 describe('prepareOperations', () => {
   const opts = getClientOptions();
@@ -51,7 +52,7 @@ describe('prepareOperations', () => {
 
       expect(res.name).to.equal('getPetById');
       expect(res.method).to.equal('GET');
-      expect(res.body).to.be.undefined;
+      expect(res.body).to.be.null;
       expect(res.returnType).to.equal('unknown');
 
       expect(res.headers.pop()).to.deep.include({
@@ -73,6 +74,264 @@ describe('prepareOperations', () => {
         originalName: 'petId',
         type: 'number',
         optional: true,
+      });
+
+      expect(res.parameters.length).to.equal(3);
+      expect(res.parameters.map((p) => p.name)).to.deep.equal(['orgID', 'orgType', 'petId']);
+    });
+
+    it('should handle empty parameters', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          responses: {},
+          group: null,
+        },
+        {
+          operationId: 'getPetById2',
+          method: 'get',
+          path: '/pets/{petId}',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [op1, op2] = prepareOperations(ops, opts);
+
+      expect(op1.parameters).to.deep.equal([]);
+      expect(op2.parameters).to.deep.equal([]);
+    });
+
+    describe('requestBody', () => {
+      it('should handle requestBody with ref type', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        const expectedBodyParam = {
+          name: 'body',
+          optional: false,
+          originalName: 'body',
+          type: 'Pet',
+          original: ops[0].requestBody,
+        };
+
+        expect(op1.body).to.deep.equal(expectedBodyParam);
+        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+      });
+
+      type TestCase = {
+        schema: OA3.SchemaObject;
+        expectedType: string;
+      };
+
+      const testCases: TestCase[] = [
+        { schema: { type: 'string' }, expectedType: 'string' },
+        {
+          schema: {
+            items: {
+              format: 'int64',
+              type: 'integer',
+            },
+            nullable: true,
+            type: 'array',
+          },
+          expectedType: 'number[]',
+        },
+        {
+          schema: {
+            oneOf: [{ $ref: '#/components/schemas/User' }],
+          },
+          expectedType: 'User',
+        },
+        {
+          schema: {
+            anyOf: [
+              { $ref: '#/components/schemas/User' },
+              { $ref: '#/components/schemas/Account' },
+            ],
+          },
+          expectedType: 'User | Account',
+        },
+        {
+          schema: {
+            allOf: [
+              { $ref: '#/components/schemas/User' },
+              { $ref: '#/components/schemas/Account' },
+            ],
+          },
+          expectedType: 'User & Account',
+        },
+      ];
+
+      for (const { schema, expectedType } of testCases) {
+        it(`should handle requestBody with ${schema} schema`, () => {
+          const ops: ApiOperation[] = [
+            {
+              operationId: 'createPet',
+              method: 'post',
+              path: '/pet',
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema,
+                  },
+                },
+              },
+              responses: {},
+              group: null,
+            },
+          ];
+
+          const [op1] = prepareOperations(ops, opts);
+          const expectedBodyParam = {
+            name: 'body',
+            optional: true,
+            originalName: 'body',
+            type: expectedType,
+            original: ops[0].requestBody,
+          };
+
+          expect(op1.body).to.deep.equal(expectedBodyParam);
+          expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+        });
+      }
+
+      it('should handle requestBody along with other parameters', () => {
+        const ops: ExtendedApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            parameters: [
+              {
+                name: 'orgId',
+                in: 'query',
+                required: true,
+                schema: {
+                  type: 'number',
+                },
+              },
+            ],
+            requestBody: {
+              required: true,
+              'x-name': 'pet-body',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        const expectedBodyParam = {
+          name: 'petBody',
+          optional: false,
+          originalName: 'pet-body',
+          type: 'Pet',
+          original: ops[0].requestBody,
+        };
+
+        expect(op1.body).to.deep.equal(expectedBodyParam);
+        expect(op1.parameters.length).to.equal(2);
+        expect(op1.parameters[0]).to.deep.equal(expectedBodyParam);
+        expect(op1.parameters[1].name).to.equal('orgId');
+      });
+
+      it('should support x-position attributes', () => {
+        const ops: ExtendedApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet/{orgId}',
+            parameters: [
+              {
+                name: 'countryId',
+                in: 'header',
+                required: false,
+                schema: {
+                  type: 'number',
+                },
+                'x-position': 4,
+              },
+              {
+                name: 'wild',
+                in: 'query',
+                schema: {
+                  type: 'boolean',
+                },
+                'x-position': 2,
+              },
+              {
+                name: 'orgId',
+                in: 'path',
+                required: true,
+                schema: {
+                  type: 'number',
+                },
+                'x-position': 1,
+              },
+            ],
+            requestBody: {
+              required: true,
+              'x-name': 'pet',
+              'x-position': 3,
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        const expectedBodyParam = {
+          name: 'pet',
+          optional: false,
+          originalName: 'pet',
+          type: 'Pet',
+        };
+
+        op1.body.original = undefined;
+        expect(op1.body).to.deep.contain(expectedBodyParam);
+        expect(op1.parameters.length).to.equal(4);
+        expect(op1.parameters.map((p) => p.name)).to.deep.equal([
+          'orgId',
+          'wild',
+          'pet',
+          'countryId',
+        ]);
       });
     });
   });
@@ -224,3 +483,16 @@ describe('getOperationName', () => {
     });
   }
 });
+
+/**
+ * ApiOperation that allows extending with x-attributes
+ */
+interface ExtendedApiOperation extends Omit<ApiOperation, 'parameters' | 'requestBody'> {
+  parameters: (
+    | OA3.ReferenceObject
+    | (OA3.ParameterObject & { [key: `x-${string}`]: number | string })
+  )[];
+  requestBody?:
+    | OA3.ReferenceObject
+    | (OA3.RequestBodyObject & { [key: `x-${string}`]: number | string });
+}
