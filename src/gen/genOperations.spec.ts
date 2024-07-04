@@ -1,9 +1,9 @@
 import { expect } from 'chai';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions } from '../utils';
-import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 describe('prepareOperations', () => {
   const opts = getClientOptions();
@@ -105,7 +105,7 @@ describe('prepareOperations', () => {
       expect(op2.parameters).to.deep.equal([]);
     });
 
-    describe('requestBody', () => {
+    describe('requestBody (JSON)', () => {
       it('should handle requestBody with ref type', () => {
         const ops: ApiOperation[] = [
           {
@@ -129,6 +129,7 @@ describe('prepareOperations', () => {
 
         const [op1] = prepareOperations(ops, opts);
         const expectedBodyParam = {
+          contentType: 'json',
           name: 'body',
           optional: false,
           originalName: 'body',
@@ -205,6 +206,7 @@ describe('prepareOperations', () => {
 
           const [op1] = prepareOperations(ops, opts);
           const expectedBodyParam = {
+            contentType: 'json',
             name: 'body',
             optional: true,
             originalName: 'body',
@@ -251,6 +253,7 @@ describe('prepareOperations', () => {
 
         const [op1] = prepareOperations(ops, opts);
         const expectedBodyParam = {
+          contentType: 'json',
           name: 'petBody',
           optional: false,
           originalName: 'pet-body',
@@ -332,6 +335,127 @@ describe('prepareOperations', () => {
           'pet',
           'countryId',
         ]);
+      });
+    });
+
+    describe('requestBody (x-www-form-urlencoded)', () => {
+      it('should handle requestBody with ref type', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              required: true,
+              content: {
+                'application/x-www-form-urlencoded': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        const expectedBodyParam = {
+          contentType: 'urlencoded',
+          name: 'body',
+          optional: false,
+          originalName: 'body',
+          type: 'Pet',
+          original: ops[0].requestBody,
+        };
+
+        expect(op1.body).to.deep.equal(expectedBodyParam);
+        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+      });
+    });
+
+    describe('requestBody (application/octet-stream)', () => {
+      it('should handle File request body', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              required: true,
+              content: {
+                'application/octet-stream': {
+                  schema: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        const expectedBodyParam = {
+          contentType: 'binary',
+          name: 'body',
+          optional: false,
+          originalName: 'body',
+          type: 'File',
+          original: ops[0].requestBody,
+        };
+
+        expect(op1.body).to.deep.equal(expectedBodyParam);
+        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+      });
+    });
+
+    describe('requestBody (multipart/form-data)', () => {
+      it('should handle form data', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              required: true,
+              content: {
+                'multipart/form-data': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      name: {
+                        type: 'string',
+                      },
+                      file: {
+                        type: 'string',
+                        format: 'binary',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        const expectedBodyParam = {
+          contentType: 'form-data',
+          name: 'body',
+          optional: false,
+          originalName: 'body',
+          type: 'FormData',
+          original: ops[0].requestBody,
+        };
+
+        expect(op1.body).to.deep.equal(expectedBodyParam);
+        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
       });
     });
   });

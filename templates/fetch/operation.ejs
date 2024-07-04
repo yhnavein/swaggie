@@ -30,7 +30,13 @@ $config?: RequestInit
     return fetch(url, {
       method: '<%= it.method %>',
 <% if(it.body) { %>
+<% if(it.body.contentType === 'binary') { %>
+      body: <%= it.body.name %>,
+<% } else if(it.body.contentType === 'urlencoded') { %>
+      body: new URLSearchParams(<%= it.body.name %>),
+<% } else { %>
       body: JSON.stringify(<%= it.body.name %>),
+<% } %>
 <% } %>
 <% if(it.headers && it.headers.length > 0) { %>
       headers: {

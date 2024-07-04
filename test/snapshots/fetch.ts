@@ -108,7 +108,7 @@ export const petClient = {
 
     return fetch(url, {
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: new URLSearchParams(body),
       ...$config,
     }).then((response) => response.json() as Promise<Pet>);
   },
@@ -139,10 +139,12 @@ export const petClient = {
   },
 
   /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
    */
-  uploadFile(petId: number ,
+  uploadFile(body: File | null | undefined,
+    petId: number ,
     additionalMetadata: string | null | undefined,
     $config?: RequestInit
   ): Promise<ApiResponse> {
@@ -154,6 +156,7 @@ export const petClient = {
   
     return fetch(url, {
       method: 'POST',
+      body: body,
       ...$config,
     }).then((response) => response.json() as Promise<ApiResponse>);
   },
@@ -317,7 +320,7 @@ export const userClient = {
    * @param body (optional) 
    * @param username  
    */
-  updateUser(body: User | null | undefined,
+  updateUser(body: FormData | null | undefined,
     username: string ,
     $config?: RequestInit
   ): Promise<unknown> {

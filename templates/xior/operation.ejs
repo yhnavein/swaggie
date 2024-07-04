@@ -15,26 +15,16 @@ $config?: XiorRequestConfig
     url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
 <% });
 } %>
-<% if(it.formData && it.formData.length > 0) { %>
-    const formDataBody = new FormData();
-  <% it.formData.forEach((parameter) => { %>
-    if (!!<%= parameter.name %>) {
-    <% if(parameter.original && parameter.original.type === 'array') { %>
-      <%= parameter.name %>.forEach((f: any) => formDataBody.append("<%= parameter.originalName %>", f));
-    <% } else { %>
-      formDataBody.append("<%= parameter.originalName %>", <%= parameter.name %><%= parameter.type !== 'string' && parameter.type !== 'File' && parameter.type !== 'Blob' ? '.toString()' : '' %>);
-    <% } %>
-    }
-<% });
-} %>
 
     return http.request<<%~ it.returnType %>>({
       url: url,
       method: '<%= it.method %>',
-<% if(it.formData && it.formData.length > 0) { %>
-      data: formDataBody,
-<% } else if(it.body) { %>
+<% if(it.body) { %>
+<% if(it.body.contentType === 'urlencoded') { %>
+      data: new URLSearchParams(<%= it.body.name %>),
+<% } else { %>
       data: <%= it.body.name %>,
+<% } %>
 <% } %>
 <% if(it.query && it.query.length > 0) { %>
       params: {

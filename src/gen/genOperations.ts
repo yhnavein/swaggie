@@ -155,15 +155,6 @@ function getParams(
     }));
 }
 
-export function renderOperationGroup(
-  group: any[],
-  func: any,
-  spec: OA3.Document,
-  options: ClientOptions
-): string[] {
-  return group.map((op) => func.call(this, spec, op, options)).reduce((a, b) => a.concat(b));
-}
-
 /**
  * Escapes param names to more safe form
  */
@@ -176,27 +167,61 @@ export function getParamName(name: string): string {
   );
 }
 
-function getRequestBody(
-  reqBody: OA3.ReferenceObject | OA3.RequestBodyObject
-): IOperationParam | null {
+function getRequestBody(reqBody: OA3.ReferenceObject | OA3.RequestBodyObject): IBodyParam | null {
   if (reqBody && 'content' in reqBody) {
-    const bodyContent =
-      reqBody.content['application/json'] ??
-      reqBody.content['text/json'] ??
-      reqBody.content['text/plain'] ??
-      null;
+    const [bodyContent, contentType] = getBestContentType(reqBody);
+    const isFormData = contentType === 'form-data';
 
     if (bodyContent) {
       return {
         originalName: reqBody['x-name'] ?? 'body',
         name: getParamName(reqBody['x-name'] ?? 'body'),
-        type: getParameterType(bodyContent, {}),
+        type: isFormData ? 'FormData' : getParameterType(bodyContent, {}),
         optional: !reqBody.required,
         original: reqBody,
+        contentType,
       };
     }
   }
   return null;
+}
+
+const orderedContentTypes = [
+  'application/json',
+  'text/json',
+  'text/plain',
+  'application/x-www-form-urlencoded',
+  'multipart/form-data',
+];
+function getBestContentType(reqBody: OA3.RequestBodyObject): [OA3.MediaTypeObject, MyContentType] {
+  const contentTypes = Object.keys(reqBody.content);
+  if (contentTypes.length === 0) {
+    return [null, null];
+  }
+
+  const firstContentType = orderedContentTypes.find((ct) => contentTypes.includes(ct));
+  if (firstContentType) {
+    const typeObject = reqBody.content[firstContentType];
+    const type = getContentType(firstContentType);
+    return [typeObject, type];
+  }
+
+  const typeObject = reqBody.content[contentTypes[0]];
+  const type = getContentType(contentTypes[0]);
+  return [typeObject, type];
+}
+
+function getContentType(type: string) {
+  if (type === 'application/x-www-form-urlencoded') {
+    return 'urlencoded';
+  }
+  if (type === 'multipart/form-data') {
+    return 'form-data';
+  }
+  if (type === 'application/octet-stream') {
+    return 'binary';
+  }
+  return 'json';
 }
 
 interface ClientData {
@@ -214,7 +239,7 @@ interface IOperation {
   parameters: IOperationParam[];
   query: IOperationParam[];
   pathParams: IOperationParam[];
-  body: IOperationParam;
+  body: IBodyParam;
   headers: IOperationParam[];
 }
 
@@ -225,3 +250,8 @@ interface IOperationParam {
   optional: boolean;
   original: OA3.ParameterObject | OA3.RequestBodyObject;
 }
+
+interface IBodyParam extends IOperationParam {
+  contentType?: MyContentType;
+}
+type MyContentType = 'json' | 'urlencoded' | 'form-data' | 'binary';

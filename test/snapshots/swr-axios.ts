@@ -130,7 +130,7 @@ export const petClient = {
     return axios.request<Pet>({
       url: url,
       method: 'PUT',
-      data: body,
+      data: new URLSearchParams(body),
       ...$config,
     });
   },
@@ -161,10 +161,12 @@ export const petClient = {
   },
 
     /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
    */
-  uploadFile(  petId: number ,
+  uploadFile(  body: File  | null | undefined,
+      petId: number ,
       additionalMetadata: string  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<ApiResponse> {
@@ -175,6 +177,7 @@ export const petClient = {
     return axios.request<ApiResponse>({
       url: url,
       method: 'POST',
+      data: body,
       params: {
             'additionalMetadata': serializeQueryParam(additionalMetadata),
           },
@@ -515,7 +518,7 @@ const { data, error, mutate } = useSWR<Order>(
    * @param body (optional) 
    * @param username  
    */
-  updateUser(  body: User  | null | undefined,
+  updateUser(  body: FormData  | null | undefined,
       username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {

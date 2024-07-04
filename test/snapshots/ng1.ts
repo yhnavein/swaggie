@@ -139,8 +139,8 @@ export class petService extends BaseService {
 
     return this.$post(
       url,
-        body,
-        config
+      body,
+      config
     );
   }
 
@@ -158,7 +158,7 @@ export class petService extends BaseService {
 
     return this.$delete(
       url,
-      config
+    config
     );
   }
 
@@ -176,7 +176,7 @@ export class petService extends BaseService {
   
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -194,7 +194,7 @@ export class petService extends BaseService {
   
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -210,7 +210,7 @@ export class petService extends BaseService {
 
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -225,8 +225,8 @@ export class petService extends BaseService {
 
     return this.$put(
       url,
-        body,
-        config
+      new URLSearchParams(body),
+      config
     );
   }
 
@@ -252,17 +252,19 @@ export class petService extends BaseService {
   
     return this.$post(
       url,
-        null,
-        config
+      null,
+      config
     );
   }
 
   /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
    * @return Success
    */
-  uploadFile(petId: number ,
+  uploadFile(body: File  | null | undefined,
+    petId: number ,
     additionalMetadata: string  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<ApiResponse> {
@@ -274,8 +276,8 @@ export class petService extends BaseService {
   
     return this.$post(
       url,
-        null,
-        config
+      body,
+      config
     );
   }
 
@@ -299,7 +301,7 @@ export class storeService extends BaseService {
 
     return this.$delete(
       url,
-      config
+    config
     );
   }
 
@@ -312,7 +314,7 @@ export class storeService extends BaseService {
 
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -328,7 +330,7 @@ export class storeService extends BaseService {
 
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -343,8 +345,8 @@ export class storeService extends BaseService {
 
     return this.$post(
       url,
-        body,
-        config
+      body,
+      config
     );
   }
 
@@ -367,8 +369,8 @@ export class userService extends BaseService {
 
     return this.$post(
       url,
-        body,
-        config
+      body,
+      config
     );
   }
 
@@ -383,8 +385,8 @@ export class userService extends BaseService {
 
     return this.$post(
       url,
-        body,
-        config
+      body,
+      config
     );
   }
 
@@ -400,7 +402,7 @@ export class userService extends BaseService {
 
     return this.$delete(
       url,
-      config
+    config
     );
   }
 
@@ -416,7 +418,7 @@ export class userService extends BaseService {
 
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -439,7 +441,7 @@ export class userService extends BaseService {
   
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -452,7 +454,7 @@ export class userService extends BaseService {
 
     return this.$get(
       url,
-      config
+    config
     );
   }
 
@@ -461,7 +463,7 @@ export class userService extends BaseService {
    * @param username  
    * @return Success
    */
-  updateUser(body: User  | null | undefined,
+  updateUser(body: FormData  | null | undefined,
     username: string ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
@@ -470,8 +472,8 @@ export class userService extends BaseService {
 
     return this.$put(
       url,
-        body,
-        config
+      body,
+      config
     );
   }
 

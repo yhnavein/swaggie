@@ -1,26 +1,26 @@
 import { expect } from 'chai';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import genTypes, { renderComment } from './genTypes';
+import generateTypes, { renderComment } from './genTypes';
 import { getClientOptions, getDocument } from '../utils';
 
-describe('genTypes', () => {
+describe('generateTypes', () => {
   const opts = getClientOptions();
 
   it('should handle empty components properly', () => {
-    const res = genTypes(getDocument({ components: {} }), opts);
+    const res = generateTypes(getDocument({ components: {} }), opts);
 
     expect(res).to.be.equal('');
   });
 
   it('should handle empty components schemas properly', () => {
-    const res = genTypes(getDocument({ components: { schemas: {} } }), opts);
+    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts);
 
     expect(res).to.be.equal('');
   });
 
   it('should handle schema with reference only', () => {
-    const res = genTypes(
+    const res = generateTypes(
       prepareSchemas({
         A: {
           $ref: '#/components/schemas/B',
@@ -41,7 +41,7 @@ export interface B {}`
 
   describe('enums', () => {
     it('should handle simple enums correctly', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           SimpleEnum: {
             type: 'integer',
@@ -67,7 +67,7 @@ export type StringEnum = "Active" | "Disabled";`
     });
 
     it('should handle extended enums correctly', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           XEnums: {
             type: 'integer',
@@ -115,7 +115,7 @@ export enum XEnumsString {
     });
 
     it('should handle OpenApi 3.1 enums', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           Priority: {
             type: 'integer',
@@ -157,7 +157,7 @@ export enum Size {
     });
 
     //     it("should handle NSwag's enum correctly", () => {
-    //       const res = genTypes(
+    //       const res = generateTypes(
     //         getDocument(),
     //         {
     //           SomeEnum: {
@@ -182,7 +182,7 @@ export enum Size {
 
   describe('objects', () => {
     it('should handle obj with no required fields', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           AuthenticationData: {
             type: 'object',
@@ -213,7 +213,7 @@ export interface Empty {}
     });
 
     it('should handle obj with required fields', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           AuthenticationData: {
             type: 'object',
@@ -250,7 +250,7 @@ export interface AuthenticationData {
 
   describe('arrays', () => {
     it('should handle simple array cases', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           StringArray: {
             type: 'array',
@@ -280,7 +280,7 @@ export type ObjectArray = UserViewModel[];
     });
 
     it('should handle different array types as properties', () => {
-      const res = genTypes(
+      const res = generateTypes(
         prepareSchemas({
           ComplexObject: {
             type: 'object',
@@ -340,7 +340,7 @@ export interface ComplexObject {
   describe('inheritance', () => {
     describe('allOf', () => {
       it('should handle 2 allOf correctly (most common case)', () => {
-        const res = genTypes(
+        const res = generateTypes(
           prepareSchemas({
             AuthenticationData: {
               allOf: [
@@ -366,7 +366,7 @@ export interface AuthenticationData extends BasicAuth {
       });
 
       it('should handle many allOf correctly', () => {
-        const res = genTypes(
+        const res = generateTypes(
           prepareSchemas({
             AuthenticationData: {
               allOf: [
@@ -410,7 +410,7 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
     for (const type of ['anyOf', 'oneOf']) {
       describe(type, () => {
         it(`should handle 1 ${type} with reference correctly`, () => {
-          const res = genTypes(
+          const res = generateTypes(
             prepareSchemas({
               AuthenticationData: {
                 [type]: [{ $ref: '#/components/schemas/BasicAuth' }],
@@ -423,7 +423,7 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
         });
 
         it(`should handle 2 of ${type} with reference correctly`, () => {
-          const res = genTypes(
+          const res = generateTypes(
             prepareSchemas({
               AuthenticationData: {
                 [type]: [
@@ -439,7 +439,7 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
         });
 
         it(`should handle ${type} with reference and schema correctly`, () => {
-          const res = genTypes(
+          const res = generateTypes(
             prepareSchemas({
               AuthenticationData: {
                 [type]: [

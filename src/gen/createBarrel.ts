@@ -1,4 +1,5 @@
 import { camel } from 'case';
+
 import type { ApiOperation, ClientOptions } from '../types';
 import { renderFile } from '../utils';
 

@@ -178,7 +178,7 @@ export class petService extends BaseService {
 
     return this.$put(
       url,
-      body,
+      new URLSearchParams(body),
       config
     );
   }
@@ -212,11 +212,13 @@ export class petService extends BaseService {
   }
 
 /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
    * @return Success
    */
   uploadFile(
+    body: File | null | undefined,
     petId: number,
     additionalMetadata: string | null | undefined,
     config?: any
@@ -229,7 +231,7 @@ export class petService extends BaseService {
   
     return this.$post(
       url,
-      null,
+      body,
       config
     );
   }
@@ -437,7 +439,7 @@ export class userService extends BaseService {
    * @return Success
    */
   updateUser(
-    body: User | null | undefined,
+    body: FormData | null | undefined,
     username: string,
     config?: any
   ): Observable<unknown> {
