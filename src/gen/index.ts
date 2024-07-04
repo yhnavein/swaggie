@@ -2,8 +2,8 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import genOperations from './genOperations';
 import genTypes from './genTypes';
-import { saveFile, prepareOutputFilename } from '../util';
-import type { ClientOptions } from '../../types';
+import { saveFile, prepareOutputFilename } from '../utils';
+import type { ClientOptions } from '../types';
 
 export default async function genCode(spec: OA3.Document, options: ClientOptions): Promise<string> {
   let fileContents = await genOperations(spec, options);

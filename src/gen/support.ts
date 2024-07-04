@@ -1,4 +1,4 @@
-import type { ClientOptions } from '../../types';
+import type { ClientOptions } from '../types';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 /**

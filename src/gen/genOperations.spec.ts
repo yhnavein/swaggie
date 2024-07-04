@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
-import type { ApiOperation } from '../../types';
-import { getClientOptions } from '../../utils';
+import type { ApiOperation } from '../types';
+import { getClientOptions } from '../utils';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 describe('prepareOperations', () => {

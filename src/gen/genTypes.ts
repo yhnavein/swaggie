@@ -1,7 +1,7 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
 import { getCompositeTypes, getTypeFromSchema } from './support';
-import type { ClientOptions } from '../../types';
+import type { ClientOptions } from '../types';
 
 /**
  * Generates TypeScript types for the given OpenAPI 3 document.

@@ -2,12 +2,11 @@ import { camel } from 'case';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getParameterType } from './support';
-import { groupOperationsByGroupName, getBestResponse, orderBy } from '../util';
+import { groupOperationsByGroupName, getBestResponse, orderBy, renderFile } from '../utils';
 import { generateBarrelFile } from './createBarrel';
-import { renderFile } from '../templateManager';
-import type { ApiOperation, ClientOptions } from '../../types';
-import { escapeReservedWords } from '../../utils';
-import { getOperations } from '../../swagger';
+import type { ApiOperation, ClientOptions } from '../types';
+import { escapeReservedWords } from '../utils';
+import { getOperations } from '../swagger';
 
 export default async function genOperations(
   spec: OA3.Document,
@@ -117,6 +116,11 @@ export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation
   return results;
 }
 
+/**
+ * Some spec generators include group name in the operationId. We need to remove them as they are redundant.
+ * @example
+ * getOperationName('Group_Operation', 'Group') -> 'Operation'
+ * */
 export function getOperationName(opId: string | null, group?: string | null) {
   if (!opId) {
     return '';

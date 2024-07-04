@@ -1,10 +1,9 @@
 import fs from 'node:fs';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import genJsCode from './gen/js';
-import { loadAllTemplateFiles } from './gen/templateManager';
+import genJsCode from './gen';
 import type { ClientOptions, FullAppOptions } from './types';
-import { loadSpecDocument, verifyDocumentSpec } from './utils';
+import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 
 /**
  * Runs the whole code generation process.
