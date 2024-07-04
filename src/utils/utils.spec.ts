@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
+
 import {
   type VerifableDocument,
   escapeReservedWords,

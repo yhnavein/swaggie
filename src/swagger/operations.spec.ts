@@ -1,8 +1,9 @@
 import { expect } from 'chai';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
+
 import { getOperations } from './operations';
 import { getDocument } from '../utils';
 import type { ApiOperation } from '../types';
-import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 describe('getOperations', () => {
   it('should handle empty operation list', () => {

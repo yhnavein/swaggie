@@ -10,8 +10,7 @@
       "name": "Swaggie",
       "program": "${workspaceFolder}/src/cli.ts",
       "cwd": "${workspaceFolder}",
-      "runtimeArgs": ["-r", "sucrase/register"],
-      "protocol": "inspector",
+      "runtimeArgs": ["-r", "@swc/register"],
       "args": ["-c", "./test/sample-config.json"]
     }
   ]

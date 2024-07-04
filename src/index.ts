@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import genJsCode from './gen';
+import generateCode from './gen';
 import type { ClientOptions, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 
@@ -35,7 +35,7 @@ function verifyOptions(options: Partial<FullAppOptions>) {
 function gen(spec: OA3.Document, options: ClientOptions): Promise<string> {
   loadAllTemplateFiles(options.template || 'axios');
 
-  return genJsCode(spec, options);
+  return generateCode(spec, options);
 }
 
 export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<ClientOptions> {

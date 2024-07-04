@@ -1,13 +1,13 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import { getCompositeTypes, getTypeFromSchema } from './support';
+import { getCompositeTypes, getTypeFromSchema } from '../swagger';
 import type { ClientOptions } from '../types';
 
 /**
- * Generates TypeScript types for the given OpenAPI 3 document.
+ * Generates TypeScript code with all the types for the given OpenAPI 3 document.
  * @returns String containing all TypeScript types in the document.
  */
-export default function genTypes(spec: OA3.Document, options: ClientOptions): string {
+export default function generateTypes(spec: OA3.Document, options: ClientOptions): string {
   const result: string[] = [];
 
   const schemaKeys = Object.keys(spec.components?.schemas || {});
@@ -98,7 +98,7 @@ function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOpt
   for (const prop of props) {
     const propDefinition = schema.properties[prop];
     const isRequired = !!~required.indexOf(prop);
-    result.push(renderTsTypeProp(prop, propDefinition, isRequired, options));
+    result.push(renderTypeProp(prop, propDefinition, isRequired, options));
   }
 
   return result.join('\n');
@@ -153,7 +153,7 @@ function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
   return `${res}}\n`;
 }
 
-function renderTsTypeProp(
+function renderTypeProp(
   prop: string,
   definition: OA3.ReferenceObject | OA3.SchemaObject,
   required: boolean,

@@ -1,14 +1,17 @@
 import { camel } from 'case';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { getParameterType } from './support';
+import { getParameterType } from '../swagger';
 import { groupOperationsByGroupName, getBestResponse, orderBy, renderFile } from '../utils';
 import { generateBarrelFile } from './createBarrel';
 import type { ApiOperation, ClientOptions } from '../types';
 import { escapeReservedWords } from '../utils';
 import { getOperations } from '../swagger';
 
-export default async function genOperations(
+/**
+ * Function that will analyze paths in the spec and generate the code for all the operations.
+ */
+export default async function generateOperations(
   spec: OA3.Document,
   options: ClientOptions
 ): Promise<string> {

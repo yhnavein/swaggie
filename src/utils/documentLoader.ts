@@ -3,6 +3,9 @@ import YAML from 'js-yaml';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import { request } from 'undici';
 
+/**
+ * Function that loads an OpenAPI document from a path or URL
+ */
 export async function loadSpecDocument(src: string | object): Promise<OA3.Document> {
   if (typeof src === 'string') {
     return await loadFile(src);

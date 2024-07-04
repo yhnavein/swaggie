@@ -26,6 +26,12 @@ export function getParameterType(
   return getTypeFromSchema(param.schema, options);
 }
 
+/**
+ * Converts a schema object (or a reference) to a TypeScript type.
+ * @example
+ * { type: 'number', format: 'int32' } -> 'number'
+ * { $ref: '#/components/schema/User' } -> 'User'
+ */
 export function getTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject,
   options: Partial<ClientOptions>
@@ -71,6 +77,10 @@ export function getTypeFromSchema(
   return unknownType;
 }
 
+/**
+ * Knowing that the schema is an object, this function returns a TypeScript type definition
+ * for given schema object.
+ */
 function getTypeFromObject(schema: OA3.SchemaObject, options: Partial<ClientOptions>): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 

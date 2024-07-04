@@ -1,6 +1,6 @@
-import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import { mkdir, writeFileSync as fsWriteFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import type { ApiOperation } from '../types';
 

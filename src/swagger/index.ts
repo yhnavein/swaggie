@@ -1,3 +1,2 @@
-import { getOperations } from './operations';
-
-export { getOperations };
+export * from './operations';
+export * from './typesExtractor';

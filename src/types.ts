@@ -8,7 +8,7 @@ export interface ClientOptions {
   src: string | object;
   /** Path to the file which will contain generated TypeScript code */
   out?: string;
-  /** Template to be used for generation */
+  /** Template to be used for code generation */
   template: Template;
   baseUrl?: string;
   preferAny?: boolean;

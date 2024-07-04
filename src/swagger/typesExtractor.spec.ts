@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import type { ClientOptions } from '../types';
-import { getParameterType, getTypeFromSchema } from './support';
+import { getParameterType, getTypeFromSchema } from './typesExtractor';
 import { getClientOptions } from '../utils';
 
 describe('getParameterType', () => {
@@ -34,24 +34,7 @@ describe('getParameterType', () => {
     }
   });
 
-  it('file', async () => {
-    const param: OA3.ParameterObject = {
-      name: 'attachment',
-      in: 'body',
-      required: false,
-      schema: {
-        type: 'string',
-        format: 'binary',
-      },
-    };
-    const options = {};
-
-    const res = getParameterType(param, options);
-
-    expect(res).to.be.equal('File');
-  });
-
-  it('array with a reference type', async () => {
+  it('standard case', async () => {
     const param: OA3.ParameterObject = {
       name: 'items',
       in: 'query',
@@ -62,115 +45,11 @@ describe('getParameterType', () => {
         },
       },
     };
+    const options = {};
 
-    const res = getParameterType(param, {});
+    const res = getParameterType(param, options);
 
     expect(res).to.be.equal('Item[]');
-  });
-
-  it('reference #1', async () => {
-    const param: OA3.ParameterObject = {
-      name: 'something',
-      in: 'body',
-      required: false,
-      schema: {
-        $ref: '#/components/schemas/SomeItem',
-      },
-    };
-    const options = {};
-
-    const res = getParameterType(param, options);
-
-    expect(res).to.be.equal('SomeItem');
-  });
-
-  it('inline enums', async () => {
-    const param: OA3.ParameterObject = {
-      name: 'Roles',
-      in: 'query',
-      schema: {
-        type: 'array',
-        items: {
-          enum: ['Admin', 'User', 'Guest'],
-          type: 'string',
-        },
-      },
-    };
-    const options = {};
-
-    const res = getParameterType(param, options);
-
-    expect(res).to.be.equal(`("Admin" | "User" | "Guest")[]`);
-  });
-
-  describe('responses', () => {
-    it('string', async () => {
-      const param: OA3.ParameterObject = {
-        name: 'title',
-        in: 'query',
-        required: false,
-        schema: {
-          type: 'string',
-        },
-      };
-      const options = {};
-
-      const res = getParameterType(param, options);
-
-      expect(res).to.be.equal('string');
-    });
-
-    it('date', async () => {
-      const param: OA3.ParameterObject = {
-        name: 'dateFrom',
-        in: 'query',
-        required: false,
-        schema: {
-          type: 'string',
-          format: 'date-time',
-        },
-      };
-      const options = {};
-
-      const res = getParameterType(param, options);
-
-      expect(res).to.be.equal('Date');
-    });
-
-    it('date with dateFormatter = string', async () => {
-      const param: OA3.ParameterObject = {
-        name: 'dateFrom',
-        in: 'query',
-        required: false,
-        schema: {
-          type: 'string',
-          format: 'date-time',
-        },
-      };
-      const options = { dateFormat: 'string' } as ClientOptions;
-
-      const res = getParameterType(param, options);
-
-      expect(res).to.be.equal('string');
-    });
-
-    it('array > reference', async () => {
-      const param: OA3.ParameterObject = {
-        name: 'items',
-        in: 'query',
-        schema: {
-          type: 'array',
-          items: {
-            $ref: '#/components/schemas/Item',
-          },
-        },
-      };
-      const options = {};
-
-      const res = getParameterType(param, options);
-
-      expect(res).to.be.equal('Item[]');
-    });
   });
 });
 
@@ -193,6 +72,16 @@ describe('getTypeFromSchema', () => {
       { schema: { type: 'array', items: { type: 'number' } }, expected: 'number[]' },
       { schema: { type: 'array', items: { type: 'boolean' } }, expected: 'boolean[]' },
       { schema: { type: 'array', items: { type: 'object' } }, expected: 'unknown[]' },
+      {
+        schema: {
+          type: 'array',
+          items: {
+            enum: ['Admin', 'User', 'Guest'],
+            type: 'string',
+          },
+        },
+        expected: '("Admin" | "User" | "Guest")[]',
+      },
     ];
 
     for (const { schema, expected } of testCases) {
@@ -203,7 +92,7 @@ describe('getTypeFromSchema', () => {
       });
     }
 
-    it('should process array of objects correctly', () => {
+    it('should process array of inline objects correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'array',
         items: {
@@ -221,6 +110,36 @@ describe('getTypeFromSchema', () => {
         name?: string;
         id: number;
       }[]`);
+    });
+
+    it('should process array of arrays correctly', () => {
+      const schema: OA3.SchemaObject = {
+        type: 'array',
+        items: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+      };
+      const res = getTypeFromSchema(schema, opts);
+
+      expect(res).to.equalWI('number[][]');
+    });
+
+    it('should process array of arrays with objects correctly', () => {
+      const schema: OA3.SchemaObject = {
+        type: 'array',
+        items: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/Item',
+          },
+        },
+      };
+      const res = getTypeFromSchema(schema, opts);
+
+      expect(res).to.equalWI('Item[][]');
     });
   });
 
@@ -277,7 +196,7 @@ describe('getTypeFromSchema', () => {
 
   describe('basic types', () => {
     type TestCase = {
-      schema: OA3.SchemaObject;
+      schema: OA3.SchemaObject | OA3.ReferenceObject;
       expected: string;
     };
 
@@ -289,6 +208,9 @@ describe('getTypeFromSchema', () => {
       { schema: { type: 'number' }, expected: 'number' },
       { schema: { type: 'integer' }, expected: 'number' },
       { schema: { type: 'boolean' }, expected: 'boolean' },
+      { schema: { $ref: '' }, expected: '' },
+      { schema: { $ref: '#/components/' }, expected: '' },
+      { schema: { $ref: '#/components/schema/Test' }, expected: 'Test' },
       { schema: null, expected: 'unknown' },
       { schema: undefined, expected: 'unknown' },
       { schema: {}, expected: 'unknown' },
