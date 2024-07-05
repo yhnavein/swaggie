@@ -22,7 +22,7 @@
       method: '<%= it.method %>',
 <% if(it.body) { %>
 <% if(it.body.contentType === 'urlencoded') { %>
-      data: new URLSearchParams(<%= it.body.name %>),
+      data: new URLSearchParams(<%= it.body.name %> as any),
 <% } else { %>
       data: <%= it.body.name %>,
 <% } %>

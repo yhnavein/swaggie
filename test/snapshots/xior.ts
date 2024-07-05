@@ -116,7 +116,7 @@ export const petClient = {
     return http.request<Pet>({
       url: url,
       method: 'PUT',
-      data: new URLSearchParams(body),
+      data: new URLSearchParams(body as any),
       ...$config,
     });
   },
@@ -154,11 +154,11 @@ export const petClient = {
     petId: number ,
     additionalMetadata: string | null | undefined,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<ApiResponse>> {
+  ): Promise<XiorResponse<File>> {
     let url = '/pet/{petId}/uploadImage';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
 
-    return http.request<ApiResponse>({
+    return http.request<File>({
       url: url,
       method: 'POST',
       data: body,

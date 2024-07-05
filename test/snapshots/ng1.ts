@@ -225,7 +225,7 @@ export class petService extends BaseService {
 
     return this.$put(
       url,
-      new URLSearchParams(body),
+      new URLSearchParams(body as any),
       config
     );
   }
@@ -267,7 +267,7 @@ export class petService extends BaseService {
     petId: number ,
     additionalMetadata: string  | null | undefined,
         config?: IRequestShortcutConfig
-  ): IPromise<ApiResponse> {
+  ): IPromise<File> {
     let url = '/pet/{petId}/uploadImage?';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
     if (additionalMetadata !== undefined) {

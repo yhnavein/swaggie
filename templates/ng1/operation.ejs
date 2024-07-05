@@ -32,7 +32,7 @@
       url,
 <% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
   <% if(it.body) { %>
-    <%= it.body.contentType === 'urlencoded' ? 'new URLSearchParams(' + it.body.name + ')' : it.body.name %>,
+    <%= it.body.contentType === 'urlencoded' ? 'new URLSearchParams(' + it.body.name + ' as any)' : it.body.name %>,
   <% } else { %>
     null,
   <% } %>

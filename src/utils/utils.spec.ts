@@ -250,7 +250,7 @@ describe('getBestResponse', () => {
       responses: {},
     };
 
-    const res = getBestResponse(op);
+    const [res] = getBestResponse(op);
 
     expect(res).to.be.equal(null);
   });
@@ -271,7 +271,7 @@ describe('getBestResponse', () => {
       },
     };
 
-    const res = getBestResponse(op);
+    const [res] = getBestResponse(op);
 
     expect(res).to.be.eql({
       schema: {
@@ -280,25 +280,36 @@ describe('getBestResponse', () => {
     });
   });
 
-  it('handles 201 response with unsupported media type', () => {
-    const op: OA3.OperationObject = {
-      responses: {
-        '201': {
-          description: 'Success',
-          content: {
-            'application/octet-stream': {
-              schema: {
-                $ref: '#/components/schemas/TestObject',
+  describe('different response content types', () => {
+    const sampleSchema = { $ref: '#/components/schemas/TestObject' };
+    const testCases = [
+      { contentType: 'application/json', schema: sampleSchema, expected: 'json' },
+      { contentType: 'text/json', schema: sampleSchema, expected: 'json' },
+      { contentType: 'application/octet-stream', schema: sampleSchema, expected: 'binary' },
+      { contentType: 'text/plain', schema: sampleSchema, expected: 'text' },
+      { contentType: 'something/wrong', schema: sampleSchema, expected: 'json' },
+    ];
+
+    for (const { contentType, schema, expected } of testCases) {
+      it(`handles 201 ${contentType} response`, () => {
+        const op: OA3.OperationObject = {
+          responses: {
+            '201': {
+              description: 'Success',
+              content: {
+                [contentType]: {
+                  schema,
+                },
               },
             },
           },
-        },
-      },
-    };
+        };
 
-    const res = getBestResponse(op);
+        const [, respContentType] = getBestResponse(op);
 
-    expect(res).to.be.eql(null);
+        expect(respContentType).to.deep.equal(expected);
+      });
+    }
   });
 
   it('handles multiple responses', () => {
@@ -327,7 +338,7 @@ describe('getBestResponse', () => {
       },
     };
 
-    const res = getBestResponse(op);
+    const [res] = getBestResponse(op);
 
     expect(res).to.be.eql({
       schema: {

@@ -298,9 +298,10 @@ paths:
         '200':
           description: successful operation
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                type: string
+                format: binary
       security:
         - petstore_auth:
             - 'write:pets'

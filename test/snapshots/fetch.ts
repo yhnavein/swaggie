@@ -20,13 +20,14 @@ export const petClient = {
   addPet(body: Pet ,
     $config?: RequestInit
   ): Promise<Pet> {
-    let url = defaults.baseUrl + '/pet?';
+    let url = `${defaults.baseUrl}/pet?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<Pet>);
+    })
+    .then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -37,8 +38,8 @@ export const petClient = {
     petId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    let url = `${defaults.baseUrl}/pet/{petId}?`;
+    url = url.replace('{petId}', encodeURIComponent(petId));
 
     return fetch(url, {
       method: 'DELETE',
@@ -46,7 +47,8 @@ export const petClient = {
         'api_key': apiKey,
       },
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
@@ -55,7 +57,7 @@ export const petClient = {
   findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
     $config?: RequestInit
   ): Promise<Pet[]> {
-    let url = defaults.baseUrl + '/pet/findByStatus?';
+    let url = `${defaults.baseUrl}/pet/findByStatus?`;
     if (status !== undefined) {
       url += 'status=' + serializeQueryParam(status) + "&";
     }
@@ -63,7 +65,8 @@ export const petClient = {
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Pet[]>);
+    })
+    .then((response) => response.json() as Promise<Pet[]>);
   },
 
   /**
@@ -72,7 +75,7 @@ export const petClient = {
   findPetsByTags(tags: string[] | null | undefined,
     $config?: RequestInit
   ): Promise<Pet[]> {
-    let url = defaults.baseUrl + '/pet/findByTags?';
+    let url = `${defaults.baseUrl}/pet/findByTags?`;
     if (tags !== undefined) {
       url += 'tags=' + serializeQueryParam(tags) + "&";
     }
@@ -80,7 +83,8 @@ export const petClient = {
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Pet[]>);
+    })
+    .then((response) => response.json() as Promise<Pet[]>);
   },
 
   /**
@@ -89,13 +93,14 @@ export const petClient = {
   getPetById(petId: number ,
     $config?: RequestInit
   ): Promise<Pet> {
-    let url = defaults.baseUrl + '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    let url = `${defaults.baseUrl}/pet/{petId}?`;
+    url = url.replace('{petId}', encodeURIComponent(petId));
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Pet>);
+    })
+    .then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -104,13 +109,14 @@ export const petClient = {
   updatePet(body: Pet ,
     $config?: RequestInit
   ): Promise<Pet> {
-    let url = defaults.baseUrl + '/pet?';
+    let url = `${defaults.baseUrl}/pet?`;
 
     return fetch(url, {
       method: 'PUT',
-      body: new URLSearchParams(body),
+      body: new URLSearchParams(body as any),
       ...$config,
-    }).then((response) => response.json() as Promise<Pet>);
+    })
+    .then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -123,8 +129,8 @@ export const petClient = {
     status: string | null | undefined,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    let url = `${defaults.baseUrl}/pet/{petId}?`;
+    url = url.replace('{petId}', encodeURIComponent(petId));
     if (name !== undefined) {
       url += 'name=' + serializeQueryParam(name) + "&";
     }
@@ -135,7 +141,8 @@ export const petClient = {
     return fetch(url, {
       method: 'POST',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
@@ -147,9 +154,9 @@ export const petClient = {
     petId: number ,
     additionalMetadata: string | null | undefined,
     $config?: RequestInit
-  ): Promise<ApiResponse> {
-    let url = defaults.baseUrl + '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+  ): Promise<File> {
+    let url = `${defaults.baseUrl}/pet/{petId}/uploadImage?`;
+    url = url.replace('{petId}', encodeURIComponent(petId));
     if (additionalMetadata !== undefined) {
       url += 'additionalMetadata=' + serializeQueryParam(additionalMetadata) + "&";
     }
@@ -158,7 +165,8 @@ export const petClient = {
       method: 'POST',
       body: body,
       ...$config,
-    }).then((response) => response.json() as Promise<ApiResponse>);
+    })
+    .then((response) => response.blob() as Promise<File>);
   },
 
 };
@@ -169,25 +177,27 @@ export const storeClient = {
   deleteOrder(orderId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    let url = `${defaults.baseUrl}/store/order/{orderId}?`;
+    url = url.replace('{orderId}', encodeURIComponent(orderId));
 
     return fetch(url, {
       method: 'DELETE',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
    */
   getInventory($config?: RequestInit
   ): Promise<{ [key: string]: number }> {
-    let url = defaults.baseUrl + '/store/inventory?';
+    let url = `${defaults.baseUrl}/store/inventory?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<{ [key: string]: number }>);
+    })
+    .then((response) => response.json() as Promise<{ [key: string]: number }>);
   },
 
   /**
@@ -196,13 +206,14 @@ export const storeClient = {
   getOrderById(orderId: number ,
     $config?: RequestInit
   ): Promise<Order> {
-    let url = defaults.baseUrl + '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    let url = `${defaults.baseUrl}/store/order/{orderId}?`;
+    url = url.replace('{orderId}', encodeURIComponent(orderId));
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Order>);
+    })
+    .then((response) => response.json() as Promise<Order>);
   },
 
   /**
@@ -211,13 +222,14 @@ export const storeClient = {
   placeOrder(body: Order | null | undefined,
     $config?: RequestInit
   ): Promise<Order> {
-    let url = defaults.baseUrl + '/store/order?';
+    let url = `${defaults.baseUrl}/store/order?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<Order>);
+    })
+    .then((response) => response.json() as Promise<Order>);
   },
 
 };
@@ -228,13 +240,14 @@ export const userClient = {
   createUser(body: User | null | undefined,
     $config?: RequestInit
   ): Promise<User> {
-    let url = defaults.baseUrl + '/user?';
+    let url = `${defaults.baseUrl}/user?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<User>);
+    })
+    .then((response) => response.json() as Promise<User>);
   },
 
   /**
@@ -243,13 +256,14 @@ export const userClient = {
   createUsersWithListInput(body: User[] | null | undefined,
     $config?: RequestInit
   ): Promise<User> {
-    let url = defaults.baseUrl + '/user/createWithList?';
+    let url = `${defaults.baseUrl}/user/createWithList?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<User>);
+    })
+    .then((response) => response.json() as Promise<User>);
   },
 
   /**
@@ -258,13 +272,14 @@ export const userClient = {
   deleteUser(username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    let url = `${defaults.baseUrl}/user/{username}?`;
+    url = url.replace('{username}', encodeURIComponent(username));
 
     return fetch(url, {
       method: 'DELETE',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
@@ -273,13 +288,14 @@ export const userClient = {
   getUserByName(username: string ,
     $config?: RequestInit
   ): Promise<User> {
-    let url = defaults.baseUrl + '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    let url = `${defaults.baseUrl}/user/{username}?`;
+    url = url.replace('{username}', encodeURIComponent(username));
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<User>);
+    })
+    .then((response) => response.json() as Promise<User>);
   },
 
   /**
@@ -290,7 +306,7 @@ export const userClient = {
     password: string | null | undefined,
     $config?: RequestInit
   ): Promise<string> {
-    let url = defaults.baseUrl + '/user/login?';
+    let url = `${defaults.baseUrl}/user/login?`;
     if (username !== undefined) {
       url += 'username=' + serializeQueryParam(username) + "&";
     }
@@ -301,19 +317,21 @@ export const userClient = {
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<string>);
+    })
+    .then((response) => response.json() as Promise<string>);
   },
 
   /**
    */
   logoutUser($config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/logout?';
+    let url = `${defaults.baseUrl}/user/logout?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
@@ -324,14 +342,15 @@ export const userClient = {
     username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    let url = `${defaults.baseUrl}/user/{username}?`;
+    url = url.replace('{username}', encodeURIComponent(username));
 
     return fetch(url, {
       method: 'PUT',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
 };

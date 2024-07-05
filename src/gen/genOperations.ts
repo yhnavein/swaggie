@@ -2,7 +2,14 @@ import { camel } from 'case';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getParameterType } from '../swagger';
-import { groupOperationsByGroupName, getBestResponse, orderBy, renderFile } from '../utils';
+import {
+  groupOperationsByGroupName,
+  getBestResponse,
+  orderBy,
+  renderFile,
+  type MyContentType,
+  getBestContentType,
+} from '../utils';
 import { generateBarrelFile } from './createBarrel';
 import type { ApiOperation, ClientOptions } from '../types';
 import { escapeReservedWords } from '../utils';
@@ -62,8 +69,8 @@ export function prepareOperations(
   const ops = fixDuplicateOperations(operations);
 
   return ops.map((op) => {
-    const responseObject = getBestResponse(op);
-    const returnType = getParameterType(responseObject, options);
+    const [respObject, responseContentType] = getBestResponse(op);
+    const returnType = getParameterType(respObject, options);
 
     const body = getRequestBody(op.requestBody);
     const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
@@ -80,6 +87,7 @@ export function prepareOperations(
 
     return {
       returnType,
+      responseContentType,
       method: op.method.toUpperCase(),
       name: getOperationName(op.operationId, op.group),
       url: op.path,
@@ -186,44 +194,6 @@ function getRequestBody(reqBody: OA3.ReferenceObject | OA3.RequestBodyObject): I
   return null;
 }
 
-const orderedContentTypes = [
-  'application/json',
-  'text/json',
-  'text/plain',
-  'application/x-www-form-urlencoded',
-  'multipart/form-data',
-];
-function getBestContentType(reqBody: OA3.RequestBodyObject): [OA3.MediaTypeObject, MyContentType] {
-  const contentTypes = Object.keys(reqBody.content);
-  if (contentTypes.length === 0) {
-    return [null, null];
-  }
-
-  const firstContentType = orderedContentTypes.find((ct) => contentTypes.includes(ct));
-  if (firstContentType) {
-    const typeObject = reqBody.content[firstContentType];
-    const type = getContentType(firstContentType);
-    return [typeObject, type];
-  }
-
-  const typeObject = reqBody.content[contentTypes[0]];
-  const type = getContentType(contentTypes[0]);
-  return [typeObject, type];
-}
-
-function getContentType(type: string) {
-  if (type === 'application/x-www-form-urlencoded') {
-    return 'urlencoded';
-  }
-  if (type === 'multipart/form-data') {
-    return 'form-data';
-  }
-  if (type === 'application/octet-stream') {
-    return 'binary';
-  }
-  return 'json';
-}
-
 interface ClientData {
   clientName: string;
   camelCaseName: string;
@@ -233,6 +203,7 @@ interface ClientData {
 
 interface IOperation {
   returnType: string;
+  responseContentType: string;
   method: string;
   name: string;
   url: string;
@@ -254,4 +225,3 @@ interface IOperationParam {
 interface IBodyParam extends IOperationParam {
   contentType?: MyContentType;
 }
-type MyContentType = 'json' | 'urlencoded' | 'form-data' | 'binary';

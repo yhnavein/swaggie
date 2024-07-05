@@ -9,10 +9,10 @@
     <% }); %>
 $config?: RequestInit
   ): Promise<<%~ it.returnType %>> {
-    let url = defaults.baseUrl + '<%= it.url %>?';
+    let url = `${defaults.baseUrl}<%= it.url %>?`;
 <% if(it.pathParams && it.pathParams.length > 0) {
   it.pathParams.forEach((parameter) => { %>
-    url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
+    url = url.replace('{<%= parameter.name %>}', encodeURIComponent(<%= parameter.name %>));
 <% });
 } %>
 <% if(it.query && it.query.length > 0) { %>
@@ -33,7 +33,7 @@ $config?: RequestInit
 <% if(it.body.contentType === 'binary') { %>
       body: <%= it.body.name %>,
 <% } else if(it.body.contentType === 'urlencoded') { %>
-      body: new URLSearchParams(<%= it.body.name %>),
+      body: new URLSearchParams(<%= it.body.name %> as any),
 <% } else { %>
       body: JSON.stringify(<%= it.body.name %>),
 <% } %>
@@ -46,5 +46,12 @@ $config?: RequestInit
   },
 <% } %>
       ...$config,
-    }).then((response) => response.json() as Promise<<%~ it.returnType %>>);
+    })
+<% if(it.responseContentType === 'binary') { %>
+    .then((response) => response.blob() as Promise<<%~ it.returnType %>>);
+<% } else if(it.responseContentType === 'text') { %>
+    .then((response) => response.text() as Promise<<%~ it.returnType %>>);
+<% } else { %>
+    .then((response) => response.json() as Promise<<%~ it.returnType %>>);
+<% } %>
   },

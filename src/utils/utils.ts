@@ -109,21 +109,16 @@ export function groupOperationsByGroupName(operations: ApiOperation[]) {
  * Other media types are not supported at this time.
  * @returns Response or reference of the success response
  */
-export function getBestResponse(op: OA3.OperationObject) {
+export function getBestResponse(op: OA3.OperationObject): [OA3.MediaTypeObject, MyContentType] {
   const NOT_FOUND = 100000;
   const lowestCode = Object.keys(op.responses).sort().shift() ?? NOT_FOUND;
 
   const resp = lowestCode === NOT_FOUND ? op.responses[0] : op.responses[lowestCode.toString()];
 
   if (resp && 'content' in resp) {
-    return (
-      resp.content['application/json'] ??
-      resp.content['text/json'] ??
-      resp.content['text/plain'] ??
-      null
-    );
+    return getBestContentType(resp);
   }
-  return null;
+  return [null, null];
 }
 
 /** This method tries to fix potentially wrong out parameter given from commandline */
@@ -150,3 +145,48 @@ export function orderBy<T>(arr: T[] | null | undefined, key: string) {
 }
 
 const sortByKey = (key: string) => (a, b) => a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0;
+
+const orderedContentTypes = [
+  'application/json',
+  'text/json',
+  'text/plain',
+  'application/x-www-form-urlencoded',
+  'multipart/form-data',
+];
+export function getBestContentType(
+  reqBody: OA3.RequestBodyObject | OA3.ResponseObject
+): [OA3.MediaTypeObject, MyContentType] {
+  const contentTypes = Object.keys(reqBody.content);
+  if (contentTypes.length === 0) {
+    return [null, null];
+  }
+
+  const firstContentType = orderedContentTypes.find((ct) => contentTypes.includes(ct));
+  if (firstContentType) {
+    const typeObject = reqBody.content[firstContentType];
+    const type = getContentType(firstContentType);
+    return [typeObject, type];
+  }
+
+  const typeObject = reqBody.content[contentTypes[0]];
+  const type = getContentType(contentTypes[0]);
+  return [typeObject, type];
+}
+
+function getContentType(type: string) {
+  if (type === 'application/x-www-form-urlencoded') {
+    return 'urlencoded';
+  }
+  if (type === 'multipart/form-data') {
+    return 'form-data';
+  }
+  if (type === 'application/octet-stream') {
+    return 'binary';
+  }
+  if (type === 'text/plain') {
+    return 'text';
+  }
+  return 'json';
+}
+
+export type MyContentType = 'json' | 'urlencoded' | 'form-data' | 'binary' | 'text';

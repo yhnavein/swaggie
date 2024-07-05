@@ -116,7 +116,7 @@ export const petClient = {
     return axios.request<Pet>({
       url: url,
       method: 'PUT',
-      data: new URLSearchParams(body),
+      data: new URLSearchParams(body as any),
       ...$config,
     });
   },
@@ -154,11 +154,11 @@ export const petClient = {
     petId: number ,
     additionalMetadata: string | null | undefined,
     $config?: AxiosRequestConfig
-  ): AxiosPromise<ApiResponse> {
+  ): AxiosPromise<File> {
     let url = '/pet/{petId}/uploadImage';
     url = url.replace('{petId}', encodeURIComponent("" + petId));
 
-    return axios.request<ApiResponse>({
+    return axios.request<File>({
       url: url,
       method: 'POST',
       data: body,
