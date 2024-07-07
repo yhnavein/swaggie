@@ -38,8 +38,7 @@ export const petClient = {
     petId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = `${defaults.baseUrl}/pet/{petId}?`;
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return fetch(url, {
       method: 'DELETE',
@@ -93,8 +92,7 @@ export const petClient = {
   getPetById(petId: number ,
     $config?: RequestInit
   ): Promise<Pet> {
-    let url = `${defaults.baseUrl}/pet/{petId}?`;
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return fetch(url, {
       method: 'GET',
@@ -129,8 +127,7 @@ export const petClient = {
     status: string | null | undefined,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = `${defaults.baseUrl}/pet/{petId}?`;
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
     if (name !== undefined) {
       url += `name=${serializeQueryParam(name)}&`;
     }
@@ -155,8 +152,7 @@ export const petClient = {
     additionalMetadata: string | null | undefined,
     $config?: RequestInit
   ): Promise<File> {
-    let url = `${defaults.baseUrl}/pet/{petId}/uploadImage?`;
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}/uploadImage?`;
     if (additionalMetadata !== undefined) {
       url += `additionalMetadata=${serializeQueryParam(additionalMetadata)}&`;
     }
@@ -177,8 +173,7 @@ export const storeClient = {
   deleteOrder(orderId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = `${defaults.baseUrl}/store/order/{orderId}?`;
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    let url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return fetch(url, {
       method: 'DELETE',
@@ -206,8 +201,7 @@ export const storeClient = {
   getOrderById(orderId: number ,
     $config?: RequestInit
   ): Promise<Order> {
-    let url = `${defaults.baseUrl}/store/order/{orderId}?`;
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    let url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return fetch(url, {
       method: 'GET',
@@ -272,8 +266,7 @@ export const userClient = {
   deleteUser(username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = `${defaults.baseUrl}/user/{username}?`;
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
 
     return fetch(url, {
       method: 'DELETE',
@@ -288,8 +281,7 @@ export const userClient = {
   getUserByName(username: string ,
     $config?: RequestInit
   ): Promise<User> {
-    let url = `${defaults.baseUrl}/user/{username}?`;
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
 
     return fetch(url, {
       method: 'GET',
@@ -342,8 +334,7 @@ export const userClient = {
     username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = `${defaults.baseUrl}/user/{username}?`;
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
 
     return fetch(url, {
       method: 'PUT',

@@ -10,12 +10,7 @@
     <% }); %>
     config?: IRequestShortcutConfig
   ): IPromise<<%~ it.returnType %>> {
-    let url = '<%= it.url %>?';
-<% if(it.pathParams && it.pathParams.length > 0) {
-  it.pathParams.forEach((parameter) => { %>
-    url = url.replace('{<%= parameter.name %>}', encodeURIComponent(`${<%= parameter.name %>}`));
-<% });
-} %>
+    let url = `<%= it.url %>?`;
 <% if(it.query && it.query.length > 0) { %>
   <% it.query.forEach((parameter) => { %>
   if (<%= parameter.name %> !== undefined) {

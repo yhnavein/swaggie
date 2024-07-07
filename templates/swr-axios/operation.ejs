@@ -9,13 +9,7 @@
     <% }); %>
   $config?: AxiosRequestConfig
   ): AxiosPromise<<%~ it.returnType %>> {
-    let url = '<%= it.url %>';
-
-<% if(it.pathParams && it.pathParams.length > 0) {
-  it.pathParams.forEach((parameter) => { %>
-    url = url.replace('{<%= parameter.name %>}', encodeURIComponent(`${<%= parameter.name %>}`));
-<% });
-} %>
+    const url = `<%= it.url %>`;
 
     return axios.request<<%~ it.returnType %>>({
       url: url,

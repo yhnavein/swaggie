@@ -22,7 +22,7 @@ export const petClient = {
   addPet(body: Pet ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet>> {
-    let url = '/pet';
+    const url = `/pet`;
 
     return http.request<Pet>({
       url: url,
@@ -40,8 +40,7 @@ export const petClient = {
     petId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -59,7 +58,7 @@ export const petClient = {
   findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
-    let url = '/pet/findByStatus';
+    const url = `/pet/findByStatus`;
 
     return http.request<Pet[]>({
       url: url,
@@ -77,7 +76,7 @@ export const petClient = {
   findPetsByTags(tags: string[] | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
-    let url = '/pet/findByTags';
+    const url = `/pet/findByTags`;
 
     return http.request<Pet[]>({
       url: url,
@@ -95,8 +94,7 @@ export const petClient = {
   getPetById(petId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet>> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<Pet>({
       url: url,
@@ -111,7 +109,7 @@ export const petClient = {
   updatePet(body: Pet ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet>> {
-    let url = '/pet';
+    const url = `/pet`;
 
     return http.request<Pet>({
       url: url,
@@ -131,8 +129,7 @@ export const petClient = {
     status: string | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -155,8 +152,7 @@ export const petClient = {
     additionalMetadata: string | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<File>> {
-    let url = '/pet/{petId}/uploadImage';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
     return http.request<File>({
       url: url,
@@ -178,8 +174,7 @@ export const storeClient = {
   deleteOrder(orderId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -192,7 +187,7 @@ export const storeClient = {
    */
   getInventory($config?: XiorRequestConfig
   ): Promise<XiorResponse<{ [key: string]: number }>> {
-    let url = '/store/inventory';
+    const url = `/store/inventory`;
 
     return http.request<{ [key: string]: number }>({
       url: url,
@@ -207,8 +202,7 @@ export const storeClient = {
   getOrderById(orderId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
-    let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return http.request<Order>({
       url: url,
@@ -223,7 +217,7 @@ export const storeClient = {
   placeOrder(body: Order | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
-    let url = '/store/order';
+    const url = `/store/order`;
 
     return http.request<Order>({
       url: url,
@@ -242,7 +236,7 @@ export const userClient = {
   createUser(body: User | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
-    let url = '/user';
+    const url = `/user`;
 
     return http.request<User>({
       url: url,
@@ -258,7 +252,7 @@ export const userClient = {
   createUsersWithListInput(body: User[] | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
-    let url = '/user/createWithList';
+    const url = `/user/createWithList`;
 
     return http.request<User>({
       url: url,
@@ -274,8 +268,7 @@ export const userClient = {
   deleteUser(username: string ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -290,8 +283,7 @@ export const userClient = {
   getUserByName(username: string ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<User>({
       url: url,
@@ -308,7 +300,7 @@ export const userClient = {
     password: string | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<string>> {
-    let url = '/user/login';
+    const url = `/user/login`;
 
     return http.request<string>({
       url: url,
@@ -325,7 +317,7 @@ export const userClient = {
    */
   logoutUser($config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/user/logout';
+    const url = `/user/logout`;
 
     return http.request<unknown>({
       url: url,
@@ -342,8 +334,7 @@ export const userClient = {
     username: string ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -361,7 +352,7 @@ function serializeQueryParam(obj: any) {
   if (obj instanceof Date) return obj.toJSON();
   if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
   return Object.keys(obj)
-    .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
+    .reduce((a: any, b) => a.push(`${b}=${obj[b]}`) && a, [])
     .join('&');
 }
 

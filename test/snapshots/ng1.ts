@@ -135,7 +135,7 @@ export class petService extends BaseService {
   addPet(body: Pet ,
         config?: IRequestShortcutConfig
   ): IPromise<Pet> {
-    let url = '/pet?';
+    let url = `/pet?`;
 
     return this.$post(
       url,
@@ -153,8 +153,7 @@ export class petService extends BaseService {
     petId: number ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$delete(
       url,
@@ -169,7 +168,7 @@ export class petService extends BaseService {
   findPetsByStatus(status: ("available" | "pending" | "sold")  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
-    let url = '/pet/findByStatus?';
+    let url = `/pet/findByStatus?`;
     if (status !== undefined) {
       url += serializeQueryParam(status, 'status') + "&";
     }
@@ -187,7 +186,7 @@ export class petService extends BaseService {
   findPetsByTags(tags: string[]  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
-    let url = '/pet/findByTags?';
+    let url = `/pet/findByTags?`;
     if (tags !== undefined) {
       url += serializeQueryParam(tags, 'tags') + "&";
     }
@@ -205,8 +204,7 @@ export class petService extends BaseService {
   getPetById(petId: number ,
         config?: IRequestShortcutConfig
   ): IPromise<Pet> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$get(
       url,
@@ -221,7 +219,7 @@ export class petService extends BaseService {
   updatePet(body: Pet ,
         config?: IRequestShortcutConfig
   ): IPromise<Pet> {
-    let url = '/pet?';
+    let url = `/pet?`;
 
     return this.$put(
       url,
@@ -241,8 +239,7 @@ export class petService extends BaseService {
     status: string  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
     if (name !== undefined) {
       url += serializeQueryParam(name, 'name') + "&";
     }
@@ -268,8 +265,7 @@ export class petService extends BaseService {
     additionalMetadata: string  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<File> {
-    let url = '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?`;
     if (additionalMetadata !== undefined) {
       url += serializeQueryParam(additionalMetadata, 'additionalMetadata') + "&";
     }
@@ -296,8 +292,7 @@ export class storeService extends BaseService {
   deleteOrder(orderId: number ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
-    let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    let url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$delete(
       url,
@@ -310,7 +305,7 @@ export class storeService extends BaseService {
    */
   getInventory(    config?: IRequestShortcutConfig
   ): IPromise<{ [key: string]: number }> {
-    let url = '/store/inventory?';
+    let url = `/store/inventory?`;
 
     return this.$get(
       url,
@@ -325,8 +320,7 @@ export class storeService extends BaseService {
   getOrderById(orderId: number ,
         config?: IRequestShortcutConfig
   ): IPromise<Order> {
-    let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    let url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$get(
       url,
@@ -341,7 +335,7 @@ export class storeService extends BaseService {
   placeOrder(body: Order  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<Order> {
-    let url = '/store/order?';
+    let url = `/store/order?`;
 
     return this.$post(
       url,
@@ -365,7 +359,7 @@ export class userService extends BaseService {
   createUser(body: User  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<User> {
-    let url = '/user?';
+    let url = `/user?`;
 
     return this.$post(
       url,
@@ -381,7 +375,7 @@ export class userService extends BaseService {
   createUsersWithListInput(body: User[]  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<User> {
-    let url = '/user/createWithList?';
+    let url = `/user/createWithList?`;
 
     return this.$post(
       url,
@@ -397,8 +391,7 @@ export class userService extends BaseService {
   deleteUser(username: string ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$delete(
       url,
@@ -413,8 +406,7 @@ export class userService extends BaseService {
   getUserByName(username: string ,
         config?: IRequestShortcutConfig
   ): IPromise<User> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$get(
       url,
@@ -431,7 +423,7 @@ export class userService extends BaseService {
     password: string  | null | undefined,
         config?: IRequestShortcutConfig
   ): IPromise<string> {
-    let url = '/user/login?';
+    let url = `/user/login?`;
     if (username !== undefined) {
       url += serializeQueryParam(username, 'username') + "&";
     }
@@ -450,7 +442,7 @@ export class userService extends BaseService {
    */
   logoutUser(    config?: IRequestShortcutConfig
   ): IPromise<unknown> {
-    let url = '/user/logout?';
+    let url = `/user/logout?`;
 
     return this.$get(
       url,
@@ -467,8 +459,7 @@ export class userService extends BaseService {
     username: string ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$put(
       url,

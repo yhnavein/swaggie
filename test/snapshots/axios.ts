@@ -22,7 +22,7 @@ export const petClient = {
   addPet(body: Pet ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
-    let url = '/pet';
+    const url = `/pet`;
 
     return axios.request<Pet>({
       url: url,
@@ -40,8 +40,7 @@ export const petClient = {
     petId: number ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -59,7 +58,7 @@ export const petClient = {
   findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
-    let url = '/pet/findByStatus';
+    const url = `/pet/findByStatus`;
 
     return axios.request<Pet[]>({
       url: url,
@@ -77,7 +76,7 @@ export const petClient = {
   findPetsByTags(tags: string[] | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
-    let url = '/pet/findByTags';
+    const url = `/pet/findByTags`;
 
     return axios.request<Pet[]>({
       url: url,
@@ -95,8 +94,7 @@ export const petClient = {
   getPetById(petId: number ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<Pet>({
       url: url,
@@ -111,7 +109,7 @@ export const petClient = {
   updatePet(body: Pet ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
-    let url = '/pet';
+    const url = `/pet`;
 
     return axios.request<Pet>({
       url: url,
@@ -131,8 +129,7 @@ export const petClient = {
     status: string | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -155,8 +152,7 @@ export const petClient = {
     additionalMetadata: string | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<File> {
-    let url = '/pet/{petId}/uploadImage';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
     return axios.request<File>({
       url: url,
@@ -178,8 +174,7 @@ export const storeClient = {
   deleteOrder(orderId: number ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -192,7 +187,7 @@ export const storeClient = {
    */
   getInventory($config?: AxiosRequestConfig
   ): AxiosPromise<{ [key: string]: number }> {
-    let url = '/store/inventory';
+    const url = `/store/inventory`;
 
     return axios.request<{ [key: string]: number }>({
       url: url,
@@ -207,8 +202,7 @@ export const storeClient = {
   getOrderById(orderId: number ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
-    let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return axios.request<Order>({
       url: url,
@@ -223,7 +217,7 @@ export const storeClient = {
   placeOrder(body: Order | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
-    let url = '/store/order';
+    const url = `/store/order`;
 
     return axios.request<Order>({
       url: url,
@@ -242,7 +236,7 @@ export const userClient = {
   createUser(body: User | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
-    let url = '/user';
+    const url = `/user`;
 
     return axios.request<User>({
       url: url,
@@ -258,7 +252,7 @@ export const userClient = {
   createUsersWithListInput(body: User[] | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
-    let url = '/user/createWithList';
+    const url = `/user/createWithList`;
 
     return axios.request<User>({
       url: url,
@@ -274,8 +268,7 @@ export const userClient = {
   deleteUser(username: string ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -290,8 +283,7 @@ export const userClient = {
   getUserByName(username: string ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return axios.request<User>({
       url: url,
@@ -308,7 +300,7 @@ export const userClient = {
     password: string | null | undefined,
     $config?: AxiosRequestConfig
   ): AxiosPromise<string> {
-    let url = '/user/login';
+    const url = `/user/login`;
 
     return axios.request<string>({
       url: url,
@@ -325,7 +317,7 @@ export const userClient = {
    */
   logoutUser($config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/user/logout';
+    const url = `/user/logout`;
 
     return axios.request<unknown>({
       url: url,
@@ -342,8 +334,7 @@ export const userClient = {
     username: string ,
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return axios.request<unknown>({
       url: url,

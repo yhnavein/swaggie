@@ -69,13 +69,6 @@ describe('prepareOperations', () => {
         optional: true,
       });
 
-      expect(res.pathParams.pop()).to.deep.include({
-        name: 'petId',
-        originalName: 'petId',
-        type: 'number',
-        optional: true,
-      });
-
       expect(res.parameters.length).to.equal(3);
       expect(res.parameters.map((p) => p.name)).to.deep.equal(['orgID', 'orgType', 'petId']);
     });
@@ -103,6 +96,40 @@ describe('prepareOperations', () => {
 
       expect(op1.parameters).to.deep.equal([]);
       expect(op2.parameters).to.deep.equal([]);
+    });
+
+    it('should prepare URL correctly', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'get1',
+          method: 'get',
+          path: '/pet/{petId}',
+          responses: {},
+          group: null,
+        },
+        {
+          operationId: 'get2',
+          method: 'get',
+          path: '/users/{userId}/Wrong{/Path}',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+        {
+          operationId: 'get3',
+          method: 'get',
+          path: '/users/{}/Wrong{',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [op1, op2, op3] = prepareOperations(ops, opts);
+
+      expect(op1.url).to.equal('/pet/${encodeURIComponent(`${petId}`)}');
+      expect(op2.url).to.equal('/users/${encodeURIComponent(`${userId}`)}/Wrong{/Path}');
+      expect(op3.url).to.equal('/users/{}/Wrong{');
     });
 
     describe('requestBody (JSON)', () => {

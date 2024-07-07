@@ -83,7 +83,7 @@ export class petService extends BaseService {
     body: Pet,
     config?: any
   ): Observable<Pet> {
-    let url = '/pet?';
+    let url = `/pet?`;
 
     return this.$post(
       url,
@@ -102,8 +102,7 @@ export class petService extends BaseService {
     petId: number,
     config?: any
   ): Observable<unknown> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$delete(
       url,
@@ -119,7 +118,7 @@ export class petService extends BaseService {
     status: ("available" | "pending" | "sold") | null | undefined,
     config?: any
   ): Observable<Pet[]> {
-    let url = '/pet/findByStatus?';
+    let url = `/pet/findByStatus?`;
     if (status !== undefined && status !== null) {
       url += `status=${encodeURIComponent(`${status}`)}&`;
     }
@@ -138,7 +137,7 @@ export class petService extends BaseService {
     tags: string[] | null | undefined,
     config?: any
   ): Observable<Pet[]> {
-    let url = '/pet/findByTags?';
+    let url = `/pet/findByTags?`;
     if (tags !== undefined && tags !== null) {
       url += `tags=${encodeURIComponent(`${tags}`)}&`;
     }
@@ -157,8 +156,7 @@ export class petService extends BaseService {
     petId: number,
     config?: any
   ): Observable<Pet> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$get(
       url,
@@ -174,7 +172,7 @@ export class petService extends BaseService {
     body: Pet,
     config?: any
   ): Observable<Pet> {
-    let url = '/pet?';
+    let url = `/pet?`;
 
     return this.$put(
       url,
@@ -195,8 +193,7 @@ export class petService extends BaseService {
     status: string | null | undefined,
     config?: any
   ): Observable<unknown> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
     if (name !== undefined && name !== null) {
       url += `name=${encodeURIComponent(`${name}`)}&`;
     }
@@ -223,8 +220,7 @@ export class petService extends BaseService {
     additionalMetadata: string | null | undefined,
     config?: any
   ): Observable<File> {
-    let url = '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?`;
     if (additionalMetadata !== undefined && additionalMetadata !== null) {
       url += `additionalMetadata=${encodeURIComponent(`${additionalMetadata}`)}&`;
     }
@@ -257,8 +253,7 @@ export class storeService extends BaseService {
     orderId: number,
     config?: any
   ): Observable<unknown> {
-    let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    let url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$delete(
       url,
@@ -272,7 +267,7 @@ export class storeService extends BaseService {
   getInventory(
     config?: any
   ): Observable<{ [key: string]: number }> {
-    let url = '/store/inventory?';
+    let url = `/store/inventory?`;
 
     return this.$get(
       url,
@@ -288,8 +283,7 @@ export class storeService extends BaseService {
     orderId: number,
     config?: any
   ): Observable<Order> {
-    let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
+    let url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$get(
       url,
@@ -305,7 +299,7 @@ export class storeService extends BaseService {
     body: Order | null | undefined,
     config?: any
   ): Observable<Order> {
-    let url = '/store/order?';
+    let url = `/store/order?`;
 
     return this.$post(
       url,
@@ -335,7 +329,7 @@ export class userService extends BaseService {
     body: User | null | undefined,
     config?: any
   ): Observable<User> {
-    let url = '/user?';
+    let url = `/user?`;
 
     return this.$post(
       url,
@@ -352,7 +346,7 @@ export class userService extends BaseService {
     body: User[] | null | undefined,
     config?: any
   ): Observable<User> {
-    let url = '/user/createWithList?';
+    let url = `/user/createWithList?`;
 
     return this.$post(
       url,
@@ -369,8 +363,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<unknown> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$delete(
       url,
@@ -386,8 +379,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<User> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$get(
       url,
@@ -405,7 +397,7 @@ export class userService extends BaseService {
     password: string | null | undefined,
     config?: any
   ): Observable<string> {
-    let url = '/user/login?';
+    let url = `/user/login?`;
     if (username !== undefined && username !== null) {
       url += `username=${encodeURIComponent(`${username}`)}&`;
     }
@@ -425,7 +417,7 @@ export class userService extends BaseService {
   logoutUser(
     config?: any
   ): Observable<unknown> {
-    let url = '/user/logout?';
+    let url = `/user/logout?`;
 
     return this.$get(
       url,
@@ -443,8 +435,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<unknown> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent(`${username}`));
+    let url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$put(
       url,

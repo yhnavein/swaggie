@@ -90,14 +90,26 @@ export function prepareOperations(
       responseContentType,
       method: op.method.toUpperCase(),
       name: getOperationName(op.operationId, op.group),
-      url: op.path,
+      url: prepareUrl(op.path),
       parameters: params,
       query: queryParams,
-      pathParams: getParams(op.parameters as OA3.ParameterObject[], options, ['path']),
       body,
       headers: getParams(op.parameters as OA3.ParameterObject[], options, ['header']),
     };
   });
+}
+
+/**
+ * This function will replace path template expressions with ${encodeURIComponent('paramName')} placeholders
+ * The end result will be a string that is effectively a template (i.e. you should wrap end result with backticks)
+ * This method is not really safe, but it will point out the potential issues with the path template expressions
+ * So that the developer can see actual problem in the compiled code (as opposed to having a runtime issues)
+ */
+function prepareUrl(path: string): string {
+  return path.replace(
+    /{([^}/]+)}/g,
+    (_, paramName) => `\${encodeURIComponent(\`\${${paramName}}\`)}`
+  );
 }
 
 /**
@@ -209,7 +221,6 @@ interface IOperation {
   url: string;
   parameters: IOperationParam[];
   query: IOperationParam[];
-  pathParams: IOperationParam[];
   body: IBodyParam;
   headers: IOperationParam[];
 }
