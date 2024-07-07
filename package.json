@@ -1,7 +1,7 @@
 {
   "name": "swaggie",
-  "version": "0.8.5",
-  "description": "Generate ES6 or TypeScript service integration code from an OpenAPI spec",
+  "version": "1.0.0-beta.0",
+  "description": "Generate TypeScript REST client code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
     "url": "https://github.com/yhnavein"
@@ -16,7 +16,7 @@
     "url": "https://github.com/yhnavein/swaggie/issues"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,8 @@
     "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests && npm run types",
     "rm-tests": "find dist/ -name '*.spec.js' -type f -delete",
     "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "npx nyc -r text -r json-summary mocha"
   },
   "files": [
     "dist",
@@ -35,9 +36,15 @@
   ],
   "keywords": [
     "swagger",
-    "swagger 2.0",
     "openapi",
+    "openapi 3.0",
     "rest",
+    "rest client",
+    "fetch",
+    "axios",
+    "angular",
+    "xior",
+    "swr",
     "service",
     "typescript",
     "codegen"
