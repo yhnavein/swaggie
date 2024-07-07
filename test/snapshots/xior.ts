@@ -41,7 +41,7 @@ export const petClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return http.request<unknown>({
       url: url,
@@ -96,7 +96,7 @@ export const petClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet>> {
     let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return http.request<Pet>({
       url: url,
@@ -132,7 +132,7 @@ export const petClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return http.request<unknown>({
       url: url,
@@ -156,7 +156,7 @@ export const petClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<File>> {
     let url = '/pet/{petId}/uploadImage';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return http.request<File>({
       url: url,
@@ -179,7 +179,7 @@ export const storeClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return http.request<unknown>({
       url: url,
@@ -208,7 +208,7 @@ export const storeClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
     let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return http.request<Order>({
       url: url,
@@ -275,7 +275,7 @@ export const userClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return http.request<unknown>({
       url: url,
@@ -291,7 +291,7 @@ export const userClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
     let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return http.request<User>({
       url: url,
@@ -343,7 +343,7 @@ export const userClient = {
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return http.request<unknown>({
       url: url,

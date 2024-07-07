@@ -14,7 +14,7 @@ export function <%= it.swrOpName %>(<% it.parameters.forEach((parameter) => { %>
 
 <% if(it.pathParams && it.pathParams.length > 0) {
   it.pathParams.forEach((parameter) => { %>
-  url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
+  url = url.replace('{<%= parameter.name %>}', encodeURIComponent(`${<%= parameter.name %>}`));
 <% });
 } %>
 

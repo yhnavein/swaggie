@@ -39,12 +39,12 @@ export const petClient = {
     $config?: RequestInit
   ): Promise<unknown> {
     let url = `${defaults.baseUrl}/pet/{petId}?`;
-    url = url.replace('{petId}', encodeURIComponent(petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return fetch(url, {
       method: 'DELETE',
       headers: {
-        'api_key': apiKey,
+        'api_key': apiKey ?? '',
       },
       ...$config,
     })
@@ -59,7 +59,7 @@ export const petClient = {
   ): Promise<Pet[]> {
     let url = `${defaults.baseUrl}/pet/findByStatus?`;
     if (status !== undefined) {
-      url += 'status=' + serializeQueryParam(status) + "&";
+      url += `status=${serializeQueryParam(status)}&`;
     }
   
     return fetch(url, {
@@ -77,7 +77,7 @@ export const petClient = {
   ): Promise<Pet[]> {
     let url = `${defaults.baseUrl}/pet/findByTags?`;
     if (tags !== undefined) {
-      url += 'tags=' + serializeQueryParam(tags) + "&";
+      url += `tags=${serializeQueryParam(tags)}&`;
     }
   
     return fetch(url, {
@@ -94,7 +94,7 @@ export const petClient = {
     $config?: RequestInit
   ): Promise<Pet> {
     let url = `${defaults.baseUrl}/pet/{petId}?`;
-    url = url.replace('{petId}', encodeURIComponent(petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return fetch(url, {
       method: 'GET',
@@ -130,12 +130,12 @@ export const petClient = {
     $config?: RequestInit
   ): Promise<unknown> {
     let url = `${defaults.baseUrl}/pet/{petId}?`;
-    url = url.replace('{petId}', encodeURIComponent(petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
     if (name !== undefined) {
-      url += 'name=' + serializeQueryParam(name) + "&";
+      url += `name=${serializeQueryParam(name)}&`;
     }
     if (status !== undefined) {
-      url += 'status=' + serializeQueryParam(status) + "&";
+      url += `status=${serializeQueryParam(status)}&`;
     }
   
     return fetch(url, {
@@ -156,9 +156,9 @@ export const petClient = {
     $config?: RequestInit
   ): Promise<File> {
     let url = `${defaults.baseUrl}/pet/{petId}/uploadImage?`;
-    url = url.replace('{petId}', encodeURIComponent(petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
     if (additionalMetadata !== undefined) {
-      url += 'additionalMetadata=' + serializeQueryParam(additionalMetadata) + "&";
+      url += `additionalMetadata=${serializeQueryParam(additionalMetadata)}&`;
     }
   
     return fetch(url, {
@@ -178,7 +178,7 @@ export const storeClient = {
     $config?: RequestInit
   ): Promise<unknown> {
     let url = `${defaults.baseUrl}/store/order/{orderId}?`;
-    url = url.replace('{orderId}', encodeURIComponent(orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return fetch(url, {
       method: 'DELETE',
@@ -207,7 +207,7 @@ export const storeClient = {
     $config?: RequestInit
   ): Promise<Order> {
     let url = `${defaults.baseUrl}/store/order/{orderId}?`;
-    url = url.replace('{orderId}', encodeURIComponent(orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return fetch(url, {
       method: 'GET',
@@ -273,7 +273,7 @@ export const userClient = {
     $config?: RequestInit
   ): Promise<unknown> {
     let url = `${defaults.baseUrl}/user/{username}?`;
-    url = url.replace('{username}', encodeURIComponent(username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return fetch(url, {
       method: 'DELETE',
@@ -289,7 +289,7 @@ export const userClient = {
     $config?: RequestInit
   ): Promise<User> {
     let url = `${defaults.baseUrl}/user/{username}?`;
-    url = url.replace('{username}', encodeURIComponent(username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return fetch(url, {
       method: 'GET',
@@ -308,10 +308,10 @@ export const userClient = {
   ): Promise<string> {
     let url = `${defaults.baseUrl}/user/login?`;
     if (username !== undefined) {
-      url += 'username=' + serializeQueryParam(username) + "&";
+      url += `username=${serializeQueryParam(username)}&`;
     }
     if (password !== undefined) {
-      url += 'password=' + serializeQueryParam(password) + "&";
+      url += `password=${serializeQueryParam(password)}&`;
     }
   
     return fetch(url, {
@@ -343,7 +343,7 @@ export const userClient = {
     $config?: RequestInit
   ): Promise<unknown> {
     let url = `${defaults.baseUrl}/user/{username}?`;
-    url = url.replace('{username}', encodeURIComponent(username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return fetch(url, {
       method: 'PUT',
@@ -360,7 +360,7 @@ function serializeQueryParam(obj: any) {
   if (obj instanceof Date) return encodeURIComponent(obj.toJSON());
   if (typeof obj !== 'object' || Array.isArray(obj)) return encodeURIComponent(obj);
   return Object.keys(obj)
-    .reduce((a: any, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
+    .reduce((a: any, b) => a.push(`${encodeURIComponent(b)}=${encodeURIComponent(obj[b])}`) && a, [])
     .join('&');
 }
 

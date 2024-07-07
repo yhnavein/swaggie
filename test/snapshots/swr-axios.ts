@@ -51,7 +51,7 @@ export const petClient = {
   ): AxiosPromise<unknown> {
     let url = '/pet/{petId}';
 
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<unknown>({
       url: url,
@@ -109,7 +109,7 @@ export const petClient = {
   ): AxiosPromise<Pet> {
     let url = '/pet/{petId}';
 
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<Pet>({
       url: url,
@@ -147,7 +147,7 @@ export const petClient = {
   ): AxiosPromise<unknown> {
     let url = '/pet/{petId}';
 
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<unknown>({
       url: url,
@@ -172,7 +172,7 @@ export const petClient = {
   ): AxiosPromise<File> {
     let url = '/pet/{petId}/uploadImage';
 
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<File>({
       url: url,
@@ -266,7 +266,7 @@ export function usepetPetById(  petId: number ,
   let url = '/pet/{petId}';
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  url = url.replace('{petId}', encodeURIComponent("" + petId));
+  url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
   let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<Pet>(
@@ -295,7 +295,7 @@ const { data, error, mutate } = useSWR<Pet>(
   ): AxiosPromise<unknown> {
     let url = '/store/order/{orderId}';
 
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return axios.request<unknown>({
       url: url,
@@ -326,7 +326,7 @@ const { data, error, mutate } = useSWR<Pet>(
   ): AxiosPromise<Order> {
     let url = '/store/order/{orderId}';
 
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return axios.request<Order>({
       url: url,
@@ -389,7 +389,7 @@ export function usestoreOrderById(  orderId: number ,
   let url = '/store/order/{orderId}';
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+  url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
   let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<Order>(
@@ -452,7 +452,7 @@ const { data, error, mutate } = useSWR<Order>(
   ): AxiosPromise<unknown> {
     let url = '/user/{username}';
 
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return axios.request<unknown>({
       url: url,
@@ -469,7 +469,7 @@ const { data, error, mutate } = useSWR<Order>(
   ): AxiosPromise<User> {
     let url = '/user/{username}';
 
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return axios.request<User>({
       url: url,
@@ -524,7 +524,7 @@ const { data, error, mutate } = useSWR<Order>(
   ): AxiosPromise<unknown> {
     let url = '/user/{username}';
 
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return axios.request<unknown>({
       url: url,
@@ -545,7 +545,7 @@ export function useuserUserByName(  username: string ,
   let url = '/user/{username}';
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  url = url.replace('{username}', encodeURIComponent("" + username));
+  url = url.replace('{username}', encodeURIComponent(`${username}`));
 
   let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<User>(

@@ -9,9 +9,9 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import { Observable, throwError as _observableThrow, of as _observableOf } from "rxjs";
+import { Observable } from "rxjs";
 import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
-import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 export const API_BASE_URL = new InjectionToken<string>("API_BASE_URL");
 
@@ -103,7 +103,7 @@ export class petService extends BaseService {
     config?: any
   ): Observable<unknown> {
     let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return this.$delete(
       url,
@@ -120,8 +120,8 @@ export class petService extends BaseService {
     config?: any
   ): Observable<Pet[]> {
     let url = '/pet/findByStatus?';
-    if (status !== undefined) {
-      url += 'status=' + encodeURIComponent("" + status) + "&";
+    if (status !== undefined && status !== null) {
+      url += `status=${encodeURIComponent(`${status}`)}&`;
     }
   
     return this.$get(
@@ -139,8 +139,8 @@ export class petService extends BaseService {
     config?: any
   ): Observable<Pet[]> {
     let url = '/pet/findByTags?';
-    if (tags !== undefined) {
-      url += 'tags=' + encodeURIComponent("" + tags) + "&";
+    if (tags !== undefined && tags !== null) {
+      url += `tags=${encodeURIComponent(`${tags}`)}&`;
     }
   
     return this.$get(
@@ -158,7 +158,7 @@ export class petService extends BaseService {
     config?: any
   ): Observable<Pet> {
     let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return this.$get(
       url,
@@ -196,12 +196,12 @@ export class petService extends BaseService {
     config?: any
   ): Observable<unknown> {
     let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    if (name !== undefined) {
-      url += 'name=' + encodeURIComponent("" + name) + "&";
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    if (name !== undefined && name !== null) {
+      url += `name=${encodeURIComponent(`${name}`)}&`;
     }
-    if (status !== undefined) {
-      url += 'status=' + encodeURIComponent("" + status) + "&";
+    if (status !== undefined && status !== null) {
+      url += `status=${encodeURIComponent(`${status}`)}&`;
     }
   
     return this.$post(
@@ -224,9 +224,9 @@ export class petService extends BaseService {
     config?: any
   ): Observable<File> {
     let url = '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    if (additionalMetadata !== undefined) {
-      url += 'additionalMetadata=' + encodeURIComponent("" + additionalMetadata) + "&";
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
+    if (additionalMetadata !== undefined && additionalMetadata !== null) {
+      url += `additionalMetadata=${encodeURIComponent(`${additionalMetadata}`)}&`;
     }
   
     return this.$post(
@@ -258,7 +258,7 @@ export class storeService extends BaseService {
     config?: any
   ): Observable<unknown> {
     let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return this.$delete(
       url,
@@ -289,7 +289,7 @@ export class storeService extends BaseService {
     config?: any
   ): Observable<Order> {
     let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return this.$get(
       url,
@@ -370,7 +370,7 @@ export class userService extends BaseService {
     config?: any
   ): Observable<unknown> {
     let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return this.$delete(
       url,
@@ -387,7 +387,7 @@ export class userService extends BaseService {
     config?: any
   ): Observable<User> {
     let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return this.$get(
       url,
@@ -406,11 +406,11 @@ export class userService extends BaseService {
     config?: any
   ): Observable<string> {
     let url = '/user/login?';
-    if (username !== undefined) {
-      url += 'username=' + encodeURIComponent("" + username) + "&";
+    if (username !== undefined && username !== null) {
+      url += `username=${encodeURIComponent(`${username}`)}&`;
     }
-    if (password !== undefined) {
-      url += 'password=' + encodeURIComponent("" + password) + "&";
+    if (password !== undefined && password !== null) {
+      url += `password=${encodeURIComponent(`${password}`)}&`;
     }
   
     return this.$get(
@@ -444,7 +444,7 @@ export class userService extends BaseService {
     config?: any
   ): Observable<unknown> {
     let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return this.$put(
       url,

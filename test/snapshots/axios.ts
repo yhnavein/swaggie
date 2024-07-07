@@ -41,7 +41,7 @@ export const petClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<unknown>({
       url: url,
@@ -96,7 +96,7 @@ export const petClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<Pet>({
       url: url,
@@ -132,7 +132,7 @@ export const petClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<unknown>({
       url: url,
@@ -156,7 +156,7 @@ export const petClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<File> {
     let url = '/pet/{petId}/uploadImage';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return axios.request<File>({
       url: url,
@@ -179,7 +179,7 @@ export const storeClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return axios.request<unknown>({
       url: url,
@@ -208,7 +208,7 @@ export const storeClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
     let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return axios.request<Order>({
       url: url,
@@ -275,7 +275,7 @@ export const userClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return axios.request<unknown>({
       url: url,
@@ -291,7 +291,7 @@ export const userClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return axios.request<User>({
       url: url,
@@ -343,7 +343,7 @@ export const userClient = {
     $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return axios.request<unknown>({
       url: url,

@@ -154,7 +154,7 @@ export class petService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return this.$delete(
       url,
@@ -206,7 +206,7 @@ export class petService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<Pet> {
     let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
 
     return this.$get(
       url,
@@ -242,7 +242,7 @@ export class petService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
     if (name !== undefined) {
       url += serializeQueryParam(name, 'name') + "&";
     }
@@ -269,7 +269,7 @@ export class petService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<File> {
     let url = '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    url = url.replace('{petId}', encodeURIComponent(`${petId}`));
     if (additionalMetadata !== undefined) {
       url += serializeQueryParam(additionalMetadata, 'additionalMetadata') + "&";
     }
@@ -297,7 +297,7 @@ export class storeService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return this.$delete(
       url,
@@ -326,7 +326,7 @@ export class storeService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<Order> {
     let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    url = url.replace('{orderId}', encodeURIComponent(`${orderId}`));
 
     return this.$get(
       url,
@@ -398,7 +398,7 @@ export class userService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return this.$delete(
       url,
@@ -414,7 +414,7 @@ export class userService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<User> {
     let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return this.$get(
       url,
@@ -468,7 +468,7 @@ export class userService extends BaseService {
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    url = url.replace('{username}', encodeURIComponent(`${username}`));
 
     return this.$put(
       url,
