@@ -223,17 +223,41 @@ Server is not necessary to use Swaggie. Swaggie cares only about the JSON/yaml f
 
 If you are familiar with the client-code generators for the Swagger / OpenAPI standards then you might wonder why `swaggie` is better than existing tools. Currently the most popular alternative is an open-source `NSwag`.
 
-Quick comparison table:
+Quick comparison:
 
-| swaggie                                                       | NSwag                                                     | Hey API                                                                     |
-| ------------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Written in node.js + TypeScript                               | Written in .NET                                           | Written in TypeScript                                                       |
-| Fast                                                          | Slow                                                      | Fast                                                                        |
-| ![swaggie size](https://packagephobia.now.sh/badge?p=swaggie) | ![nswag size](https://packagephobia.now.sh/badge?p=nswag) | ![nswag size](https://packagephobia.now.sh/badge?p=%40hey-api%2Fopenapi-ts) |
-| Easy to contribute to                                         | Contributing hard                                         | Does not allow custom templates, so change is hard                          |
-| Lightweight                                                   | Complicated templates                                     | Generates a lot of code and multiple files                                  |
-| Flexible, suits well in the existing apps                     | Flexible, suits well in the existing apps                 | Enforces usage of other tools and architecture                              |
-| Generates REST clients and all models                         | Many more features (but mostly for .NET apps)             | No flexibility, other clients are discouraged from use                      |
+### Swaggie
+
+- Fast and small ![swaggie size](https://packagephobia.now.sh/badge?p=swaggie)
+- Lightweight and easy to start
+- Easy to contribute to, custom templates
+- Flexible, suits well in the existing apps
+- Generates REST clients and all models
+- Supports different templates (like `axios`, `fetch`, `xior`, `swr-axios`, `ng1`, `ng2`)
+- Written in TypeScript
+- Generates only one file with everything you need inside
+
+### [NSwag](https://github.com/RicoSuter/NSwag)
+
+- Slow and big ![nswag size](https://packagephobia.now.sh/badge?p=nswag)
+- Complicated templates, not easy to contribute to
+- Enforces usage of other tools and architecture
+- Generates more boilerplate code
+- Written in .NET, require .NET to execute, although published to npm as well
+- Many more features (but mostly for .NET apps), client generation is just a part of it
+
+### [Hey API](https://heyapi.vercel.app)
+
+- Fast and small ![nswag size](https://packagephobia.now.sh/badge?p=%40hey-api%2Fopenapi-ts)
+- No flexibility, other clients are discouraged from use
+- Generates a lot of code and multiple files
+- Written in TypeScript
+
+### [Kiota](https://learn.microsoft.com/en-us/openapi/kiota/)
+
+- A lot of boilerplate code and many files
+- Written in .NET, requires .NET to execute, published to NuGet
+- Not flexible at all - you need to use their architecture in your code
+- Looks like an enterprise solution with many configuration options
 
 ## Notes
 
