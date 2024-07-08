@@ -11,5 +11,6 @@
 
 export const defaults = {
   baseUrl: '<%= it.baseUrl || '' %>',
+  paramsSerializer: (params: any) => paramsSerializer(params),
 };
 

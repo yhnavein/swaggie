@@ -13,5 +13,6 @@ import xior, { type XiorResponse, type XiorRequestConfig } from "xior";
 
 export const http = xior.create({
   baseURL: '<%= it.baseUrl || '' %>',
+  paramsSerializer: (params) => paramsSerializer(params),
 });
 

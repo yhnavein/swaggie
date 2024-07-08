@@ -4,5 +4,8 @@
 
   "files.associations": {
     "templates/**/*.ejs": "plaintext"
+  },
+  "[html]": {
+    "editor.formatOnSave": false
   }
 }

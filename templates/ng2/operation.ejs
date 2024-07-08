@@ -11,18 +11,11 @@
     <% }); %>
 config?: any
   ): Observable<<%~ it.returnType %>> {
-    let url = `<%= it.url %>?`;
-<% if(it.query && it.query.length > 0) { %>
-  <% it.query.forEach((parameter) => { %>
-  if (<%= parameter.name %> !== undefined && <%= parameter.name %> !== null) {
-  <% if(parameter.original?.type === 'array') { %>
-    <%= parameter.name %>.forEach(item => { url += `<%= parameter.originalName %>=${encodeURIComponent(`${item}`)}&`; });
-  <% } else {%>
-    url += `<%= parameter.originalName %>=${encodeURIComponent(`${<%= parameter.name %>}`)}&`;
-  <% } %>
-  }
-  <% }); %>
-<% } %>
+    const url = `<%= it.url %>?<%
+    if(it.query && it.query.length > 0) { %>${paramsSerializer({<%
+      it.query.forEach((parameter) => { %>
+'<%= parameter.originalName %>': <%= parameter.name %>,
+      <% }); %>})}<% } %>`;
 
     return this.$<%= it.method.toLowerCase() %>(
       url,

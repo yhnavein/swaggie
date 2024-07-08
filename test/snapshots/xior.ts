@@ -13,6 +13,7 @@ import xior, { type XiorResponse, type XiorRequestConfig } from "xior";
 
 export const http = xior.create({
   baseURL: '',
+  paramsSerializer: (params) => paramsSerializer(params),
 });
 
 export const petClient = {
@@ -64,7 +65,7 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-        'status': serializeQueryParam(status),
+        'status': status,
       },
       ...$config,
     });
@@ -82,7 +83,7 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-        'tags': serializeQueryParam(tags),
+        'tags': tags,
       },
       ...$config,
     });
@@ -135,8 +136,8 @@ export const petClient = {
       url: url,
       method: 'POST',
       params: {
-        'name': serializeQueryParam(name),
-        'status': serializeQueryParam(status),
+        'name': name,
+        'status': status,
       },
       ...$config,
     });
@@ -159,7 +160,7 @@ export const petClient = {
       method: 'POST',
       data: body,
       params: {
-        'additionalMetadata': serializeQueryParam(additionalMetadata),
+        'additionalMetadata': additionalMetadata,
       },
       ...$config,
     });
@@ -306,8 +307,8 @@ export const userClient = {
       url: url,
       method: 'GET',
       params: {
-        'username': serializeQueryParam(username),
-        'password': serializeQueryParam(password),
+        'username': username,
+        'password': password,
       },
       ...$config,
     });
@@ -347,13 +348,38 @@ export const userClient = {
 };
 
 
-function serializeQueryParam(obj: any) {
-  if (obj === null || obj === undefined) return '';
-  if (obj instanceof Date) return obj.toJSON();
-  if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
-  return Object.keys(obj)
-    .reduce((a: any, b) => a.push(`${b}=${obj[b]}`) && a, [])
-    .join('&');
+function paramsSerializer<T = any>(params: T, parentKey: string | null = null): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const encodeValue = (value: any) =>
+    encodeURIComponent(value instanceof Date && !Number.isNaN(value) ? value.toISOString() : value);
+
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      const value = (params as any)[key];
+      if (value !== undefined) {
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+        if (Array.isArray(value)) {
+          for (const element of value) {
+            encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(element)}`);
+          }
+        } else if (value instanceof Date && !Number.isNaN(value)) {
+          // If the value is a Date, convert it to ISO format
+          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
+        } else if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = paramsSerializer(value, fullKey);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
+        }
+      }
+    }
+  }
+
+  return encodedParams.join('&');
 }
 
 export interface Order {

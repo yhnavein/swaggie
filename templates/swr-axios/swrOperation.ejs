@@ -29,7 +29,7 @@ const { data, error, mutate } = useSWR<<%~ it.returnType %>>(
 <% if(it.query && it.query.length > 0) { %>
     params: {
       <% it.query.forEach((parameter) => { %>
-  '<%= parameter.originalName %>': serializeQueryParam(<%= parameter.name %>),
+  '<%= parameter.originalName %>': <%= parameter.name %>,
     <% }); %>
   },
 <% } %>

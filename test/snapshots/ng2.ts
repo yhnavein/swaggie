@@ -9,7 +9,7 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import { Observable } from "rxjs";
+import type { Observable } from "rxjs";
 import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
@@ -83,7 +83,7 @@ export class petService extends BaseService {
     body: Pet,
     config?: any
   ): Observable<Pet> {
-    let url = `/pet?`;
+    const url = `/pet?`;
 
     return this.$post(
       url,
@@ -102,7 +102,7 @@ export class petService extends BaseService {
     petId: number,
     config?: any
   ): Observable<unknown> {
-    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
+    const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$delete(
       url,
@@ -118,11 +118,9 @@ export class petService extends BaseService {
     status: ("available" | "pending" | "sold") | null | undefined,
     config?: any
   ): Observable<Pet[]> {
-    let url = `/pet/findByStatus?`;
-    if (status !== undefined && status !== null) {
-      url += `status=${encodeURIComponent(`${status}`)}&`;
-    }
-  
+    const url = `/pet/findByStatus?${paramsSerializer({'status': status,
+      })}`;
+
     return this.$get(
       url,
       config
@@ -137,11 +135,9 @@ export class petService extends BaseService {
     tags: string[] | null | undefined,
     config?: any
   ): Observable<Pet[]> {
-    let url = `/pet/findByTags?`;
-    if (tags !== undefined && tags !== null) {
-      url += `tags=${encodeURIComponent(`${tags}`)}&`;
-    }
-  
+    const url = `/pet/findByTags?${paramsSerializer({'tags': tags,
+      })}`;
+
     return this.$get(
       url,
       config
@@ -156,7 +152,7 @@ export class petService extends BaseService {
     petId: number,
     config?: any
   ): Observable<Pet> {
-    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
+    const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$get(
       url,
@@ -172,7 +168,7 @@ export class petService extends BaseService {
     body: Pet,
     config?: any
   ): Observable<Pet> {
-    let url = `/pet?`;
+    const url = `/pet?`;
 
     return this.$put(
       url,
@@ -193,14 +189,10 @@ export class petService extends BaseService {
     status: string | null | undefined,
     config?: any
   ): Observable<unknown> {
-    let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
-    if (name !== undefined && name !== null) {
-      url += `name=${encodeURIComponent(`${name}`)}&`;
-    }
-    if (status !== undefined && status !== null) {
-      url += `status=${encodeURIComponent(`${status}`)}&`;
-    }
-  
+    const url = `/pet/${encodeURIComponent(`${petId}`)}?${paramsSerializer({'name': name,
+      'status': status,
+      })}`;
+
     return this.$post(
       url,
       null,
@@ -220,11 +212,9 @@ export class petService extends BaseService {
     additionalMetadata: string | null | undefined,
     config?: any
   ): Observable<File> {
-    let url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?`;
-    if (additionalMetadata !== undefined && additionalMetadata !== null) {
-      url += `additionalMetadata=${encodeURIComponent(`${additionalMetadata}`)}&`;
-    }
-  
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${paramsSerializer({'additionalMetadata': additionalMetadata,
+      })}`;
+
     return this.$post(
       url,
       body,
@@ -253,7 +243,7 @@ export class storeService extends BaseService {
     orderId: number,
     config?: any
   ): Observable<unknown> {
-    let url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$delete(
       url,
@@ -267,7 +257,7 @@ export class storeService extends BaseService {
   getInventory(
     config?: any
   ): Observable<{ [key: string]: number }> {
-    let url = `/store/inventory?`;
+    const url = `/store/inventory?`;
 
     return this.$get(
       url,
@@ -283,7 +273,7 @@ export class storeService extends BaseService {
     orderId: number,
     config?: any
   ): Observable<Order> {
-    let url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$get(
       url,
@@ -299,7 +289,7 @@ export class storeService extends BaseService {
     body: Order | null | undefined,
     config?: any
   ): Observable<Order> {
-    let url = `/store/order?`;
+    const url = `/store/order?`;
 
     return this.$post(
       url,
@@ -329,7 +319,7 @@ export class userService extends BaseService {
     body: User | null | undefined,
     config?: any
   ): Observable<User> {
-    let url = `/user?`;
+    const url = `/user?`;
 
     return this.$post(
       url,
@@ -346,7 +336,7 @@ export class userService extends BaseService {
     body: User[] | null | undefined,
     config?: any
   ): Observable<User> {
-    let url = `/user/createWithList?`;
+    const url = `/user/createWithList?`;
 
     return this.$post(
       url,
@@ -363,7 +353,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<unknown> {
-    let url = `/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$delete(
       url,
@@ -379,7 +369,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<User> {
-    let url = `/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$get(
       url,
@@ -397,14 +387,10 @@ export class userService extends BaseService {
     password: string | null | undefined,
     config?: any
   ): Observable<string> {
-    let url = `/user/login?`;
-    if (username !== undefined && username !== null) {
-      url += `username=${encodeURIComponent(`${username}`)}&`;
-    }
-    if (password !== undefined && password !== null) {
-      url += `password=${encodeURIComponent(`${password}`)}&`;
-    }
-  
+    const url = `/user/login?${paramsSerializer({'username': username,
+      'password': password,
+      })}`;
+
     return this.$get(
       url,
       config
@@ -417,7 +403,7 @@ export class userService extends BaseService {
   logoutUser(
     config?: any
   ): Observable<unknown> {
-    let url = `/user/logout?`;
+    const url = `/user/logout?`;
 
     return this.$get(
       url,
@@ -435,7 +421,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<unknown> {
-    let url = `/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$put(
       url,
@@ -444,6 +430,41 @@ export class userService extends BaseService {
     );
   }
 
+}
+
+
+function paramsSerializer<T = any>(params: T, parentKey: string | null = null): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const encodeValue = (value: any) =>
+    encodeURIComponent(value instanceof Date && !Number.isNaN(value) ? value.toISOString() : value);
+
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      const value = (params as any)[key];
+      if (value !== undefined) {
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+        if (Array.isArray(value)) {
+          for (const element of value) {
+            encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(element)}`);
+          }
+        } else if (value instanceof Date && !Number.isNaN(value)) {
+          // If the value is a Date, convert it to ISO format
+          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
+        } else if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = paramsSerializer(value, fullKey);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
+        }
+      }
+    }
+  }
+
+  return encodedParams.join('&');
 }
 
 export interface Order {

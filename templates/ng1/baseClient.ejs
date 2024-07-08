@@ -9,7 +9,7 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import { IHttpService, IRequestShortcutConfig, IPromise } from 'angular';
+import type { IHttpService, IRequestShortcutConfig, IPromise } from 'angular';
 
 abstract class BaseService {
   constructor(protected readonly $http: IHttpService, public baseUrl: string) { }
