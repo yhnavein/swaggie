@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,18 @@ public class UserViewModel
   public string Email { get; set; }
 
   public UserRole Role { get; set; }
+
+  [Required]
+  public Dictionary<int, string> SomeDict { get; set; } = new();
+
+  public PagedResult<string> AuditEvents { get; set; } = new();
+}
+
+public class PagedResult<T>
+{
+  public IList<T> Items { get; set; }
+
+  public int TotalCount { get; set; }
 }
 
 public enum UserRole

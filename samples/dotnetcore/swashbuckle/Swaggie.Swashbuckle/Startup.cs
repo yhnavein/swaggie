@@ -66,6 +66,12 @@ public class Startup
     }
 
     app.UseRouting();
+    app.UseCors(c =>
+    {
+      c.AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowAnyOrigin();
+    });
 
     if (!_isProduction)
     {

@@ -42,9 +42,8 @@ public class Startup
 
     if (!_isProduction)
     {
-      services.AddSwaggerDocument(c =>
+      services.AddOpenApiDocument(c =>
       {
-        // c.GenerateEnumMappingDescription = true;
         c.PostProcess = document =>
         {
           document.Info.Version = "v1";
@@ -68,10 +67,25 @@ public class Startup
     if (!_isProduction)
     {
       app.UseOpenApi();
-      app.UseSwaggerUi3(c =>
+      app.UseSwaggerUi(c =>
       {
-        c.Path = "/swagger";
-        c.DocumentPath = "/swagger/v1/swagger.json";
+        c.DocExpansion = "list";
+        c.DefaultModelsExpandDepth = 1;
+      });
+      app.UseReDoc(c =>
+      {
+        c.Path = "/redoc";
+      });
+
+      // Redirect root to Swagger UI
+      app.Use(async (context, next) =>
+      {
+        if (context.Request.Path.Value == "/")
+        {
+          context.Response.Redirect("/swagger");
+          return;
+        }
+        await next();
       });
     }
 

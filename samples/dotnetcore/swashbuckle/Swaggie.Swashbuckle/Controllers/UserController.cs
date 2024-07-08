@@ -35,37 +35,17 @@ public class UserController : Controller
   }
 
   [HttpGet("filter")]
-  [Produces(typeof(PagedResult<UserViewModel>))]
-  public IActionResult FilterUsers([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery] Dictionary<string, int> someDict)
+  [Produces(typeof(FilterTestResponse))]
+  public IActionResult TestFilters([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery] Dictionary<string, int> someDict)
   {
-    Console.WriteLine(JsonConvert.SerializeObject(filter));
-    Console.WriteLine(JsonConvert.SerializeObject(secondFilter));
-    var allUsers = new[]
+    Console.WriteLine("filter: " + JsonConvert.SerializeObject(filter));
+    Console.WriteLine("secondFilter: " + JsonConvert.SerializeObject(secondFilter));
+    Console.WriteLine("someDict: " + JsonConvert.SerializeObject(someDict));
+    var result = new FilterTestResponse
     {
-      new UserViewModel
-      {
-        Name = "Ann Bobcat", Id = 1, Email = "ann.b@test.org", Role = UserRole.Admin
-      },
-      new UserViewModel
-      {
-        Name = "Bob Johnson", Id = 2, Email = "bob.j@test.org", Role = UserRole.User
-      }
-    };
-
-    if (filter == null)
-    {
-      return Ok(allUsers);
-    }
-
-    var users = allUsers
-      .Where(u => filter.Roles.Count > 0 || filter.Roles.Contains(u.Role))
-      // Rest of the filtering logic
-      .ToList();
-
-    var result = new PagedResult<UserViewModel>
-    {
-      Items = users,
-      TotalCount = users.Count
+      filter = filter,
+      secondFilter = secondFilter,
+      someDict = someDict
     };
 
     return Ok(result);
@@ -157,4 +137,11 @@ public enum UserRole
   Admin = 0,
   User = 1,
   Guest = 2
+}
+
+public class FilterTestResponse
+{
+  public UserFilter? filter { get; set; }
+  public UserFilter? secondFilter { get; set; }
+  public Dictionary<string, int> someDict { get; set; }
 }

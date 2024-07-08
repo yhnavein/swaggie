@@ -2,7 +2,13 @@
 
 ## ASP.NET Core NSwag configuration
 
-You can open `Swaggie.Nswag/Swaggie.Nswag.sln` in Rider or VS to see the sample ASP.NET Core project with NSwag configured. It is working out of the box and it requires `dotnet 6.0`. It should be compatible with other dotnet versions as well.
+You can open `Swaggie.Nswag/Swaggie.Nswag.sln` in Rider or VS to see the sample ASP.NET Core project with NSwag configured. It is working out of the box and it requires `dotnet 8.0`. It should be compatible with other dotnet versions as well.
+
+## Concerns
+
+If you use complex query parameter types, then I suggest you strongly to migrate away from NSwag to Swashbuckle.
+Both are generating wrong specs, but for Swashbuckle it's possible to fix it by using custom `OperationFilter`.
+NSwag offers same extensibility, but in practice it's not working as expected (or, it's very hard to make it work).
 
 ## Swaggie result
 

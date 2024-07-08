@@ -4,9 +4,11 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Swaggie.Swashbuckle;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class FromQueryModelFilter : IOperationFilter
 {
   public void Apply(OpenApiOperation operation, OperationFilterContext context)
@@ -19,7 +21,9 @@ public class FromQueryModelFilter : IOperationFilter
       return;
     }
 
-    var actionParameters = description.ActionDescriptor.Parameters;
+    var actionParameters = description.ActionDescriptor.Parameters
+      .Where(p => p.ParameterType != typeof(CancellationToken))
+      .ToList();
     var apiParameters = description.ParameterDescriptions
       .Where(p => p.Source.IsFromRequest)
       .ToList();
@@ -46,7 +50,7 @@ public class FromQueryModelFilter : IOperationFilter
     return newParameters.Count != 0 ? newParameters : null;
   }
 
-  private OpenApiParameter CreateParameter(
+  private static OpenApiParameter CreateParameter(
     ParameterDescriptor actionParameter,
     IList<OpenApiParameter> operationParameters,
     OperationFilterContext context)
@@ -67,7 +71,7 @@ public class FromQueryModelFilter : IOperationFilter
       context.SchemaGenerator.GenerateSchema(actionParameter.ParameterType,
         context.SchemaRepository);
 
-    var newParameter = new OpenApiParameter
+    return new OpenApiParameter
     {
       Name = actionParameter.Name,
       In = ParameterLocation.Query,
@@ -75,7 +79,5 @@ public class FromQueryModelFilter : IOperationFilter
       Explode = true,
       Style = ParameterStyle.Simple
     };
-
-    return newParameter;
   }
 }

@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NSwag.Core.Yaml" Version="13.20.0" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.20.0" />
+    <PackageReference Include="NSwag.Core.Yaml" Version="14.0.8" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.0.8" />
   </ItemGroup>
 </Project>
