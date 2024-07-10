@@ -9,10 +9,14 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import Axios, { type AxiosPromise, AxiosRequestConfig } from "axios";
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 
 export const axios = Axios.create({
   baseURL: '<%= it.baseUrl || '' %>',
-  paramsSerializer: (params: any) => paramsSerializer(params),
+  paramsSerializer: (params) =>
+    encodeParams(params, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 

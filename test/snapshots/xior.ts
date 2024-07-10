@@ -9,11 +9,15 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import xior, { type XiorResponse, type XiorRequestConfig } from "xior";
+import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
 export const http = xior.create({
   baseURL: '',
-  paramsSerializer: (params) => paramsSerializer(params),
+  paramsSerializer: (params) =>
+    encodeParams(params, true, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 export const petClient = {
@@ -346,41 +350,6 @@ export const userClient = {
   },
 
 };
-
-
-function paramsSerializer<T = any>(params: T, parentKey: string | null = null): string {
-  if (params === undefined || params === null) return '';
-  const encodedParams: string[] = [];
-  const encodeValue = (value: any) =>
-    encodeURIComponent(value instanceof Date && !Number.isNaN(value) ? value.toISOString() : value);
-
-  for (const key in params) {
-    if (Object.prototype.hasOwnProperty.call(params, key)) {
-      const value = (params as any)[key];
-      if (value !== undefined) {
-        const fullKey = parentKey ? `${parentKey}.${key}` : key;
-
-        if (Array.isArray(value)) {
-          for (const element of value) {
-            encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(element)}`);
-          }
-        } else if (value instanceof Date && !Number.isNaN(value)) {
-          // If the value is a Date, convert it to ISO format
-          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
-        } else if (typeof value === 'object') {
-          // If the value is an object or array, recursively encode its contents
-          const result = paramsSerializer(value, fullKey);
-          if (result !== '') encodedParams.push(result);
-        } else {
-          // Otherwise, encode the key-value pair
-          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
-        }
-      }
-    }
-  }
-
-  return encodedParams.join('&');
-}
 
 export interface Order {
   id?: number;

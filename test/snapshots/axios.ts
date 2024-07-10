@@ -9,11 +9,15 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import Axios, { type AxiosPromise, AxiosRequestConfig } from "axios";
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 
 export const axios = Axios.create({
   baseURL: '',
-  paramsSerializer: (params: any) => paramsSerializer(params),
+  paramsSerializer: (params) =>
+    encodeParams(params, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 export const petClient = {
@@ -348,32 +352,55 @@ export const userClient = {
 };
 
 
-function paramsSerializer<T = any>(params: T, parentKey: string | null = null): string {
+/**
+ * Serializes a params object into a query string that is compatible with different REST APIs.
+ * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
+ * Kudos to @suhaotian for the original implementation
+ */
+function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
   if (params === undefined || params === null) return '';
   const encodedParams: string[] = [];
-  const encodeValue = (value: any) =>
-    encodeURIComponent(value instanceof Date && !Number.isNaN(value) ? value.toISOString() : value);
+  const paramsIsArray = Array.isArray(params);
+  const { arrayFormat, allowDots, serializeDate } = options || {};
+
+  const getKey = (key: string) => {
+    if (allowDots && !paramsIsArray) return `.${key}`;
+    if (paramsIsArray) {
+      if (arrayFormat === 'brackets') {
+        return '[]';
+      }
+      if (arrayFormat === 'repeat') {
+        return '';
+      }
+    }
+    return `[${key}]`;
+  };
 
   for (const key in params) {
     if (Object.prototype.hasOwnProperty.call(params, key)) {
-      const value = (params as any)[key];
+      let value = (params as any)[key];
       if (value !== undefined) {
-        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
 
-        if (Array.isArray(value)) {
-          for (const element of value) {
-            encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(element)}`);
-          }
-        } else if (value instanceof Date && !Number.isNaN(value)) {
-          // If the value is a Date, convert it to ISO format
-          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
-        } else if (typeof value === 'object') {
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+        if (!isNaN(value) && value instanceof Date) {
+          value = serializeDate ? serializeDate(value) : value.toISOString();
+        }
+        if (typeof value === 'object') {
           // If the value is an object or array, recursively encode its contents
-          const result = paramsSerializer(value, fullKey);
+          const result = encodeParams(value, encodedKey, options);
           if (result !== '') encodedParams.push(result);
         } else {
           // Otherwise, encode the key-value pair
-          encodedParams.push(`${encodeURIComponent(fullKey)}=${encodeValue(value)}`);
+          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
         }
       }
     }

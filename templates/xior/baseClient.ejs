@@ -9,10 +9,14 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import xior, { type XiorResponse, type XiorRequestConfig } from "xior";
+import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
 export const http = xior.create({
   baseURL: '<%= it.baseUrl || '' %>',
-  paramsSerializer: (params) => paramsSerializer(params),
+  paramsSerializer: (params) =>
+    encodeParams(params, true, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 

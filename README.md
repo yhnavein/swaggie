@@ -6,7 +6,7 @@
 
 ![npm latest version](https://img.shields.io/npm/v/swaggie)
 ![NodeCI](https://github.com/yhnavein/swaggie/workflows/NodeCI/badge.svg)
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/yhnavein/swaggie.svg)
+![Test Coverage](https://img.shields.io/badge/test_coverage-98%25-brightgreen)
 ![npm downloads](https://img.shields.io/npm/dw/swaggie.svg)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
 ![npm install size](https://packagephobia.now.sh/badge?p=swaggie)
@@ -268,7 +268,7 @@ Quick comparison:
 | Spec formats: `JSON`, `YAML`                                                   | Very complex query params                  |
 | Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (one will be used) |
 | Content types: `JSON`, `text`, `multipart/form-data`                           | Multiple request types (one will be used)  |
-| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` |                                            |
+| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to other spec files             |
 | Different types of enum definitions (+ OpenAPI 3.1 support for enums)          |                                            |
 | Paths inheritance, comments (descriptions)                                     |                                            |
 | Getting documents from remote locations or as path reference (local file)      |                                            |

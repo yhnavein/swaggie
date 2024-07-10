@@ -9,12 +9,16 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import Axios, { type AxiosPromise, AxiosRequestConfig } from "axios";
-import useSWR, { SWRConfiguration, Key } from 'swr';
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
+import useSWR, { type SWRConfiguration, type Key } from 'swr';
 
 export const axios = Axios.create({
   baseURL: '<%= it.baseUrl || '' -%>',
-  paramsSerializer: (params: any) => paramsSerializer(params),
+  paramsSerializer: (params) =>
+    encodeParams(params, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 interface SwrConfig extends SWRConfiguration {
