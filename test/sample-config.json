@@ -6,5 +6,9 @@
   "baseUrl": "https://google.pl",
   "preferAny": true,
   "servicePrefix": "Test",
-  "dateFormat": "string"
+  "dateFormat": "string",
+  "queryParamsSerialization": {
+    "arrayFormat": "repeat",
+    "allowDots": true
+  }
 }

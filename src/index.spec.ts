@@ -69,8 +69,8 @@ describe('runCodeGenerator', () => {
       out: './.tmp/test/',
     };
 
-    const res = await runCodeGenerator(parameters);
-    expect(res).to.be.ok;
+    const conf = await runCodeGenerator(parameters);
+    expect(conf).to.be.ok;
   });
 
   it('fails when wrong --config provided', async () => {
@@ -116,8 +116,22 @@ describe('runCodeGenerator', () => {
       return expect(e).to.contain('Could not correctly load config file');
     }
   });
+});
 
-  it('properly loads configuration from config file', async () => {
+describe('applyConfigFile', () => {
+  it('should use default values', async () => {
+    const parameters = { src: './test/petstore-v3.yml', out: './.tmp/test/' };
+
+    const conf = await applyConfigFile(parameters);
+
+    expect(conf).to.be.ok;
+    expect(conf.queryParamsSerialization).to.deep.equal({
+      arrayFormat: 'repeat',
+      allowDots: true,
+    });
+  });
+
+  it('should load configuration from config file', async () => {
     const parameters = {
       config: './test/sample-config.json',
     };
@@ -129,13 +143,19 @@ describe('runCodeGenerator', () => {
     expect(conf.src).to.be.equal(
       'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json'
     );
+    expect(conf.queryParamsSerialization).to.deep.equal({
+      arrayFormat: 'repeat',
+      allowDots: true,
+    });
   });
 
-  it('makes inline parameters higher priority than from config file', async () => {
+  it('should treat inline parameters with a higher priority', async () => {
     const parameters = {
       config: './test/sample-config.json',
       baseUrl: 'https://wp.pl',
       src: './test/petstore-v3.yml',
+      arrayFormat: 'indices',
+      allowDots: false,
     };
 
     const conf = await applyConfigFile(parameters);
@@ -143,5 +163,9 @@ describe('runCodeGenerator', () => {
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://wp.pl');
     expect(conf.src).to.be.equal('./test/petstore-v3.yml');
+    expect(conf.queryParamsSerialization).to.deep.equal({
+      arrayFormat: 'indices',
+      allowDots: false,
+    });
   });
 });

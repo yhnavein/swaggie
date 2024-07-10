@@ -24,19 +24,21 @@ export default async function generateOperations(
 ): Promise<string> {
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
+  const servicePrefix = options.servicePrefix ?? '';
   let result =
     renderFile('baseClient.ejs', {
-      servicePrefix: options.servicePrefix || '',
+      servicePrefix,
       baseUrl: options.baseUrl,
+      ...options.queryParamsSerialization,
     }) || '';
 
   for (const name in groups) {
     const group = groups[name];
-    const clientData = prepareClient((options.servicePrefix ?? '') + name, group, options);
+    const clientData = prepareClient(servicePrefix + name, group, options);
 
     const renderedFile = renderFile('client.ejs', {
       ...clientData,
-      servicePrefix: options.servicePrefix || '',
+      servicePrefix,
     });
 
     result += renderedFile || '';

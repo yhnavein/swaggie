@@ -15,8 +15,8 @@ export const http = xior.create({
   baseURL: '<%= it.baseUrl || '' %>',
   paramsSerializer: (params) =>
     encodeParams(params, true, null, {
-      allowDots: true,
-      arrayFormat: 'repeat',
+      allowDots: <%= it.allowDots %>,
+      arrayFormat: '<%= it.arrayFormat %>',
     }),
 });
 

@@ -49,15 +49,17 @@ Usage: swaggie [options]
 
 Options:
 
-  -h, --help               output usage information
-  -V, --version            output the version number
-  -c, --config <path>      The path to the configuration JSON file. You can do all the set up there instead of parameters in the CLI
-  -s, --src <url|path>     The url or path to the Open API spec file
-  -t, --template <string>  Template used forgenerating API client. Default: "axios"
-  -o, --out <path>         The path to the file where the API would be generated
-  -b, --baseUrl <string>   Base URL that will be used as a default value in the clients. Default: ""
-  --preferAny              Use "any" type instead of "unknown". Default: false
-  --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ''
+  -V, --version             output the version number
+  -c, --config <path>       The path to the configuration JSON file. You can do all the set up there instead of parameters in the CLI
+  -s, --src <url|path>      The url or path to the Open API spec file
+  -o, --out <filePath>      The path to the file where the API would be generated. Use stdout if left empty
+  -b, --baseUrl <string>    Base URL that will be used as a default value in the clients (default: "")
+  -t, --template <string>   Template used forgenerating API client. Default: "axios" (default: "axios")
+  --preferAny               Use "any" type instead of "unknown" (default: false)
+  --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions (default: "")
+  --allowDots <bool>        Determines if dots should be used for serialization object properties
+  --arrayFormat <format>    Determines how arrays should be serialized (choices: "indices", "repeat", "brackets")
+  -h, --help                display help for command
 ```
 
 Sample CLI usage using Swagger's Pet Store:
@@ -89,7 +91,11 @@ Sample configuration looks like this:
   "baseUrl": "/api",
   "preferAny": true,
   "servicePrefix": "",
-  "dateFormat": "Date" // "string" | "Date"
+  "dateFormat": "Date", // "string" | "Date"
+  "queryParamsSerialization": {
+    "arrayFormat": "repeat", // "repeat" | "brackets" | "indices"
+    "allowDots": true
+  }
 }
 ```
 
@@ -112,36 +118,44 @@ If you want to use your own template, you can use the path to your template for 
 swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore --template ./my-swaggie-template/
 ```
 
-### Code
-
-```javascript
-const swaggie = require('swaggie');
-swaggie
-  .genCode({
-    src: 'https://petstore3.swagger.io/api/v3/openapi.json',
-    out: './api/petstore.ts',
-  })
-  .then(complete, error);
-
-function complete(spec) {
-  console.info('Service generation complete');
-}
-
-function error(e) {
-  console.error(e.toString());
-}
-```
-
 ## Usage – Integrating into your project
 
 Let's assume that you have a [PetStore API](http://petstore.swagger.io/) as your REST API and you are developing a client app written in TypeScript that will consume this API.
 
 Instead of writing any code by hand for fetching particular resources, we will let Swaggie do it for us.
 
+### Query Parameters Serialization
+
+When it comes to use of query parameters then you might need to adjust the way these parameters will be serialized, as backend server you are using expects them to be in a specific format. Thankfully in Swaggie you can specify how they should be handled. If you won't provide any configuration, then Swaggie will use the defaults values expected in the ASP.NET Core world.
+
+For your convenience there are few config examples to achieve different serialization formats for an object `{ "a": { "b": 1 }, "c": [2, 3] }`:
+
+| Expected Format         | allowDots | arrayFormat |
+| ----------------------- | --------- | ----------- |
+| `?a.b=1&c=2&c=3`        | `true`    | `repeat`    |
+| `?a.b=1&c[]=2&c[]=3`    | `true`    | `brackets`  |
+| `?a.b=1&c[0]=2&c[1]=3`  | `true`    | `indices`   |
+| `?a[b]=1&c=2&c=3`       | `false`   | `repeat`    |
+| `?a[b]=1&c[]=2&c[]=3`   | `false`   | `brackets`  |
+| `?a[b]=1&c[0]=2&c[1]=3` | `false`   | `indices`   |
+
+Once you know what your backend expects, you can adjust the configuration file accordingly: (below are default values)
+
+```json
+{
+  "queryParamsSerialization": {
+    "arrayFormat": "repeat",
+    "allowDots": true
+  }
+}
+```
+
+### Code Quality
+
 > Please note that it's **recommended** to pipe Swaggie command to some prettifier like `prettier`, `biome` or `dprint` to make the generated code look not only nice, but also persistent.
 > Because Swaggie relies on a templating engine, whitespaces are generally a mess, so they may change between versions.
 
-### Suggested prettiers
+**Suggested prettiers**
 
 [prettier](https://prettier.io/) - the most popular one
 
@@ -171,6 +185,11 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./api/petstore.ts
 import Axios, { AxiosPromise } from 'axios';
 const axios = Axios.create({
   baseURL: '/api',
+  paramsSerializer: (params) =>
+    encodeParams(params, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 /** [...] **/
@@ -178,12 +197,9 @@ const axios = Axios.create({
 export const petClient = {
   /**
    * @param petId
-   * @return Success
    */
   getPetById(petId: number): AxiosPromise<Pet> {
-    let url = '/pet/{petId}';
-
-    url = url.replace('{petId}', encodeURIComponent('' + petId));
+    let url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<Pet>({
       url: url,
@@ -221,9 +237,7 @@ Server is not necessary to use Swaggie. Swaggie cares only about the JSON/yaml f
 
 ## Competitors
 
-If you are familiar with the client-code generators for the Swagger / OpenAPI standards then you might wonder why `swaggie` is better than existing tools. Currently the most popular alternative is an open-source `NSwag`.
-
-Quick comparison:
+If you are familiar with the client-code generators for the Swagger / OpenAPI standards then you might wonder why `swaggie` is better than existing tools. I compiled a quick comparison with other tools below:
 
 ### Swaggie
 
@@ -258,6 +272,26 @@ Quick comparison:
 - Written in .NET, requires .NET to execute, published to NuGet
 - Not flexible at all - you need to use their architecture in your code
 - Looks like an enterprise solution with many configuration options
+
+## Using Swaggie programmatically
+
+```javascript
+const swaggie = require('swaggie');
+swaggie
+  .genCode({
+    src: 'https://petstore3.swagger.io/api/v3/openapi.json',
+    out: './api/petstore.ts',
+  })
+  .then(complete, error);
+
+function complete(spec) {
+  console.info('Service generation complete');
+}
+
+function error(e) {
+  console.error(e.toString());
+}
+```
 
 ## Notes
 

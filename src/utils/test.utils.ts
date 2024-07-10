@@ -32,6 +32,10 @@ export function getClientOptions(opts: Partial<ClientOptions> = {}): ClientOptio
     src: 'http://example.com/swagger.json',
     out: 'output.ts',
     template: 'xior',
+    queryParamsSerialization: {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    },
     ...opts,
   };
 }

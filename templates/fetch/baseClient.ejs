@@ -13,8 +13,8 @@ export const defaults = {
   baseUrl: '<%= it.baseUrl || '' %>',
   paramsSerializer: (params) =>
     encodeParams(params, null, {
-      allowDots: true,
-      arrayFormat: 'repeat',
+      allowDots: <%= it.allowDots %>,
+      arrayFormat: '<%= it.arrayFormat %>',
     }),
 };
 

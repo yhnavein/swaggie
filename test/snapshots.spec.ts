@@ -14,6 +14,10 @@ describe('petstore snapshots', () => {
         src: './test/petstore-v3.yml',
         out: './.tmp/test/',
         template,
+        queryParamsSerialization: {
+          allowDots: true,
+          arrayFormat: 'repeat',
+        },
       };
 
       const [generatedCode] = await runCodeGenerator(parameters);

@@ -4,5 +4,9 @@
   "src": "./test/petstore-v3.json",
   "template": "axios",
   "preferAny": true,
-  "dateFormat": "string"
+  "dateFormat": "string",
+  "queryParamsSerialization": {
+    "arrayFormat": "repeat",
+    "allowDots": true
+  }
 }

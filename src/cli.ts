@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
 import { bold, cyan, red } from 'nanocolors';
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 
 import { type CodeGenResult, runCodeGenerator } from './index';
 import type { FullAppOptions } from './types';
+
+const arrayFormatOption = new Option(
+  '--arrayFormat <format>',
+  'Determines how arrays should be serialized'
+).choices(['indices', 'repeat', 'brackets']);
 
 const program = new Command();
 program
@@ -28,14 +33,25 @@ program
   )
   .option(
     '-b, --baseUrl <string>',
-    'Base URL that will be used as a default value in the clients. Default: ""'
+    'Base URL that will be used as a default value in the clients',
+    ''
   )
-  .option('-t, --template <string>', 'Template used forgenerating API client. Default: "axios"')
-  .option('--preferAny', 'Use "any" type instead of "unknown". Default: false')
+  .option(
+    '-t, --template <string>',
+    'Template used forgenerating API client. Default: "axios"',
+    'axios'
+  )
+  .option('--preferAny', 'Use "any" type instead of "unknown"', false)
   .option(
     '--servicePrefix <string>',
-    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""'
-  );
+    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions',
+    ''
+  )
+  .option(
+    '--allowDots <bool>',
+    'Determines if dots should be used for serialization object properties'
+  )
+  .addOption(arrayFormatOption);
 
 program.parse(process.argv);
 

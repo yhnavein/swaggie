@@ -64,6 +64,13 @@ abstract class BaseService {
   }
 }
 
+function paramsSerializer(params: any) {
+  return encodeParams(params, null, {
+    allowDots: true,
+    arrayFormat: 'repeat',
+  });
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -488,13 +495,6 @@ function encodeParams<T = any>(
   }
 
   return encodedParams.join('&');
-}
-
-function paramsSerializer(params: any) {
-  return encodeParams(params, true, null, {
-    allowDots: true,
-    arrayFormat: 'repeat',
-  });
 }
 
 export interface Order {

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateCode from './gen';
-import type { ClientOptions, FullAppOptions } from './types';
+import type { ArrayFormat, ClientOptions, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 
 /**
@@ -41,7 +41,7 @@ function gen(spec: OA3.Document, options: ClientOptions): Promise<string> {
 export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<ClientOptions> {
   try {
     if (!options.config) {
-      return options as ClientOptions;
+      return prepareAppOptions(options as CliOptions);
     }
 
     const configUrl = options.config;
@@ -52,7 +52,7 @@ export async function applyConfigFile(options: Partial<FullAppOptions>): Promise
         `Could not correctly parse config file from "${configUrl}". Is it a valid JSON file?`
       );
     }
-    return { ...parsedConfig, ...options };
+    return prepareAppOptions({ ...parsedConfig, ...options });
   } catch (e) {
     return Promise.reject(
       'Could not correctly load config file. It does not exist or you cannot access it'
@@ -67,3 +67,32 @@ function readFile(filePath: string): Promise<string> {
 }
 
 export type CodeGenResult = [string, ClientOptions];
+
+interface CliOptions extends FullAppOptions {
+  allowDots?: boolean;
+  arrayFormat?: ArrayFormat;
+}
+
+const defaultQueryParamsConfig = {
+  allowDots: true,
+  arrayFormat: 'repeat' as const,
+};
+
+/**
+ * CLI options are flat, but within the app we use nested objects.
+ * This function converts flat options structure to the nested one and
+ * merges it with the default values.
+ * */
+function prepareAppOptions(cliOpts: CliOptions): FullAppOptions {
+  const { allowDots, arrayFormat, queryParamsSerialization = {}, ...rest } = cliOpts;
+  const mergedQueryParamsSerialization = {
+    ...defaultQueryParamsConfig,
+    ...Object.fromEntries(
+      Object.entries(queryParamsSerialization).filter(([_, v]) => v !== undefined)
+    ),
+    ...(allowDots !== undefined ? { allowDots } : {}),
+    ...(arrayFormat !== undefined ? { arrayFormat } : {}),
+  };
+
+  return { ...rest, queryParamsSerialization: mergedQueryParamsSerialization };
+}

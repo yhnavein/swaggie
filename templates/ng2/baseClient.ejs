@@ -64,3 +64,10 @@ abstract class BaseService {
   }
 }
 
+function paramsSerializer(params: any) {
+  return encodeParams(params, null, {
+    allowDots: <%= it.allowDots %>,
+    arrayFormat: '<%= it.arrayFormat %>',
+  });
+}
+
