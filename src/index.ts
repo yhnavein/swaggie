@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateCode from './gen';
-import type { ArrayFormat, ClientOptions, FullAppOptions } from './types';
+import type { ClientOptions, CliOptions, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 
 /**
@@ -68,11 +68,6 @@ function readFile(filePath: string): Promise<string> {
 
 export type CodeGenResult = [string, ClientOptions];
 
-interface CliOptions extends FullAppOptions {
-  allowDots?: boolean;
-  arrayFormat?: ArrayFormat;
-}
-
 const defaultQueryParamsConfig = {
   allowDots: true,
   arrayFormat: 'repeat' as const,
@@ -84,7 +79,7 @@ const defaultQueryParamsConfig = {
  * merges it with the default values.
  * */
 function prepareAppOptions(cliOpts: CliOptions): FullAppOptions {
-  const { allowDots, arrayFormat, queryParamsSerialization = {}, ...rest } = cliOpts;
+  const { allowDots, arrayFormat, template, queryParamsSerialization = {}, ...rest } = cliOpts;
   const mergedQueryParamsSerialization = {
     ...defaultQueryParamsConfig,
     ...Object.fromEntries(
@@ -94,5 +89,9 @@ function prepareAppOptions(cliOpts: CliOptions): FullAppOptions {
     ...(arrayFormat !== undefined ? { arrayFormat } : {}),
   };
 
-  return { ...rest, queryParamsSerialization: mergedQueryParamsSerialization };
+  return {
+    ...rest,
+    queryParamsSerialization: mergedQueryParamsSerialization,
+    template: template ?? 'axios',
+  };
 }

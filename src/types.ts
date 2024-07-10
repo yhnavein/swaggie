@@ -24,6 +24,11 @@ export interface ClientOptions {
   queryParamsSerialization: QueryParamsSerializationOptions;
 }
 
+export interface CliOptions extends FullAppOptions {
+  allowDots?: boolean;
+  arrayFormat?: ArrayFormat;
+}
+
 export interface FullAppOptions extends ClientOptions {
   /** Path to the configuration file that contains actual config to be used */
   config?: string;

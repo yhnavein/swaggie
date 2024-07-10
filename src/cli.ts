@@ -36,11 +36,7 @@ program
     'Base URL that will be used as a default value in the clients',
     ''
   )
-  .option(
-    '-t, --template <string>',
-    'Template used forgenerating API client. Default: "axios"',
-    'axios'
-  )
+  .option('-t, --template <string>', 'Template used forgenerating API client. Default: "axios"')
   .option('--preferAny', 'Use "any" type instead of "unknown"', false)
   .option(
     '--servicePrefix <string>',

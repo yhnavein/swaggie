@@ -3,6 +3,7 @@ import { MockAgent, setGlobalDispatcher } from 'undici';
 
 import { runCodeGenerator, applyConfigFile } from './';
 import { mockRequest } from './utils';
+import type { CliOptions } from './types';
 
 describe('runCodeGenerator', () => {
   let mockAgent: MockAgent;
@@ -129,6 +130,7 @@ describe('applyConfigFile', () => {
       arrayFormat: 'repeat',
       allowDots: true,
     });
+    expect(conf.template).to.be.equal('axios');
   });
 
   it('should load configuration from config file', async () => {
@@ -147,15 +149,17 @@ describe('applyConfigFile', () => {
       arrayFormat: 'repeat',
       allowDots: true,
     });
+    expect(conf.template).to.be.equal('xior');
   });
 
   it('should treat inline parameters with a higher priority', async () => {
-    const parameters = {
+    const parameters: Partial<CliOptions> = {
       config: './test/sample-config.json',
       baseUrl: 'https://wp.pl',
       src: './test/petstore-v3.yml',
       arrayFormat: 'indices',
       allowDots: false,
+      template: 'fetch',
     };
 
     const conf = await applyConfigFile(parameters);
@@ -163,6 +167,7 @@ describe('applyConfigFile', () => {
     expect(conf).to.be.ok;
     expect(conf.baseUrl).to.be.equal('https://wp.pl');
     expect(conf.src).to.be.equal('./test/petstore-v3.yml');
+    expect(conf.template).to.be.equal('fetch');
     expect(conf.queryParamsSerialization).to.deep.equal({
       arrayFormat: 'indices',
       allowDots: false,

@@ -54,7 +54,7 @@ Options:
   -s, --src <url|path>      The url or path to the Open API spec file
   -o, --out <filePath>      The path to the file where the API would be generated. Use stdout if left empty
   -b, --baseUrl <string>    Base URL that will be used as a default value in the clients (default: "")
-  -t, --template <string>   Template used forgenerating API client. Default: "axios" (default: "axios")
+  -t, --template <string>   Template used forgenerating API client. Default: "axios"
   --preferAny               Use "any" type instead of "unknown" (default: false)
   --servicePrefix <string>  Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions (default: "")
   --allowDots <bool>        Determines if dots should be used for serialization object properties

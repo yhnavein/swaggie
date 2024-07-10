@@ -11,7 +11,7 @@
 
 export const defaults = {
   baseUrl: '',
-  paramsSerializer: (params) =>
+  paramsSerializer: (params: any) =>
     encodeParams(params, null, {
       allowDots: true,
       arrayFormat: 'repeat',

@@ -13,7 +13,7 @@ import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 
 export const axios = Axios.create({
   baseURL: '',
-  paramsSerializer: (params) =>
+  paramsSerializer: (params: any) =>
     encodeParams(params, null, {
       allowDots: true,
       arrayFormat: 'repeat',
