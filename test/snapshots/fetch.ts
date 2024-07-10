@@ -113,6 +113,9 @@ export const petClient = {
     return fetch(url, {
       method: 'PUT',
       body: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       ...$config,
     })
     .then((response) => response.json() as Promise<Pet>);
@@ -329,7 +332,7 @@ export const userClient = {
 
     return fetch(url, {
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: body,
       ...$config,
     })
     .then((response) => response.json() as Promise<unknown>);

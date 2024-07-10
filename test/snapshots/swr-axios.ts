@@ -59,8 +59,8 @@ export const petClient = {
       url: url,
       method: 'DELETE',
       headers: {
-                'api_key': apiKey,
-              },
+        'api_key': apiKey,
+      },
       ...$config,
     });
   },
@@ -77,8 +77,8 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-            'status': status,
-          },
+        'status': status,
+      },
       ...$config,
     });
   },
@@ -95,8 +95,8 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-            'tags': tags,
-          },
+        'tags': tags,
+      },
       ...$config,
     });
   },
@@ -128,6 +128,9 @@ export const petClient = {
       url: url,
       method: 'PUT',
       data: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       ...$config,
     });
   },
@@ -148,9 +151,9 @@ export const petClient = {
       url: url,
       method: 'POST',
       params: {
-            'name': name,
+        'name': name,
         'status': status,
-          },
+      },
       ...$config,
     });
   },
@@ -172,8 +175,8 @@ export const petClient = {
       method: 'POST',
       data: body,
       params: {
-            'additionalMetadata': additionalMetadata,
-          },
+        'additionalMetadata': additionalMetadata,
+      },
       ...$config,
     });
   },
@@ -189,19 +192,17 @@ export function usepetfindPetsByStatus(  status: ("available" | "pending" | "sol
   const url = `/pet/findByStatus`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
-  if (!!status) {
-    cacheUrl += `status=${status}&`;
-  }
+  const cacheUrl = `${url}?${encodeParams({'status': status,
+    })}`;
 
-  const { data, error, mutate } = useSWR<Pet[]>(
+const { data, error, mutate } = useSWR<Pet[]>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
     method: 'GET',
     params: {
-        'status': status,
-      },
+      'status': status,
+    },
     ...$axiosConf})
     .then((resp) => resp.data),
   config);
@@ -223,19 +224,17 @@ export function usepetfindPetsByTags(  tags: string[]  | null | undefined,
   const url = `/pet/findByTags`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
-  if (!!tags) {
-    cacheUrl += `tags=${tags}&`;
-  }
+  const cacheUrl = `${url}?${encodeParams({'tags': tags,
+    })}`;
 
-  const { data, error, mutate } = useSWR<Pet[]>(
+const { data, error, mutate } = useSWR<Pet[]>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
     method: 'GET',
     params: {
-        'tags': tags,
-      },
+      'tags': tags,
+    },
     ...$axiosConf})
     .then((resp) => resp.data),
   config);
@@ -257,7 +256,8 @@ export function usepetPetById(  petId: number ,
   const url = `/pet/${encodeURIComponent(`${petId}`)}`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
+  const cacheUrl = `${url}?`;
+
 const { data, error, mutate } = useSWR<Pet>(
   key ?? cacheUrl,
   () => axios.request({
@@ -344,7 +344,8 @@ export function usestoreInventory(  $config?: SwrConfig
   const url = `/store/inventory`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
+  const cacheUrl = `${url}?`;
+
 const { data, error, mutate } = useSWR<{ [key: string]: number }>(
   key ?? cacheUrl,
   () => axios.request({
@@ -371,7 +372,8 @@ export function usestoreOrderById(  orderId: number ,
   const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
+  const cacheUrl = `${url}?`;
+
 const { data, error, mutate } = useSWR<Order>(
   key ?? cacheUrl,
   () => axios.request({
@@ -466,9 +468,9 @@ const { data, error, mutate } = useSWR<Order>(
       url: url,
       method: 'GET',
       params: {
-            'username': username,
+        'username': username,
         'password': password,
-          },
+      },
       ...$config,
     });
   },
@@ -515,7 +517,8 @@ export function useuserUserByName(  username: string ,
   const url = `/user/${encodeURIComponent(`${username}`)}`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
+  const cacheUrl = `${url}?`;
+
 const { data, error, mutate } = useSWR<User>(
   key ?? cacheUrl,
   () => axios.request({
@@ -544,24 +547,19 @@ export function useuserloginUser(  username: string  | null | undefined,
   const url = `/user/login`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
-  if (!!username) {
-    cacheUrl += `username=${username}&`;
-  }
+  const cacheUrl = `${url}?${encodeParams({'username': username,
+    'password': password,
+    })}`;
 
-  if (!!password) {
-    cacheUrl += `password=${password}&`;
-  }
-
-  const { data, error, mutate } = useSWR<string>(
+const { data, error, mutate } = useSWR<string>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
     method: 'GET',
     params: {
-        'username': username,
+      'username': username,
       'password': password,
-      },
+    },
     ...$axiosConf})
     .then((resp) => resp.data),
   config);
@@ -581,7 +579,8 @@ export function useuserlogoutUser(  $config?: SwrConfig
   const url = `/user/logout`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  let cacheUrl = url + '?';
+  const cacheUrl = `${url}?`;
+
 const { data, error, mutate } = useSWR<unknown>(
   key ?? cacheUrl,
   () => axios.request({

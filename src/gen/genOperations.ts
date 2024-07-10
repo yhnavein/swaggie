@@ -87,6 +87,15 @@ export function prepareOperations(
       params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
     }
 
+    const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
+    // Some libraries need to know the content type of the request body in case of urlencoded body
+    if (body?.contentType === 'urlencoded') {
+      headers.push({
+        originalName: 'Content-Type',
+        value: 'application/x-www-form-urlencoded',
+      });
+    }
+
     return {
       returnType,
       responseContentType,
@@ -96,7 +105,7 @@ export function prepareOperations(
       parameters: params,
       query: queryParams,
       body,
-      headers: getParams(op.parameters as OA3.ParameterObject[], options, ['header']),
+      headers,
     };
   });
 }
@@ -229,10 +238,11 @@ interface IOperation {
 
 interface IOperationParam {
   originalName: string;
-  name: string;
-  type: string;
-  optional: boolean;
-  original: OA3.ParameterObject | OA3.RequestBodyObject;
+  name?: string;
+  type?: string;
+  value?: string;
+  optional?: boolean;
+  original?: OA3.ParameterObject | OA3.RequestBodyObject;
 }
 
 interface IBodyParam extends IOperationParam {

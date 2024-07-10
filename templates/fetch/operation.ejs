@@ -18,20 +18,24 @@ $config?: RequestInit
     return fetch(url, {
       method: '<%= it.method %>',
 <% if(it.body) { %>
-<% if(it.body.contentType === 'binary') { %>
-      body: <%= it.body.name %>,
+<% if(it.body.contentType === 'json') { %>
+      body: JSON.stringify(<%= it.body.name %>),
 <% } else if(it.body.contentType === 'urlencoded') { %>
       body: new URLSearchParams(<%= it.body.name %> as any),
 <% } else { %>
-      body: JSON.stringify(<%= it.body.name %>),
+      body: <%= it.body.name %>,
 <% } %>
 <% } %>
 <% if(it.headers && it.headers.length > 0) { %>
       headers: {
-    <% it.headers.forEach((parameter) => { %>
-    '<%= parameter.originalName %>': <%= parameter.name %> ?? '',
-    <% }); %>
-  },
+  <% it.headers.forEach((parameter) => { %>
+    <% if (parameter.value) { %>
+  '<%= parameter.originalName %>': '<%= parameter.value %>',
+    <% } else { %>
+  '<%= parameter.originalName %>': <%= parameter.name %> ?? '',
+    <% } %>
+  <% }); %>
+},
 <% } %>
       ...$config,
     })

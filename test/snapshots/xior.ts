@@ -120,6 +120,9 @@ export const petClient = {
       url: url,
       method: 'PUT',
       data: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       ...$config,
     });
   },
