@@ -31,17 +31,12 @@ program
     'The path to the file where the API would be generated. Use stdout if left empty',
     process.env.OPEN_API_OUT
   )
-  .option(
-    '-b, --baseUrl <string>',
-    'Base URL that will be used as a default value in the clients',
-    ''
-  )
+  .option('-b, --baseUrl <string>', 'Base URL that will be used as a default value in the clients')
   .option('-t, --template <string>', 'Template used forgenerating API client. Default: "axios"')
-  .option('--preferAny', 'Use "any" type instead of "unknown"', false)
+  .option('--preferAny', 'Use "any" type instead of "unknown"')
   .option(
     '--servicePrefix <string>',
-    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions',
-    ''
+    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions'
   )
   .option(
     '--allowDots <bool>',
