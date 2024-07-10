@@ -186,8 +186,15 @@ export function renderComment(comment: string | null) {
 }
 
 function getMergedCompositeObjects(schema: OA3.SchemaObject) {
-  const composite = schema.allOf || schema.oneOf || schema.anyOf || [];
+  const { allOf, oneOf, anyOf, ...safeSchema } = schema;
+  const composite = allOf || oneOf || anyOf || [];
   const subSchemas = composite.filter((v) => !('$ref' in v));
+
+  // This is the case where schema itself is of type object, with properties
+  // and at the same time has sub-schemas like `allOf` or similar
+  if (safeSchema.type === 'object' && 'properties' in safeSchema) {
+    subSchemas.push(safeSchema);
+  }
 
   return deepMerge({}, ...subSchemas);
 }

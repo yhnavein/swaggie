@@ -9,6 +9,12 @@ using System.Threading;
 namespace Swaggie.Swashbuckle;
 
 // ReSharper disable once ClassNeverInstantiated.Global
+/// <summary>
+/// Filter that replaces original complex query parameters with the reference types instead
+/// This will work only for OpenAPI 3.0 (as Swagger does not offer such functionality)
+/// Without it, Swashbuckle will flatten objects into query parameters, which will effectively
+/// break the contract with the API
+/// </summary>
 public class FromQueryModelFilter : IOperationFilter
 {
   public void Apply(OpenApiOperation operation, OperationFilterContext context)

@@ -401,6 +401,34 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
   signForSpam?: boolean;
 }`);
       });
+
+      it('should handle allOf combined with object directly', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              required: ['rememberMe'],
+              type: 'object',
+              allOf: [{ $ref: '#/components/schemas/LoginPart' }],
+
+              properties: {
+                rememberMe: {
+                  type: 'boolean',
+                },
+                signForSpam: {
+                  type: 'boolean',
+                },
+              },
+            },
+          }),
+          opts
+        );
+
+        expect(res).to.equalWI(`
+export interface AuthenticationData extends LoginPart {
+  rememberMe: boolean;
+  signForSpam?: boolean;
+}`);
+      });
     });
 
     // Use of `anyOf` and `oneOf` is implemented in the same and very simple way

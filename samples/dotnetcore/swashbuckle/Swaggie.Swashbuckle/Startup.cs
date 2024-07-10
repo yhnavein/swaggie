@@ -48,6 +48,7 @@ public class Startup
       {
         c.SchemaGeneratorOptions.UseOneOfForPolymorphism = true;
         c.OperationFilter<FromQueryModelFilter>();
+        c.SchemaFilter<XEnumNamesSchemaFilter>();
         c.CustomOperationIds(e =>
           $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sample Api", Version = "v1" });
