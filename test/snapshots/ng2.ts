@@ -9,9 +9,9 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import { Observable, throwError as _observableThrow, of as _observableOf } from "rxjs";
+import type { Observable } from "rxjs";
 import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
-import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 export const API_BASE_URL = new InjectionToken<string>("API_BASE_URL");
 
@@ -64,6 +64,13 @@ abstract class BaseService {
   }
 }
 
+function paramsSerializer(params: any) {
+  return encodeParams(params, null, {
+    allowDots: true,
+    arrayFormat: 'repeat',
+  });
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -82,8 +89,8 @@ export class petService extends BaseService {
   addPet(
     body: Pet,
     config?: any
-  ): Observable<unknown> {
-    let url = '/pet?';
+  ): Observable<Pet> {
+    const url = `/pet?`;
 
     return this.$post(
       url,
@@ -102,8 +109,7 @@ export class petService extends BaseService {
     petId: number,
     config?: any
   ): Observable<unknown> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$delete(
       url,
@@ -112,18 +118,16 @@ export class petService extends BaseService {
   }
 
 /**
-   * @param status  
+   * @param status (optional) 
    * @return Success
    */
   findPetsByStatus(
-    status: ('available'|'pending'|'sold')[],
+    status: ("available" | "pending" | "sold") | null | undefined,
     config?: any
   ): Observable<Pet[]> {
-    let url = '/pet/findByStatus?';
-    if (status !== undefined) {
-      status.forEach(item => { url += 'status=' + encodeURIComponent("" + item) + "&"; });
-    }
-  
+    const url = `/pet/findByStatus?${paramsSerializer({'status': status,
+      })}`;
+
     return this.$get(
       url,
       config
@@ -131,18 +135,16 @@ export class petService extends BaseService {
   }
 
 /**
-   * @param tags  
+   * @param tags (optional) 
    * @return Success
    */
   findPetsByTags(
-    tags: string[],
+    tags: string[] | null | undefined,
     config?: any
   ): Observable<Pet[]> {
-    let url = '/pet/findByTags?';
-    if (tags !== undefined) {
-      tags.forEach(item => { url += 'tags=' + encodeURIComponent("" + item) + "&"; });
-    }
-  
+    const url = `/pet/findByTags?${paramsSerializer({'tags': tags,
+      })}`;
+
     return this.$get(
       url,
       config
@@ -157,8 +159,7 @@ export class petService extends BaseService {
     petId: number,
     config?: any
   ): Observable<Pet> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return this.$get(
       url,
@@ -173,12 +174,12 @@ export class petService extends BaseService {
   updatePet(
     body: Pet,
     config?: any
-  ): Observable<unknown> {
-    let url = '/pet?';
+  ): Observable<Pet> {
+    const url = `/pet?`;
 
     return this.$put(
       url,
-      body,
+      new URLSearchParams(body as any),
       config
     );
   }
@@ -195,48 +196,35 @@ export class petService extends BaseService {
     status: string | null | undefined,
     config?: any
   ): Observable<unknown> {
-    let url = '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-    if (!!name) {
-      formDataBody.append("name", name);
-    }
-    if (!!status) {
-      formDataBody.append("status", status);
-    }
+    const url = `/pet/${encodeURIComponent(`${petId}`)}?${paramsSerializer({'name': name,
+      'status': status,
+      })}`;
 
     return this.$post(
       url,
-      formDataBody,
+      null,
       config
     );
   }
 
 /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    * @return Success
    */
   uploadFile(
+    body: File | null | undefined,
     petId: number,
     additionalMetadata: string | null | undefined,
-    file: File | null | undefined,
     config?: any
-  ): Observable<ApiResponse> {
-    let url = '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-    if (!!additionalMetadata) {
-      formDataBody.append("additionalMetadata", additionalMetadata);
-    }
-    if (!!file) {
-      formDataBody.append("file", file);
-    }
+  ): Observable<File> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${paramsSerializer({'additionalMetadata': additionalMetadata,
+      })}`;
 
     return this.$post(
       url,
-      formDataBody,
+      body,
       config
     );
   }
@@ -262,8 +250,7 @@ export class storeService extends BaseService {
     orderId: number,
     config?: any
   ): Observable<unknown> {
-    let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$delete(
       url,
@@ -277,7 +264,7 @@ export class storeService extends BaseService {
   getInventory(
     config?: any
   ): Observable<{ [key: string]: number }> {
-    let url = '/store/inventory?';
+    const url = `/store/inventory?`;
 
     return this.$get(
       url,
@@ -293,8 +280,7 @@ export class storeService extends BaseService {
     orderId: number,
     config?: any
   ): Observable<Order> {
-    let url = '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return this.$get(
       url,
@@ -303,14 +289,14 @@ export class storeService extends BaseService {
   }
 
 /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
   placeOrder(
-    body: Order,
+    body: Order | null | undefined,
     config?: any
   ): Observable<Order> {
-    let url = '/store/order?';
+    const url = `/store/order?`;
 
     return this.$post(
       url,
@@ -333,14 +319,14 @@ export class userService extends BaseService {
   }
 
   /**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
   createUser(
-    body: User,
+    body: User | null | undefined,
     config?: any
-  ): Observable<unknown> {
-    let url = '/user?';
+  ): Observable<User> {
+    const url = `/user?`;
 
     return this.$post(
       url,
@@ -350,31 +336,14 @@ export class userService extends BaseService {
   }
 
 /**
-   * @param body  
-   * @return Success
-   */
-  createUsersWithArrayInput(
-    body: User[],
-    config?: any
-  ): Observable<unknown> {
-    let url = '/user/createWithArray?';
-
-    return this.$post(
-      url,
-      body,
-      config
-    );
-  }
-
-/**
-   * @param body  
+   * @param body (optional) 
    * @return Success
    */
   createUsersWithListInput(
-    body: User[],
+    body: User[] | null | undefined,
     config?: any
-  ): Observable<unknown> {
-    let url = '/user/createWithList?';
+  ): Observable<User> {
+    const url = `/user/createWithList?`;
 
     return this.$post(
       url,
@@ -391,8 +360,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<unknown> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$delete(
       url,
@@ -408,8 +376,7 @@ export class userService extends BaseService {
     username: string,
     config?: any
   ): Observable<User> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$get(
       url,
@@ -418,23 +385,19 @@ export class userService extends BaseService {
   }
 
 /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    * @return Success
    */
   loginUser(
-    username: string,
-    password: string,
+    username: string | null | undefined,
+    password: string | null | undefined,
     config?: any
   ): Observable<string> {
-    let url = '/user/login?';
-    if (username !== undefined) {
-      url += 'username=' + encodeURIComponent("" + username) + "&";
-    }
-    if (password !== undefined) {
-      url += 'password=' + encodeURIComponent("" + password) + "&";
-    }
-  
+    const url = `/user/login?${paramsSerializer({'username': username,
+      'password': password,
+      })}`;
+
     return this.$get(
       url,
       config
@@ -447,7 +410,7 @@ export class userService extends BaseService {
   logoutUser(
     config?: any
   ): Observable<unknown> {
-    let url = '/user/logout?';
+    const url = `/user/logout?`;
 
     return this.$get(
       url,
@@ -456,17 +419,16 @@ export class userService extends BaseService {
   }
 
 /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    * @return Success
    */
   updateUser(
+    body: FormData | null | undefined,
     username: string,
-    body: User,
     config?: any
   ): Observable<unknown> {
-    let url = '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}?`;
 
     return this.$put(
       url,
@@ -477,30 +439,62 @@ export class userService extends BaseService {
 
 }
 
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+/**
+ * Serializes a params object into a query string that is compatible with different REST APIs.
+ * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
+ * Kudos to @suhaotian for the original implementation
+ */
+function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const paramsIsArray = Array.isArray(params);
+  const { arrayFormat, allowDots, serializeDate } = options || {};
 
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
+  const getKey = (key: string) => {
+    if (allowDots && !paramsIsArray) return `.${key}`;
+    if (paramsIsArray) {
+      if (arrayFormat === 'brackets') {
+        return '[]';
+      }
+      if (arrayFormat === 'repeat') {
+        return '';
+      }
+    }
+    return `[${key}]`;
+  };
 
-  status?: 'available'|'pending'|'sold';
-}
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      let value = (params as any)[key];
+      if (value !== undefined) {
+        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
 
-export interface Tag {
-  id?: number;
-  name?: string;
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+        if (!isNaN(value) && value instanceof Date) {
+          value = serializeDate ? serializeDate(value) : value.toISOString();
+        }
+        if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = encodeParams(value, encodedKey, options);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
+        }
+      }
+    }
+  }
+
+  return encodedParams.join('&');
 }
 
 export interface Order {
@@ -508,10 +502,24 @@ export interface Order {
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -521,6 +529,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

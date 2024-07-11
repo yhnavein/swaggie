@@ -1,65 +1,63 @@
-import fs from 'fs';
+import fs from 'node:fs';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import genJsCode from './gen/js';
-import { loadAllTemplateFiles } from './gen/templateManager';
-import { getOperations, resolveSpec } from './swagger';
-import type { ApiSpec, ClientOptions, FullAppOptions } from './types';
+import generateCode from './gen';
+import type { ClientOptions, CliOptions, FullAppOptions } from './types';
+import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 
-/** Runs whole code generation process. @returns generated code */
-export function runCodeGenerator(options: FullAppOptions) {
-  return verifyOptions(options)
-    .then(applyConfigFile)
-    .then((opts) =>
-      resolveSpec(opts.src, { ignoreRefType: '#/definitions/' })
-        .then((spec) => verifySpec(spec))
-        .then((spec) => gen(spec, opts))
-        .then((code) => [code, opts] as CodeGenResult)
-    );
+/**
+ * Runs the whole code generation process.
+ * @returns `CodeGenResult`
+ **/
+export async function runCodeGenerator(options: Partial<FullAppOptions>): Promise<CodeGenResult> {
+  try {
+    verifyOptions(options);
+    const opts = await applyConfigFile(options);
+    const spec = await loadSpecDocument(opts.src);
+    const verifiedSpec = verifyDocumentSpec(spec);
+    const code = await gen(verifiedSpec, opts);
+
+    return [code, opts];
+  } catch (e) {
+    return Promise.reject(e);
+  }
 }
 
-function verifyOptions(options: FullAppOptions) {
+function verifyOptions(options: Partial<FullAppOptions>) {
   if (!options) {
-    return Promise.reject('Options were not provided');
+    throw new Error('Options were not provided');
   }
   if (!!options.config === !!options.src) {
-    return Promise.reject('You need to provide either --config or --src parameters');
+    throw new Error('You need to provide either --config or --src parameters');
   }
-  return Promise.resolve(options);
 }
 
-/** Validates if the spec is correct and if is supported */
-export function verifySpec(spec: ApiSpec): Promise<ApiSpec> {
-  if (!spec || !spec.swagger)
-    return Promise.reject('Spec does not look like Swagger / OpenAPI 2! Open API 3 support is WIP');
-  return Promise.resolve(spec);
-}
-
-function gen(spec: ApiSpec, options: ClientOptions): Promise<string> {
+function gen(spec: OA3.Document, options: ClientOptions): Promise<string> {
   loadAllTemplateFiles(options.template || 'axios');
 
-  const operations = getOperations(spec);
-  return genJsCode(spec, operations, options);
+  return generateCode(spec, options);
 }
 
-export function applyConfigFile(options: FullAppOptions): Promise<ClientOptions> {
-  return new Promise((resolve, reject) => {
+export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<ClientOptions> {
+  try {
     if (!options.config) {
-      return resolve(options);
+      return prepareAppOptions(options as CliOptions);
     }
 
     const configUrl = options.config;
-    return readFile(configUrl)
-      .then((contents) => {
-        const parsedConfig = JSON.parse(contents);
-        if (!parsedConfig || parsedConfig.length < 1) {
-          return reject('Could not correctly load config file. Is it a valid JSON file?');
-        }
-        return resolve(Object.assign({}, parsedConfig, options));
-      })
-      .catch((ex) =>
-        reject('Could not correctly load config file. It does not exist or you cannot access it')
+    const configContents = await readFile(configUrl);
+    const parsedConfig = JSON.parse(configContents);
+    if (!parsedConfig || parsedConfig.length < 1) {
+      throw new Error(
+        `Could not correctly parse config file from "${configUrl}". Is it a valid JSON file?`
       );
-  });
+    }
+    return prepareAppOptions({ ...parsedConfig, ...options });
+  } catch (e) {
+    return Promise.reject(
+      'Could not correctly load config file. It does not exist or you cannot access it'
+    );
+  }
 }
 
 function readFile(filePath: string): Promise<string> {
@@ -69,3 +67,31 @@ function readFile(filePath: string): Promise<string> {
 }
 
 export type CodeGenResult = [string, ClientOptions];
+
+const defaultQueryParamsConfig = {
+  allowDots: true,
+  arrayFormat: 'repeat' as const,
+};
+
+/**
+ * CLI options are flat, but within the app we use nested objects.
+ * This function converts flat options structure to the nested one and
+ * merges it with the default values.
+ * */
+function prepareAppOptions(cliOpts: CliOptions): FullAppOptions {
+  const { allowDots, arrayFormat, template, queryParamsSerialization = {}, ...rest } = cliOpts;
+  const mergedQueryParamsSerialization = {
+    ...defaultQueryParamsConfig,
+    ...Object.fromEntries(
+      Object.entries(queryParamsSerialization).filter(([_, v]) => v !== undefined)
+    ),
+    ...(allowDots !== undefined ? { allowDots } : {}),
+    ...(arrayFormat !== undefined ? { arrayFormat } : {}),
+  };
+
+  return {
+    ...rest,
+    queryParamsSerialization: mergedQueryParamsSerialization,
+    template: template ?? 'axios',
+  };
+}

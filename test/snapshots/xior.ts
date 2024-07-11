@@ -9,10 +9,15 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import xior, { type XiorResponse, type XiorRequestConfig } from "xior";
+import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
 export const http = xior.create({
   baseURL: '',
+  paramsSerializer: (params) =>
+    encodeParams(params, true, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 export const petClient = {
@@ -21,10 +26,10 @@ export const petClient = {
    */
   addPet(body: Pet ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    let url = '/pet';
+  ): Promise<XiorResponse<Pet>> {
+    const url = `/pet`;
 
-    return http.request<unknown>({
+    return http.request<Pet>({
       url: url,
       method: 'POST',
       data: body,
@@ -40,8 +45,7 @@ export const petClient = {
     petId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -54,36 +58,36 @@ export const petClient = {
   },
 
   /**
-   * @param status  
+   * @param status (optional) 
    */
-  findPetsByStatus(status: ('available'|'pending'|'sold')[] ,
+  findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
-    let url = '/pet/findByStatus';
+    const url = `/pet/findByStatus`;
 
     return http.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
-        'status': serializeQueryParam(status),
+        'status': status,
       },
       ...$config,
     });
   },
 
   /**
-   * @param tags  
+   * @param tags (optional) 
    */
-  findPetsByTags(tags: string[] ,
+  findPetsByTags(tags: string[] | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
-    let url = '/pet/findByTags';
+    const url = `/pet/findByTags`;
 
     return http.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
-        'tags': serializeQueryParam(tags),
+        'tags': tags,
       },
       ...$config,
     });
@@ -95,8 +99,7 @@ export const petClient = {
   getPetById(petId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet>> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<Pet>({
       url: url,
@@ -110,13 +113,16 @@ export const petClient = {
    */
   updatePet(body: Pet ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    let url = '/pet';
+  ): Promise<XiorResponse<Pet>> {
+    const url = `/pet`;
 
-    return http.request<unknown>({
+    return http.request<Pet>({
       url: url,
       method: 'PUT',
-      data: body,
+      data: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       ...$config,
     });
   },
@@ -131,48 +137,38 @@ export const petClient = {
     status: string | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/pet/{petId}';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!name) {
-          formDataBody.append("name", name);
-        }
-    if (!!status) {
-          formDataBody.append("status", status);
-        }
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<unknown>({
       url: url,
       method: 'POST',
-      data: formDataBody,
+      params: {
+        'name': name,
+        'status': status,
+      },
       ...$config,
     });
   },
 
   /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    */
-  uploadFile(petId: number ,
+  uploadFile(body: File | null | undefined,
+    petId: number ,
     additionalMetadata: string | null | undefined,
-    file: File | null | undefined,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<ApiResponse>> {
-    let url = '/pet/{petId}/uploadImage';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!additionalMetadata) {
-          formDataBody.append("additionalMetadata", additionalMetadata);
-        }
-    if (!!file) {
-          formDataBody.append("file", file);
-        }
+  ): Promise<XiorResponse<File>> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    return http.request<ApiResponse>({
+    return http.request<File>({
       url: url,
       method: 'POST',
-      data: formDataBody,
+      data: body,
+      params: {
+        'additionalMetadata': additionalMetadata,
+      },
       ...$config,
     });
   },
@@ -186,8 +182,7 @@ export const storeClient = {
   deleteOrder(orderId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -200,7 +195,7 @@ export const storeClient = {
    */
   getInventory($config?: XiorRequestConfig
   ): Promise<XiorResponse<{ [key: string]: number }>> {
-    let url = '/store/inventory';
+    const url = `/store/inventory`;
 
     return http.request<{ [key: string]: number }>({
       url: url,
@@ -215,8 +210,7 @@ export const storeClient = {
   getOrderById(orderId: number ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
-    let url = '/store/order/{orderId}';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return http.request<Order>({
       url: url,
@@ -226,12 +220,12 @@ export const storeClient = {
   },
 
   /**
-   * @param body  
+   * @param body (optional) 
    */
-  placeOrder(body: Order ,
+  placeOrder(body: Order | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
-    let url = '/store/order';
+    const url = `/store/order`;
 
     return http.request<Order>({
       url: url,
@@ -245,14 +239,14 @@ export const storeClient = {
 
 export const userClient = {
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUser(body: User ,
+  createUser(body: User | null | undefined,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    let url = '/user';
+  ): Promise<XiorResponse<User>> {
+    const url = `/user`;
 
-    return http.request<unknown>({
+    return http.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -261,30 +255,14 @@ export const userClient = {
   },
 
   /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUsersWithArrayInput(body: User[] ,
+  createUsersWithListInput(body: User[] | null | undefined,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    let url = '/user/createWithArray';
+  ): Promise<XiorResponse<User>> {
+    const url = `/user/createWithList`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'POST',
-      data: body,
-      ...$config,
-    });
-  },
-
-  /**
-   * @param body  
-   */
-  createUsersWithListInput(body: User[] ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    let url = '/user/createWithList';
-
-    return http.request<unknown>({
+    return http.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -298,8 +276,7 @@ export const userClient = {
   deleteUser(username: string ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -314,8 +291,7 @@ export const userClient = {
   getUserByName(username: string ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<User>({
       url: url,
@@ -325,21 +301,21 @@ export const userClient = {
   },
 
   /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-  loginUser(username: string ,
-    password: string ,
+  loginUser(username: string | null | undefined,
+    password: string | null | undefined,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<string>> {
-    let url = '/user/login';
+    const url = `/user/login`;
 
     return http.request<string>({
       url: url,
       method: 'GET',
       params: {
-        'username': serializeQueryParam(username),
-        'password': serializeQueryParam(password),
+        'username': username,
+        'password': password,
       },
       ...$config,
     });
@@ -349,7 +325,7 @@ export const userClient = {
    */
   logoutUser($config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/user/logout';
+    const url = `/user/logout`;
 
     return http.request<unknown>({
       url: url,
@@ -359,15 +335,14 @@ export const userClient = {
   },
 
   /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    */
-  updateUser(username: string ,
-    body: User ,
+  updateUser(body: FormData | null | undefined,
+    username: string ,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
-    let url = '/user/{username}';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<unknown>({
       url: url,
@@ -379,51 +354,29 @@ export const userClient = {
 
 };
 
-
-function serializeQueryParam(obj: any) {
-  if (obj === null || obj === undefined) return '';
-  if (obj instanceof Date) return obj.toJSON();
-  if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
-  return Object.keys(obj)
-    .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
-    .join('&');
-}
-
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
-
-export interface Category {
-  id?: number;
-  name?: string;
-}
-
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
-
-  status?: 'available'|'pending'|'sold';
-}
-
-export interface Tag {
-  id?: number;
-  name?: string;
-}
-
 export interface Order {
   id?: number;
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -433,6 +386,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

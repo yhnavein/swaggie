@@ -9,36 +9,41 @@
     <% }); %>
 $config?: RequestInit
   ): Promise<<%~ it.returnType %>> {
-    let url = defaults.baseUrl + '<%= it.url %>?';
-<% if(it.pathParams && it.pathParams.length > 0) {
-  it.pathParams.forEach((parameter) => { %>
-    url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
-<% });
-} %>
-<% if(it.query && it.query.length > 0) { %>
-  <% it.query.forEach((parameter) => { %>
-  if (<%= parameter.name %> !== undefined) {
-  <% if(!!parameter.original && parameter.original.type === 'array') { %>
-    <%= parameter.name %>.forEach(item => { url += '<%= parameter.originalName %>=' + serializeQueryParam(item) + "&"; });
-  <% } else {%>
-    url += '<%= parameter.originalName %>=' + serializeQueryParam(<%= parameter.name %>) + "&";
-  <% } %>
-  }
-  <% }); %>
-<% } %>
+    const url = `${defaults.baseUrl}<%= it.url %>?<%
+    if(it.query && it.query.length > 0) { %>${defaults.paramsSerializer({<%
+      it.query.forEach((parameter) => { %>
+'<%= parameter.originalName %>': <%= parameter.name %>,
+      <% }); %>})}<% } %>`;
 
     return fetch(url, {
       method: '<%= it.method %>',
 <% if(it.body) { %>
+<% if(it.body.contentType === 'json') { %>
       body: JSON.stringify(<%= it.body.name %>),
+<% } else if(it.body.contentType === 'urlencoded') { %>
+      body: new URLSearchParams(<%= it.body.name %> as any),
+<% } else { %>
+      body: <%= it.body.name %>,
+<% } %>
 <% } %>
 <% if(it.headers && it.headers.length > 0) { %>
       headers: {
-    <% it.headers.forEach((parameter) => { %>
-    '<%= parameter.originalName %>': <%= parameter.name %>,
-    <% }); %>
-  },
+  <% it.headers.forEach((parameter) => { %>
+    <% if (parameter.value) { %>
+  '<%= parameter.originalName %>': '<%= parameter.value %>',
+    <% } else { %>
+  '<%= parameter.originalName %>': <%= parameter.name %> ?? '',
+    <% } %>
+  <% }); %>
+},
 <% } %>
       ...$config,
-    }).then((response) => response.json() as Promise<<%~ it.returnType %>>);
+    })
+<% if(it.responseContentType === 'binary') { %>
+    .then((response) => response.blob() as Promise<<%~ it.returnType %>>);
+<% } else if(it.responseContentType === 'text') { %>
+    .then((response) => response.text() as Promise<<%~ it.returnType %>>);
+<% } else { %>
+    .then((response) => response.json() as Promise<<%~ it.returnType %>>);
+<% } %>
   },

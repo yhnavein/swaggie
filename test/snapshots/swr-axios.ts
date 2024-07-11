@@ -9,11 +9,16 @@
 // ReSharper disable InconsistentNaming
 // deno-lint-ignore-file
 
-import Axios, { AxiosPromise, AxiosRequestConfig } from "axios";
-import useSWR, { SWRConfiguration, Key } from 'swr';
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
+import useSWR, { type SWRConfiguration, type Key } from 'swr';
 
 export const axios = Axios.create({
   baseURL: '',
+  paramsSerializer: (params: any) =>
+    encodeParams(params, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 interface SwrConfig extends SWRConfiguration {
@@ -29,11 +34,10 @@ export const petClient = {
    */
   addPet(  body: Pet ,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    let url = '/pet';
+  ): AxiosPromise<Pet> {
+    const url = `/pet`;
 
-
-    return axios.request<unknown>({
+    return axios.request<Pet>({
       url: url,
       method: 'POST',
       data: body,
@@ -49,54 +53,50 @@ export const petClient = {
       petId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/pet/{petId}';
-
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<unknown>({
       url: url,
       method: 'DELETE',
       headers: {
-                'api_key': apiKey,
-              },
+        'api_key': apiKey,
+      },
       ...$config,
     });
   },
 
     /**
-   * @param status  
+   * @param status (optional) 
    */
-  findPetsByStatus(  status: ('available'|'pending'|'sold')[] ,
+  findPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
-    let url = '/pet/findByStatus';
-
+    const url = `/pet/findByStatus`;
 
     return axios.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
-            'status': serializeQueryParam(status),
-          },
+        'status': status,
+      },
       ...$config,
     });
   },
 
     /**
-   * @param tags  
+   * @param tags (optional) 
    */
-  findPetsByTags(  tags: string[] ,
+  findPetsByTags(  tags: string[]  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
-    let url = '/pet/findByTags';
-
+    const url = `/pet/findByTags`;
 
     return axios.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
-            'tags': serializeQueryParam(tags),
-          },
+        'tags': tags,
+      },
       ...$config,
     });
   },
@@ -107,9 +107,7 @@ export const petClient = {
   getPetById(  petId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
-    let url = '/pet/{petId}';
-
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<Pet>({
       url: url,
@@ -123,14 +121,16 @@ export const petClient = {
    */
   updatePet(  body: Pet ,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    let url = '/pet';
+  ): AxiosPromise<Pet> {
+    const url = `/pet`;
 
-
-    return axios.request<unknown>({
+    return axios.request<Pet>({
       url: url,
       method: 'PUT',
-      data: body,
+      data: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       ...$config,
     });
   },
@@ -145,50 +145,38 @@ export const petClient = {
       status: string  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/pet/{petId}';
-
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!name) {
-          formDataBody.append("name", name);
-        }
-    if (!!status) {
-          formDataBody.append("status", status);
-        }
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return axios.request<unknown>({
       url: url,
       method: 'POST',
-      data: formDataBody,
+      params: {
+        'name': name,
+        'status': status,
+      },
       ...$config,
     });
   },
 
     /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    */
-  uploadFile(  petId: number ,
+  uploadFile(  body: File  | null | undefined,
+      petId: number ,
       additionalMetadata: string  | null | undefined,
-      file: File  | null | undefined,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<ApiResponse> {
-    let url = '/pet/{petId}/uploadImage';
+  ): AxiosPromise<File> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
-    const formDataBody = new FormData();
-      if (!!additionalMetadata) {
-          formDataBody.append("additionalMetadata", additionalMetadata);
-        }
-    if (!!file) {
-          formDataBody.append("file", file);
-        }
-
-    return axios.request<ApiResponse>({
+    return axios.request<File>({
       url: url,
       method: 'POST',
-      data: formDataBody,
+      data: body,
+      params: {
+        'additionalMetadata': additionalMetadata,
+      },
       ...$config,
     });
   },
@@ -196,28 +184,25 @@ export const petClient = {
   };
 
   /**
-   * @param status  
+   * @param status (optional) 
    */
-export function usepetfindPetsByStatus(  status: ('available'|'pending'|'sold')[] ,
+export function usepetfindPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
       $config?: SwrConfig
   ) {
-  let url = '/pet/findByStatus';
+  const url = `/pet/findByStatus`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
+  const cacheUrl = `${url}?${encodeParams({'status': status,
+    })}`;
 
-  let cacheUrl = url + '?';
-  if (!!status) {
-    cacheUrl += `status=${status}&`;
-  }
-
-  const { data, error, mutate } = useSWR<Pet[]>(
+const { data, error, mutate } = useSWR<Pet[]>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
     method: 'GET',
     params: {
-        'status': serializeQueryParam(status),
-      },
+      'status': status,
+    },
     ...$axiosConf})
     .then((resp) => resp.data),
   config);
@@ -231,28 +216,25 @@ export function usepetfindPetsByStatus(  status: ('available'|'pending'|'sold')[
 }
 
   /**
-   * @param tags  
+   * @param tags (optional) 
    */
-export function usepetfindPetsByTags(  tags: string[] ,
+export function usepetfindPetsByTags(  tags: string[]  | null | undefined,
       $config?: SwrConfig
   ) {
-  let url = '/pet/findByTags';
+  const url = `/pet/findByTags`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
+  const cacheUrl = `${url}?${encodeParams({'tags': tags,
+    })}`;
 
-  let cacheUrl = url + '?';
-  if (!!tags) {
-    cacheUrl += `tags=${tags}&`;
-  }
-
-  const { data, error, mutate } = useSWR<Pet[]>(
+const { data, error, mutate } = useSWR<Pet[]>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
     method: 'GET',
     params: {
-        'tags': serializeQueryParam(tags),
-      },
+      'tags': tags,
+    },
     ...$axiosConf})
     .then((resp) => resp.data),
   config);
@@ -271,12 +253,11 @@ export function usepetfindPetsByTags(  tags: string[] ,
 export function usepetPetById(  petId: number ,
       $config?: SwrConfig
   ) {
-  let url = '/pet/{petId}';
+  const url = `/pet/${encodeURIComponent(`${petId}`)}`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  url = url.replace('{petId}', encodeURIComponent("" + petId));
+  const cacheUrl = `${url}?`;
 
-  let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<Pet>(
   key ?? cacheUrl,
   () => axios.request({
@@ -301,9 +282,7 @@ const { data, error, mutate } = useSWR<Pet>(
   deleteOrder(  orderId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/store/order/{orderId}';
-
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -316,8 +295,7 @@ const { data, error, mutate } = useSWR<Pet>(
    */
   getInventory(  $config?: AxiosRequestConfig
   ): AxiosPromise<{ [key: string]: number }> {
-    let url = '/store/inventory';
-
+    const url = `/store/inventory`;
 
     return axios.request<{ [key: string]: number }>({
       url: url,
@@ -332,9 +310,7 @@ const { data, error, mutate } = useSWR<Pet>(
   getOrderById(  orderId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
-    let url = '/store/order/{orderId}';
-
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return axios.request<Order>({
       url: url,
@@ -344,13 +320,12 @@ const { data, error, mutate } = useSWR<Pet>(
   },
 
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  placeOrder(  body: Order ,
+  placeOrder(  body: Order  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
-    let url = '/store/order';
-
+    const url = `/store/order`;
 
     return axios.request<Order>({
       url: url,
@@ -366,11 +341,11 @@ const { data, error, mutate } = useSWR<Pet>(
    */
 export function usestoreInventory(  $config?: SwrConfig
   ) {
-  let url = '/store/inventory';
+  const url = `/store/inventory`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
+  const cacheUrl = `${url}?`;
 
-  let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<{ [key: string]: number }>(
   key ?? cacheUrl,
   () => axios.request({
@@ -394,12 +369,11 @@ const { data, error, mutate } = useSWR<{ [key: string]: number }>(
 export function usestoreOrderById(  orderId: number ,
       $config?: SwrConfig
   ) {
-  let url = '/store/order/{orderId}';
+  const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+  const cacheUrl = `${url}?`;
 
-  let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<Order>(
   key ?? cacheUrl,
   () => axios.request({
@@ -419,15 +393,14 @@ const { data, error, mutate } = useSWR<Order>(
 
   export const userClient = {
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUser(  body: User ,
+  createUser(  body: User  | null | undefined,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    let url = '/user';
+  ): AxiosPromise<User> {
+    const url = `/user`;
 
-
-    return axios.request<unknown>({
+    return axios.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -436,32 +409,14 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUsersWithArrayInput(  body: User[] ,
+  createUsersWithListInput(  body: User[]  | null | undefined,
       $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    let url = '/user/createWithArray';
+  ): AxiosPromise<User> {
+    const url = `/user/createWithList`;
 
-
-    return axios.request<unknown>({
-      url: url,
-      method: 'POST',
-      data: body,
-      ...$config,
-    });
-  },
-
-    /**
-   * @param body  
-   */
-  createUsersWithListInput(  body: User[] ,
-      $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    let url = '/user/createWithList';
-
-
-    return axios.request<unknown>({
+    return axios.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -475,9 +430,7 @@ const { data, error, mutate } = useSWR<Order>(
   deleteUser(  username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/user/{username}';
-
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -492,9 +445,7 @@ const { data, error, mutate } = useSWR<Order>(
   getUserByName(  username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
-    let url = '/user/{username}';
-
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return axios.request<User>({
       url: url,
@@ -504,23 +455,22 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-  loginUser(  username: string ,
-      password: string ,
+  loginUser(  username: string  | null | undefined,
+      password: string  | null | undefined,
       $config?: AxiosRequestConfig
   ): AxiosPromise<string> {
-    let url = '/user/login';
-
+    const url = `/user/login`;
 
     return axios.request<string>({
       url: url,
       method: 'GET',
       params: {
-            'username': serializeQueryParam(username),
-        'password': serializeQueryParam(password),
-          },
+        'username': username,
+        'password': password,
+      },
       ...$config,
     });
   },
@@ -529,8 +479,7 @@ const { data, error, mutate } = useSWR<Order>(
    */
   logoutUser(  $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/user/logout';
-
+    const url = `/user/logout`;
 
     return axios.request<unknown>({
       url: url,
@@ -540,16 +489,14 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    */
-  updateUser(  username: string ,
-      body: User ,
+  updateUser(  body: FormData  | null | undefined,
+      username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
-    let url = '/user/{username}';
-
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return axios.request<unknown>({
       url: url,
@@ -567,12 +514,11 @@ const { data, error, mutate } = useSWR<Order>(
 export function useuserUserByName(  username: string ,
       $config?: SwrConfig
   ) {
-  let url = '/user/{username}';
+  const url = `/user/${encodeURIComponent(`${username}`)}`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
-  url = url.replace('{username}', encodeURIComponent("" + username));
+  const cacheUrl = `${url}?`;
 
-  let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<User>(
   key ?? cacheUrl,
   () => axios.request({
@@ -591,35 +537,29 @@ const { data, error, mutate } = useSWR<User>(
 }
 
   /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-export function useuserloginUser(  username: string ,
-      password: string ,
+export function useuserloginUser(  username: string  | null | undefined,
+      password: string  | null | undefined,
       $config?: SwrConfig
   ) {
-  let url = '/user/login';
+  const url = `/user/login`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
+  const cacheUrl = `${url}?${encodeParams({'username': username,
+    'password': password,
+    })}`;
 
-  let cacheUrl = url + '?';
-  if (!!username) {
-    cacheUrl += `username=${username}&`;
-  }
-
-  if (!!password) {
-    cacheUrl += `password=${password}&`;
-  }
-
-  const { data, error, mutate } = useSWR<string>(
+const { data, error, mutate } = useSWR<string>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
     method: 'GET',
     params: {
-        'username': serializeQueryParam(username),
-      'password': serializeQueryParam(password),
-      },
+      'username': username,
+      'password': password,
+    },
     ...$axiosConf})
     .then((resp) => resp.data),
   config);
@@ -636,11 +576,11 @@ export function useuserloginUser(  username: string ,
    */
 export function useuserlogoutUser(  $config?: SwrConfig
   ) {
-  let url = '/user/logout';
+  const url = `/user/logout`;
   const { axios: $axiosConf, key, ...config } = $config || {};
 
+  const cacheUrl = `${url}?`;
 
-  let cacheUrl = url + '?';
 const { data, error, mutate } = useSWR<unknown>(
   key ?? cacheUrl,
   () => axios.request({
@@ -659,38 +599,61 @@ const { data, error, mutate } = useSWR<unknown>(
 }
 
   
-function serializeQueryParam(obj: any) {
-  if (obj === null || obj === undefined) return '';
-  if (obj instanceof Date) return obj.toJSON();
-  if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
-  return Object.keys(obj)
-    .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
-    .join('&');
-}
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
+/**
+ * Serializes a params object into a query string that is compatible with different REST APIs.
+ * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
+ * Kudos to @suhaotian for the original implementation
+ */
+function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const paramsIsArray = Array.isArray(params);
+  const { arrayFormat, allowDots, serializeDate } = options || {};
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+  const getKey = (key: string) => {
+    if (allowDots && !paramsIsArray) return `.${key}`;
+    if (paramsIsArray) {
+      if (arrayFormat === 'brackets') {
+        return '[]';
+      }
+      if (arrayFormat === 'repeat') {
+        return '';
+      }
+    }
+    return `[${key}]`;
+  };
 
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      let value = (params as any)[key];
+      if (value !== undefined) {
+        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
 
-  status?: 'available'|'pending'|'sold';
-}
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+        if (!isNaN(value) && value instanceof Date) {
+          value = serializeDate ? serializeDate(value) : value.toISOString();
+        }
+        if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = encodeParams(value, encodedKey, options);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
+        }
+      }
+    }
+  }
 
-export interface Tag {
-  id?: number;
-  name?: string;
+  return encodedParams.join('&');
 }
 
 export interface Order {
@@ -698,10 +661,24 @@ export interface Order {
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -711,6 +688,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

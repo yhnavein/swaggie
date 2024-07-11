@@ -1,5 +1,14 @@
 {
-  "extension": ["js", "ts"],
-  "require": ["sucrase/register"],
-  "spec": ["src/**/*.spec.ts", "test/**/*.spec.ts"]
+  "extension": [
+    "js",
+    "ts"
+  ],
+  "require": [
+    "sucrase/register",
+    "./test/test-setup.ts"
+  ],
+  "spec": [
+    "src/**/*.spec.ts",
+    "test/*.spec.ts"
+  ]
 }

@@ -11,6 +11,11 @@
 
 export const defaults = {
   baseUrl: '',
+  paramsSerializer: (params: any) =>
+    encodeParams(params, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 };
 
 export const petClient = {
@@ -19,14 +24,15 @@ export const petClient = {
    */
   addPet(body: Pet ,
     $config?: RequestInit
-  ): Promise<unknown> {
-    let url = defaults.baseUrl + '/pet?';
+  ): Promise<Pet> {
+    const url = `${defaults.baseUrl}/pet?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -37,50 +43,48 @@ export const petClient = {
     petId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return fetch(url, {
       method: 'DELETE',
       headers: {
-        'api_key': apiKey,
+        'api_key': apiKey ?? '',
       },
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
-   * @param status  
+   * @param status (optional) 
    */
-  findPetsByStatus(status: ('available'|'pending'|'sold')[] ,
+  findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
     $config?: RequestInit
   ): Promise<Pet[]> {
-    let url = defaults.baseUrl + '/pet/findByStatus?';
-    if (status !== undefined) {
-      status.forEach(item => { url += 'status=' + serializeQueryParam(item) + "&"; });
-    }
-  
+    const url = `${defaults.baseUrl}/pet/findByStatus?${defaults.paramsSerializer({'status': status,
+      })}`;
+
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Pet[]>);
+    })
+    .then((response) => response.json() as Promise<Pet[]>);
   },
 
   /**
-   * @param tags  
+   * @param tags (optional) 
    */
-  findPetsByTags(tags: string[] ,
+  findPetsByTags(tags: string[] | null | undefined,
     $config?: RequestInit
   ): Promise<Pet[]> {
-    let url = defaults.baseUrl + '/pet/findByTags?';
-    if (tags !== undefined) {
-      tags.forEach(item => { url += 'tags=' + serializeQueryParam(item) + "&"; });
-    }
-  
+    const url = `${defaults.baseUrl}/pet/findByTags?${defaults.paramsSerializer({'tags': tags,
+      })}`;
+
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Pet[]>);
+    })
+    .then((response) => response.json() as Promise<Pet[]>);
   },
 
   /**
@@ -89,13 +93,13 @@ export const petClient = {
   getPetById(petId: number ,
     $config?: RequestInit
   ): Promise<Pet> {
-    let url = defaults.baseUrl + '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Pet>);
+    })
+    .then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -103,14 +107,18 @@ export const petClient = {
    */
   updatePet(body: Pet ,
     $config?: RequestInit
-  ): Promise<unknown> {
-    let url = defaults.baseUrl + '/pet?';
+  ): Promise<Pet> {
+    const url = `${defaults.baseUrl}/pet?`;
 
     return fetch(url, {
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<Pet>);
   },
 
   /**
@@ -123,32 +131,36 @@ export const petClient = {
     status: string | null | undefined,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/pet/{petId}?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?${defaults.paramsSerializer({'name': name,
+      'status': status,
+      })}`;
 
     return fetch(url, {
       method: 'POST',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
+   * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
-   * @param file (optional) 
    */
-  uploadFile(petId: number ,
+  uploadFile(body: File | null | undefined,
+    petId: number ,
     additionalMetadata: string | null | undefined,
-    file: File | null | undefined,
     $config?: RequestInit
-  ): Promise<ApiResponse> {
-    let url = defaults.baseUrl + '/pet/{petId}/uploadImage?';
-    url = url.replace('{petId}', encodeURIComponent("" + petId));
+  ): Promise<File> {
+    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${defaults.paramsSerializer({'additionalMetadata': additionalMetadata,
+      })}`;
 
     return fetch(url, {
       method: 'POST',
+      body: body,
       ...$config,
-    }).then((response) => response.json() as Promise<ApiResponse>);
+    })
+    .then((response) => response.blob() as Promise<File>);
   },
 
 };
@@ -159,25 +171,26 @@ export const storeClient = {
   deleteOrder(orderId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return fetch(url, {
       method: 'DELETE',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
    */
   getInventory($config?: RequestInit
   ): Promise<{ [key: string]: number }> {
-    let url = defaults.baseUrl + '/store/inventory?';
+    const url = `${defaults.baseUrl}/store/inventory?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<{ [key: string]: number }>);
+    })
+    .then((response) => response.json() as Promise<{ [key: string]: number }>);
   },
 
   /**
@@ -186,75 +199,63 @@ export const storeClient = {
   getOrderById(orderId: number ,
     $config?: RequestInit
   ): Promise<Order> {
-    let url = defaults.baseUrl + '/store/order/{orderId}?';
-    url = url.replace('{orderId}', encodeURIComponent("" + orderId));
+    const url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<Order>);
+    })
+    .then((response) => response.json() as Promise<Order>);
   },
 
   /**
-   * @param body  
+   * @param body (optional) 
    */
-  placeOrder(body: Order ,
+  placeOrder(body: Order | null | undefined,
     $config?: RequestInit
   ): Promise<Order> {
-    let url = defaults.baseUrl + '/store/order?';
+    const url = `${defaults.baseUrl}/store/order?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<Order>);
+    })
+    .then((response) => response.json() as Promise<Order>);
   },
 
 };
 export const userClient = {
     /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUser(body: User ,
+  createUser(body: User | null | undefined,
     $config?: RequestInit
-  ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user?';
+  ): Promise<User> {
+    const url = `${defaults.baseUrl}/user?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<User>);
   },
 
   /**
-   * @param body  
+   * @param body (optional) 
    */
-  createUsersWithArrayInput(body: User[] ,
+  createUsersWithListInput(body: User[] | null | undefined,
     $config?: RequestInit
-  ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/createWithArray?';
+  ): Promise<User> {
+    const url = `${defaults.baseUrl}/user/createWithList?`;
 
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
-  },
-
-  /**
-   * @param body  
-   */
-  createUsersWithListInput(body: User[] ,
-    $config?: RequestInit
-  ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/createWithList?';
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<User>);
   },
 
   /**
@@ -263,13 +264,13 @@ export const userClient = {
   deleteUser(username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
 
     return fetch(url, {
       method: 'DELETE',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
@@ -278,102 +279,122 @@ export const userClient = {
   getUserByName(username: string ,
     $config?: RequestInit
   ): Promise<User> {
-    let url = defaults.baseUrl + '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<User>);
+    })
+    .then((response) => response.json() as Promise<User>);
   },
 
   /**
-   * @param username  
-   * @param password  
+   * @param username (optional) 
+   * @param password (optional) 
    */
-  loginUser(username: string ,
-    password: string ,
+  loginUser(username: string | null | undefined,
+    password: string | null | undefined,
     $config?: RequestInit
   ): Promise<string> {
-    let url = defaults.baseUrl + '/user/login?';
-    if (username !== undefined) {
-      url += 'username=' + serializeQueryParam(username) + "&";
-    }
-    if (password !== undefined) {
-      url += 'password=' + serializeQueryParam(password) + "&";
-    }
-  
+    const url = `${defaults.baseUrl}/user/login?${defaults.paramsSerializer({'username': username,
+      'password': password,
+      })}`;
+
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<string>);
+    })
+    .then((response) => response.json() as Promise<string>);
   },
 
   /**
    */
   logoutUser($config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/logout?';
+    const url = `${defaults.baseUrl}/user/logout?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
   /**
+   * @param body (optional) 
    * @param username  
-   * @param body  
    */
-  updateUser(username: string ,
-    body: User ,
+  updateUser(body: FormData | null | undefined,
+    username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
-    let url = defaults.baseUrl + '/user/{username}?';
-    url = url.replace('{username}', encodeURIComponent("" + username));
+    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
 
     return fetch(url, {
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: body,
       ...$config,
-    }).then((response) => response.json() as Promise<unknown>);
+    })
+    .then((response) => response.json() as Promise<unknown>);
   },
 
 };
 
-function serializeQueryParam(obj: any) {
-  if (obj === null || obj === undefined) return '';
-  if (obj instanceof Date) return encodeURIComponent(obj.toJSON());
-  if (typeof obj !== 'object' || Array.isArray(obj)) return encodeURIComponent(obj);
-  return Object.keys(obj)
-    .reduce((a: any, b) => a.push(encodeURIComponent(b) + '=' + encodeURIComponent(obj[b])) && a, [])
-    .join('&');
-}
+/**
+ * Serializes a params object into a query string that is compatible with different REST APIs.
+ * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
+ * Kudos to @suhaotian for the original implementation
+ */
+function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const paramsIsArray = Array.isArray(params);
+  const { arrayFormat, allowDots, serializeDate } = options || {};
 
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
-}
+  const getKey = (key: string) => {
+    if (allowDots && !paramsIsArray) return `.${key}`;
+    if (paramsIsArray) {
+      if (arrayFormat === 'brackets') {
+        return '[]';
+      }
+      if (arrayFormat === 'repeat') {
+        return '';
+      }
+    }
+    return `[${key}]`;
+  };
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      let value = (params as any)[key];
+      if (value !== undefined) {
+        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
 
-export interface Pet {
-  name: string;
-  photoUrls: string[];
-  id?: number;
-  category?: Category;
-  tags?: Tag[];
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+        if (!isNaN(value) && value instanceof Date) {
+          value = serializeDate ? serializeDate(value) : value.toISOString();
+        }
+        if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = encodeParams(value, encodedKey, options);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
+        }
+      }
+    }
+  }
 
-  status?: 'available'|'pending'|'sold';
-}
-
-export interface Tag {
-  id?: number;
-  name?: string;
+  return encodedParams.join('&');
 }
 
 export interface Order {
@@ -381,10 +402,24 @@ export interface Order {
   petId?: number;
   quantity?: number;
   shipDate?: Date;
+// Order Status
+  status?: ("placed" | "approved" | "delivered");
+  complete?: boolean;}
 
-  status?: 'placed'|'approved'|'delivered';
-  complete?: boolean;
-}
+export interface Customer {
+  id?: number;
+  username?: string;
+  address?: Address[];}
+
+export interface Address {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;}
+
+export interface Category {
+  id?: number;
+  name?: string;}
 
 export interface User {
   id?: number;
@@ -394,6 +429,23 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
+// User Status
+  userStatus?: number;}
 
-  userStatus?: number;
-}
+export interface Tag {
+  id?: number;
+  name?: string;}
+
+export interface Pet {
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[];
+  tags?: Tag[];
+// pet status in the store
+  status?: ("available" | "pending" | "sold");}
+
+export interface ApiResponse {
+  code?: number;
+  type?: string;
+  message?: string;}

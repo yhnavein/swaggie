@@ -11,40 +11,20 @@
     <% }); %>
 config?: any
   ): Observable<<%~ it.returnType %>> {
-    let url = '<%= it.url %>?';
-<% if(it.pathParams && it.pathParams.length > 0) {
-  it.pathParams.forEach((parameter) => { %>
-    url = url.replace('{<%= parameter.name %>}', encodeURIComponent("" + <%= parameter.name %>));
-<% });
-} %>
-<% if(it.formData && it.formData.length > 0) { %>
-    const formDataBody = new FormData();
-<% it.formData.forEach((parameter) => { %>
-    if (!!<%= parameter.name %>) {
-  <% if(parameter.original && parameter.original.type === 'array') { %>
-    <%= parameter.name %>.forEach((f: any) => formDataBody.append("<%= parameter.originalName %>", f));
-  <% } else { %>
-    formDataBody.append("<%= parameter.originalName %>", <%= parameter.name %><%= parameter.type !== 'string' && parameter.type !== 'File' && parameter.type !== 'Blob' ? '.toString()' : '' %>);
-  <% } %>
-  }
-<% });
-} %>
-<% if(it.query && it.query.length > 0) { %>
-  <% it.query.forEach((parameter) => { %>
-  if (<%= parameter.name %> !== undefined) {
-  <% if(!!parameter.original && parameter.original.type === 'array') { %>
-    <%= parameter.name %>.forEach(item => { url += '<%= parameter.originalName %>=' + encodeURIComponent("" + item) + "&"; });
-  <% } else {%>
-    url += '<%= parameter.originalName %>=' + encodeURIComponent("" + <%= parameter.name %>) + "&";
-  <% } %>
-  }
-  <% }); %>
-<% } %>
+    const url = `<%= it.url %>?<%
+    if(it.query && it.query.length > 0) { %>${paramsSerializer({<%
+      it.query.forEach((parameter) => { %>
+'<%= parameter.originalName %>': <%= parameter.name %>,
+      <% }); %>})}<% } %>`;
 
     return this.$<%= it.method.toLowerCase() %>(
       url,
 <% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
-      <%= it.body ? it.body.name : (it.formData && it.formData.length > 0) ? 'formDataBody' : 'null' %>,
+<% if(it.body) { %>
+      <%= it.body.contentType === 'urlencoded' ? 'new URLSearchParams(' + it.body.name + ' as any)' : it.body.name %>,
+<% } else { %>
+      null,
+<% } %>
 <% } %>
       config
     );

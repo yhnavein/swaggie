@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Eta } from 'eta';
 
 let engine: Eta;
@@ -21,6 +21,9 @@ export function loadAllTemplateFiles(templateName: string | null) {
   engine = new Eta({ views: templatesDir });
 }
 
+/**
+ * Get's a template file and renders it with the provided data.
+ */
 export function renderFile(templateFile: string, data: object = {}) {
   return engine.render(templateFile, data);
 }

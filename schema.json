@@ -3,6 +3,27 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Swaggie Settings Schema",
   "definitions": {
+    "QueryParamsSerialization": {
+      "additionalProperties": true,
+      "description": "Settings for query parameters serialization",
+      "properties": {
+        "allowDots": {
+          "description": "Determines if dots should be used for serialization object properties. Otherwise brackets will be used",
+          "type": "boolean",
+          "default": true
+        },
+        "arrayFormat": {
+          "description": "Determines how arrays should be serialized",
+          "enum": [
+            "indices",
+            "repeat",
+            "brackets"
+          ],
+          "type": "string",
+          "default": "repeat"
+        }
+      }
+    },
     "Globals": {
       "additionalProperties": true,
       "description": "Main settings of the application",
@@ -38,11 +59,6 @@
           "description": "Use `any` type instead of `unknown`",
           "type": "boolean"
         },
-        "queryModels": {
-          "default": false,
-          "description": "Generate models for query string instead list of parameters",
-          "type": "boolean"
-        },
         "servicePrefix": {
           "default": "",
           "description": "Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions",
@@ -56,6 +72,9 @@
             "string"
           ],
           "type": "string"
+        },
+        "queryParamsSerialization": {
+          "$ref": "#/definitions/QueryParamsSerialization"
         }
       },
       "required": [

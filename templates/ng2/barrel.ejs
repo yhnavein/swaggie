@@ -1,0 +1,58 @@
+
+/**
+ * Serializes a params object into a query string that is compatible with different REST APIs.
+ * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
+ * Kudos to @suhaotian for the original implementation
+ */
+function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const paramsIsArray = Array.isArray(params);
+  const { arrayFormat, allowDots, serializeDate } = options || {};
+
+  const getKey = (key: string) => {
+    if (allowDots && !paramsIsArray) return `.${key}`;
+    if (paramsIsArray) {
+      if (arrayFormat === 'brackets') {
+        return '[]';
+      }
+      if (arrayFormat === 'repeat') {
+        return '';
+      }
+    }
+    return `[${key}]`;
+  };
+
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      let value = (params as any)[key];
+      if (value !== undefined) {
+        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
+
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+        if (!isNaN(value) && value instanceof Date) {
+          value = serializeDate ? serializeDate(value) : value.toISOString();
+        }
+        if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = encodeParams(value, encodedKey, options);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
+        }
+      }
+    }
+  }
+
+  return encodedParams.join('&');
+}
+

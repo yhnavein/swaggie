@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,71 +7,88 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
-namespace Swaggie.Nswag
+namespace Swaggie.Nswag;
+
+public class Startup
 {
-  public class Startup
+  private readonly bool _isProduction;
+
+  public Startup(IWebHostEnvironment env)
   {
-    private readonly bool _isProduction;
+    _isProduction = env.IsProduction();
+  }
 
-    public Startup(IWebHostEnvironment env)
+  // This method gets called by the runtime. Use this method to add services to the container
+  public void ConfigureServices(IServiceCollection services)
+  {
+    services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
+    JsonConvert.DefaultSettings = () => new JsonSerializerSettings
     {
-      _isProduction = env.IsProduction();
-    }
+      // Automatically converts DotNetNames to jsFriendlyNames
+      ContractResolver = new CamelCasePropertyNamesContractResolver()
+    };
 
-    // This method gets called by the runtime. Use this method to add services to the container
-    public void ConfigureServices(IServiceCollection services)
-    {
-      services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
-      JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+    services.AddControllers()
+      .AddNewtonsoftJson(x =>
       {
-        // Automatically converts DotNetNames to jsFriendlyNames
-        ContractResolver = new CamelCasePropertyNamesContractResolver()
-      };
+        // Ignores potential reference loop problems
+        x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
-      services.AddControllers()
-        .AddNewtonsoftJson(x =>
+        // Serializes dotnet enums to strings (you can remove it if you prefer numbers instead)
+        x.SerializerSettings.Converters.Add(new StringEnumConverter());
+      });
+
+    services.AddHttpContextAccessor();
+
+    if (!_isProduction)
+    {
+      services.AddOpenApiDocument(c =>
+      {
+        c.PostProcess = document =>
         {
-          // Ignores potential reference loop problems
-          x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-          // Serializes dotnet enums to strings (you can remove it if you prefer numbers instead)
-          x.SerializerSettings.Converters.Add(new StringEnumConverter());
-        });
-
-      services.AddHttpContextAccessor();
-
-      if (!_isProduction)
-      {
-        services.AddSwaggerDocument(c =>
-        {
-          c.GenerateEnumMappingDescription = true;
-          c.PostProcess = document =>
-          {
-            document.Info.Version = "v1";
-            document.Info.Title = "Sample Api";
-          };
-        });
-      }
+          document.Info.Version = "v1";
+          document.Info.Title = "Sample Api";
+        };
+      });
     }
+  }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
-      IHostApplicationLifetime appLifetime)
+  // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
+  public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+    IHostApplicationLifetime appLifetime)
+  {
+    if (!_isProduction)
     {
-      if (!_isProduction)
-      {
-        app.UseDeveloperExceptionPage();
-      }
-
-      app.UseRouting();
-
-      if (!_isProduction)
-      {
-        app.UseOpenApi();
-        app.UseSwaggerUi3(c => { c.ServerUrl = "/api"; });
-      }
-
-      app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+      app.UseDeveloperExceptionPage();
     }
+
+    app.UseRouting();
+
+    if (!_isProduction)
+    {
+      app.UseOpenApi();
+      app.UseSwaggerUi(c =>
+      {
+        c.DocExpansion = "list";
+        c.DefaultModelsExpandDepth = 1;
+      });
+      app.UseReDoc(c =>
+      {
+        c.Path = "/redoc";
+      });
+
+      // Redirect root to Swagger UI
+      app.Use(async (context, next) =>
+      {
+        if (context.Request.Path.Value == "/")
+        {
+          context.Response.Redirect("/swagger");
+          return;
+        }
+        await next();
+      });
+    }
+
+    app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
   }
 }

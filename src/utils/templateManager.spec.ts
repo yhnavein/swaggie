@@ -1,25 +1,26 @@
-import os from 'os';
-import fs from 'fs';
-import path from 'path';
+import os from 'node:os';
+import fs from 'node:fs';
+import path from 'node:path';
 import { expect } from 'chai';
+
 import { loadAllTemplateFiles, renderFile } from './templateManager';
 
 const GOOD_FILE = 'client.ejs';
 
 describe('loadAllTemplateFiles', () => {
-  it('should handle loading wrong template', async () => {
+  it('should handle loading wrong template', () => {
     expect(() => {
       loadAllTemplateFiles('non-existent');
     }).to.throw('Could not found');
   });
 
-  it('should handle empty template name', async () => {
+  it('should handle empty template name', () => {
     expect(() => {
       loadAllTemplateFiles('');
     }).to.throw('No template');
   });
 
-  it('should handle null template', async () => {
+  it('should handle null template', () => {
     expect(() => {
       loadAllTemplateFiles(null);
     }).to.throw('No template');
@@ -52,8 +53,8 @@ describe('render', () => {
           parameters: [],
           name: 'TestName',
           returnType: 'string',
+          responseContentType: 'json',
           url: 'api/test',
-          pathParams: [],
           method: 'GET',
           formData: [],
           body: null,

@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
 import { bold, cyan, red } from 'nanocolors';
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 
 import { type CodeGenResult, runCodeGenerator } from './index';
 import type { FullAppOptions } from './types';
+
+const arrayFormatOption = new Option(
+  '--arrayFormat <format>',
+  'Determines how arrays should be serialized'
+).choices(['indices', 'repeat', 'brackets']);
 
 const program = new Command();
 program
@@ -26,24 +31,22 @@ program
     'The path to the file where the API would be generated. Use stdout if left empty',
     process.env.OPEN_API_OUT
   )
-  .option(
-    '-b, --baseUrl <string>',
-    'Base URL that will be used as a default value in the clients. Default: ""'
-  )
+  .option('-b, --baseUrl <string>', 'Base URL that will be used as a default value in the clients')
   .option('-t, --template <string>', 'Template used forgenerating API client. Default: "axios"')
-  .option('--preferAny', 'Use "any" type instead of "unknown". Default: false')
+  .option('--preferAny', 'Use "any" type instead of "unknown"')
   .option(
     '--servicePrefix <string>',
-    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions. Default: ""'
+    'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions'
   )
   .option(
-    '--queryModels',
-    'Generate models for query string instead list of parameters. Default: false'
-  );
+    '--allowDots <bool>',
+    'Determines if dots should be used for serialization object properties'
+  )
+  .addOption(arrayFormatOption);
 
 program.parse(process.argv);
 
-const options = program.opts() as FullAppOptions;
+const options = program.opts<FullAppOptions>();
 
 runCodeGenerator(options).then(complete, error);
 
@@ -58,7 +61,7 @@ function complete([code, opts]: CodeGenResult) {
   process.exit(0);
 }
 
-function error(e) {
+function error(e: any) {
   const msg = e instanceof Error ? e.message : e;
   console.error(red(msg));
   process.exit(1);

@@ -1,11 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
   "out": "./.tmp/test1",
-  "src": "https://petstore.swagger.io/v2/swagger.json",
-  "template": "axios",
+  "src": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json",
+  "template": "xior",
   "baseUrl": "https://google.pl",
   "preferAny": true,
   "servicePrefix": "Test",
-  "queryModels": true,
-  "dateFormat": "string"
+  "dateFormat": "string",
+  "queryParamsSerialization": {
+    "arrayFormat": "repeat",
+    "allowDots": true
+  }
 }

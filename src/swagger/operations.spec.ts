@@ -1,30 +1,24 @@
 import { expect } from 'chai';
-import { resolveSpec } from './swagger';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
+
 import { getOperations } from './operations';
+import { getDocument } from '../utils';
+import type { ApiOperation } from '../types';
 
-describe('getPathOperation', () => {
+describe('getOperations', () => {
   it('should handle empty operation list', () => {
-    const spec = {
-      swagger: '2.0',
-      paths: {},
-      definitions: {},
-    };
+    const res = getOperations(getDocument());
 
-    const res = getOperations(spec as any);
-
-    expect(res).to.be.ok;
     expect(res.length).to.eq(0);
   });
 
   it('should handle one operation list', () => {
-    const spec = {
-      swagger: '2.0',
+    const spec = getDocument({
       paths: {
         '/api/heartbeat': {
           get: {
             tags: ['System'],
             operationId: 'ApiHeartbeatGet',
-            produces: ['application/json'],
             responses: {
               '200': {
                 description: 'Service is available.',
@@ -33,79 +27,178 @@ describe('getPathOperation', () => {
           },
         },
       },
-      definitions: {},
-      contentTypes: [],
-      accepts: [],
-    };
+    });
 
-    const res = getOperations(spec as any);
+    const res = getOperations(spec);
 
-    const validResp = [
+    const validResp: ApiOperation[] = [
       {
-        accepts: ['application/json'],
-        contentTypes: [],
         group: 'System',
-        id: 'ApiHeartbeatGet',
+        operationId: 'ApiHeartbeatGet',
         method: 'get',
         parameters: [],
         path: '/api/heartbeat',
-        responses: [{ code: '200', description: 'Service is available.' }],
-        security: undefined,
+        responses: { 200: { description: 'Service is available.' } },
         tags: ['System'],
       },
     ];
-    expect(res).to.be.eql(validResp);
+    expect(res).to.deep.equal(validResp);
   });
 
-  it('should handle additional content types', () => {
-    const spec = {
-      swagger: '2.0',
+  it('should handle empty operationId or tags', () => {
+    const spec = getDocument({
       paths: {
-        '/api/heartbeat': {
-          post: {
-            tags: ['System'],
-            operationId: 'ApiHeartbeatGet',
-            produces: ['application/json'],
-            consumes: ['application/x-www-form-urlencoded'],
+        '/api/heartbeat': {},
+        '/api/pokemon': {
+          get: {
+            tags: ['Pokemon'],
+            operationId: null,
             responses: {
-              '200': {
-                description: 'Service is available.',
-              },
+              '200': { $ref: '#/components/responses/PokemonList' },
             },
+          },
+          post: {
+            tags: [],
+            operationId: null,
+            responses: {},
+          },
+          patch: {
+            operationId: 'pokePatch',
+            responses: {},
           },
         },
       },
-      definitions: {},
-      contentTypes: [],
-      accepts: [],
-    };
+    });
 
-    const res = getOperations(spec as any);
+    const res = getOperations(spec);
 
-    expect(res).to.be.ok;
-    expect(res[0].contentTypes).to.be.eql(['application/x-www-form-urlencoded']);
+    const validResp: ApiOperation[] = [
+      {
+        group: 'Pokemon',
+        // id will be generated as sanitized method + path when it's not defined
+        operationId: 'getApiPokemon',
+        method: 'get',
+        parameters: [],
+        path: '/api/pokemon',
+        responses: { 200: { $ref: '#/components/responses/PokemonList' } },
+        tags: ['Pokemon'],
+      },
+      {
+        group: 'default',
+        // id will be generated as sanitized method + path when it's not defined
+        operationId: 'postApiPokemon',
+        method: 'post',
+        parameters: [],
+        path: '/api/pokemon',
+        responses: {},
+        tags: [],
+      },
+      {
+        group: 'default',
+        operationId: 'pokePatch',
+        method: 'patch',
+        parameters: [],
+        path: '/api/pokemon',
+        responses: {},
+      },
+    ];
+    expect(res).to.deep.equal(validResp);
   });
 
-  it('should parse operations from spec [PetStore Example]', async () => {
-    const path = `${__dirname}/../../test/petstore.yml`;
-    const spec = await resolveSpec(path);
-    const operations = getOperations(spec);
-    expect(operations).to.be.ok;
-    expect(operations.length).to.eq(3);
+  it('should handle inheritance of parameters', () => {
+    const inheritedParams: OA3.ParameterObject[] = [
+      {
+        name: 'limit',
+        in: 'query',
+        schema: { type: 'integer' },
+      },
+      {
+        name: 'offset',
+        in: 'query',
+        schema: { type: 'integer' },
+      },
+      {
+        name: 'filter',
+        in: 'query',
+        schema: { $ref: '#/components/schemas/Filter' },
+      },
+    ];
 
-    const listPets = operations.find((op) => op.id === 'listPets');
-    expect(listPets).to.be.ok;
-    expect(listPets?.method).to.be.equal('get');
-    expect(listPets?.path).to.be.equal('/pets');
-    expect(listPets?.tags).to.be.ok;
-    expect(listPets?.tags?.[0]).to.be.equal('pets');
-    expect(listPets?.responses).to.be.ok;
-    expect(listPets?.responses.length).to.eq(2);
+    const spec = getDocument({
+      paths: {
+        '/api/pokemon': {
+          get: {
+            operationId: 'A',
+            parameters: [],
+            responses: {},
+          },
+          post: {
+            operationId: 'B',
+            responses: {},
+          },
+          patch: {
+            operationId: 'C',
+            parameters: [
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'number', format: 'int32' },
+              },
+              {
+                name: 'sort',
+                in: 'query',
+                schema: { $ref: '#/components/schemas/Sort' },
+              },
+            ],
+            responses: {},
+          },
+          // parameters that should be inherited by all operations above
+          parameters: inheritedParams,
+        },
+      },
+    });
 
-    const res200 = listPets?.responses.find((res) => res.code === '200');
-    expect(res200).to.be.ok;
-    expect(res200?.headers['x-next'].type).to.be.equal('string');
-    const resDefault = listPets?.responses.find((res) => res.code === 'default');
-    expect(resDefault).to.be.ok;
+    const res = getOperations(spec);
+
+    const validResp: ApiOperation[] = [
+      {
+        group: 'default',
+        operationId: 'A',
+        method: 'get',
+        parameters: inheritedParams,
+        path: '/api/pokemon',
+        responses: {},
+      },
+      {
+        group: 'default',
+        operationId: 'B',
+        method: 'post',
+        parameters: inheritedParams,
+        path: '/api/pokemon',
+        responses: {},
+      },
+      {
+        group: 'default',
+        operationId: 'C',
+        method: 'patch',
+        parameters: [
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'number', format: 'int32' },
+          },
+          {
+            name: 'sort',
+            in: 'query',
+            schema: { $ref: '#/components/schemas/Sort' },
+          },
+          inheritedParams[1],
+          inheritedParams[2],
+        ],
+        path: '/api/pokemon',
+        responses: {},
+      },
+    ];
+    expect(res).to.deep.equal(validResp);
   });
 });

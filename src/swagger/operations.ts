@@ -1,10 +1,5 @@
-import type {
-  ApiOperation,
-  ApiOperationResponse,
-  ApiOperationSecurity,
-  ApiSpec,
-  HttpMethod,
-} from '../types';
+import type { OpenAPIV3 as OA3 } from 'openapi-types';
+import type { ApiOperation, HttpMethod } from '../types';
 
 const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
 
@@ -26,99 +21,86 @@ const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'p
  *    { "method": "POST", "path": "/api/heartbeat", ... },
  *  ]
  */
-export function getOperations(spec: ApiSpec): ApiOperation[] {
+export function getOperations(spec: OA3.Document): ApiOperation[] {
   return getPaths(spec).reduce<ApiOperation[]>(
-    (ops, pathInfo) => ops.concat(getPathOperations(pathInfo, spec)),
+    (acc, el) => acc.concat(getPathOperations(el, spec)),
     []
   );
 }
 
-function getPaths(spec: ApiSpec): object[] {
+/**
+ * This method converts dictionary-alike path definition to path array
+ * @example
+ * "/url": { ... } -> [ { "path": "/url", ... } ]
+ */
+function getPaths(spec: OA3.Document): PathInfo[] {
   return Object.keys(spec.paths || {}).map((path) => Object.assign({ path }, spec.paths[path]));
 }
 
-function getPathOperations(pathInfo, spec): ApiOperation[] {
+function getPathOperations(pathInfo: PathInfo, spec: OA3.Document): ApiOperation[] {
   return Object.keys(pathInfo)
     .filter((key) => !!~SUPPORTED_METHODS.indexOf(key))
     .map((method) => getPathOperation(method as HttpMethod, pathInfo, spec));
 }
 
-function inheritPathParams(op, spec, pathInfo) {
+/**
+ * Parameters can be defined on the path level and should be inherited by all operations
+ * contained in the path.
+ */
+function inheritPathParams(op: ApiOperation, spec: OA3.Document, pathInfo: PathInfo) {
   const pathParams = spec.paths[pathInfo.path].parameters;
   if (pathParams) {
-    pathParams.forEach((pathParam) => {
-      if (!op.parameters.some((p) => p.name === pathParam.name && p.in === pathParam.in)) {
-        op.parameters.push(Object.assign({}, pathParam));
+    for (const pathParam of pathParams) {
+      if ('$ref' in pathParam) {
+        if (
+          !op.parameters
+            .filter((p) => '$ref' in p)
+            .some((p: OA3.ReferenceObject) => p.$ref === pathParam.$ref)
+        ) {
+          op.parameters.push(Object.assign({}, pathParam));
+        }
+      } else {
+        if (
+          !op.parameters
+            .filter((p) => 'name' in p)
+            .some((p: OA3.ParameterObject) => p.name === pathParam.name && p.in === pathParam.in)
+        ) {
+          op.parameters.push(Object.assign({}, pathParam));
+        }
       }
-    });
+    }
   }
 }
 
-function getPathOperation(method: HttpMethod, pathInfo, spec: ApiSpec): ApiOperation {
-  const op = Object.assign({ method, path: pathInfo.path, parameters: [] }, pathInfo[method]);
-  op.id = op.operationId;
+function getPathOperation(
+  method: HttpMethod,
+  pathInfo: PathInfo,
+  spec: OA3.Document
+): ApiOperation {
+  const op: ApiOperation = Object.assign(
+    { method, path: pathInfo.path, parameters: [], group: getOperationGroupName(pathInfo[method]) },
+    pathInfo[method]
+  );
 
   // if there's no explicit operationId given, create one based on the method and path
-  if (!op.id) {
-    op.id = method + pathInfo.path;
-    op.id = op.id.replace(/[\/{(?\/{)\-]([^{.])/g, (_, m) => m.toUpperCase());
-    op.id = op.id.replace(/[\/}\-]/g, '');
+  // and make it normalized for further usage
+  if (!op.operationId) {
+    op.operationId = (method + pathInfo.path)
+      .replace(/[\/{(?\/{)\-]([^{.])/g, (_, m) => m.toUpperCase())
+      .replace(/[\/}\-]/g, '');
   }
 
   inheritPathParams(op, spec, pathInfo);
 
-  op.group = getOperationGroupName(op);
-  delete op.operationId;
-  op.responses = getOperationResponses(op);
-  op.security = getOperationSecurity(op, spec);
-
-  const operation: any = op;
-  if (operation.consumes) {
-    operation.contentTypes = operation.consumes;
-  }
-  if (operation.produces) {
-    operation.accepts = operation.produces;
-  }
-  delete operation.consumes;
-  delete operation.produces;
-
-  if (!op.contentTypes || !op.contentTypes.length) {
-    op.contentTypes = spec.contentTypes.slice();
-  }
-  if (!op.accepts || !op.accepts.length) {
-    op.accepts = spec.accepts.slice();
-  }
-  return op as ApiOperation;
+  return op;
 }
 
-function getOperationGroupName(op: any): string {
-  let name = op.tags && op.tags.length ? op.tags[0] : 'default';
+function getOperationGroupName(op: OA3.OperationObject): string {
+  let name = op.tags?.length ? op.tags[0] : 'default';
   name = name.replace(/[^$_a-z0-9]+/gi, '');
   return name.replace(/^[0-9]+/m, '');
 }
 
-function getOperationResponses(op: any): ApiOperationResponse[] {
-  return Object.keys(op.responses || {}).map((code) => {
-    const info = op.responses[code];
-    info.code = code;
-    return info;
-  });
-}
-
-function getOperationSecurity(op: any, spec: any): ApiOperationSecurity[] {
-  let security;
-
-  if (op.security && op.security.length) {
-    security = op.security;
-  } else if (spec.security && spec.security.length) {
-    security = spec.security;
-  } else {
-    return;
-  }
-
-  return security.map((def) => {
-    const id = Object.keys(def)[0];
-    const scopes = def[id].length ? def[id] : undefined;
-    return { id, scopes };
-  });
+interface PathInfo extends OA3.PathItemObject {
+  path: string;
 }

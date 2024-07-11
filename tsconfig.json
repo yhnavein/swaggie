@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "target": "es2017",
+    "rootDir": "./",
+    "target": "ES2021",
     "module": "commonjs",
     "declaration": true,
     "removeComments": false,
     "esModuleInterop": true,
     "sourceMap": false,
     "newLine": "lf",
+    "noEmit": true,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "dist", "test", "coverage", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "coverage", "test/snapshots"]
 }
