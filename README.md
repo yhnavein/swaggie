@@ -10,14 +10,26 @@
 ![npm downloads](https://img.shields.io/npm/dw/swaggie.svg)
 ![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
 ![npm install size](https://packagephobia.now.sh/badge?p=swaggie)
+![Hackage Dependencies](https://img.shields.io/hackage-deps/v/swaggie)
 
-<!-- ![Dependencies](https://img.shields.io/david/yhnavein/swaggie.svg) -->
-
-Generate ES6 or Typescript code from an OpenAPI 3.0 spec, so that accessing REST API resources from the client code is less error-prone, static-typed and just easier to use long-term.
+Generate Typescript code from an OpenAPI 3.0 document, so that accessing REST API resources from the client code is less error-prone, static-typed and just easier to use long-term.
 
 You can take a look at the [Examples section](#example) down below.
 
 Project is based and inspired by [OpenApi Client](https://github.com/mikestead/openapi-client).
+
+### Features
+
+- Generate TypeScript code from OpenAPI 3.0 spec
+- Supports `fetch`, `axios`, `xior`, `SWR + axios`, `Angular 1`, `Angular 2+` templates. It's flexible.
+- Possible to create your own template that works with your existing codebase
+- It's a dev tool that generates code, so it's not a runtime dependency
+- Support for `allOf`, `oneOf`, `anyOf` and `$ref` in schemas
+- Support for different types of enums
+- Support for different content types
+- JSDoc comments for generated code
+- Small library size and very small and tree-shakable output that is all placed in one file
+- OpenAPI 3.1 is partially supported (mostly enums, more to come)
 
 ## Install
 
@@ -31,7 +43,7 @@ Or globally to run CLI from anywhere
 
 ## OpenAPI versions
 
-Swaggie from version 1.0 supports OpenAPI 3.0 (and some features of 3.1). Swagger or OpenAPI v2 documents are not supported anymore, but you have few options how to deal with it:
+Swaggie from version 1.0 supports OpenAPI 3.0 (and some features of 3.1). Swagger or OpenAPI 2.0 documents are not supported anymore, but you have few options how to deal with it:
 
 - **(preferred)** From your backend server generate OpenAPI 3.0 spec instead of version 2 (samples are updated to use OpenAPI 3.0)
 - Convert your OpenAPI 2.0 spec to 3.0 using [swagger2openapi](https://www.npmjs.com/package/swagger2openapi) tool (or something similar)
@@ -65,7 +77,7 @@ Options:
 Sample CLI usage using Swagger's Pet Store:
 
 ```bash
-swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore/
+swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore.ts
 ```
 
 `swaggie` outputs TypeScript that is somehow formatted, but it's far from perfect. You can adjust the generated code by prettifying output using your preferred beautify tool using your repo's styling guidelines. For example involving `prettier` looks like this:
@@ -114,7 +126,7 @@ ng2       Template for Angular 2+ (uses HttpClient, InjectionTokens, etc)
 
 If you want to use your own template, you can use the path to your template for the `-t` parameter:
 
-```
+```bash
 swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore --template ./my-swaggie-template/
 ```
 
@@ -159,13 +171,13 @@ Once you know what your backend expects, you can adjust the configuration file a
 
 [prettier](https://prettier.io/) - the most popular one
 
-```sh
+```bash
 prettier ./FILE_PATH.ts --write
 ```
 
 [biome](https://biomejs.dev) - the super fast one
 
-```sh
+```bash
 biome check ./FILE_PATH.ts --apply-unsafe
 ```
 
@@ -235,44 +247,6 @@ You might wonder how to set up server to fully utilize Swaggie's features. For t
 
 Server is not necessary to use Swaggie. Swaggie cares only about the JSON/yaml file with the Open API spec, but for your development purpose you might want to have a server that can serve this file automatically from the actual endpoints.
 
-## Competitors
-
-If you are familiar with the client-code generators for the Swagger / OpenAPI standards then you might wonder why `swaggie` is better than existing tools. I compiled a quick comparison with other tools below:
-
-### Swaggie
-
-- Fast and small ![swaggie size](https://packagephobia.now.sh/badge?p=swaggie)
-- Lightweight and easy to start
-- Easy to contribute to, custom templates
-- Flexible, suits well in the existing apps
-- Generates REST clients and all models
-- Supports different templates (like `axios`, `fetch`, `xior`, `swr-axios`, `ng1`, `ng2`)
-- Written in TypeScript
-- Generates only one file with everything you need inside
-
-### [NSwag](https://github.com/RicoSuter/NSwag)
-
-- Slow and big ![nswag size](https://packagephobia.now.sh/badge?p=nswag)
-- Complicated templates, not easy to contribute to
-- Enforces usage of other tools and architecture
-- Generates more boilerplate code
-- Written in .NET, require .NET to execute, although published to npm as well
-- Many more features (but mostly for .NET apps), client generation is just a part of it
-
-### [Hey API](https://heyapi.vercel.app)
-
-- Fast and small ![nswag size](https://packagephobia.now.sh/badge?p=%40hey-api%2Fopenapi-ts)
-- No flexibility, other clients are discouraged from use
-- Generates a lot of code and multiple files
-- Written in TypeScript
-
-### [Kiota](https://learn.microsoft.com/en-us/openapi/kiota/)
-
-- A lot of boilerplate code and many files
-- Written in .NET, requires .NET to execute, published to NuGet
-- Not flexible at all - you need to use their architecture in your code
-- Looks like an enterprise solution with many configuration options
-
 ## Using Swaggie programmatically
 
 ```javascript
@@ -297,7 +271,7 @@ function error(e) {
 
 | Supported                                                                      | Not supported                              |
 | ------------------------------------------------------------------------------ | ------------------------------------------ |
-| OpenAPI 3                                                                      | Swagger 2                                  |
+| OpenAPI 3                                                                      | Swagger, Open API 2.0                      |
 | `allOf`, `oneOf`, `anyOf`, `$ref` to schemas                                   | `not`                                      |
 | Spec formats: `JSON`, `YAML`                                                   | Very complex query params                  |
 | Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (one will be used) |
