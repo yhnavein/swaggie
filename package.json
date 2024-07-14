@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate TypeScript REST client code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests && npm run types",
-    "rm-tests": "find dist/ -name '*.spec.js' -type f -delete",
+    "rm-tests": "find dist/ \\( -name '*.spec.js' -o -name 'types.js' \\) -type f -delete",
     "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
     "test": "mocha",
     "coverage": "npx nyc -r text -r json-summary mocha"

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
 import generateTypes, { renderComment } from './genTypes';
-import { getClientOptions, getDocument } from '../utils';
+import { getClientOptions, getDocument } from '../../test/test.utils';
 
 describe('generateTypes', () => {
   const opts = getClientOptions();

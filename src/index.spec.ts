@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { MockAgent, setGlobalDispatcher } from 'undici';
 
 import { runCodeGenerator, applyConfigFile } from './';
-import { mockRequest } from './utils';
+import { mockRequest } from '../test/test.utils';
 import type { CliOptions } from './types';
 
 describe('runCodeGenerator', () => {

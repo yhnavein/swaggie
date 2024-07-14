@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getOperations } from './operations';
-import { getDocument } from '../utils';
+import { getDocument } from '../../test/test.utils';
 import type { ApiOperation } from '../types';
 
 describe('getOperations', () => {

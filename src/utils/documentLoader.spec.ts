@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { MockAgent, setGlobalDispatcher } from 'undici';
 
 import { loadSpecDocument } from './documentLoader';
-import { mockRequest } from './test.utils';
+import { mockRequest } from '../../test/test.utils';
 
 // URLs are not used to fetch anything. We are faking responses through SinonJS
 const petstore3 = {

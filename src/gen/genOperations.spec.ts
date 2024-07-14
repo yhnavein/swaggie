@@ -3,7 +3,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
 import type { ApiOperation } from '../types';
-import { getClientOptions } from '../utils';
+import { getClientOptions } from '../../test/test.utils';
 
 describe('prepareOperations', () => {
   const opts = getClientOptions();
@@ -623,6 +623,14 @@ describe('getOperationName', () => {
     {
       input: { opId: 'Test_GetPetStory', group: 'Test' },
       expected: 'getPetStory',
+    },
+    {
+      input: { opId: 'Passport.login', group: 'Test' },
+      expected: 'passportLogin',
+    },
+    {
+      input: { opId: 'Passport:login', group: 'Test' },
+      expected: 'passportLogin',
     },
   ];
 

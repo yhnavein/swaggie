@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import type { MockAgent } from 'undici';
 
-import type { ClientOptions } from '../types';
+import type { ClientOptions } from '../src/types';
 
 /**
  * Returns a valid OpenAPI 3.0 document with the minimal required fields.
@@ -50,7 +50,7 @@ export function mockRequest(mockAgent: MockAgent, url: string, responseFileName:
   const urlObject = new URL(url);
   const mockPool = mockAgent.get(urlObject.origin);
 
-  const response = fs.readFileSync(path.join(__dirname, '..', '..', 'test', responseFileName), {
+  const response = fs.readFileSync(path.join(__dirname, responseFileName), {
     encoding: 'utf-8',
   });
 

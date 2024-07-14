@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import type { ClientOptions } from '../types';
 import { getParameterType, getTypeFromSchema } from './typesExtractor';
-import { getClientOptions } from '../utils';
+import { getClientOptions } from '../../test/test.utils';
 
 describe('getParameterType', () => {
   describe('empty cases', () => {

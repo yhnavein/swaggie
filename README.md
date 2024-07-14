@@ -281,3 +281,10 @@ function error(e) {
 | Paths inheritance, comments (descriptions)                                     |                                            |
 | Getting documents from remote locations or as path reference (local file)      |                                            |
 | Grouping endpoints by tags + handle gracefully duplicate operation ids         |                                            |
+
+## Used by
+
+<div style="display: flex; gap: 1rem;">
+<a href="https://www.britishcouncil.org"><img alt="British Council" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/BritishCouncil.png/320px-BritishCouncil.png" style="height: 50px;" /></a>
+<a href="https://kpmg.com/"><img alt="KPMG" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/KPMG.svg/320px-KPMG.svg.png" style="height: 50px;" /></a>
+</div>
