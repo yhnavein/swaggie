@@ -4,7 +4,15 @@ import fs from 'node:fs';
 import { runCodeGenerator } from '../src/index';
 import type { FullAppOptions, Template } from '../src/types';
 
-const templates: Template[] = ['axios', 'xior', 'swr-axios', 'fetch', 'ng1', 'ng2'];
+const templates: Template[] = [
+  'axios',
+  'xior',
+  'swr-axios',
+  'fetch',
+  'ng1',
+  'ng2',
+  'tanstack-query',
+];
 
 describe('petstore snapshots', () => {
   for (const template of templates) {

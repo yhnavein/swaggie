@@ -34,7 +34,7 @@ export interface FullAppOptions extends ClientOptions {
   config?: string;
 }
 
-export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior';
+export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior' | 'tanstack-query';
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
 export type ArrayFormat = 'indices' | 'repeat' | 'brackets';

@@ -1,0 +1,44 @@
+  /**
+<% it.parameters.forEach((parameter) => { %>
+   * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
+
+<% }); -%>
+   */
+  <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
+<%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? '| null | undefined' : '' %>,
+    <% }); %>
+$config?: XiorRequestConfig
+  ): Promise<XiorResponse<<%~ it.returnType %>>> {
+    const url = `<%= it.url %>`;
+
+    return http.request<<%~ it.returnType %>>({
+      url: url,
+      method: '<%= it.method %>',
+<% if(it.body) { %>
+<% if(it.body.contentType === 'urlencoded') { %>
+      data: new URLSearchParams(<%= it.body.name %> as any),
+<% } else { %>
+      data: <%= it.body.name %>,
+<% } %>
+<% } %>
+<% if(it.query && it.query.length > 0) { %>
+      params: {
+    <% it.query.forEach((parameter) => { %>
+    '<%= parameter.originalName %>': <%= parameter.name %>,
+    <% }); %>
+  },
+<% } %>
+<% if(it.headers && it.headers.length > 0) { %>
+      headers: {
+  <% it.headers.forEach((parameter) => { %>
+    <% if (parameter.value) { %>
+  '<%= parameter.originalName %>': '<%= parameter.value %>',
+    <% } else { %>
+  '<%= parameter.originalName %>': <%= parameter.name %>,
+    <% } %>
+  <% }); %>
+},
+<% } %>
+      ...$config,
+    });
+  },

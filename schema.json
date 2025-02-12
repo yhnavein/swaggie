@@ -45,7 +45,8 @@
             "swr-axios",
             "fetch",
             "ng1",
-            "ng2"
+            "ng2",
+            "tanstack-query"
           ],
           "type": "string"
         },
