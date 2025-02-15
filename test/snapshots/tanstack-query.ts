@@ -10,7 +10,7 @@
 // deno-lint-ignore-file
 
 import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
-import { QueryClient, type UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
+import { QueryClient, type UseQueryOptions, useQuery } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient();
 
@@ -184,48 +184,60 @@ export const petClient = {
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usepetfindPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
-    $config?: UndefinedInitialDataOptions<Pet[], Error, Pet[]>,
+export function usepetfindPetsByStatus<TData = Pet[], TError = Error>(  status: ("available" | "pending" | "sold")  | null | undefined,
+    $config?: Omit<
+  UseQueryOptions<Pet[], TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<Pet[], TError, TData>({
     queryKey: ['pet', 'petfindPetsByStatus', status, ],
-    queryFn: () => petClient.findPetsByStatus(status, $httpConfig),
+    queryFn: () => petClient.findPetsByStatus(status, $httpConfig).then(res => res.data),
     ...$config
   });
 }
+usepetfindPetsByStatus.queryKeys = ['pet', 'petfindPetsByStatus'];
 
   /**
    * @param tags (optional) 
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usepetfindPetsByTags(  tags: string[]  | null | undefined,
-    $config?: UndefinedInitialDataOptions<Pet[], Error, Pet[]>,
+export function usepetfindPetsByTags<TData = Pet[], TError = Error>(  tags: string[]  | null | undefined,
+    $config?: Omit<
+  UseQueryOptions<Pet[], TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<Pet[], TError, TData>({
     queryKey: ['pet', 'petfindPetsByTags', tags, ],
-    queryFn: () => petClient.findPetsByTags(tags, $httpConfig),
+    queryFn: () => petClient.findPetsByTags(tags, $httpConfig).then(res => res.data),
     ...$config
   });
 }
+usepetfindPetsByTags.queryKeys = ['pet', 'petfindPetsByTags'];
 
   /**
    * @param petId  
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usepetPetById(  petId: number ,
-    $config?: UndefinedInitialDataOptions<Pet, Error, Pet>,
+export function usepetPetById<TData = Pet, TError = Error>(  petId: number ,
+    $config?: Omit<
+  UseQueryOptions<Pet, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<Pet, TError, TData>({
     queryKey: ['pet', 'petPetById', ],
-    queryFn: () => petClient.getPetById(petId, $httpConfig),
+    queryFn: () => petClient.getPetById(petId, $httpConfig).then(res => res.data),
     ...$config
   });
 }
+usepetPetById.queryKeys = ['pet', 'petPetById'];
 
   export const storeClient = {
     /**
@@ -294,31 +306,39 @@ export function usepetPetById(  petId: number ,
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usestoreInventory($config?: UndefinedInitialDataOptions<{ [key: string]: number }, Error, { [key: string]: number }>,
+export function usestoreInventory<TData = { [key: string]: number }, TError = Error>($config?: Omit<
+  UseQueryOptions<{ [key: string]: number }, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<{ [key: string]: number }, TError, TData>({
     queryKey: ['store', 'storeInventory', ],
-    queryFn: () => storeClient.getInventory($httpConfig),
+    queryFn: () => storeClient.getInventory($httpConfig).then(res => res.data),
     ...$config
   });
 }
+usestoreInventory.queryKeys = ['store', 'storeInventory'];
 
   /**
    * @param orderId  
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usestoreOrderById(  orderId: number ,
-    $config?: UndefinedInitialDataOptions<Order, Error, Order>,
+export function usestoreOrderById<TData = Order, TError = Error>(  orderId: number ,
+    $config?: Omit<
+  UseQueryOptions<Order, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<Order, TError, TData>({
     queryKey: ['store', 'storeOrderById', ],
-    queryFn: () => storeClient.getOrderById(orderId, $httpConfig),
+    queryFn: () => storeClient.getOrderById(orderId, $httpConfig).then(res => res.data),
     ...$config
   });
 }
+usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
 
   export const userClient = {
     /**
@@ -443,16 +463,20 @@ export function usestoreOrderById(  orderId: number ,
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function useuserUserByName(  username: string ,
-    $config?: UndefinedInitialDataOptions<User, Error, User>,
+export function useuserUserByName<TData = User, TError = Error>(  username: string ,
+    $config?: Omit<
+  UseQueryOptions<User, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<User, TError, TData>({
     queryKey: ['user', 'userUserByName', ],
-    queryFn: () => userClient.getUserByName(username, $httpConfig),
+    queryFn: () => userClient.getUserByName(username, $httpConfig).then(res => res.data),
     ...$config
   });
 }
+useuserUserByName.queryKeys = ['user', 'userUserByName'];
 
   /**
    * @param username (optional) 
@@ -460,31 +484,39 @@ export function useuserUserByName(  username: string ,
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function useuserloginUser(  username: string  | null | undefined,
+export function useuserloginUser<TData = string, TError = Error>(  username: string  | null | undefined,
       password: string  | null | undefined,
-    $config?: UndefinedInitialDataOptions<string, Error, string>,
+    $config?: Omit<
+  UseQueryOptions<string, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<string, TError, TData>({
     queryKey: ['user', 'userloginUser', username, password, ],
-    queryFn: () => userClient.loginUser(username, password, $httpConfig),
+    queryFn: () => userClient.loginUser(username, password, $httpConfig).then(res => res.data),
     ...$config
   });
 }
+useuserloginUser.queryKeys = ['user', 'userloginUser'];
 
   /**
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function useuserlogoutUser($config?: UndefinedInitialDataOptions<unknown, Error, unknown>,
+export function useuserlogoutUser<TData = unknown, TError = Error>($config?: Omit<
+  UseQueryOptions<unknown, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<unknown, TError, TData>({
     queryKey: ['user', 'userlogoutUser', ],
-    queryFn: () => userClient.logoutUser($httpConfig),
+    queryFn: () => userClient.logoutUser($httpConfig).then(res => res.data),
     ...$config
   });
 }
+useuserlogoutUser.queryKeys = ['user', 'userlogoutUser'];
 
   export interface Order {
   id?: number;

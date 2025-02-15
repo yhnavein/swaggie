@@ -6,16 +6,20 @@
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function <%= it.rqOpName %>(<% it.parameters.forEach((parameter) => { %>
+export function <%= it.rqOpName %><TData = <%~ it.returnType %>, TError = Error>(<% it.parameters.forEach((parameter) => { %>
   <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
     <% }); %>
-$config?: UndefinedInitialDataOptions<<%~ it.returnType %>, Error, <%~ it.returnType %>>,
+$config?: Omit<
+  UseQueryOptions<<%~ it.returnType %>, TError, TData>,
+  'queryKey' | 'queryFn'
+>,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery({
+  return useQuery<<%~ it.returnType %>, TError, TData>({
     queryKey: ['<%= it.clientName %>', '<%= it.opKey %>', <% it.query.forEach((parameter) => { %><%= parameter.name %>, <% }); %>],
     queryFn: () => <%= it.clientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %>
-<%= parameter.name %>, <% }); %>$httpConfig),
+<%= parameter.name %>, <% }); %>$httpConfig).then(res => res.data),
     ...$config
   });
 }
+<%= it.rqOpName %>.queryKeys = ['<%= it.clientName %>', '<%= it.opKey %>'];
