@@ -46,7 +46,7 @@
             "fetch",
             "ng1",
             "ng2",
-            "tanstack-query"
+            "tsq-xior"
           ],
           "type": "string"
         },

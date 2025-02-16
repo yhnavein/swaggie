@@ -32,7 +32,10 @@ program
     process.env.OPEN_API_OUT
   )
   .option('-b, --baseUrl <string>', 'Base URL that will be used as a default value in the clients')
-  .option('-t, --template <string>', 'Template used forgenerating API client. Default: "axios"')
+  .option(
+    '-t, --template <string>',
+    'Template used forgenerating API client. Default: "axios". Other: "fetch", "ng1", "ng2", "swr-axios", "xior", "tsq-xior"'
+  )
   .option('--preferAny', 'Use "any" type instead of "unknown"')
   .option(
     '--servicePrefix <string>',
