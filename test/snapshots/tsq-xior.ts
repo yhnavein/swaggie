@@ -232,7 +232,7 @@ export function usepetPetById<TData = Pet, TError = Error>(  petId: number ,
     $httpConfig?: XiorRequestConfig
   ) {
   return useQuery<Pet, TError, TData>({
-    queryKey: ['pet', 'petPetById', ],
+    queryKey: ['pet', 'petPetById', petId, ],
     queryFn: () => petClient.getPetById(petId, $httpConfig).then(res => res.data),
     ...$config
   });
@@ -333,7 +333,7 @@ export function usestoreOrderById<TData = Order, TError = Error>(  orderId: numb
     $httpConfig?: XiorRequestConfig
   ) {
   return useQuery<Order, TError, TData>({
-    queryKey: ['store', 'storeOrderById', ],
+    queryKey: ['store', 'storeOrderById', orderId, ],
     queryFn: () => storeClient.getOrderById(orderId, $httpConfig).then(res => res.data),
     ...$config
   });
@@ -471,7 +471,7 @@ export function useuserUserByName<TData = User, TError = Error>(  username: stri
     $httpConfig?: XiorRequestConfig
   ) {
   return useQuery<User, TError, TData>({
-    queryKey: ['user', 'userUserByName', ],
+    queryKey: ['user', 'userUserByName', username, ],
     queryFn: () => userClient.getUserByName(username, $httpConfig).then(res => res.data),
     ...$config
   });
