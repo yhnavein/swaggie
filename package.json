@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Generate TypeScript REST client code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -16,7 +16,7 @@
     "url": "https://github.com/yhnavein/swaggie/issues"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.17"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -55,7 +55,7 @@
     "eta": "^3.5.0",
     "js-yaml": "^4.1.0",
     "nanocolors": "^0.2.0",
-    "undici": "^7.3.0"
+    "undici": "^6.21.1"
   },
   "devDependencies": {
     "@types/chai": "5.0.1",
