@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "out": "./.tmp/fetch-petstore.ts",
   "src": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json",
-  "template": "fetch",
+  "template": "tsq-xior",
   "preferAny": true,
   "dateFormat": "string",
   "queryParamsSerialization": {

@@ -1,0 +1,22 @@
+export const <%= it.camelCaseName %>Client = {
+  <% it.operations.forEach((operation) => { %>
+<%~ include('operation.ejs', operation); %>
+
+<% }); %>
+};
+
+
+<% var getOperations = it.operations.filter((o) => o.method === 'GET');
+if(getOperations.length > 0) { %>
+  <% getOperations.forEach((operation) => {
+  var opName = operation.name;
+  if(opName.toLowerCase().startsWith("get")) {
+    opName = opName.substring(3);
+  }
+  opName[0] = opName[0].toUpperCase();
+  var customName = "use" + it.clientName + opName;
+  var queryOperation = Object.assign({ rqOpName: customName, opKey: it.clientName + opName, clientName: it.camelCaseName }, operation); %>
+<%~ include('queryOperation.ejs', queryOperation); %>
+
+  <% }); %>
+<% } %>
