@@ -661,7 +661,7 @@ export interface Order {
   petId?: number;
   quantity?: number;
   shipDate?: Date;
-// Order Status
+/** Order Status */
   status?: ("placed" | "approved" | "delivered");
   complete?: boolean;}
 
@@ -688,7 +688,7 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string;
-// User Status
+/** User Status */
   userStatus?: number;}
 
 export interface Tag {
@@ -701,7 +701,7 @@ export interface Pet {
   category?: Category;
   photoUrls: string[];
   tags?: Tag[];
-// pet status in the store
+/** pet status in the store */
   status?: ("available" | "pending" | "sold");}
 
 export interface ApiResponse {

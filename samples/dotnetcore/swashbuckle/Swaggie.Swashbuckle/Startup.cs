@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+using System;
+using System.IO;
+using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +55,11 @@ public class Startup
         c.CustomOperationIds(e =>
           $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sample Api", Version = "v1" });
+        
+        // Add XML comments from main assembly
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        c.IncludeXmlComments(xmlPath);
       });
       services.AddSwaggerGenNewtonsoftSupport();
     }

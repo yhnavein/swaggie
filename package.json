@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Generate TypeScript REST client code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -58,14 +58,14 @@
     "undici": "^6.21.1"
   },
   "devDependencies": {
-    "@types/chai": "5.0.1",
+    "@types/chai": "5.2.2",
     "@types/js-yaml": "4.0.9",
     "@types/mocha": "10.0.10",
-    "@types/node": "22.13.4",
-    "chai": "5.2.0",
-    "mocha": "11.1.0",
+    "@types/node": "24.0.14",
+    "chai": "5.2.1",
+    "mocha": "11.7.1",
     "openapi-types": "^12.1.3",
     "sucrase": "3.35.0",
-    "typescript": "5.7.3"
+    "typescript": "5.8.3"
   }
 }

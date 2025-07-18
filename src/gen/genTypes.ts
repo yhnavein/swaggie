@@ -7,7 +7,10 @@ import type { ClientOptions } from '../types';
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
  * @returns String containing all TypeScript types in the document.
  */
-export default function generateTypes(spec: OA3.Document, options: ClientOptions): string {
+export default function generateTypes(
+  spec: OA3.Document,
+  options: ClientOptions
+): string {
   const result: string[] = [];
 
   const schemaKeys = Object.keys(spec.components?.schemas || {});
@@ -69,7 +72,9 @@ function renderType(
   } else if (schema.type === 'array') {
     // This case is quite rare but is definitely possible that a schema definition is
     // an array of something. In this case it's just a type reference
-    result.push(`export type ${name} = ${generateItemsType(schema.items, options)}[];`);
+    result.push(
+      `export type ${name} = ${generateItemsType(schema.items, options)}[];`
+    );
     return result.join('\n');
   } else {
     result.push(`export interface ${name} {`);
@@ -79,7 +84,10 @@ function renderType(
   return `${result.join('\n')}}\n`;
 }
 
-function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions) {
+function getTypesFromAnyOrOneOf(
+  schema: OA3.SchemaObject,
+  options: ClientOptions
+) {
   const types = getCompositeTypes(schema);
   const mergedSchema = getMergedCompositeObjects(schema);
   const typeContents = generateObjectTypeContents(mergedSchema, options);
@@ -90,7 +98,10 @@ function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions
   return types.join(' | ');
 }
 
-function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOptions) {
+function generateObjectTypeContents(
+  schema: OA3.SchemaObject,
+  options: ClientOptions
+) {
   const result: string[] = [];
   const required = schema.required || [];
   const props = Object.keys(schema.properties || {});
@@ -104,7 +115,10 @@ function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOpt
   return result.join('\n');
 }
 
-function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: ClientOptions) {
+function generateItemsType(
+  schema: OA3.ReferenceObject | OA3.SchemaObject,
+  options: ClientOptions
+) {
   const fallbackType = options.preferAny ? 'any' : 'unknown';
 
   if ('$ref' in schema) {
@@ -135,7 +149,9 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
  * Render simple enum types (just a union of values)
  */
 function renderEnumType(name: string, def: OA3.SchemaObject) {
-  const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
+  const values = def.enum
+    .map((v) => (typeof v === 'number' ? v : `"${v}"`))
+    .join(' | ');
   return `export type ${name} = ${values};\n`;
 }
 
@@ -179,7 +195,7 @@ export function renderComment(comment: string | null) {
   const commentLines = comment.split('\n');
 
   if (commentLines.length === 1) {
-    return `// ${comment.trim()}`;
+    return `/** ${comment.trim()} */`;
   }
 
   return ` /**\n${commentLines.map((line) => `  * ${line.trim()}`).join('\n')}\n  */`;
@@ -202,7 +218,10 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject) {
 function isObject(item?: object): item is Record<string, object> {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
-function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
+function deepMerge<T extends Record<string, any>>(
+  target: T,
+  ...sources: Partial<T>[]
+): T {
   if (!sources.length) return target;
   const source = sources.shift();
 
@@ -215,7 +234,9 @@ function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial
         if (!target[key]) {
           Object.assign(target, { [key]: source[key] });
         } else if (Array.isArray(target[key])) {
-          (target[key] as any[]) = Array.from(new Set([...target[key], ...source[key]]));
+          (target[key] as any[]) = Array.from(
+            new Set([...target[key], ...source[key]])
+          );
         }
       } else {
         Object.assign(target, { [key]: source[key] });
