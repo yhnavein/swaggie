@@ -14,7 +14,10 @@ describe('generateTypes', () => {
   });
 
   it('should handle empty components schemas properly', () => {
-    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts);
+    const res = generateTypes(
+      getDocument({ components: { schemas: {} } }),
+      opts
+    );
 
     expect(res).to.be.equal('');
   });
@@ -61,7 +64,7 @@ export interface B {}`
         `
 export type SimpleEnum = 0 | 1;
 
-// Feature is activated or not
+/** Feature is activated or not */
 export type StringEnum = "Active" | "Disabled";`
       );
     });
@@ -105,7 +108,7 @@ export enum XEnumVarnames {
   Low = 0,
 }
 
-// How big the feature is
+/** How big the feature is */
 export enum XEnumsString {
   Large = "L",
   Medium = "M",
@@ -147,7 +150,7 @@ export enum Priority {
   Low = 0,
 }
 
-// How big the feature is
+/** How big the feature is */
 export enum Size {
   Large = "L",
   Medium = "M",
@@ -463,7 +466,9 @@ export interface AuthenticationData extends LoginPart {
             opts
           );
 
-          expect(res).to.equalWI('export type AuthenticationData = BasicAuth | OAuth2;');
+          expect(res).to.equalWI(
+            'export type AuthenticationData = BasicAuth | OAuth2;'
+          );
         });
 
         it(`should handle ${type} with reference and schema correctly`, () => {
@@ -510,11 +515,11 @@ describe('renderComment', () => {
   const testCases = [
     {
       comment: 'One liner',
-      expected: '// One liner',
+      expected: '/** One liner */',
     },
     {
       comment: '   One liner   ',
-      expected: '// One liner',
+      expected: '/** One liner */',
     },
     {
       comment: null,
@@ -536,7 +541,9 @@ describe('renderComment', () => {
 });
 
 type ExtendedSchema = {
-  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: object });
+  [key: string]:
+    | OA3.ReferenceObject
+    | (OA31.SchemaObject & { [key: `x-${string}`]: object });
 };
 function prepareSchemas(schemas: ExtendedSchema) {
   return getDocument({
