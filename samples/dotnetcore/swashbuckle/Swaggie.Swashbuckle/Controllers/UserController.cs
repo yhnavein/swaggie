@@ -36,7 +36,7 @@ public class UserController : Controller
 
   [HttpGet("filter")]
   [Produces(typeof(FilterTestResponse))]
-  public IActionResult TestFilters([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery] Dictionary<string, int> someDict)
+  public IActionResult TestFilters([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery, Required] Dictionary<string, int> someDict)
   {
     Console.WriteLine("filter: " + JsonConvert.SerializeObject(filter));
     Console.WriteLine("secondFilter: " + JsonConvert.SerializeObject(secondFilter));
