@@ -149,7 +149,7 @@ export class petService extends BaseService {
    * @param petId  
    * @return Success
    */
-  deletePet(apiKey: string  | null | undefined,
+  deletePet(apiKey: string | null | undefined,
     petId: number ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
@@ -165,7 +165,7 @@ export class petService extends BaseService {
    * @param status (optional) 
    * @return Success
    */
-  findPetsByStatus(status: ("available" | "pending" | "sold")  | null | undefined,
+  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
     let url = `/pet/findByStatus?`;
@@ -183,7 +183,7 @@ export class petService extends BaseService {
    * @param tags (optional) 
    * @return Success
    */
-  findPetsByTags(tags: string[]  | null | undefined,
+  findPetsByTags(tags?: string[] | null,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
     let url = `/pet/findByTags?`;
@@ -235,8 +235,8 @@ export class petService extends BaseService {
    * @return Success
    */
   updatePetWithForm(petId: number ,
-    name: string  | null | undefined,
-    status: string  | null | undefined,
+    name?: string | null,
+    status?: string | null,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
@@ -260,9 +260,9 @@ export class petService extends BaseService {
    * @param additionalMetadata (optional) 
    * @return Success
    */
-  uploadFile(body: File  | null | undefined,
+  uploadFile(body: File | null | undefined,
     petId: number ,
-    additionalMetadata: string  | null | undefined,
+    additionalMetadata?: string | null,
         config?: IRequestShortcutConfig
   ): IPromise<File> {
     let url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?`;
@@ -332,7 +332,7 @@ export class storeService extends BaseService {
    * @param body (optional) 
    * @return Success
    */
-  placeOrder(body: Order  | null | undefined,
+  placeOrder(body?: Order | null,
         config?: IRequestShortcutConfig
   ): IPromise<Order> {
     let url = `/store/order?`;
@@ -356,7 +356,7 @@ export class userService extends BaseService {
    * @param body (optional) 
    * @return Success
    */
-  createUser(body: User  | null | undefined,
+  createUser(body?: User | null,
         config?: IRequestShortcutConfig
   ): IPromise<User> {
     let url = `/user?`;
@@ -372,7 +372,7 @@ export class userService extends BaseService {
    * @param body (optional) 
    * @return Success
    */
-  createUsersWithListInput(body: User[]  | null | undefined,
+  createUsersWithListInput(body?: User[] | null,
         config?: IRequestShortcutConfig
   ): IPromise<User> {
     let url = `/user/createWithList?`;
@@ -419,8 +419,8 @@ export class userService extends BaseService {
    * @param password (optional) 
    * @return Success
    */
-  loginUser(username: string  | null | undefined,
-    password: string  | null | undefined,
+  loginUser(username?: string | null,
+    password?: string | null,
         config?: IRequestShortcutConfig
   ): IPromise<string> {
     let url = `/user/login?`;
@@ -455,7 +455,7 @@ export class userService extends BaseService {
    * @param username  
    * @return Success
    */
-  updateUser(body: FormData  | null | undefined,
+  updateUser(body: FormData | null | undefined,
     username: string ,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {

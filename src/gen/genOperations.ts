@@ -64,6 +64,18 @@ function prepareClient(
   };
 }
 
+/**
+ * Prepares operations for client generation. A lot of things will be done here:
+ * - Fix duplicate operation names
+ * - Determine the best response object and content type
+ * - Get the parameter type for the response object
+ * - Get the request body, query parameters, and other parameters
+ * - Sort parameters by their 'x-position' if defined
+ *
+ * @param operations Flat list of operations from the spec
+ * @param options
+ * @returns List of operations prepared for client generation
+ */
 export function prepareOperations(
   operations: ApiOperation[],
   options: ClientOptions
@@ -87,6 +99,8 @@ export function prepareOperations(
       params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
     }
 
+    markParametersAsSkippable(params);
+
     const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
     // Some libraries need to know the content type of the request body in case of urlencoded body
     if (body?.contentType === 'urlencoded') {
@@ -108,6 +122,17 @@ export function prepareOperations(
       headers,
     };
   });
+}
+
+function markParametersAsSkippable(params: IOperationParam[]): void {
+  const lastRequiredParamIndex = params.map((p) => !p.optional).lastIndexOf(true);
+  if (lastRequiredParamIndex === params.length - 1) {
+    return;
+  }
+
+  for (let i = lastRequiredParamIndex + 1; i < params.length; i++) {
+    params[i].skippable = true;
+  }
 }
 
 /**
@@ -241,7 +266,10 @@ interface IOperationParam {
   name?: string;
   type?: string;
   value?: string;
+  /** Whether the parameter is optional */
   optional?: boolean;
+  /** Whether the parameter can be skipped. Skipped means that parameter can be skipped in the parameter list */
+  skippable?: boolean;
   original?: OA3.ParameterObject | OA3.RequestBodyObject;
 }
 

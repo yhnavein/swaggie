@@ -71,6 +71,7 @@ describe('prepareOperations', () => {
 
       expect(res.parameters.length).to.equal(3);
       expect(res.parameters.map((p) => p.name)).to.deep.equal(['orgID', 'orgType', 'petId']);
+      expect(res.parameters.map((p) => p.skippable ?? false)).to.deep.equal([false, true, true]);
     });
 
     it('should handle empty parameters', () => {
@@ -130,6 +131,64 @@ describe('prepareOperations', () => {
       expect(op1.url).to.equal('/pet/${encodeURIComponent(`${petId}`)}');
       expect(op2.url).to.equal('/users/${encodeURIComponent(`${userId}`)}/Wrong{/Path}');
       expect(op3.url).to.equal('/users/{}/Wrong{');
+    });
+
+    it('should not mark parameters as skippable if there is required parameter after them', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          parameters: [
+            {
+              name: 'orgId',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'number',
+              },
+            },
+            {
+              name: 'orgType',
+              in: 'query',
+              required: false,
+              allowEmptyValue: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'petId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'number',
+                format: 'int64',
+              },
+            },
+            {
+              name: 'groupId',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'number',
+              },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [{ parameters }] = prepareOperations(ops, opts);
+
+      expect(parameters.length).to.equal(4);
+      expect(parameters.map((p) => p.skippable ?? false)).to.deep.equal([
+        false,
+        false,
+        false,
+        true,
+      ]);
     });
 
     describe('requestBody (JSON)', () => {
@@ -236,6 +295,7 @@ describe('prepareOperations', () => {
             contentType: 'json',
             name: 'body',
             optional: true,
+            skippable: true,
             originalName: 'body',
             type: expectedType,
             original: ops[0].requestBody,
