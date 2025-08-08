@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [18.x, 20.x, 22.x, 24.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +25,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
       - run: yarn build
-      - run: yarn test
+      - name: Run tests
+        run: |
+          yarn test
+        shell: bash
       - run: node dist/cli.js -c test/ci-test.config.json
       - run: yarn coverage
