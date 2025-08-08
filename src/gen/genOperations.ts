@@ -25,12 +25,11 @@ export default async function generateOperations(
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix ?? '';
-  let result =
-    renderFile('baseClient.ejs', {
-      servicePrefix,
-      baseUrl: options.baseUrl,
-      ...options.queryParamsSerialization,
-    }) || '';
+  let result = renderFile('baseClient.ejs', {
+    servicePrefix,
+    baseUrl: options.baseUrl,
+    ...options.queryParamsSerialization,
+  });
 
   for (const name in groups) {
     const group = groups[name];
@@ -41,7 +40,7 @@ export default async function generateOperations(
       servicePrefix,
     });
 
-    result += renderedFile || '';
+    result += renderedFile;
   }
 
   result += generateBarrelFile(groups, options);
@@ -191,7 +190,7 @@ export function getOperationName(opId: string | null, group?: string | null) {
   return camel(opId.replace(`${group}_`, ''));
 }
 
-function getParams(
+export function getParams(
   params: OA3.ParameterObject[],
   options: ClientOptions,
   where?: string[]
@@ -200,7 +199,7 @@ function getParams(
     return [];
   }
 
-  return params
+  const result = params
     .filter((p) => !where || where.includes(p.in))
     .map((p) => ({
       originalName: p.name,
@@ -209,6 +208,28 @@ function getParams(
       optional: p.required === undefined || p.required === null ? true : !p.required,
       original: p,
     }));
+
+  if (options.modifiers?.parameters) {
+    for (const [name, modifier] of Object.entries(options.modifiers.parameters)) {
+      const paramIndex = result.findIndex(
+        (p) => p.original.in !== 'path' && (p.originalName === name || p.name === name)
+      );
+      if (paramIndex === -1) {
+        continue;
+      }
+      const param = result[paramIndex];
+
+      if (modifier === 'optional') {
+        param.optional = true;
+      } else if (modifier === 'required') {
+        param.optional = false;
+      } else if (modifier === 'ignore') {
+        result.splice(paramIndex, 1);
+      }
+    }
+  }
+
+  return result;
 }
 
 /**

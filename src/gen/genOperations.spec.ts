@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
+import {
+  prepareOperations,
+  fixDuplicateOperations,
+  getOperationName,
+  getParamName,
+  getParams,
+} from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions } from '../../test/test.utils';
 
@@ -701,6 +707,202 @@ describe('getOperationName', () => {
       expect(res).to.be.equal(expected);
     });
   }
+});
+
+describe('getParamName', () => {
+  const testCases = [
+    { input: 'test', expected: 'test' },
+    { input: 'function', expected: '_function' },
+    { input: 'test.test', expected: 'test_test' },
+    { input: 'test test', expected: 'testTest' },
+    { input: 'test.test.test', expected: 'test_test_test' },
+    { input: 'af_UNDERSCORED_NAME', expected: 'afUNDERSCOREDNAME' },
+  ];
+
+  for (const { input, expected } of testCases) {
+    it(`should handle ${JSON.stringify(input)}`, () => {
+      const res = getParamName(input);
+
+      expect(res).to.be.equal(expected);
+    });
+  }
+});
+
+describe('getParams', () => {
+  it('should not affect parameters if no modifiers are provided', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test1',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: 'test2',
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {},
+    });
+
+    const [param1, param2] = getParams(originalParams, opts);
+
+    expect(param1).to.deep.include({
+      name: 'test1',
+      type: 'unknown',
+      optional: false,
+    });
+
+    expect(param2).to.deep.include({
+      name: 'test2',
+      type: 'string',
+      optional: true,
+    });
+  });
+
+  it('should apply modifiers for parameters', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test1',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: 'test 2',
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      {
+        name: 'test3',
+        in: 'header',
+        required: true,
+        schema: {
+          type: 'number',
+        },
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {
+        parameters: {
+          test1: 'optional',
+          // also supports matching by original name
+          'test 2': 'required',
+          test3: 'ignore',
+        },
+      },
+    });
+
+    const [param1, param2, param3] = getParams(originalParams, opts);
+
+    expect(param1).to.deep.include({
+      name: 'test1',
+      type: 'unknown',
+      optional: true,
+    });
+
+    expect(param2).to.deep.include({
+      name: 'test2',
+      originalName: 'test 2',
+      type: 'string',
+      optional: false,
+    });
+
+    expect(param3).to.be.undefined;
+  });
+
+  it('should ignore unrecognized modifiers', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test1',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: 'test 2',
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      {
+        name: 'test3',
+        in: 'header',
+        required: true,
+        schema: {
+          type: 'number',
+        },
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {
+        parameters: {
+          // matching by filtered name 'test 2' -> 'test2'
+          test2: 'required',
+          somethingElse: 'ignore',
+          'a different name': 'optional',
+        },
+      },
+    });
+
+    const [param1, param2, param3] = getParams(originalParams, opts);
+
+    expect(param1).to.deep.include({
+      name: 'test1',
+      type: 'unknown',
+      optional: false,
+    });
+
+    expect(param2).to.deep.include({
+      name: 'test2',
+      originalName: 'test 2',
+      type: 'string',
+      optional: false,
+    });
+
+    expect(param3).to.deep.include({
+      name: 'test3',
+      type: 'number',
+      optional: false,
+    });
+  });
+
+  // It's because path parameters are by default required. And changing it
+  // will break the API. We want to avoid this.
+  it('should ignore parameter adjustments for path parameters', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test',
+        schema: {
+          type: 'string',
+        },
+        in: 'path',
+        required: true,
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {
+        parameters: {
+          test: 'ignore',
+        },
+      },
+    });
+
+    const [param] = getParams(originalParams, opts);
+
+    expect(param).to.deep.include({
+      name: 'test',
+      type: 'string',
+      optional: false,
+    });
+  });
 });
 
 /**
