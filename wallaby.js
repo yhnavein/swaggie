@@ -1,6 +1,5 @@
 module.exports = () => ({
   files: [
-    'test/chai-extensions.ts',
     'test/test.utils.ts',
     'src/**/*.ts',
     'test/*.json',

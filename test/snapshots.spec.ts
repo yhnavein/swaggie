@@ -1,4 +1,5 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 import fs from 'node:fs';
 
 import { runCodeGenerator } from '../src/index';
@@ -8,7 +9,7 @@ const templates: Template[] = ['axios', 'xior', 'swr-axios', 'fetch', 'ng1', 'ng
 
 describe('petstore snapshots', () => {
   for (const template of templates) {
-    it(`should match existing ${template} snapshot`, async () => {
+    test(`should match existing ${template} snapshot`, async () => {
       const snapshotFile = `./test/snapshots/${template}.ts`;
       const parameters: FullAppOptions = {
         src: './test/petstore-v3.yml',
@@ -24,11 +25,11 @@ describe('petstore snapshots', () => {
 
       if (process.env.UPDATE_SNAPSHOTS) {
         fs.writeFileSync(snapshotFile, generatedCode, 'utf8');
-        expect(true).to.eq(true);
+        // No need to assert anything when updating snapshots
       } else {
         const existingSnapshot = fs.readFileSync(snapshotFile, 'utf8');
 
-        expect(existingSnapshot).to.equal(generatedCode);
+        assert.strictEqual(existingSnapshot, generatedCode);
       }
     });
   }
