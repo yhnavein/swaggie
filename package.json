@@ -27,8 +27,8 @@
     "build": "sucrase ./src -d ./dist --transforms typescript,imports && npm run rm-tests && npm run types",
     "rm-tests": "find dist/ \\( -name '*.spec.js' -o -name 'types.js' \\) -type f -delete",
     "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
-    "test": "mocha",
-    "coverage": "npx nyc -r text -r json-summary mocha"
+    "test": "tsx --test {src,test}/**/*.spec.ts",
+    "coverage": "npx c8 yarn test"
   },
   "files": [
     "dist",
@@ -59,11 +59,10 @@
   },
   "devDependencies": {
     "@types/js-yaml": "4.0.9",
-    "@types/mocha": "10.0.10",
     "@types/node": "24.2.0",
-    "mocha": "11.7.1",
     "openapi-types": "^12.1.3",
     "sucrase": "3.35.0",
+    "tsx": "^4.20.3",
     "typescript": "5.9.2"
   }
 }
