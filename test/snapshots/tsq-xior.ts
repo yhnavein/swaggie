@@ -63,7 +63,7 @@ export const petClient = {
   /**
    * @param status (optional) 
    */
-  findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
+  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/findByStatus`;
@@ -81,7 +81,7 @@ export const petClient = {
   /**
    * @param tags (optional) 
    */
-  findPetsByTags(tags: string[] | null | undefined,
+  findPetsByTags(tags?: string[] | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/findByTags`;
@@ -136,8 +136,8 @@ export const petClient = {
    * @param status (optional) 
    */
   updatePetWithForm(petId: number ,
-    name: string | null | undefined,
-    status: string | null | undefined,
+    name?: string | null,
+    status?: string | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -160,7 +160,7 @@ export const petClient = {
    */
   uploadFile(body: File | null | undefined,
     petId: number ,
-    additionalMetadata: string | null | undefined,
+    additionalMetadata?: string | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<File>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
@@ -184,7 +184,7 @@ export const petClient = {
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usepetfindPetsByStatus<TData = Pet[], TError = Error>(  status: ("available" | "pending" | "sold")  | null | undefined,
+export function usepetfindPetsByStatus<TData = Pet[], TError = Error>(  status?: ("available" | "pending" | "sold") | null,
     $config?: Omit<
   UseQueryOptions<Pet[], TError, TData>,
   'queryKey' | 'queryFn'
@@ -204,7 +204,7 @@ usepetfindPetsByStatus.queryKeys = ['pet', 'petfindPetsByStatus'];
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function usepetfindPetsByTags<TData = Pet[], TError = Error>(  tags: string[]  | null | undefined,
+export function usepetfindPetsByTags<TData = Pet[], TError = Error>(  tags?: string[] | null,
     $config?: Omit<
   UseQueryOptions<Pet[], TError, TData>,
   'queryKey' | 'queryFn'
@@ -286,7 +286,7 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
   /**
    * @param body (optional) 
    */
-  placeOrder(body: Order | null | undefined,
+  placeOrder(body?: Order | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
     const url = `/store/order`;
@@ -344,7 +344,7 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
     /**
    * @param body (optional) 
    */
-  createUser(body: User | null | undefined,
+  createUser(body?: User | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
     const url = `/user`;
@@ -360,7 +360,7 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
   /**
    * @param body (optional) 
    */
-  createUsersWithListInput(body: User[] | null | undefined,
+  createUsersWithListInput(body?: User[] | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
     const url = `/user/createWithList`;
@@ -407,8 +407,8 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
    * @param username (optional) 
    * @param password (optional) 
    */
-  loginUser(username: string | null | undefined,
-    password: string | null | undefined,
+  loginUser(username?: string | null,
+    password?: string | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<string>> {
     const url = `/user/login`;
@@ -484,8 +484,8 @@ useuserUserByName.queryKeys = ['user', 'userUserByName'];
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-export function useuserloginUser<TData = string, TError = Error>(  username: string  | null | undefined,
-      password: string  | null | undefined,
+export function useuserloginUser<TData = string, TError = Error>(  username?: string | null,
+      password?: string | null,
     $config?: Omit<
   UseQueryOptions<string, TError, TData>,
   'queryKey' | 'queryFn'

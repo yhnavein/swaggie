@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import assert from 'node:assert';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import type { MockAgent } from 'undici';
 
@@ -61,4 +62,10 @@ export function mockRequest(mockAgent: MockAgent, url: string, responseFileName:
       method: 'GET',
     })
     .reply(200, response);
+}
+
+// Helper function to compare strings ignoring whitespace (equivalent to Chai's equalWI)
+export function assertEqualIgnoringWhitespace(actual: string, expected: string) {
+  const normalize = (str: string) => str.replace(/\s+/g, '').trim();
+  assert.strictEqual(normalize(actual), normalize(expected));
 }

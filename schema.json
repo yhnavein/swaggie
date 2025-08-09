@@ -24,6 +24,25 @@
         }
       }
     },
+    "GlobalModifiers": {
+      "additionalProperties": false,
+      "description": "Global modifiers for parameters. It gives flexibility to adjust the OpenAPI spec before it is processed",
+      "properties": {
+        "parameters": {
+          "type": "object",
+          "description": "Global-level modifiers for parameters with a matching name",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "optional",
+              "required",
+              "ignore"
+            ],
+            "description": "Modify the parameter in the following way: `optional` - make the parameter optional, `required` - make the parameter required, `ignore` - remove the parameter from the operations"
+          }
+        }
+      }
+    },
     "Globals": {
       "additionalProperties": true,
       "description": "Main settings of the application",
@@ -76,6 +95,9 @@
         },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
+        },
+        "modifiers": {
+          "$ref": "#/definitions/GlobalModifiers"
         }
       },
       "required": [

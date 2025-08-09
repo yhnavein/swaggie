@@ -8,9 +8,7 @@
 ![NodeCI](https://github.com/yhnavein/swaggie/workflows/NodeCI/badge.svg)
 ![Test Coverage](https://img.shields.io/badge/test_coverage-98%25-brightgreen)
 ![npm downloads](https://img.shields.io/npm/dw/swaggie.svg)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/swaggie.svg)
 ![npm install size](https://packagephobia.now.sh/badge?p=swaggie)
-![Hackage Dependencies](https://img.shields.io/hackage-deps/v/swaggie)
 
 Generate Typescript code from an OpenAPI 3.0 document, so that accessing REST API resources from the client code is less error-prone, static-typed and just easier to use long-term.
 
@@ -86,7 +84,7 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 swaggie -s $URL -o ./client/petstore.ts && prettier ./client/petstore.ts --write`
 ```
 
-And this can be easily automated (in the npm scripts for example)
+And this can be easily automated (in the `npm` scripts for example)
 
 ### Configuration File
 
@@ -238,6 +236,29 @@ If Petstore owners decide to remove method we use, then after running `swaggie` 
 
 Without this approach, the error would be spotted by our end-user and he/she would not appreciate it at all!
 
+## Other features
+
+### Parameter adjustment
+
+In some cases you might want to adjust the parameters globally but without touching the OpenAPI spec. For example, the spec may explicitly define some of parameters as `required`, but you will handle them in the interceptor. In such case, you don't want to define them is every single method. This is where this feature comes in handy.
+
+Example (in the config file):
+
+```json
+{
+  "modifiers": {
+    "parameters": {
+      "clientId": "ignore",
+      "orgId": "optional",
+      "country": "required"
+    }
+  }
+}
+```
+
+This will ensure that `clientId` parameters will never appear in any of the generated methods, and `orgId` will be optional (regardless of what the spec says).
+You can also use `required` value to enforce the parameter to be required, _(but in this case, realistically it would be better to just fix the spec)_.
+
 ## Server config
 
 You might wonder how to set up server to fully utilize Swaggie's features. For that I've added a `samples/` folder with sample configurations.
@@ -270,18 +291,18 @@ function error(e) {
 
 ## Notes
 
-| Supported                                                                      | Not supported                              |
-| ------------------------------------------------------------------------------ | ------------------------------------------ |
-| OpenAPI 3                                                                      | Swagger, Open API 2.0                      |
-| `allOf`, `oneOf`, `anyOf`, `$ref` to schemas                                   | `not`                                      |
-| Spec formats: `JSON`, `YAML`                                                   | Very complex query params                  |
-| Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (one will be used) |
-| Content types: `JSON`, `text`, `multipart/form-data`                           | Multiple request types (one will be used)  |
-| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to other spec files             |
-| Different types of enum definitions (+ OpenAPI 3.1 support for enums)          |                                            |
-| Paths inheritance, comments (descriptions)                                     |                                            |
-| Getting documents from remote locations or as path reference (local file)      |                                            |
-| Grouping endpoints by tags + handle gracefully duplicate operation ids         |                                            |
+| Supported                                                                      | Not supported                                   |
+| ------------------------------------------------------------------------------ | ----------------------------------------------- |
+| OpenAPI 3                                                                      | Swagger, Open API 2.0                           |
+| `allOf`, `oneOf`, `anyOf`, `$ref` to schemas                                   | `not`                                           |
+| Spec formats: `JSON`, `YAML`                                                   | Very complex query params                       |
+| Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (only one will be used) |
+| Content types: `JSON`, `text`, `multipart/form-data`                           | Multiple request types (only one will be used)  |
+| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to other spec files                  |
+| Different types of enum definitions (+ OpenAPI 3.1 support for enums)          | OpenAPI callbacks                               |
+| Paths inheritance, comments (descriptions)                                     | OpenAPI webhooks                                |
+| Getting documents from remote locations or as path reference (local file)      |                                                 |
+| Grouping endpoints by tags + handle gracefully duplicate operation ids         |                                                 |
 
 ## Used by
 

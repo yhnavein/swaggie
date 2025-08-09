@@ -60,7 +60,7 @@ export const petClient = {
   /**
    * @param status (optional) 
    */
-  findPetsByStatus(status: ("available" | "pending" | "sold") | null | undefined,
+  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/findByStatus`;
@@ -78,7 +78,7 @@ export const petClient = {
   /**
    * @param tags (optional) 
    */
-  findPetsByTags(tags: string[] | null | undefined,
+  findPetsByTags(tags?: string[] | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/findByTags`;
@@ -133,8 +133,8 @@ export const petClient = {
    * @param status (optional) 
    */
   updatePetWithForm(petId: number ,
-    name: string | null | undefined,
-    status: string | null | undefined,
+    name?: string | null,
+    status?: string | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -157,7 +157,7 @@ export const petClient = {
    */
   uploadFile(body: File | null | undefined,
     petId: number ,
-    additionalMetadata: string | null | undefined,
+    additionalMetadata?: string | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<File>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
@@ -222,7 +222,7 @@ export const storeClient = {
   /**
    * @param body (optional) 
    */
-  placeOrder(body: Order | null | undefined,
+  placeOrder(body?: Order | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Order>> {
     const url = `/store/order`;
@@ -241,7 +241,7 @@ export const userClient = {
     /**
    * @param body (optional) 
    */
-  createUser(body: User | null | undefined,
+  createUser(body?: User | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
     const url = `/user`;
@@ -257,7 +257,7 @@ export const userClient = {
   /**
    * @param body (optional) 
    */
-  createUsersWithListInput(body: User[] | null | undefined,
+  createUsersWithListInput(body?: User[] | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<User>> {
     const url = `/user/createWithList`;
@@ -304,8 +304,8 @@ export const userClient = {
    * @param username (optional) 
    * @param password (optional) 
    */
-  loginUser(username: string | null | undefined,
-    password: string | null | undefined,
+  loginUser(username?: string | null,
+    password?: string | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<string>> {
     const url = `/user/login`;

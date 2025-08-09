@@ -87,7 +87,7 @@ export class petService extends BaseService {
    * @return Success
    */
   addPet(
-    body: Pet,
+    body: Pet ,
     config?: any
   ): Observable<Pet> {
     const url = `/pet?`;
@@ -106,7 +106,7 @@ export class petService extends BaseService {
    */
   deletePet(
     apiKey: string | null | undefined,
-    petId: number,
+    petId: number ,
     config?: any
   ): Observable<unknown> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
@@ -122,7 +122,7 @@ export class petService extends BaseService {
    * @return Success
    */
   findPetsByStatus(
-    status: ("available" | "pending" | "sold") | null | undefined,
+    status?: ("available" | "pending" | "sold") | null,
     config?: any
   ): Observable<Pet[]> {
     const url = `/pet/findByStatus?${paramsSerializer({'status': status,
@@ -139,7 +139,7 @@ export class petService extends BaseService {
    * @return Success
    */
   findPetsByTags(
-    tags: string[] | null | undefined,
+    tags?: string[] | null,
     config?: any
   ): Observable<Pet[]> {
     const url = `/pet/findByTags?${paramsSerializer({'tags': tags,
@@ -156,7 +156,7 @@ export class petService extends BaseService {
    * @return Success
    */
   getPetById(
-    petId: number,
+    petId: number ,
     config?: any
   ): Observable<Pet> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
@@ -172,7 +172,7 @@ export class petService extends BaseService {
    * @return Success
    */
   updatePet(
-    body: Pet,
+    body: Pet ,
     config?: any
   ): Observable<Pet> {
     const url = `/pet?`;
@@ -191,9 +191,9 @@ export class petService extends BaseService {
    * @return Success
    */
   updatePetWithForm(
-    petId: number,
-    name: string | null | undefined,
-    status: string | null | undefined,
+    petId: number ,
+    name?: string | null,
+    status?: string | null,
     config?: any
   ): Observable<unknown> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}?${paramsSerializer({'name': name,
@@ -215,8 +215,8 @@ export class petService extends BaseService {
    */
   uploadFile(
     body: File | null | undefined,
-    petId: number,
-    additionalMetadata: string | null | undefined,
+    petId: number ,
+    additionalMetadata?: string | null,
     config?: any
   ): Observable<File> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${paramsSerializer({'additionalMetadata': additionalMetadata,
@@ -247,7 +247,7 @@ export class storeService extends BaseService {
    * @return Success
    */
   deleteOrder(
-    orderId: number,
+    orderId: number ,
     config?: any
   ): Observable<unknown> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
@@ -277,7 +277,7 @@ export class storeService extends BaseService {
    * @return Success
    */
   getOrderById(
-    orderId: number,
+    orderId: number ,
     config?: any
   ): Observable<Order> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
@@ -293,7 +293,7 @@ export class storeService extends BaseService {
    * @return Success
    */
   placeOrder(
-    body: Order | null | undefined,
+    body?: Order | null,
     config?: any
   ): Observable<Order> {
     const url = `/store/order?`;
@@ -323,7 +323,7 @@ export class userService extends BaseService {
    * @return Success
    */
   createUser(
-    body: User | null | undefined,
+    body?: User | null,
     config?: any
   ): Observable<User> {
     const url = `/user?`;
@@ -340,7 +340,7 @@ export class userService extends BaseService {
    * @return Success
    */
   createUsersWithListInput(
-    body: User[] | null | undefined,
+    body?: User[] | null,
     config?: any
   ): Observable<User> {
     const url = `/user/createWithList?`;
@@ -357,7 +357,7 @@ export class userService extends BaseService {
    * @return Success
    */
   deleteUser(
-    username: string,
+    username: string ,
     config?: any
   ): Observable<unknown> {
     const url = `/user/${encodeURIComponent(`${username}`)}?`;
@@ -373,7 +373,7 @@ export class userService extends BaseService {
    * @return Success
    */
   getUserByName(
-    username: string,
+    username: string ,
     config?: any
   ): Observable<User> {
     const url = `/user/${encodeURIComponent(`${username}`)}?`;
@@ -390,8 +390,8 @@ export class userService extends BaseService {
    * @return Success
    */
   loginUser(
-    username: string | null | undefined,
-    password: string | null | undefined,
+    username?: string | null,
+    password?: string | null,
     config?: any
   ): Observable<string> {
     const url = `/user/login?${paramsSerializer({'username': username,
@@ -425,7 +425,7 @@ export class userService extends BaseService {
    */
   updateUser(
     body: FormData | null | undefined,
-    username: string,
+    username: string ,
     config?: any
   ): Observable<unknown> {
     const url = `/user/${encodeURIComponent(`${username}`)}?`;

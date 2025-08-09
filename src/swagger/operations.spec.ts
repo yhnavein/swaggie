@@ -1,4 +1,5 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getOperations } from './operations';
@@ -6,13 +7,13 @@ import { getDocument } from '../../test/test.utils';
 import type { ApiOperation } from '../types';
 
 describe('getOperations', () => {
-  it('should handle empty operation list', () => {
+  test('should handle empty operation list', () => {
     const res = getOperations(getDocument());
 
-    expect(res.length).to.eq(0);
+    assert.strictEqual(res.length, 0);
   });
 
-  it('should handle one operation list', () => {
+  test('should handle one operation list', () => {
     const spec = getDocument({
       paths: {
         '/api/heartbeat': {
@@ -42,10 +43,10 @@ describe('getOperations', () => {
         tags: ['System'],
       },
     ];
-    expect(res).to.deep.equal(validResp);
+    assert.deepStrictEqual(res, validResp);
   });
 
-  it('should handle empty operationId or tags', () => {
+  test('should handle empty operationId or tags', () => {
     const spec = getDocument({
       paths: {
         '/api/heartbeat': {},
@@ -102,10 +103,10 @@ describe('getOperations', () => {
         responses: {},
       },
     ];
-    expect(res).to.deep.equal(validResp);
+    assert.deepStrictEqual(res, validResp);
   });
 
-  it('should handle inheritance of parameters', () => {
+  test('should handle inheritance of parameters', () => {
     const inheritedParams: OA3.ParameterObject[] = [
       {
         name: 'limit',
@@ -199,6 +200,6 @@ describe('getOperations', () => {
         responses: {},
       },
     ];
-    expect(res).to.deep.equal(validResp);
+    assert.deepStrictEqual(res, validResp);
   });
 });

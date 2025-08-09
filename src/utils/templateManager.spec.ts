@@ -1,29 +1,30 @@
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect } from 'chai';
+import { test, describe, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert';
 
 import { loadAllTemplateFiles, renderFile } from './templateManager';
 
 const GOOD_FILE = 'client.ejs';
 
 describe('loadAllTemplateFiles', () => {
-  it('should handle loading wrong template', () => {
-    expect(() => {
+  test('should handle loading wrong template', () => {
+    assert.throws(() => {
       loadAllTemplateFiles('non-existent');
-    }).to.throw('Could not found');
+    }, /Could not found/);
   });
 
-  it('should handle empty template name', () => {
-    expect(() => {
+  test('should handle empty template name', () => {
+    assert.throws(() => {
       loadAllTemplateFiles('');
-    }).to.throw('No template');
+    }, /No template/);
   });
 
-  it('should handle null template', () => {
-    expect(() => {
+  test('should handle null template', () => {
+    assert.throws(() => {
       loadAllTemplateFiles(null);
-    }).to.throw('No template');
+    }, /No template/);
   });
 });
 
@@ -32,7 +33,7 @@ describe('render', () => {
     loadAllTemplateFiles('axios');
   });
 
-  it('should get existing template', () => {
+  test('should get existing template', () => {
     const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
       camelCaseName: 'test',
@@ -40,10 +41,10 @@ describe('render', () => {
       operations: [],
     });
 
-    expect(templateFunction).to.contain('testClient');
+    assert(templateFunction.includes('testClient'));
   });
 
-  it('should render template that is complex (multiple levels of includes)', () => {
+  test('should render template that is complex (multiple levels of includes)', () => {
     const templateFunction = renderFile(GOOD_FILE, {
       clientName: 'Test',
       camelCaseName: 'test',
@@ -64,8 +65,8 @@ describe('render', () => {
       ],
     });
 
-    expect(templateFunction).to.contain('testClient');
-    expect(templateFunction).to.contain('TestName');
+    assert(templateFunction.includes('testClient'));
+    assert(templateFunction.includes('TestName'));
   });
 });
 
@@ -85,7 +86,7 @@ describe('custom templates', () => {
     loadAllTemplateFiles(tempDir);
   });
 
-  it('should handle custom template', () => {
+  test('should handle custom template', () => {
     const templateFunction = renderFile('client.ejs', {
       clientName: 'Test',
       camelCaseName: 'test',
@@ -93,7 +94,7 @@ describe('custom templates', () => {
       operations: [],
     });
 
-    expect(templateFunction).to.contain('testClient');
+    assert(templateFunction.includes('testClient'));
   });
 
   afterEach(() => {

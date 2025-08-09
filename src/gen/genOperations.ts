@@ -25,12 +25,11 @@ export default async function generateOperations(
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix ?? '';
-  let result =
-    renderFile('baseClient.ejs', {
-      servicePrefix,
-      baseUrl: options.baseUrl,
-      ...options.queryParamsSerialization,
-    }) || '';
+  let result = renderFile('baseClient.ejs', {
+    servicePrefix,
+    baseUrl: options.baseUrl,
+    ...options.queryParamsSerialization,
+  });
 
   for (const name in groups) {
     const group = groups[name];
@@ -41,7 +40,7 @@ export default async function generateOperations(
       servicePrefix,
     });
 
-    result += renderedFile || '';
+    result += renderedFile;
   }
 
   result += generateBarrelFile(groups, options);
@@ -64,6 +63,18 @@ function prepareClient(
   };
 }
 
+/**
+ * Prepares operations for client generation. A lot of things will be done here:
+ * - Fix duplicate operation names
+ * - Determine the best response object and content type
+ * - Get the parameter type for the response object
+ * - Get the request body, query parameters, and other parameters
+ * - Sort parameters by their 'x-position' if defined
+ *
+ * @param operations Flat list of operations from the spec
+ * @param options
+ * @returns List of operations prepared for client generation
+ */
 export function prepareOperations(
   operations: ApiOperation[],
   options: ClientOptions
@@ -87,6 +98,8 @@ export function prepareOperations(
       params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
     }
 
+    markParametersAsSkippable(params);
+
     const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
     // Some libraries need to know the content type of the request body in case of urlencoded body
     if (body?.contentType === 'urlencoded') {
@@ -108,6 +121,26 @@ export function prepareOperations(
       headers,
     };
   });
+}
+
+/**
+ * Marks parameters as skippable based on their position relative to the last required parameter.
+ *
+ * This function iterates through the list of parameters and finds the last required parameter
+ * (where `optional` is false). All parameters that come after this required parameter are marked
+ * as skippable. This is useful, as we can skip such parameters when calling the generated function.
+ *
+ * @param params - Array of operation parameters to analyze and mark as skippable. (in-place modification)
+ */
+function markParametersAsSkippable(params: IOperationParam[]): void {
+  const lastRequiredParamIndex = params.map((p) => !p.optional).lastIndexOf(true);
+  if (lastRequiredParamIndex === params.length - 1) {
+    return;
+  }
+
+  for (let i = lastRequiredParamIndex + 1; i < params.length; i++) {
+    params[i].skippable = true;
+  }
 }
 
 /**
@@ -166,7 +199,7 @@ export function getOperationName(opId: string | null, group?: string | null) {
   return camel(opId.replace(`${group}_`, ''));
 }
 
-function getParams(
+export function getParams(
   params: OA3.ParameterObject[],
   options: ClientOptions,
   where?: string[]
@@ -175,7 +208,7 @@ function getParams(
     return [];
   }
 
-  return params
+  const result = params
     .filter((p) => !where || where.includes(p.in))
     .map((p) => ({
       originalName: p.name,
@@ -184,6 +217,28 @@ function getParams(
       optional: p.required === undefined || p.required === null ? true : !p.required,
       original: p,
     }));
+
+  if (options.modifiers?.parameters) {
+    for (const [name, modifier] of Object.entries(options.modifiers.parameters)) {
+      const paramIndex = result.findIndex(
+        (p) => p.original.in !== 'path' && (p.originalName === name || p.name === name)
+      );
+      if (paramIndex === -1) {
+        continue;
+      }
+      const param = result[paramIndex];
+
+      if (modifier === 'optional') {
+        param.optional = true;
+      } else if (modifier === 'required') {
+        param.optional = false;
+      } else if (modifier === 'ignore') {
+        result.splice(paramIndex, 1);
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -241,7 +296,10 @@ interface IOperationParam {
   name?: string;
   type?: string;
   value?: string;
+  /** Whether the parameter is optional */
   optional?: boolean;
+  /** Whether the parameter can be skipped. Skipped means that parameter can be skipped in the parameter list */
+  skippable?: boolean;
   original?: OA3.ParameterObject | OA3.RequestBodyObject;
 }
 

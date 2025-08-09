@@ -15,21 +15,23 @@ public class XEnumNamesSchemaFilter : ISchemaFilter
 {
   public void Apply(OpenApiSchema schema, SchemaFilterContext context)
   {
-    if (context.Type.IsEnum)
+    if (!context.Type.IsEnum)
     {
-      schema.Enum.Clear();
-      var enumValues = Enum.GetValues(context.Type);
-      var enumNames = Enum.GetNames(context.Type);
+      return;
+    }
 
-      var enumNamesArray = new OpenApiArray();
-      enumNamesArray.AddRange(enumNames.Select(name => new OpenApiString(name)));
+    schema.Enum.Clear();
+    var enumValues = Enum.GetValues(context.Type);
+    var enumNames = Enum.GetNames(context.Type);
 
-      schema.Extensions.Add("x-enumNames", enumNamesArray);
+    var enumNamesArray = new OpenApiArray();
+    enumNamesArray.AddRange(enumNames.Select(name => new OpenApiString(name)));
 
-      foreach (var enumValue in enumValues)
-      {
-        schema.Enum.Add(new OpenApiInteger((int)enumValue));
-      }
+    schema.Extensions.Add("x-enumNames", enumNamesArray);
+
+    foreach (var enumValue in enumValues)
+    {
+      schema.Enum.Add(new OpenApiInteger((int)enumValue));
     }
   }
 }

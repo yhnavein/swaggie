@@ -1,7 +1,14 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { prepareOperations, fixDuplicateOperations, getOperationName } from './genOperations';
+import {
+  prepareOperations,
+  fixDuplicateOperations,
+  getOperationName,
+  getParamName,
+  getParams,
+} from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions } from '../../test/test.utils';
 
@@ -9,7 +16,7 @@ describe('prepareOperations', () => {
   const opts = getClientOptions();
 
   describe('parameters', () => {
-    it('should prepare parameter types for use in templates', () => {
+    test('should prepare parameter types for use in templates', () => {
       const ops: ApiOperation[] = [
         {
           operationId: 'getPetById',
@@ -50,30 +57,35 @@ describe('prepareOperations', () => {
 
       const [res] = prepareOperations(ops, opts);
 
-      expect(res.name).to.equal('getPetById');
-      expect(res.method).to.equal('GET');
-      expect(res.body).to.be.null;
-      expect(res.returnType).to.equal('unknown');
+      assert.strictEqual(res.name, 'getPetById');
+      assert.strictEqual(res.method, 'GET');
+      assert.strictEqual(res.body, null);
+      assert.strictEqual(res.returnType, 'unknown');
 
-      expect(res.headers.pop()).to.deep.include({
-        name: 'orgID',
-        originalName: 'Org-ID',
-        type: 'string',
-        optional: false,
-      });
+      const headerParam = res.headers.pop();
+      assert.strictEqual(headerParam.name, 'orgID');
+      assert.strictEqual(headerParam.originalName, 'Org-ID');
+      assert.strictEqual(headerParam.type, 'string');
+      assert.strictEqual(headerParam.optional, false);
 
-      expect(res.query.pop()).to.deep.include({
-        name: 'orgType',
-        originalName: 'OrgType',
-        type: 'string',
-        optional: true,
-      });
+      const queryParam = res.query.pop();
+      assert.strictEqual(queryParam.name, 'orgType');
+      assert.strictEqual(queryParam.originalName, 'OrgType');
+      assert.strictEqual(queryParam.type, 'string');
+      assert.strictEqual(queryParam.optional, true);
 
-      expect(res.parameters.length).to.equal(3);
-      expect(res.parameters.map((p) => p.name)).to.deep.equal(['orgID', 'orgType', 'petId']);
+      assert.strictEqual(res.parameters.length, 3);
+      assert.deepStrictEqual(
+        res.parameters.map((p) => p.name),
+        ['orgID', 'orgType', 'petId']
+      );
+      assert.deepStrictEqual(
+        res.parameters.map((p) => p.skippable ?? false),
+        [false, true, true]
+      );
     });
 
-    it('should handle empty parameters', () => {
+    test('should handle empty parameters', () => {
       const ops: ApiOperation[] = [
         {
           operationId: 'getPetById',
@@ -94,11 +106,11 @@ describe('prepareOperations', () => {
 
       const [op1, op2] = prepareOperations(ops, opts);
 
-      expect(op1.parameters).to.deep.equal([]);
-      expect(op2.parameters).to.deep.equal([]);
+      assert.deepStrictEqual(op1.parameters, []);
+      assert.deepStrictEqual(op2.parameters, []);
     });
 
-    it('should prepare URL correctly', () => {
+    test('should prepare URL correctly', () => {
       const ops: ApiOperation[] = [
         {
           operationId: 'get1',
@@ -127,13 +139,69 @@ describe('prepareOperations', () => {
 
       const [op1, op2, op3] = prepareOperations(ops, opts);
 
-      expect(op1.url).to.equal('/pet/${encodeURIComponent(`${petId}`)}');
-      expect(op2.url).to.equal('/users/${encodeURIComponent(`${userId}`)}/Wrong{/Path}');
-      expect(op3.url).to.equal('/users/{}/Wrong{');
+      assert.strictEqual(op1.url, '/pet/${encodeURIComponent(`${petId}`)}');
+      assert.strictEqual(op2.url, '/users/${encodeURIComponent(`${userId}`)}/Wrong{/Path}');
+      assert.strictEqual(op3.url, '/users/{}/Wrong{');
+    });
+
+    test('should not mark parameters as skippable if there is required parameter after them', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          parameters: [
+            {
+              name: 'orgId',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'number',
+              },
+            },
+            {
+              name: 'orgType',
+              in: 'query',
+              required: false,
+              allowEmptyValue: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'petId',
+              in: 'path',
+              required: true,
+              schema: {
+                type: 'number',
+                format: 'int64',
+              },
+            },
+            {
+              name: 'groupId',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'number',
+              },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [{ parameters }] = prepareOperations(ops, opts);
+
+      assert.strictEqual(parameters.length, 4);
+      assert.deepStrictEqual(
+        parameters.map((p) => p.skippable ?? false),
+        [false, false, false, true]
+      );
     });
 
     describe('requestBody (JSON)', () => {
-      it('should handle requestBody with ref type', () => {
+      test('should handle requestBody with ref type', () => {
         const ops: ApiOperation[] = [
           {
             operationId: 'createPet',
@@ -164,8 +232,8 @@ describe('prepareOperations', () => {
           original: ops[0].requestBody,
         };
 
-        expect(op1.body).to.deep.equal(expectedBodyParam);
-        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+        assert.deepStrictEqual(op1.body, expectedBodyParam);
+        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
       });
 
       type TestCase = {
@@ -213,7 +281,7 @@ describe('prepareOperations', () => {
       ];
 
       for (const { schema, expectedType } of testCases) {
-        it(`should handle requestBody with ${schema} schema`, () => {
+        test(`should handle requestBody with ${schema} schema`, () => {
           const ops: ApiOperation[] = [
             {
               operationId: 'createPet',
@@ -236,17 +304,18 @@ describe('prepareOperations', () => {
             contentType: 'json',
             name: 'body',
             optional: true,
+            skippable: true,
             originalName: 'body',
             type: expectedType,
             original: ops[0].requestBody,
           };
 
-          expect(op1.body).to.deep.equal(expectedBodyParam);
-          expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+          assert.deepStrictEqual(op1.body, expectedBodyParam);
+          assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
         });
       }
 
-      it('should handle requestBody along with other parameters', () => {
+      test('should handle requestBody along with other parameters', () => {
         const ops: ExtendedApiOperation[] = [
           {
             operationId: 'createPet',
@@ -288,13 +357,13 @@ describe('prepareOperations', () => {
           original: ops[0].requestBody,
         };
 
-        expect(op1.body).to.deep.equal(expectedBodyParam);
-        expect(op1.parameters.length).to.equal(2);
-        expect(op1.parameters[0]).to.deep.equal(expectedBodyParam);
-        expect(op1.parameters[1].name).to.equal('orgId');
+        assert.deepStrictEqual(op1.body, expectedBodyParam);
+        assert.strictEqual(op1.parameters.length, 2);
+        assert.deepStrictEqual(op1.parameters[0], expectedBodyParam);
+        assert.strictEqual(op1.parameters[1].name, 'orgId');
       });
 
-      it('should support x-position attributes', () => {
+      test('should support x-position attributes', () => {
         const ops: ExtendedApiOperation[] = [
           {
             operationId: 'createPet',
@@ -354,19 +423,20 @@ describe('prepareOperations', () => {
         };
 
         op1.body.original = undefined;
-        expect(op1.body).to.deep.contain(expectedBodyParam);
-        expect(op1.parameters.length).to.equal(4);
-        expect(op1.parameters.map((p) => p.name)).to.deep.equal([
-          'orgId',
-          'wild',
-          'pet',
-          'countryId',
-        ]);
+        assert.strictEqual(op1.body.name, expectedBodyParam.name);
+        assert.strictEqual(op1.body.optional, expectedBodyParam.optional);
+        assert.strictEqual(op1.body.originalName, expectedBodyParam.originalName);
+        assert.strictEqual(op1.body.type, expectedBodyParam.type);
+        assert.strictEqual(op1.parameters.length, 4);
+        assert.deepStrictEqual(
+          op1.parameters.map((p) => p.name),
+          ['orgId', 'wild', 'pet', 'countryId']
+        );
       });
     });
 
     describe('requestBody (x-www-form-urlencoded)', () => {
-      it('should handle requestBody with ref type', () => {
+      test('should handle requestBody with ref type', () => {
         const ops: ApiOperation[] = [
           {
             operationId: 'createPet',
@@ -397,13 +467,13 @@ describe('prepareOperations', () => {
           original: ops[0].requestBody,
         };
 
-        expect(op1.body).to.deep.equal(expectedBodyParam);
-        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+        assert.deepStrictEqual(op1.body, expectedBodyParam);
+        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
       });
     });
 
     describe('requestBody (application/octet-stream)', () => {
-      it('should handle File request body', () => {
+      test('should handle File request body', () => {
         const ops: ApiOperation[] = [
           {
             operationId: 'createPet',
@@ -435,13 +505,13 @@ describe('prepareOperations', () => {
           original: ops[0].requestBody,
         };
 
-        expect(op1.body).to.deep.equal(expectedBodyParam);
-        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+        assert.deepStrictEqual(op1.body, expectedBodyParam);
+        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
       });
     });
 
     describe('requestBody (multipart/form-data)', () => {
-      it('should handle form data', () => {
+      test('should handle form data', () => {
         const ops: ApiOperation[] = [
           {
             operationId: 'createPet',
@@ -481,8 +551,8 @@ describe('prepareOperations', () => {
           original: ops[0].requestBody,
         };
 
-        expect(op1.body).to.deep.equal(expectedBodyParam);
-        expect(op1.parameters).to.deep.equal([expectedBodyParam]);
+        assert.deepStrictEqual(op1.body, expectedBodyParam);
+        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
       });
     });
   });
@@ -495,14 +565,14 @@ describe('fixDuplicateOperations', () => {
     { input: undefined, expected: undefined },
   ];
   for (const { input, expected } of testCases) {
-    it(`should handle ${input} as input`, () => {
+    test(`should handle ${input} as input`, () => {
       const res = fixDuplicateOperations(input);
 
-      expect(res).to.deep.eq(expected);
+      assert.deepStrictEqual(res, expected);
     });
   }
 
-  it('handle list with 1 operation only', () => {
+  test('handle list with 1 operation only', () => {
     const ops: ApiOperation[] = [
       {
         operationId: 'getPetById',
@@ -517,10 +587,10 @@ describe('fixDuplicateOperations', () => {
     const res = fixDuplicateOperations(ops);
 
     // Basically it should be the same
-    expect(res).to.be.deep.equal(ops);
+    assert.deepStrictEqual(res, ops);
   });
 
-  it('handle 2 different operations', () => {
+  test('handle 2 different operations', () => {
     const ops: ApiOperation[] = [
       {
         operationId: 'getPetById',
@@ -543,10 +613,10 @@ describe('fixDuplicateOperations', () => {
     const res = fixDuplicateOperations(ops);
 
     // Basically it should be the same
-    expect(res).to.be.deep.equal(ops);
+    assert.deepStrictEqual(res, ops);
   });
 
-  it('handle 2 operations with the same operationId', () => {
+  test('handle 2 operations with the same operationId', () => {
     const ops: ApiOperation[] = [
       {
         operationId: 'getPetById',
@@ -568,7 +638,7 @@ describe('fixDuplicateOperations', () => {
 
     const res = fixDuplicateOperations(ops);
 
-    expect(res[1].operationId).not.to.be.equal(res[0].operationId);
+    assert.notStrictEqual(res[1].operationId, res[0].operationId);
   });
 
   // TODO: If someone wants to adjust code to fix this issue, then please go ahead :)
@@ -635,12 +705,192 @@ describe('getOperationName', () => {
   ];
 
   for (const { input, expected } of testCases) {
-    it(`should handle ${JSON.stringify(input)}`, () => {
+    test(`should handle ${JSON.stringify(input)}`, () => {
       const res = getOperationName(input.opId, input.group);
 
-      expect(res).to.be.equal(expected);
+      assert.strictEqual(res, expected);
     });
   }
+});
+
+describe('getParamName', () => {
+  const testCases = [
+    { input: 'test', expected: 'test' },
+    { input: 'function', expected: '_function' },
+    { input: 'test.test', expected: 'test_test' },
+    { input: 'test test', expected: 'testTest' },
+    { input: 'test.test.test', expected: 'test_test_test' },
+    { input: 'af_UNDERSCORED_NAME', expected: 'afUNDERSCOREDNAME' },
+  ];
+
+  for (const { input, expected } of testCases) {
+    test(`should handle ${JSON.stringify(input)}`, () => {
+      const res = getParamName(input);
+
+      assert.strictEqual(res, expected);
+    });
+  }
+});
+
+describe('getParams', () => {
+  test('should not affect parameters if no modifiers are provided', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test1',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: 'test2',
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {},
+    });
+
+    const [param1, param2] = getParams(originalParams, opts);
+
+    assert.strictEqual(param1.name, 'test1');
+    assert.strictEqual(param1.type, 'unknown');
+    assert.strictEqual(param1.optional, false);
+
+    assert.strictEqual(param2.name, 'test2');
+    assert.strictEqual(param2.type, 'string');
+    assert.strictEqual(param2.optional, true);
+  });
+
+  test('should apply modifiers for parameters', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test1',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: 'test 2',
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      {
+        name: 'test3',
+        in: 'header',
+        required: true,
+        schema: {
+          type: 'number',
+        },
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {
+        parameters: {
+          test1: 'optional',
+          // also supports matching by original name
+          'test 2': 'required',
+          test3: 'ignore',
+        },
+      },
+    });
+
+    const [param1, param2, param3] = getParams(originalParams, opts);
+
+    assert.strictEqual(param1.name, 'test1');
+    assert.strictEqual(param1.type, 'unknown');
+    assert.strictEqual(param1.optional, true);
+
+    assert.strictEqual(param2.name, 'test2');
+    assert.strictEqual(param2.originalName, 'test 2');
+    assert.strictEqual(param2.type, 'string');
+    assert.strictEqual(param2.optional, false);
+
+    assert.strictEqual(param3, undefined);
+  });
+
+  test('should ignore unrecognized modifiers', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test1',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: 'test 2',
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      {
+        name: 'test3',
+        in: 'header',
+        required: true,
+        schema: {
+          type: 'number',
+        },
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {
+        parameters: {
+          // matching by filtered name 'test 2' -> 'test2'
+          test2: 'required',
+          somethingElse: 'ignore',
+          'a different name': 'optional',
+        },
+      },
+    });
+
+    const [param1, param2, param3] = getParams(originalParams, opts);
+
+    assert.strictEqual(param1.name, 'test1');
+    assert.strictEqual(param1.type, 'unknown');
+    assert.strictEqual(param1.optional, false);
+
+    assert.strictEqual(param2.name, 'test2');
+    assert.strictEqual(param2.originalName, 'test 2');
+    assert.strictEqual(param2.type, 'string');
+    assert.strictEqual(param2.optional, false);
+
+    assert.strictEqual(param3.name, 'test3');
+    assert.strictEqual(param3.type, 'number');
+    assert.strictEqual(param3.optional, false);
+  });
+
+  // It's because path parameters are by default required. And changing it
+  // will break the API. We want to avoid this.
+  test('should ignore parameter adjustments for path parameters', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: 'test',
+        schema: {
+          type: 'string',
+        },
+        in: 'path',
+        required: true,
+      },
+    ];
+    const opts = getClientOptions({
+      modifiers: {
+        parameters: {
+          test: 'ignore',
+        },
+      },
+    });
+
+    const [param] = getParams(originalParams, opts);
+
+    assert.strictEqual(param.name, 'test');
+    assert.strictEqual(param.type, 'string');
+    assert.strictEqual(param.optional, false);
+  });
 });
 
 /**

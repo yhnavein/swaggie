@@ -1,28 +1,30 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
 import generateTypes, { renderComment } from './genTypes';
-import { getClientOptions, getDocument } from '../../test/test.utils';
+import {
+  assertEqualIgnoringWhitespace,
+  getClientOptions,
+  getDocument,
+} from '../../test/test.utils';
 
 describe('generateTypes', () => {
   const opts = getClientOptions();
 
-  it('should handle empty components properly', () => {
+  test('should handle empty components properly', () => {
     const res = generateTypes(getDocument({ components: {} }), opts);
 
-    expect(res).to.be.equal('');
+    assert.strictEqual(res, '');
   });
 
-  it('should handle empty components schemas properly', () => {
-    const res = generateTypes(
-      getDocument({ components: { schemas: {} } }),
-      opts
-    );
+  test('should handle empty components schemas properly', () => {
+    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts);
 
-    expect(res).to.be.equal('');
+    assert.strictEqual(res, '');
   });
 
-  it('should handle schema with reference only', () => {
+  test('should handle schema with reference only', () => {
     const res = generateTypes(
       prepareSchemas({
         A: {
@@ -35,7 +37,8 @@ describe('generateTypes', () => {
       opts
     );
 
-    expect(res).to.equalWI(
+    assertEqualIgnoringWhitespace(
+      res,
       `
 export type A = B;
 export interface B {}`
@@ -43,7 +46,7 @@ export interface B {}`
   });
 
   describe('enums', () => {
-    it('should handle simple enums correctly', () => {
+    test('should handle simple enums correctly', () => {
       const res = generateTypes(
         prepareSchemas({
           SimpleEnum: {
@@ -60,7 +63,8 @@ export interface B {}`
         opts
       );
 
-      expect(res).to.equalWI(
+      assertEqualIgnoringWhitespace(
+        res,
         `
 export type SimpleEnum = 0 | 1;
 
@@ -69,7 +73,7 @@ export type StringEnum = "Active" | "Disabled";`
       );
     });
 
-    it('should handle extended enums correctly', () => {
+    test('should handle extended enums correctly', () => {
       const res = generateTypes(
         prepareSchemas({
           XEnums: {
@@ -94,7 +98,8 @@ export type StringEnum = "Active" | "Disabled";`
         opts
       );
 
-      expect(res).to.equalWI(
+      assertEqualIgnoringWhitespace(
+        res,
         `
 export enum XEnums {
   High = 2,
@@ -117,7 +122,7 @@ export enum XEnumsString {
       );
     });
 
-    it('should handle OpenApi 3.1 enums', () => {
+    test('should handle OpenApi 3.1 enums', () => {
       const res = generateTypes(
         prepareSchemas({
           Priority: {
@@ -142,7 +147,8 @@ export enum XEnumsString {
         opts
       );
 
-      expect(res).to.equalWI(
+      assertEqualIgnoringWhitespace(
+        res,
         `
 export enum Priority {
   High = 2,
@@ -184,7 +190,7 @@ export enum Size {
   });
 
   describe('objects', () => {
-    it('should handle obj with no required fields', () => {
+    test('should handle obj with no required fields', () => {
       const res = generateTypes(
         prepareSchemas({
           AuthenticationData: {
@@ -205,17 +211,20 @@ export enum Size {
         opts
       );
 
-      expect(res).to.equalWI(`
+      assertEqualIgnoringWhitespace(
+        res,
+        `
 export interface AuthenticationData {
   login?: string;
   password?: string;
 }
 
 export interface Empty {}
-`);
+`
+      );
     });
 
-    it('should handle obj with required fields', () => {
+    test('should handle obj with required fields', () => {
       const res = generateTypes(
         prepareSchemas({
           AuthenticationData: {
@@ -242,17 +251,20 @@ export interface Empty {}
         opts
       );
 
-      expect(res).to.equalWI(`
+      assertEqualIgnoringWhitespace(
+        res,
+        `
 export interface AuthenticationData {
   login: string;
   password: string;
   rememberMe?: boolean;
-}`);
+}`
+      );
     });
   });
 
   describe('arrays', () => {
-    it('should handle simple array cases', () => {
+    test('should handle simple array cases', () => {
       const res = generateTypes(
         prepareSchemas({
           StringArray: {
@@ -275,14 +287,17 @@ export interface AuthenticationData {
         opts
       );
 
-      expect(res).to.equalWI(`
+      assertEqualIgnoringWhitespace(
+        res,
+        `
 export type StringArray = string[];
 export type EmptyArray = unknown[];
 export type ObjectArray = UserViewModel[];
-`);
+`
+      );
     });
 
-    it('should handle different array types as properties', () => {
+    test('should handle different array types as properties', () => {
       const res = generateTypes(
         prepareSchemas({
           ComplexObject: {
@@ -330,19 +345,22 @@ export type ObjectArray = UserViewModel[];
         opts
       );
 
-      expect(res).to.equalWI(`
+      assertEqualIgnoringWhitespace(
+        res,
+        `
 export interface ComplexObject {
   roles: string[];
   ids: number[];
   inlineGroups?: { name?: string; id: number; }[];
   groups?: Group[];
-}`);
+}`
+      );
     });
   });
 
   describe('inheritance', () => {
     describe('allOf', () => {
-      it('should handle 2 allOf correctly (most common case)', () => {
+      test('should handle 2 allOf correctly (most common case)', () => {
         const res = generateTypes(
           prepareSchemas({
             AuthenticationData: {
@@ -362,13 +380,16 @@ export interface ComplexObject {
           opts
         );
 
-        expect(res).to.equalWI(`
+        assertEqualIgnoringWhitespace(
+          res,
+          `
 export interface AuthenticationData extends BasicAuth {
   rememberMe?: boolean;
-}`);
+}`
+        );
       });
 
-      it('should handle many allOf correctly', () => {
+      test('should handle many allOf correctly', () => {
         const res = generateTypes(
           prepareSchemas({
             AuthenticationData: {
@@ -398,14 +419,17 @@ export interface AuthenticationData extends BasicAuth {
           opts
         );
 
-        expect(res).to.equalWI(`
+        assertEqualIgnoringWhitespace(
+          res,
+          `
 export interface AuthenticationData extends LoginPart, PasswordPart {
   rememberMe: boolean;
   signForSpam?: boolean;
-}`);
+}`
+        );
       });
 
-      it('should handle allOf combined with object directly', () => {
+      test('should handle allOf combined with object directly', () => {
         const res = generateTypes(
           prepareSchemas({
             AuthenticationData: {
@@ -426,11 +450,14 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
           opts
         );
 
-        expect(res).to.equalWI(`
+        assertEqualIgnoringWhitespace(
+          res,
+          `
 export interface AuthenticationData extends LoginPart {
   rememberMe: boolean;
   signForSpam?: boolean;
-}`);
+}`
+        );
       });
     });
 
@@ -440,7 +467,7 @@ export interface AuthenticationData extends LoginPart {
 
     for (const type of ['anyOf', 'oneOf']) {
       describe(type, () => {
-        it(`should handle 1 ${type} with reference correctly`, () => {
+        test(`should handle 1 ${type} with reference correctly`, () => {
           const res = generateTypes(
             prepareSchemas({
               AuthenticationData: {
@@ -450,10 +477,10 @@ export interface AuthenticationData extends LoginPart {
             opts
           );
 
-          expect(res).to.equalWI('export type AuthenticationData = BasicAuth;');
+          assertEqualIgnoringWhitespace(res, 'export type AuthenticationData = BasicAuth;');
         });
 
-        it(`should handle 2 of ${type} with reference correctly`, () => {
+        test(`should handle 2 of ${type} with reference correctly`, () => {
           const res = generateTypes(
             prepareSchemas({
               AuthenticationData: {
@@ -466,12 +493,13 @@ export interface AuthenticationData extends LoginPart {
             opts
           );
 
-          expect(res).to.equalWI(
+          assertEqualIgnoringWhitespace(
+            res,
             'export type AuthenticationData = BasicAuth | OAuth2;'
           );
         });
 
-        it(`should handle ${type} with reference and schema correctly`, () => {
+        test(`should handle ${type} with reference and schema correctly`, () => {
           const res = generateTypes(
             prepareSchemas({
               AuthenticationData: {
@@ -491,7 +519,8 @@ export interface AuthenticationData extends LoginPart {
             opts
           );
 
-          expect(res).to.equalWI(
+          assertEqualIgnoringWhitespace(
+            res,
             'export type AuthenticationData = BasicAuth | { token?: string; };'
           );
         });
@@ -501,15 +530,18 @@ export interface AuthenticationData extends LoginPart {
 });
 
 describe('renderComment', () => {
-  it('should render proper multiline comment with trimming', () => {
+  test('should render proper multiline comment with trimming', () => {
     const comment = `   Quite a lenghty comment
    With at least two lines    `;
     const res = renderComment(comment);
 
-    expect(res).to.be.equal(` /**
+    assert.strictEqual(
+      res,
+      ` /**
   * Quite a lenghty comment
   * With at least two lines
-  */`);
+  */`
+    );
   });
 
   const testCases = [
@@ -532,18 +564,16 @@ describe('renderComment', () => {
   ];
 
   for (const { comment, expected } of testCases) {
-    it(`should render proper comment for "${comment}"`, () => {
+    test(`should render proper comment for "${comment}"`, () => {
       const res = renderComment(comment);
 
-      expect(res).to.be.equal(expected);
+      assert.strictEqual(res, expected);
     });
   }
 });
 
 type ExtendedSchema = {
-  [key: string]:
-    | OA3.ReferenceObject
-    | (OA31.SchemaObject & { [key: `x-${string}`]: object });
+  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: object });
 };
 function prepareSchemas(schemas: ExtendedSchema) {
   return getDocument({
