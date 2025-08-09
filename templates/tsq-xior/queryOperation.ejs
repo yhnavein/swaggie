@@ -7,7 +7,7 @@
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
 export function <%= it.rqOpName %><TData = <%~ it.returnType %>, TError = Error>(<% it.parameters.forEach((parameter) => { %>
-  <%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+  <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
 $config?: Omit<
   UseQueryOptions<<%~ it.returnType %>, TError, TData>,

@@ -37,5 +37,5 @@ function readLocalFile(filePath: string) {
 }
 
 function parseFileContents(contents: string, path: string): object {
-  return /.ya?ml$/i.test(path) ? YAML.load(contents) : JSON.parse(contents);
+  return /.ya?ml$/i.test(path) ? (YAML.load(contents) as object) : JSON.parse(contents);
 }

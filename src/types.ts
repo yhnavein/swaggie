@@ -22,6 +22,14 @@ export interface ClientOptions {
   dateFormat?: DateSupport;
   /** Options for query parameters serialization */
   queryParamsSerialization: QueryParamsSerializationOptions;
+
+  /** Offers ability to adjust the OpenAPI spec before it is processed */
+  modifiers?: {
+    /** Global-level modifiers for parameter with a given name */
+    parameters?: {
+      [key: string]: 'optional' | 'required' | 'ignore';
+    };
+  };
 }
 
 export interface CliOptions extends FullAppOptions {
@@ -36,7 +44,7 @@ export interface FullAppOptions extends ClientOptions {
 
 export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior' | 'tsq-xior';
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
-export type DateSupport = 'string' | 'Date'; // 'luxon', 'momentjs', etc
+export type DateSupport = 'string' | 'Date';
 export type ArrayFormat = 'indices' | 'repeat' | 'brackets';
 
 /**

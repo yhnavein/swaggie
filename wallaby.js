@@ -1,6 +1,8 @@
 module.exports = () => ({
+  autoDetect: ['node:test'],
+
   files: [
-    'test/chai-extensions.ts',
+    'test/test.utils.ts',
     'src/**/*.ts',
     'test/*.json',
     'test/*.yml',
@@ -13,13 +15,11 @@ module.exports = () => ({
 
   env: {
     type: 'node',
+    runner: 'node'
   },
   delays: {
     run: 1000
   },
 
-  testFramework: 'mocha',
   autoDetect: false,
-
-  setup: () => { require('./test/chai-extensions'); }
 });

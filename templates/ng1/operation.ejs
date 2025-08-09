@@ -6,7 +6,7 @@
    * @return Success
    */
   <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
-<%= parameter.name %>: <%~ parameter.type %> <%= parameter.optional ? ' | null | undefined' : '' %>,
+<%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
     config?: IRequestShortcutConfig
   ): IPromise<<%~ it.returnType %>> {

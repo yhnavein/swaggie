@@ -32,7 +32,7 @@ export const petClient = {
     /**
    * @param body  
    */
-  addPet(  body: Pet ,
+  addPet(body: Pet ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     const url = `/pet`;
@@ -49,8 +49,8 @@ export const petClient = {
    * @param apiKey (optional) (API name: api_key)
    * @param petId  
    */
-  deletePet(  apiKey: string  | null | undefined,
-      petId: number ,
+  deletePet(apiKey: string | null | undefined,
+    petId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -68,7 +68,7 @@ export const petClient = {
     /**
    * @param status (optional) 
    */
-  findPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
+  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     const url = `/pet/findByStatus`;
@@ -86,7 +86,7 @@ export const petClient = {
     /**
    * @param tags (optional) 
    */
-  findPetsByTags(  tags: string[]  | null | undefined,
+  findPetsByTags(tags?: string[] | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     const url = `/pet/findByTags`;
@@ -104,7 +104,7 @@ export const petClient = {
     /**
    * @param petId  
    */
-  getPetById(  petId: number ,
+  getPetById(petId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -119,7 +119,7 @@ export const petClient = {
     /**
    * @param body  
    */
-  updatePet(  body: Pet ,
+  updatePet(body: Pet ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     const url = `/pet`;
@@ -140,9 +140,9 @@ export const petClient = {
    * @param name (optional) 
    * @param status (optional) 
    */
-  updatePetWithForm(  petId: number ,
-      name: string  | null | undefined,
-      status: string  | null | undefined,
+  updatePetWithForm(petId: number ,
+    name?: string | null,
+    status?: string | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -163,9 +163,9 @@ export const petClient = {
    * @param petId  
    * @param additionalMetadata (optional) 
    */
-  uploadFile(  body: File  | null | undefined,
-      petId: number ,
-      additionalMetadata: string  | null | undefined,
+  uploadFile(body: File | null | undefined,
+    petId: number ,
+    additionalMetadata?: string | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<File> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
@@ -186,7 +186,7 @@ export const petClient = {
   /**
    * @param status (optional) 
    */
-export function usepetfindPetsByStatus(  status: ("available" | "pending" | "sold")  | null | undefined,
+export function usepetfindPetsByStatus(  status?: ("available" | "pending" | "sold") | null,
       $config?: SwrConfig
   ) {
   const url = `/pet/findByStatus`;
@@ -218,7 +218,7 @@ const { data, error, mutate } = useSWR<Pet[]>(
   /**
    * @param tags (optional) 
    */
-export function usepetfindPetsByTags(  tags: string[]  | null | undefined,
+export function usepetfindPetsByTags(  tags?: string[] | null,
       $config?: SwrConfig
   ) {
   const url = `/pet/findByTags`;
@@ -279,7 +279,7 @@ const { data, error, mutate } = useSWR<Pet>(
     /**
    * @param orderId  
    */
-  deleteOrder(  orderId: number ,
+  deleteOrder(orderId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
@@ -307,7 +307,7 @@ const { data, error, mutate } = useSWR<Pet>(
     /**
    * @param orderId  
    */
-  getOrderById(  orderId: number ,
+  getOrderById(orderId: number ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
@@ -322,7 +322,7 @@ const { data, error, mutate } = useSWR<Pet>(
     /**
    * @param body (optional) 
    */
-  placeOrder(  body: Order  | null | undefined,
+  placeOrder(body?: Order | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
     const url = `/store/order`;
@@ -395,7 +395,7 @@ const { data, error, mutate } = useSWR<Order>(
     /**
    * @param body (optional) 
    */
-  createUser(  body: User  | null | undefined,
+  createUser(body?: User | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     const url = `/user`;
@@ -411,7 +411,7 @@ const { data, error, mutate } = useSWR<Order>(
     /**
    * @param body (optional) 
    */
-  createUsersWithListInput(  body: User[]  | null | undefined,
+  createUsersWithListInput(body?: User[] | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     const url = `/user/createWithList`;
@@ -427,7 +427,7 @@ const { data, error, mutate } = useSWR<Order>(
     /**
    * @param username  
    */
-  deleteUser(  username: string ,
+  deleteUser(username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
@@ -442,7 +442,7 @@ const { data, error, mutate } = useSWR<Order>(
     /**
    * @param username  
    */
-  getUserByName(  username: string ,
+  getUserByName(username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
@@ -458,8 +458,8 @@ const { data, error, mutate } = useSWR<Order>(
    * @param username (optional) 
    * @param password (optional) 
    */
-  loginUser(  username: string  | null | undefined,
-      password: string  | null | undefined,
+  loginUser(username?: string | null,
+    password?: string | null,
       $config?: AxiosRequestConfig
   ): AxiosPromise<string> {
     const url = `/user/login`;
@@ -492,8 +492,8 @@ const { data, error, mutate } = useSWR<Order>(
    * @param body (optional) 
    * @param username  
    */
-  updateUser(  body: FormData  | null | undefined,
-      username: string ,
+  updateUser(body: FormData | null | undefined,
+    username: string ,
       $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
@@ -540,8 +540,8 @@ const { data, error, mutate } = useSWR<User>(
    * @param username (optional) 
    * @param password (optional) 
    */
-export function useuserloginUser(  username: string  | null | undefined,
-      password: string  | null | undefined,
+export function useuserloginUser(  username?: string | null,
+      password?: string | null,
       $config?: SwrConfig
   ) {
   const url = `/user/login`;

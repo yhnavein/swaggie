@@ -1,4 +1,5 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 
 /** This file tests a code that will be generated and is hardcoded into the templates */
 
@@ -190,10 +191,10 @@ describe('encodeParams', () => {
   for (const el of testCases) {
     describe(`with options: ${JSON.stringify(el.opts)}`, () => {
       for (const { input, exp } of el.cases) {
-        it(`should handle ${JSON.stringify(input)}`, () => {
+        test(`should handle ${JSON.stringify(input)}`, () => {
           const res = encodeParams(input, null, el.opts);
 
-          expect(res).to.be.equal(exp);
+          assert.strictEqual(res, exp);
         });
       }
     });

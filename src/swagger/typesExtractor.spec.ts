@@ -1,8 +1,9 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import type { ClientOptions } from '../types';
 import { getParameterType, getTypeFromSchema } from './typesExtractor';
-import { getClientOptions } from '../../test/test.utils';
+import { assertEqualIgnoringWhitespace, getClientOptions } from '../../test/test.utils';
 
 describe('getParameterType', () => {
   describe('empty cases', () => {
@@ -26,15 +27,15 @@ describe('getParameterType', () => {
     ];
 
     for (const { param, options, expected } of testCases) {
-      it(`should process ${param} correctly`, async () => {
+      test(`should process ${param} correctly`, async () => {
         const res = getParameterType(param, options);
 
-        expect(res).to.be.equal(expected);
+        assert.strictEqual(res, expected);
       });
     }
   });
 
-  it('standard case', async () => {
+  test('standard case', async () => {
     const param: OA3.ParameterObject = {
       name: 'items',
       in: 'query',
@@ -49,7 +50,7 @@ describe('getParameterType', () => {
 
     const res = getParameterType(param, options);
 
-    expect(res).to.be.equal('Item[]');
+    assert.strictEqual(res, 'Item[]');
   });
 });
 
@@ -85,14 +86,14 @@ describe('getTypeFromSchema', () => {
     ];
 
     for (const { schema, expected } of testCases) {
-      it(`should process ${schema} correctly`, async () => {
+      test(`should process ${schema} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
-        expect(res).to.be.equal(expected);
+        assert.strictEqual(res, expected);
       });
     }
 
-    it('should process array of inline objects correctly', () => {
+    test('should process array of inline objects correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'array',
         items: {
@@ -106,13 +107,16 @@ describe('getTypeFromSchema', () => {
       };
       const res = getTypeFromSchema(schema, opts);
 
-      expect(res).to.equalWI(`{
+      assertEqualIgnoringWhitespace(
+        res,
+        `{
         name?: string;
         id: number;
-      }[]`);
+      }[]`
+      );
     });
 
-    it('should process array of arrays correctly', () => {
+    test('should process array of arrays correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'array',
         items: {
@@ -124,10 +128,10 @@ describe('getTypeFromSchema', () => {
       };
       const res = getTypeFromSchema(schema, opts);
 
-      expect(res).to.equalWI('number[][]');
+      assertEqualIgnoringWhitespace(res, 'number[][]');
     });
 
-    it('should process array of arrays with objects correctly', () => {
+    test('should process array of arrays with objects correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'array',
         items: {
@@ -139,12 +143,12 @@ describe('getTypeFromSchema', () => {
       };
       const res = getTypeFromSchema(schema, opts);
 
-      expect(res).to.equalWI('Item[][]');
+      assertEqualIgnoringWhitespace(res, 'Item[][]');
     });
   });
 
   describe('objects', () => {
-    it('should process deep objects correctly', () => {
+    test('should process deep objects correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'object',
         required: ['id'],
@@ -161,36 +165,39 @@ describe('getTypeFromSchema', () => {
       };
       const res = getTypeFromSchema(schema, opts);
 
-      expect(res).to.equalWI(`{
+      assertEqualIgnoringWhitespace(
+        res,
+        `{
         name?: string;
         id: number;
 
         evenDeeper?: {
           foo?: string;
         };
-      }`);
+      }`
+      );
     });
   });
 
   describe('enums', () => {
-    it('should process string enums correctly', () => {
+    test('should process string enums correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'string',
         enum: ['Admin', 'User', 'Guest'],
       };
       const res = getTypeFromSchema(schema, opts);
 
-      expect(res).to.equalWI(`("Admin" | "User" | "Guest")`);
+      assertEqualIgnoringWhitespace(res, `("Admin" | "User" | "Guest")`);
     });
 
-    it('should process numeric enums correctly', () => {
+    test('should process numeric enums correctly', () => {
       const schema: OA3.SchemaObject = {
         type: 'number',
         enum: [1, 2, 3],
       };
       const res = getTypeFromSchema(schema, opts);
 
-      expect(res).to.equalWI('(1 | 2 | 3)');
+      assertEqualIgnoringWhitespace(res, '(1 | 2 | 3)');
     });
   });
 
@@ -217,10 +224,10 @@ describe('getTypeFromSchema', () => {
     ];
 
     for (const { schema, expected } of testCases) {
-      it(`should process ${schema} correctly`, async () => {
+      test(`should process ${schema} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
-        expect(res).to.be.equal(expected);
+        assert.strictEqual(res, expected);
       });
     }
   });

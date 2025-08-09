@@ -1,4 +1,5 @@
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import {
@@ -21,17 +22,17 @@ describe('escapeReservedWords', () => {
   ];
 
   for (const { input, expected } of testCases) {
-    it(`should escape ${input} correctly`, async () => {
+    test(`should escape ${input} correctly`, async () => {
       const res = escapeReservedWords(input);
 
-      expect(res).to.equal(expected);
+      assert.strictEqual(res, expected);
     });
   }
 });
 
 describe('verifyDocumentSpec', () => {
-  it('should accept OpenAPI 3', () => {
-    expect(() => {
+  test('should accept OpenAPI 3', () => {
+    assert.doesNotThrow(() => {
       const res = verifyDocumentSpec({
         openapi: '3.0.3',
         info: {
@@ -41,26 +42,26 @@ describe('verifyDocumentSpec', () => {
         paths: {},
       });
 
-      expect(res).to.be.ok;
-    }).to.not.throw();
+      assert(res);
+    });
   });
 
-  it('should reject Swagger 2.0 document', () => {
-    expect(() => {
+  test('should reject Swagger 2.0 document', () => {
+    assert.throws(() => {
       const res = verifyDocumentSpec({
         swagger: '2.0',
       } as VerifableDocument);
 
-      expect(res).to.not.be.ok;
-    }).to.throw('not supported');
+      assert(!res);
+    }, /not supported/);
   });
 
-  it('should reject an empty document', () => {
-    expect(() => {
+  test('should reject an empty document', () => {
+    assert.throws(() => {
       const res = verifyDocumentSpec(null as any);
 
-      expect(res).to.not.be.ok;
-    }).to.throw('is empty');
+      assert(!res);
+    }, /is empty/);
   });
 });
 
@@ -71,14 +72,14 @@ describe('groupOperationsByGroupName', () => {
     { input: undefined, expected: {} },
   ];
   for (const { input, expected } of testCases) {
-    it(`should handle ${input} as input`, async () => {
+    test(`should handle ${input} as input`, async () => {
       const res = groupOperationsByGroupName(input);
 
-      expect(res).to.deep.equal(expected);
+      assert.deepStrictEqual(res, expected);
     });
   }
 
-  it('handles single operation', async () => {
+  test('handles single operation', async () => {
     const def: ApiOperation[] = [
       {
         operationId: 'HealthCheck_PerformAllChecks',
@@ -106,12 +107,12 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).to.be.ok;
-    expect(res.HealthCheck).to.be.ok;
-    expect(res.HealthCheck.length).to.eq(1);
+    assert(res);
+    assert(res.HealthCheck);
+    assert.strictEqual(res.HealthCheck.length, 1);
   });
 
-  it('handles two different operations and the same group', async () => {
+  test('handles two different operations and the same group', async () => {
     const def: ApiOperation[] = [
       {
         operationId: 'HealthCheck_PerformAllChecks',
@@ -161,12 +162,12 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).to.be.ok;
-    expect(res.HealthCheck).to.be.ok;
-    expect(res.HealthCheck.length).to.eq(2);
+    assert(res);
+    assert(res.HealthCheck);
+    assert.strictEqual(res.HealthCheck.length, 2);
   });
 
-  it('handles two different operations and different groups', async () => {
+  test('handles two different operations and different groups', async () => {
     const def: ApiOperation[] = [
       {
         operationId: 'HealthCheck_PerformAllChecks',
@@ -216,11 +217,11 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    expect(res).to.be.ok;
-    expect(res.HealthCheck).to.be.ok;
-    expect(res.HealthCheck.length).to.eq(1);
-    expect(res.Illness).to.be.ok;
-    expect(res.Illness.length).to.eq(1);
+    assert(res);
+    assert(res.HealthCheck);
+    assert.strictEqual(res.HealthCheck.length, 1);
+    assert(res.Illness);
+    assert.strictEqual(res.Illness.length, 1);
   });
 });
 
@@ -236,26 +237,26 @@ describe('prepareOutputFilename', () => {
     { given: 'api\\api.ts', expected: 'api/api.ts' },
     { given: 'api/api/', expected: 'api/api/index.ts' },
   ]) {
-    it(`handles "${given}" correctly`, () => {
+    test(`handles "${given}" correctly`, () => {
       const res = prepareOutputFilename(given);
 
-      expect(res).to.be.equal(expected);
+      assert.strictEqual(res, expected);
     });
   }
 });
 
 describe('getBestResponse', () => {
-  it('handles no responses', () => {
+  test('handles no responses', () => {
     const op: OA3.OperationObject = {
       responses: {},
     };
 
     const [res] = getBestResponse(op);
 
-    expect(res).to.be.equal(null);
+    assert.strictEqual(res, null);
   });
 
-  it('handles 200 response with text/plain media type', () => {
+  test('handles 200 response with text/plain media type', () => {
     const op: OA3.OperationObject = {
       responses: {
         '200': {
@@ -273,7 +274,7 @@ describe('getBestResponse', () => {
 
     const [res] = getBestResponse(op);
 
-    expect(res).to.be.eql({
+    assert.deepStrictEqual(res, {
       schema: {
         $ref: '#/components/schemas/TestObject',
       },
@@ -291,7 +292,7 @@ describe('getBestResponse', () => {
     ];
 
     for (const { contentType, schema, expected } of testCases) {
-      it(`handles 201 ${contentType} response`, () => {
+      test(`handles 201 ${contentType} response`, () => {
         const op: OA3.OperationObject = {
           responses: {
             '201': {
@@ -307,12 +308,12 @@ describe('getBestResponse', () => {
 
         const [, respContentType] = getBestResponse(op);
 
-        expect(respContentType).to.deep.equal(expected);
+        assert.deepStrictEqual(respContentType, expected);
       });
     }
   });
 
-  it('handles multiple responses', () => {
+  test('handles multiple responses', () => {
     const op: OA3.OperationObject = {
       responses: {
         '301': {
@@ -340,7 +341,7 @@ describe('getBestResponse', () => {
 
     const [res] = getBestResponse(op);
 
-    expect(res).to.be.eql({
+    assert.deepStrictEqual(res, {
       schema: {
         $ref: '#/components/schemas/TestObject',
       },
