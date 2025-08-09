@@ -123,6 +123,15 @@ export function prepareOperations(
   });
 }
 
+/**
+ * Marks parameters as skippable based on their position relative to the last required parameter.
+ *
+ * This function iterates through the list of parameters and finds the last required parameter
+ * (where `optional` is false). All parameters that come after this required parameter are marked
+ * as skippable. This is useful, as we can skip such parameters when calling the generated function.
+ *
+ * @param params - Array of operation parameters to analyze and mark as skippable. (in-place modification)
+ */
 function markParametersAsSkippable(params: IOperationParam[]): void {
   const lastRequiredParamIndex = params.map((p) => !p.optional).lastIndexOf(true);
   if (lastRequiredParamIndex === params.length - 1) {
