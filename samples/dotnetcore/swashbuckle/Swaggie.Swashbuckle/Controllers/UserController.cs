@@ -53,7 +53,7 @@ public class UserController : Controller
 
   [HttpPost("")]
   [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status201Created)]
-  public IActionResult CreateUser([FromBody] UserViewModel user)
+  public IActionResult CreateUser([FromBody, Required] UserViewModel user)
   {
     return Created("some-url", user);
   }
@@ -74,7 +74,7 @@ public class UserController : Controller
   [Consumes("application/x-www-form-urlencoded")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public IActionResult UpdateUserProperties([FromForm] UserUpdateModel userUpdate)
+  public IActionResult UpdateUserProperties([FromForm, Required] UserUpdateModel userUpdate)
   {
     Console.WriteLine("userUpdate: " + JsonConvert.SerializeObject(userUpdate));
 
@@ -86,7 +86,7 @@ public class UserController : Controller
   [Consumes("multipart/form-data")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public IActionResult UpdateUserProfile([FromForm] UserProfileUpdateModel profileUpdate)
+  public IActionResult UpdateUserProfile([FromForm, Required] UserProfileUpdateModel profileUpdate)
   {
     Console.WriteLine("profileUpdate: " + JsonConvert.SerializeObject(profileUpdate));
 
@@ -144,7 +144,7 @@ public class UserFilter
   public List<long> Ids { get; set; } = new();
 
   /// <summary>
-  /// User's email. Can be partial match
+  /// User's email. Can be a partial match
   /// </summary>
   public string Email { get; set; }
 

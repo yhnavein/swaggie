@@ -26,7 +26,7 @@
     },
     "GlobalModifiers": {
       "additionalProperties": false,
-      "description": "Global modifiers for operations / parameters. It gives flexibility to adjust the OpenAPI spec before it is processed",
+      "description": "Global modifiers for parameters. It gives flexibility to adjust the OpenAPI spec before it is processed",
       "properties": {
         "parameters": {
           "type": "object",

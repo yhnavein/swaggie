@@ -55,8 +55,8 @@ public class Startup
         c.CustomOperationIds(e =>
           $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sample Api", Version = "v1" });
-        
-        // Add XML comments from main assembly
+
+        // Add XML comments from the main assembly
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);

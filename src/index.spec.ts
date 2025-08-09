@@ -108,7 +108,7 @@ describe('runCodeGenerator', () => {
   test('works with proper --config provided', async () => {
     mockRequest(
       mockAgent,
-      'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json',
+      'https://raw.githubusercontent.com/readmeio/oas-examples/refs/heads/main/3.0/json/petstore.json',
       'petstore-v3.json'
     );
 
@@ -149,8 +149,9 @@ describe('applyConfigFile', () => {
 
     assert(conf);
     assert.strictEqual(conf.baseUrl, 'https://google.pl');
-    assert.strictEqual(conf.src,
-      'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.json'
+    assert.strictEqual(
+      conf.src,
+      'https://raw.githubusercontent.com/readmeio/oas-examples/refs/heads/main/3.0/json/petstore.json'
     );
     assert.deepStrictEqual(conf.queryParamsSerialization, {
       arrayFormat: 'repeat',
