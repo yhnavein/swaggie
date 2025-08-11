@@ -37,5 +37,20 @@ function readLocalFile(filePath: string) {
 }
 
 function parseFileContents(contents: string, path: string): object {
-  return /.ya?ml$/i.test(path) ? (YAML.load(contents) as object) : JSON.parse(contents);
+  // If the path ends with .yaml or .yml, parse as YAML
+  if (/.ya?ml$/i.test(path)) {
+    return YAML.load(contents) as object;
+  }
+  // If the path ends with .json, parse as JSON
+  if (/.json$/i.test(path)) {
+    return JSON.parse(contents);
+  }
+
+  // It is possible that the URL does not have an extension, so we need to check the contents
+  const firstChar = contents.trimStart()[0];
+  if (firstChar === '{') {
+    return JSON.parse(contents);
+  }
+
+  return YAML.load(contents) as object;
 }

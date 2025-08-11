@@ -39,6 +39,24 @@ describe('loadSpecDocument', () => {
     assert(spec.paths);
   });
 
+  test('should resolve a YAML spec from an extensionless url', async () => {
+    const urlWithoutExtension = petstore3.yaml.replace('.yaml', '');
+    mockRequest(mockAgent, urlWithoutExtension, 'petstore-v3.yml');
+
+    const spec = await loadSpecDocument(urlWithoutExtension);
+    assert(spec);
+    assert(spec.paths);
+  });
+
+  test('should resolve a JSON spec from an extensionless url', async () => {
+    const urlWithoutExtension = petstore3.json.replace('.json', '');
+    mockRequest(mockAgent, urlWithoutExtension, 'petstore-v3.json');
+
+    const spec = await loadSpecDocument(urlWithoutExtension);
+    assert(spec);
+    assert(spec.paths);
+  });
+
   test('should resolve a YAML spec from local file', async () => {
     const path = `${__dirname}/../../test/petstore-v3.yml`;
     const spec = await loadSpecDocument(path);
