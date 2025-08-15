@@ -1,16 +1,14 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import { getCompositeTypes, getTypeFromSchema } from '../swagger';
+import { getCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
 import type { ClientOptions } from '../types';
+import { escapePropName } from '../utils';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
  * @returns String containing all TypeScript types in the document.
  */
-export default function generateTypes(
-  spec: OA3.Document,
-  options: ClientOptions
-): string {
+export default function generateTypes(spec: OA3.Document, options: ClientOptions): string {
   const result: string[] = [];
 
   const schemaKeys = Object.keys(spec.components?.schemas || {});
@@ -31,10 +29,12 @@ function renderType(
   schema: OA3.ReferenceObject | OA3.SchemaObject,
   options: ClientOptions
 ): string {
+  const safeName = getSafeIdentifier(name);
+
   // This is an interesting case, because it is allowed but not likely to be used
   // as it is just a reference to another schema object
   if ('$ref' in schema) {
-    return `export type ${name} = ${schema.$ref.split('/').pop()};`;
+    return `export type ${safeName} = ${getSafeIdentifier(schema.$ref.split('/').pop())};`;
   }
 
   const result: string[] = [];
@@ -43,51 +43,46 @@ function renderType(
   }
 
   if ('x-enumNames' in schema || 'x-enum-varnames' in schema) {
-    result.push(renderExtendedEnumType(name, schema));
+    result.push(renderExtendedEnumType(safeName, schema));
     return result.join('\n');
   }
   if ('enum' in schema) {
-    result.push(renderEnumType(name, schema));
+    result.push(renderEnumType(safeName, schema));
     return result.join('\n');
   }
 
   // OpenAPI 3.1 enums support. We need to check if the schema is an object and has a oneOf property
   if ('oneOf' in schema && schema.type !== 'object' && schema.type) {
-    result.push(renderOpenApi31Enum(name, schema));
+    result.push(renderOpenApi31Enum(safeName, schema));
     return result.join('\n');
   }
 
   if ('allOf' in schema) {
     const types = getCompositeTypes(schema);
     const extensions = types ? `extends ${types.join(', ')} ` : '';
-    result.push(`export interface ${name} ${extensions}{`);
+    result.push(`export interface ${safeName} ${extensions}{`);
 
     const mergedSchema = getMergedCompositeObjects(schema);
     result.push(generateObjectTypeContents(mergedSchema, options));
   } else if ('oneOf' in schema || 'anyOf' in schema) {
     const typeDefinition = getTypesFromAnyOrOneOf(schema, options);
-    result.push(`export type ${name} = ${typeDefinition};`);
+    result.push(`export type ${safeName} = ${typeDefinition};`);
 
     return `${result.join('\n')}\n`;
   } else if (schema.type === 'array') {
     // This case is quite rare but is definitely possible that a schema definition is
     // an array of something. In this case it's just a type reference
-    result.push(
-      `export type ${name} = ${generateItemsType(schema.items, options)}[];`
-    );
+    result.push(`export type ${safeName} = ${generateItemsType(schema.items, options)}[];`);
     return result.join('\n');
   } else {
-    result.push(`export interface ${name} {`);
+    result.push(`export interface ${safeName} {`);
     result.push(generateObjectTypeContents(schema, options));
   }
 
   return `${result.join('\n')}}\n`;
 }
 
-function getTypesFromAnyOrOneOf(
-  schema: OA3.SchemaObject,
-  options: ClientOptions
-) {
+function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions) {
   const types = getCompositeTypes(schema);
   const mergedSchema = getMergedCompositeObjects(schema);
   const typeContents = generateObjectTypeContents(mergedSchema, options);
@@ -98,10 +93,7 @@ function getTypesFromAnyOrOneOf(
   return types.join(' | ');
 }
 
-function generateObjectTypeContents(
-  schema: OA3.SchemaObject,
-  options: ClientOptions
-) {
+function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOptions) {
   const result: string[] = [];
   const required = schema.required || [];
   const props = Object.keys(schema.properties || {});
@@ -115,14 +107,12 @@ function generateObjectTypeContents(
   return result.join('\n');
 }
 
-function generateItemsType(
-  schema: OA3.ReferenceObject | OA3.SchemaObject,
-  options: ClientOptions
-) {
+function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: ClientOptions) {
   const fallbackType = options.preferAny ? 'any' : 'unknown';
 
   if ('$ref' in schema) {
-    return schema.$ref.split('/').pop() ?? fallbackType;
+    const refName = schema.$ref.split('/').pop();
+    return getSafeIdentifier(refName) || fallbackType;
   }
 
   // Schema object is not supported at the moment, but it can be added if needed
@@ -149,9 +139,7 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
  * Render simple enum types (just a union of values)
  */
 function renderEnumType(name: string, def: OA3.SchemaObject) {
-  const values = def.enum
-    .map((v) => (typeof v === 'number' ? v : `"${v}"`))
-    .join(' | ');
+  const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
   return `export type ${name} = ${values};\n`;
 }
 
@@ -170,7 +158,7 @@ function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
 }
 
 function renderTypeProp(
-  prop: string,
+  propName: string,
   definition: OA3.ReferenceObject | OA3.SchemaObject,
   required: boolean,
   options: ClientOptions
@@ -182,7 +170,10 @@ function renderTypeProp(
     lines.push(renderComment(definition.description));
   }
   const optionalMark = required ? '' : '?';
-  lines.push(`  ${prop}${optionalMark}: ${type};`);
+  // If prop name is not a valid identifier, we need to wrap it in quotes.
+  // We can't use getSafeIdentifier here because it will affect the data model.
+  const safePropName = escapePropName(propName);
+  lines.push(`  ${safePropName}${optionalMark}: ${type};`);
 
   return lines.join('\n');
 }
@@ -218,10 +209,7 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject) {
 function isObject(item?: object): item is Record<string, object> {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
-function deepMerge<T extends Record<string, any>>(
-  target: T,
-  ...sources: Partial<T>[]
-): T {
+function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
   if (!sources.length) return target;
   const source = sources.shift();
 
@@ -234,9 +222,7 @@ function deepMerge<T extends Record<string, any>>(
         if (!target[key]) {
           Object.assign(target, { [key]: source[key] });
         } else if (Array.isArray(target[key])) {
-          (target[key] as any[]) = Array.from(
-            new Set([...target[key], ...source[key]])
-          );
+          (target[key] as any[]) = Array.from(new Set([...target[key], ...source[key]]));
         }
       } else {
         Object.assign(target, { [key]: source[key] });

@@ -4,26 +4,72 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import {
   type VerifableDocument,
-  escapeReservedWords,
+  escapeIdentifier,
   verifyDocumentSpec,
   groupOperationsByGroupName,
   getBestResponse,
   prepareOutputFilename,
+  escapePropName,
 } from './utils';
 import type { ApiOperation } from '../types';
 
-describe('escapeReservedWords', () => {
+describe('escapeIdentifier', () => {
   const testCases = [
     { input: '', expected: '' },
     { input: null, expected: null },
     { input: undefined, expected: undefined },
     { input: 'Burrito', expected: 'Burrito' },
     { input: 'return', expected: '_return' },
+    { input: '1test', expected: '_1test' },
   ];
 
   for (const { input, expected } of testCases) {
     test(`should escape ${input} correctly`, async () => {
-      const res = escapeReservedWords(input);
+      const res = escapeIdentifier(input);
+
+      assert.strictEqual(res, expected);
+    });
+  }
+});
+
+describe('escapePropName', () => {
+  const testCases = [
+    { input: '', expected: null },
+    { input: null, expected: null },
+    { input: undefined, expected: null },
+    { input: 'Burrito', expected: 'Burrito' },
+    { input: '123numeric', expected: '"123numeric"' },
+    { input: 'with$dollar', expected: 'with$dollar' }, // $ is not a special character
+    { input: 'with-hyphen', expected: '"with-hyphen"' },
+    { input: 'with space', expected: '"with space"' },
+    { input: 'with.dot', expected: '"with.dot"' },
+    { input: 'with@symbol', expected: '"with@symbol"' },
+    { input: 'with+plus', expected: '"with+plus"' },
+    { input: 'with/slash', expected: '"with/slash"' },
+    { input: 'with:colon', expected: '"with:colon"' },
+    { input: 'with;semicolon', expected: '"with;semicolon"' },
+    { input: 'with,comma', expected: '"with,comma"' },
+    { input: 'with(parentheses', expected: '"with(parentheses"' },
+    { input: 'with[brackets', expected: '"with[brackets"' },
+    { input: 'with{braces', expected: '"with{braces"' },
+    { input: 'with|pipe', expected: '"with|pipe"' },
+    { input: 'with\\backslash', expected: '"with\\backslash"' },
+    { input: 'with?question', expected: '"with?question"' },
+    { input: 'with<greater', expected: '"with<greater"' },
+    { input: 'with=equals', expected: '"with=equals"' },
+    { input: 'with~tilde', expected: '"with~tilde"' },
+    { input: 'with`backtick', expected: '"with`backtick"' },
+    { input: 'with!exclamation', expected: '"with!exclamation"' },
+    { input: 'with#hash', expected: '"with#hash"' },
+    { input: 'with%percent', expected: '"with%percent"' },
+    { input: 'with^caret', expected: '"with^caret"' },
+    { input: 'with&ampersand', expected: '"with&ampersand"' },
+    { input: 'with*asterisk', expected: '"with*asterisk"' },
+  ];
+
+  for (const { input, expected } of testCases) {
+    test(`should escape ${input} correctly`, async () => {
+      const res = escapePropName(input);
 
       assert.strictEqual(res, expected);
     });

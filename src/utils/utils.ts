@@ -4,7 +4,8 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import type { ApiOperation } from '../types';
 
-const reservedWords = [
+const reservedKeywords = new Set([
+  'arguments',
   'break',
   'case',
   'catch',
@@ -16,37 +17,80 @@ const reservedWords = [
   'delete',
   'do',
   'else',
+  'enum',
+  'eval',
   'export',
   'extends',
+  'false',
   'finally',
   'for',
   'function',
   'if',
+  'implements',
   'import',
   'in',
   'instanceof',
+  'interface',
+  'let',
   'new',
+  'null',
+  'package',
+  'private',
+  'protected',
+  'public',
   'return',
+  'static',
   'super',
   'switch',
   'this',
   'throw',
+  'true',
   'try',
   'typeof',
   'var',
   'void',
+  'volatile',
   'while',
   'with',
   'yield',
-];
+]);
 
-export function escapeReservedWords(name?: string | null): string {
-  let escapedName = name;
-
-  if (reservedWords.indexOf(name) >= 0) {
-    escapedName = `_${name}`;
+/**
+ * Escapes reserved words so they can be used as a valid identifier in the generated code.
+ * For example, `break` is a reserved word in TypeScript, but it is allowed in OpenAPI.
+ * Escaping is done by adding an underscore prefix.
+ */
+export function escapeIdentifier(name?: string | null): string {
+  if (reservedKeywords.has(name) || /^[0-9]/.test(name)) {
+    return `_${name}`;
   }
-  return escapedName;
+
+  return name;
+}
+
+/**
+ * Escapes property name so it can be used as a valid identifier in the generated code.
+ * It does not change the model, as it wraps it in quotes. It's only used for property names.
+ * Property names need quotes if they:
+ * - Contain special characters (not letters, numbers, underscore, or dollar sign)
+ * - Start with a number
+ */
+export function escapePropName(propName?: string | null): string | null {
+  if (!propName) {
+    return null;
+  }
+
+  if (
+    // Check if it starts with a number
+    /^[0-9]/.test(propName) ||
+    // Check if it contains any character that's not a letter, number, underscore, or dollar sign
+    // This covers spaces, hyphens, dots, and all other special characters
+    !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(propName)
+  ) {
+    return `"${propName}"`;
+  }
+
+  return propName;
 }
 
 /** Validates if the spec document is correct and if is supported */

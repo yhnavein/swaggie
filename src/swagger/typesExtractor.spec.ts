@@ -86,7 +86,7 @@ describe('getTypeFromSchema', () => {
     ];
 
     for (const { schema, expected } of testCases) {
-      test(`should process ${schema} correctly`, async () => {
+      test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
         assert.strictEqual(res, expected);
@@ -215,8 +215,8 @@ describe('getTypeFromSchema', () => {
       { schema: { type: 'number' }, expected: 'number' },
       { schema: { type: 'integer' }, expected: 'number' },
       { schema: { type: 'boolean' }, expected: 'boolean' },
-      { schema: { $ref: '' }, expected: '' },
-      { schema: { $ref: '#/components/' }, expected: '' },
+      { schema: { $ref: '' }, expected: 'unknown' },
+      { schema: { $ref: '#/components/' }, expected: 'unknown' },
       { schema: { $ref: '#/components/schema/Test' }, expected: 'Test' },
       { schema: null, expected: 'unknown' },
       { schema: undefined, expected: 'unknown' },
@@ -224,7 +224,7 @@ describe('getTypeFromSchema', () => {
     ];
 
     for (const { schema, expected } of testCases) {
-      test(`should process ${schema} correctly`, async () => {
+      test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
         assert.strictEqual(res, expected);

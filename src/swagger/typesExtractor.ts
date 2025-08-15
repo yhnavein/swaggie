@@ -41,8 +41,10 @@ export function getTypeFromSchema(
   if (!schema) {
     return unknownType;
   }
+
   if ('$ref' in schema) {
-    return schema.$ref.split('/').pop();
+    const refName = schema.$ref.split('/').pop();
+    return getSafeIdentifier(refName) || unknownType;
   }
 
   if ('allOf' in schema || 'oneOf' in schema || 'anyOf' in schema) {
@@ -127,6 +129,19 @@ function getTypeFromComposites(schema: OA3.SchemaObject, options: Partial<Client
 }
 
 /**
+ * Escapes name so it can be used as a valid identifier in the generated code.
+ * Component names can contain certain characters that are not allowed in identifiers.
+ * For example, `-` is not allowed in TypeScript, but it is allowed in OpenAPI.
+ */
+export function getSafeIdentifier(name: string | undefined) {
+  if (!name) {
+    return '';
+  }
+
+  return name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+/**
  * Returns a string with the types that the given schema extends.
  * It uses the `allOf`, `oneOf` or `anyOf` properties to determine the types.
  * If the schema has no composite types, it returns an empty string.
@@ -138,7 +153,7 @@ export function getCompositeTypes(schema: OA3.SchemaObject) {
   if (composite) {
     return composite
       .filter((v) => '$ref' in v)
-      .map((s: OA3.ReferenceObject) => s.$ref.split('/').pop());
+      .map((s: OA3.ReferenceObject) => getSafeIdentifier(s.$ref.split('/').pop()));
   }
 
   return [];

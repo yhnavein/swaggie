@@ -261,6 +261,54 @@ export interface AuthenticationData {
 }`
       );
     });
+
+    test(`should handle component names with special characters`, () => {
+      const res = generateTypes(
+        prepareSchemas({
+          'Authentication-Data': {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              },
+              obj: {
+                $ref: '#/components/schemas/Object.Name',
+              },
+            },
+          },
+          'Data Object': {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              },
+              auth: {
+                $ref: '#/components/schemas/Authentication-Data',
+              },
+            },
+          },
+          'Object.Name': {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              },
+              data: {
+                $ref: '#/components/schemas/Data Object',
+              },
+            },
+          },
+        }),
+        opts
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export interface Authentication_Data { token?: string; obj?: Object_Name; }
+export interface Data_Object { token?: string; auth?: Authentication_Data; }
+export interface Object_Name { token?: string; data?: Data_Object; }`
+      );
+    });
   });
 
   describe('arrays', () => {

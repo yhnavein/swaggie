@@ -12,7 +12,7 @@ import {
 } from '../utils';
 import { generateBarrelFile } from './createBarrel';
 import type { ApiOperation, ClientOptions } from '../types';
-import { escapeReservedWords } from '../utils';
+import { escapeIdentifier } from '../utils';
 import { getOperations } from '../swagger';
 
 /**
@@ -152,7 +152,7 @@ function markParametersAsSkippable(params: IOperationParam[]): void {
 function prepareUrl(path: string): string {
   return path.replace(
     /{([^}/]+)}/g,
-    (_, paramName) => `\${encodeURIComponent(\`\${${paramName}}\`)}`
+    (_, paramName) => `\${encodeURIComponent(\`\${${getParamName(paramName)}}\`)}`
   );
 }
 
@@ -242,10 +242,10 @@ export function getParams(
 }
 
 /**
- * Escapes param names to more safe form
+ * Escapes param name so it can be used as a valid identifier in the generated code
  */
 export function getParamName(name: string): string {
-  return escapeReservedWords(
+  return escapeIdentifier(
     name
       .split('.')
       .map((x) => camel(x))

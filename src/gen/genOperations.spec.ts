@@ -721,6 +721,8 @@ describe('getParamName', () => {
     { input: 'test test', expected: 'testTest' },
     { input: 'test.test.test', expected: 'test_test_test' },
     { input: 'af_UNDERSCORED_NAME', expected: 'afUNDERSCOREDNAME' },
+    { input: 'test-test', expected: 'testTest' },
+    { input: 'test&test', expected: 'testTest' },
   ];
 
   for (const { input, expected } of testCases) {
