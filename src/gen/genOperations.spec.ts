@@ -556,6 +556,43 @@ describe('prepareOperations', () => {
       });
     });
   });
+
+  describe('operation documentation', () => {
+    test('should include description and summary in JSDocs', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          description: 'Returns a single pet',
+          summary: 'Find pet by ID',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+        {
+          operationId: 'getPetByIdDeprecated',
+          method: 'get',
+          path: '/pet/byId/{petId}',
+          description: 'Returns a single pet (old)',
+          summary: 'Find pet by ID',
+          deprecated: true,
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [op1, op2] = prepareOperations(ops, opts);
+
+      assert.deepStrictEqual(op1.docs, ['Returns a single pet', 'Find pet by ID']);
+      assert.deepStrictEqual(op2.docs, [
+        'Returns a single pet (old)',
+        'Find pet by ID',
+        '@deprecated',
+      ]);
+    });
+  });
 });
 
 describe('fixDuplicateOperations', () => {

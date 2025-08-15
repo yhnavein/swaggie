@@ -22,6 +22,8 @@ export const http = xior.create({
 
 export const petClient = {
     /**
+   * Add a new pet to the store
+   * Add a new pet to the store
    * @param body  
    */
   addPet(body: Pet ,
@@ -38,6 +40,7 @@ export const petClient = {
   },
 
   /**
+   * Deletes a pet
    * @param apiKey (optional) (API name: api_key)
    * @param petId  
    */
@@ -58,6 +61,8 @@ export const petClient = {
   },
 
   /**
+   * Multiple status values can be provided with comma separated strings
+   * Finds Pets by status
    * @param status (optional) 
    */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
@@ -76,6 +81,9 @@ export const petClient = {
   },
 
   /**
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+   * Finds Pets by tags
+   * @deprecated
    * @param tags (optional) 
    */
   findPetsByTags(tags?: string[] | null,
@@ -94,6 +102,8 @@ export const petClient = {
   },
 
   /**
+   * Returns a single pet
+   * Find pet by ID
    * @param petId  
    */
   getPetById(petId: number ,
@@ -109,6 +119,8 @@ export const petClient = {
   },
 
   /**
+   * Update an existing pet by Id
+   * Update an existing pet
    * @param body  
    */
   updatePet(body: Pet ,
@@ -128,6 +140,7 @@ export const petClient = {
   },
 
   /**
+   * Updates a pet in the store with form data
    * @param petId  
    * @param name (optional) 
    * @param status (optional) 
@@ -151,6 +164,7 @@ export const petClient = {
   },
 
   /**
+   * uploads an image
    * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
@@ -177,6 +191,8 @@ export const petClient = {
 
 export const storeClient = {
     /**
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
+   * Delete purchase order by ID
    * @param orderId  
    */
   deleteOrder(orderId: number ,
@@ -192,6 +208,8 @@ export const storeClient = {
   },
 
   /**
+   * Returns a map of status codes to quantities
+   * Returns pet inventories by status
    */
   getInventory($config?: XiorRequestConfig
   ): Promise<XiorResponse<{ [key: string]: number }>> {
@@ -205,6 +223,8 @@ export const storeClient = {
   },
 
   /**
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+   * Find purchase order by ID
    * @param orderId  
    */
   getOrderById(orderId: number ,
@@ -220,6 +240,8 @@ export const storeClient = {
   },
 
   /**
+   * Place a new order in the store
+   * Place an order for a pet
    * @param body (optional) 
    */
   placeOrder(body?: Order | null,
@@ -239,6 +261,8 @@ export const storeClient = {
 
 export const userClient = {
     /**
+   * This can only be done by the logged in user.
+   * Create user
    * @param body (optional) 
    */
   createUser(body?: User | null,
@@ -255,6 +279,8 @@ export const userClient = {
   },
 
   /**
+   * Creates list of users with given input array
+   * Creates list of users with given input array
    * @param body (optional) 
    */
   createUsersWithListInput(body?: User[] | null,
@@ -271,6 +297,8 @@ export const userClient = {
   },
 
   /**
+   * This can only be done by the logged in user.
+   * Delete user
    * @param username  
    */
   deleteUser(username: string ,
@@ -286,6 +314,7 @@ export const userClient = {
   },
 
   /**
+   * Get user by user name
    * @param username  
    */
   getUserByName(username: string ,
@@ -301,6 +330,7 @@ export const userClient = {
   },
 
   /**
+   * Logs user into the system
    * @param username (optional) 
    * @param password (optional) 
    */
@@ -322,6 +352,7 @@ export const userClient = {
   },
 
   /**
+   * Logs out current logged in user session
    */
   logoutUser($config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
@@ -335,6 +366,8 @@ export const userClient = {
   },
 
   /**
+   * This can only be done by the logged in user.
+   * Update user
    * @param body (optional) 
    * @param username  
    */

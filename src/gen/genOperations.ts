@@ -110,6 +110,7 @@ export function prepareOperations(
     }
 
     return {
+      docs: getOperationDocs(op),
       returnType,
       responseContentType,
       method: op.method.toUpperCase(),
@@ -121,6 +122,25 @@ export function prepareOperations(
       headers,
     };
   });
+}
+
+/**
+ * Prepares content for the operation docs. We will use description and summary if they are defined
+ * in the spec. Additionally we will add deprecation tag if the operation is deprecated.
+ * This function should include JSDocs asterisks to make comments look nice.
+ */
+function getOperationDocs(op: ApiOperation): string[] {
+  const result = [];
+  if (op.description) {
+    result.push(op.description);
+  }
+  if (op.summary) {
+    result.push(op.summary);
+  }
+  if (op.deprecated) {
+    result.push('@deprecated');
+  }
+  return result;
 }
 
 /**
@@ -280,6 +300,7 @@ interface ClientData {
 }
 
 interface IOperation {
+  docs?: string[];
   returnType: string;
   responseContentType: string;
   method: string;

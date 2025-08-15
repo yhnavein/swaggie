@@ -1,4 +1,8 @@
 /**
+<% if(it.docs && it.docs.length > 0) { %>
+  * <%~ it.docs.join('\n   * ') %>
+<% } %>
+
 <% it.parameters.forEach((parameter) => { %>
    * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
 
