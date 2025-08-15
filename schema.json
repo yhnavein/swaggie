@@ -84,6 +84,11 @@
           "description": "Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions",
           "type": "string"
         },
+        "skipDeprecated": {
+          "default": false,
+          "description": "Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code",
+          "type": "boolean"
+        },
         "dateFormat": {
           "default": "Date",
           "description": "It determines how Date fields will be handled and what type they will have in models",

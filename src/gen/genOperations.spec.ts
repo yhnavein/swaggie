@@ -593,6 +593,39 @@ describe('prepareOperations', () => {
       ]);
     });
   });
+
+  describe('skipDeprecated', () => {
+    test('should skip deprecated operations', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+        {
+          operationId: 'getPetByIdDeprecated',
+          method: 'get',
+          path: '/pet/byId/{petId}',
+          parameters: [],
+          responses: {},
+          group: null,
+          deprecated: true,
+        },
+      ];
+
+      const opts = getClientOptions({
+        skipDeprecated: true,
+      });
+
+      const operations = prepareOperations(ops, opts);
+
+      assert.deepStrictEqual(operations.length, 1);
+      assert.deepStrictEqual(operations[0].name, 'getPetById');
+    });
+  });
 });
 
 describe('fixDuplicateOperations', () => {

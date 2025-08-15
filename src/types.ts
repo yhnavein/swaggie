@@ -17,6 +17,8 @@ export interface ClientOptions {
   template: Template;
   baseUrl?: string;
   preferAny?: boolean;
+  /** Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code */
+  skipDeprecated?: boolean;
   servicePrefix?: string;
   /** How date should be handled. It does not do any special serialization */
   dateFormat?: DateSupport;

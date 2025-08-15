@@ -79,7 +79,11 @@ export function prepareOperations(
   operations: ApiOperation[],
   options: ClientOptions
 ): IOperation[] {
-  const ops = fixDuplicateOperations(operations);
+  let ops = fixDuplicateOperations(operations);
+
+  if (options.skipDeprecated) {
+    ops = ops.filter((op) => !op.deprecated);
+  }
 
   return ops.map((op) => {
     const [respObject, responseContentType] = getBestResponse(op);

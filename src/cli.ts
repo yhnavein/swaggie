@@ -38,6 +38,10 @@ program
   )
   .option('--preferAny', 'Use "any" type instead of "unknown"')
   .option(
+    '--skipDeprecated',
+    'Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code'
+  )
+  .option(
     '--servicePrefix <string>',
     'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions'
   )
