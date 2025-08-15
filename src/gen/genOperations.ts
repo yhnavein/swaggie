@@ -35,6 +35,10 @@ export default async function generateOperations(
     const group = groups[name];
     const clientData = prepareClient(servicePrefix + name, group, options);
 
+    if (!clientData) {
+      continue;
+    }
+
     const renderedFile = renderFile('client.ejs', {
       ...clientData,
       servicePrefix,
@@ -52,8 +56,12 @@ function prepareClient(
   name: string,
   operations: ApiOperation[],
   options: ClientOptions
-): ClientData {
+): ClientData | null {
   const preparedOperations = prepareOperations(operations, options);
+
+  if (preparedOperations.length === 0) {
+    return null;
+  }
 
   return {
     clientName: name,
