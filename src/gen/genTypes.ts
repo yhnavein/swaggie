@@ -6,9 +6,15 @@ import { escapePropName } from '../utils';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
+ * This function will also traverse all the spec to see if the types are actually used.
+ * Circular dependencies will mark the types as used - this is acknowledged.
  * @returns String containing all TypeScript types in the document.
  */
-export default function generateTypes(spec: OA3.Document, options: ClientOptions): string {
+export default function generateTypes(
+  spec: OA3.Document,
+  options: ClientOptions,
+  skipUnused: boolean = true
+): string {
   const result: string[] = [];
 
   const schemaKeys = Object.keys(spec.components?.schemas || {});
@@ -16,7 +22,16 @@ export default function generateTypes(spec: OA3.Document, options: ClientOptions
     return '';
   }
 
+  const usedRefs = new Set<string>();
+  if (skipUnused) {
+    findAllUsedRefs(spec, options, usedRefs);
+  }
+
   for (const schemaName of schemaKeys) {
+    if (skipUnused && !usedRefs.has(schemaName)) {
+      continue;
+    }
+
     const schema = spec.components.schemas[schemaName];
     result.push(renderType(schemaName, schema, options));
   }
@@ -231,4 +246,46 @@ function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial
   }
 
   return deepMerge(target, ...sources);
+}
+
+/**
+ * Finds all of the used refs in the spec.
+ * @param obj - The object to traverse
+ * @param options - The options for the generation
+ * @param refs - The set of used refs. It will be modified in place.
+ */
+function findAllUsedRefs(obj: object, options: ClientOptions, refs: Set<string>) {
+  if (!obj) {
+    return null;
+  }
+
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      findAllUsedRefs(item, options, refs);
+    }
+  }
+
+  if (typeof obj !== 'object') {
+    return null;
+  }
+
+  if (
+    '$ref' in obj &&
+    typeof obj.$ref === 'string' &&
+    obj.$ref.startsWith('#/components/schemas/')
+  ) {
+    const refName = obj.$ref.split('/').pop();
+    if (refName) {
+      refs.add(refName);
+    }
+  }
+
+  // If the object is deprecated and we want to skip deprecated objects,
+  // we won't process it and anything below it
+  if (options.skipDeprecated && 'deprecated' in obj && obj.deprecated) {
+    return;
+  }
+
+  // Recursively traverse all object properties
+  Object.values(obj).forEach((value) => findAllUsedRefs(value, options, refs));
 }

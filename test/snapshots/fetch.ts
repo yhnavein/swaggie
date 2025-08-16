@@ -439,11 +439,6 @@ export interface Order {
   status?: ("placed" | "approved" | "delivered");
   complete?: boolean;}
 
-export interface Customer {
-  id?: number;
-  username?: string;
-  address?: Address[];}
-
 export interface Address {
   street?: string;
   city?: string;
@@ -477,8 +472,3 @@ export interface Pet {
   tags?: Tag[];
 /** pet status in the store */
   status?: ("available" | "pending" | "sold");}
-
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;}

@@ -13,13 +13,13 @@ describe('generateTypes', () => {
   const opts = getClientOptions();
 
   test('should handle empty components properly', () => {
-    const res = generateTypes(getDocument({ components: {} }), opts);
+    const res = generateTypes(getDocument({ components: {} }), opts, false);
 
     assert.strictEqual(res, '');
   });
 
   test('should handle empty components schemas properly', () => {
-    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts);
+    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts, false);
 
     assert.strictEqual(res, '');
   });
@@ -34,7 +34,8 @@ describe('generateTypes', () => {
           type: 'string',
         },
       }),
-      opts
+      opts,
+      false
     );
 
     assertEqualIgnoringWhitespace(
@@ -60,7 +61,8 @@ export interface B {}`
             enum: ['Active', 'Disabled'],
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -95,7 +97,8 @@ export type StringEnum = "Active" | "Disabled";`
             'x-enumNames': ['Large', 'Medium', 'Small'],
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -144,7 +147,8 @@ export enum XEnumsString {
             ],
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -208,7 +212,8 @@ export enum Size {
             type: 'object',
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -248,7 +253,8 @@ export interface Empty {}
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -299,7 +305,8 @@ export interface AuthenticationData {
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -332,7 +339,8 @@ export interface Object_Name { token?: string; data?: Data_Object; }`
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -390,7 +398,8 @@ export type ObjectArray = UserViewModel[];
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -425,7 +434,8 @@ export interface ComplexObject {
               ],
             },
           }),
-          opts
+          opts,
+          false
         );
 
         assertEqualIgnoringWhitespace(
@@ -464,7 +474,8 @@ export interface AuthenticationData extends BasicAuth {
               ],
             },
           }),
-          opts
+          opts,
+          false
         );
 
         assertEqualIgnoringWhitespace(
@@ -495,7 +506,8 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
               },
             },
           }),
-          opts
+          opts,
+          false
         );
 
         assertEqualIgnoringWhitespace(
@@ -522,7 +534,8 @@ export interface AuthenticationData extends LoginPart {
                 [type]: [{ $ref: '#/components/schemas/BasicAuth' }],
               },
             }),
-            opts
+            opts,
+            false
           );
 
           assertEqualIgnoringWhitespace(res, 'export type AuthenticationData = BasicAuth;');
@@ -538,7 +551,8 @@ export interface AuthenticationData extends LoginPart {
                 ],
               },
             }),
-            opts
+            opts,
+            false
           );
 
           assertEqualIgnoringWhitespace(
@@ -564,7 +578,8 @@ export interface AuthenticationData extends LoginPart {
                 ],
               },
             }),
-            opts
+            opts,
+            false
           );
 
           assertEqualIgnoringWhitespace(
