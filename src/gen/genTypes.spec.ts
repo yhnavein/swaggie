@@ -589,6 +589,80 @@ export interface AuthenticationData extends LoginPart {
         });
       });
     }
+
+    test('should handle nullable array schema property', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Auth: {
+            anyOf: [
+              {
+                items: {
+                  $ref: '#/components/schemas/TestType',
+                },
+                type: 'array',
+              },
+              {
+                type: 'null',
+              },
+            ],
+            default: [],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(res, `export type Auth = TestType[] | null;`);
+    });
+
+    test('should handle union of all primitive types', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Madness: {
+            anyOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'number',
+                },
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'boolean',
+                },
+              },
+              {
+                type: 'null',
+              },
+            ],
+            default: [],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export type Madness = string | number | boolean | string[] | number[] | boolean[] | null;`
+      );
+    });
   });
 });
 

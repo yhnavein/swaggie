@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import { getCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
+import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
 import type { ClientOptions } from '../types';
 import { escapePropName } from '../utils';
 import { findAllUsedRefs } from './refsHelper';
@@ -34,13 +34,13 @@ export default function generateTypes(
     }
 
     const schema = spec.components.schemas[schemaName];
-    result.push(renderType(schemaName, schema, options));
+    result.push(renderSchema(schemaName, schema, options));
   }
 
   return result.join('\n');
 }
 
-function renderType(
+function renderSchema(
   name: string,
   schema: OA3.ReferenceObject | OA3.SchemaObject,
   options: ClientOptions
@@ -74,7 +74,7 @@ function renderType(
   }
 
   if ('allOf' in schema) {
-    const types = getCompositeTypes(schema);
+    const types = getRefCompositeTypes(schema);
     const extensions = types ? `extends ${types.join(', ')} ` : '';
     result.push(`export interface ${safeName} ${extensions}{`);
 
@@ -98,17 +98,24 @@ function renderType(
   return `${result.join('\n')}}\n`;
 }
 
+/**
+ * Generates the type definition for an `anyOf` or `oneOf` schema.
+ * @param schema - The schema object to generate the type definition for.
+ * @param options - The options for the generation.
+ * @returns The type definition for the `anyOf` or `oneOf` schema.
+ */
 function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions) {
-  const types = getCompositeTypes(schema);
-  const mergedSchema = getMergedCompositeObjects(schema);
-  const typeContents = generateObjectTypeContents(mergedSchema, options);
-  if (typeContents) {
-    types.push(`{ ${typeContents} }`);
+  const composite = schema.allOf || schema.oneOf || schema.anyOf;
+  if (!composite) {
+    return '';
   }
 
-  return types.join(' | ');
+  return composite.map((s) => getTypeFromSchema(s, options)).join(' | ');
 }
 
+/**
+ * Generates the inline contents of an object type.
+ */
 function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOptions) {
   const result: string[] = [];
   const required = schema.required || [];

@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import type { OpenAPIV3 as OA3 } from 'openapi-types';
+import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import type { ClientOptions } from '../types';
 import { getParameterType, getTypeFromSchema } from './typesExtractor';
 import { assertEqualIgnoringWhitespace, getClientOptions } from '../../test/test.utils';
@@ -225,6 +225,41 @@ describe('getTypeFromSchema', () => {
 
     for (const { schema, expected } of testCases) {
       test(`should process ${JSON.stringify(schema)} correctly`, async () => {
+        const res = getTypeFromSchema(schema, opts);
+
+        assert.strictEqual(res, expected);
+      });
+    }
+  });
+
+  describe('composites', () => {
+    type TestCase = {
+      schema: OA31.SchemaObject;
+      expected: string;
+    };
+
+    const testCases: TestCase[] = [
+      { schema: { allOf: [{ type: 'string' }, { type: 'number' }] }, expected: 'string & number' },
+      { schema: { oneOf: [{ type: 'string' }, { type: 'number' }] }, expected: 'string | number' },
+      {
+        schema: { anyOf: [{ type: 'number' }, { type: 'string' }, { type: 'null' }] },
+        expected: 'number | string | null',
+      },
+      {
+        schema: {
+          anyOf: [
+            { type: 'number' },
+            { type: 'array', items: { type: 'string' } },
+            { type: 'array', items: { type: 'number' } },
+            { type: 'null' },
+          ],
+        },
+        expected: 'number | string[] | number[] | null',
+      },
+    ];
+
+    for (const { schema, expected } of testCases) {
+      test(`should ${JSON.stringify(schema)} match ${expected}`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
         assert.strictEqual(res, expected);
