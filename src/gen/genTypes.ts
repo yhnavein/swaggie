@@ -189,8 +189,8 @@ function renderTypeProp(
   const lines: string[] = [];
   const type = getTypeFromSchema(definition, options);
 
-  if ('description' in definition) {
-    lines.push(renderComment(definition.description));
+  if ('description' in definition || 'title' in definition) {
+    lines.push(renderComment(definition.description ?? definition.title));
   }
   const optionalMark = required ? '' : '?';
   // If prop name is not a valid identifier, we need to wrap it in quotes.

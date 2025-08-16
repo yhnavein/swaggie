@@ -202,9 +202,11 @@ export enum Size {
             properties: {
               login: {
                 type: 'string',
+                description: 'Login description',
               },
               password: {
                 type: 'string',
+                title: 'Password',
               },
             },
           },
@@ -220,7 +222,9 @@ export enum Size {
         res,
         `
 export interface AuthenticationData {
+/** Login description */
   login?: string;
+/** Password */
   password?: string;
 }
 
