@@ -712,12 +712,6 @@ export interface Order {
   status?: ("placed" | "approved" | "delivered");
   complete?: boolean;}
 
-export interface Address {
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;}
-
 export interface Category {
   id?: number;
   name?: string;}

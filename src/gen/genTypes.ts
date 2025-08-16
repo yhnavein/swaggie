@@ -3,6 +3,7 @@ import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import { getCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
 import type { ClientOptions } from '../types';
 import { escapePropName } from '../utils';
+import { findAllUsedRefs } from './refsHelper';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
@@ -246,46 +247,4 @@ function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial
   }
 
   return deepMerge(target, ...sources);
-}
-
-/**
- * Finds all of the used refs in the spec.
- * @param obj - The object to traverse
- * @param options - The options for the generation
- * @param refs - The set of used refs. It will be modified in place.
- */
-function findAllUsedRefs(obj: object, options: ClientOptions, refs: Set<string>) {
-  if (!obj) {
-    return null;
-  }
-
-  if (Array.isArray(obj)) {
-    for (const item of obj) {
-      findAllUsedRefs(item, options, refs);
-    }
-  }
-
-  if (typeof obj !== 'object') {
-    return null;
-  }
-
-  if (
-    '$ref' in obj &&
-    typeof obj.$ref === 'string' &&
-    obj.$ref.startsWith('#/components/schemas/')
-  ) {
-    const refName = obj.$ref.split('/').pop();
-    if (refName) {
-      refs.add(refName);
-    }
-  }
-
-  // If the object is deprecated and we want to skip deprecated objects,
-  // we won't process it and anything below it
-  if (options.skipDeprecated && 'deprecated' in obj && obj.deprecated) {
-    return;
-  }
-
-  // Recursively traverse all object properties
-  Object.values(obj).forEach((value) => findAllUsedRefs(value, options, refs));
 }
