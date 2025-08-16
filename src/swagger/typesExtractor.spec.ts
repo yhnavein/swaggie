@@ -256,6 +256,7 @@ describe('getTypeFromSchema', () => {
         },
         expected: 'number | string[] | number[] | null',
       },
+      { schema: {}, expected: 'unknown' },
     ];
 
     for (const { schema, expected } of testCases) {

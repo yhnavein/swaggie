@@ -10,6 +10,8 @@ import {
   getBestResponse,
   prepareOutputFilename,
   escapePropName,
+  orderBy,
+  getBestContentType,
 } from './utils';
 import type { ApiOperation } from '../types';
 
@@ -392,5 +394,47 @@ describe('getBestResponse', () => {
         $ref: '#/components/schemas/TestObject',
       },
     });
+  });
+});
+
+describe('orderBy', () => {
+  test('should order by a key', () => {
+    const arr = [{ a: 1 }, { a: 2 }, { a: 3 }];
+    const res = orderBy(arr, 'a');
+
+    assert.deepStrictEqual(res, [{ a: 1 }, { a: 2 }, { a: 3 }]);
+  });
+
+  test('should nullish data', () => {
+    const res = orderBy(null, 'a');
+
+    assert.deepStrictEqual(res, []);
+  });
+});
+
+describe('getBestContentType', () => {
+  test('should return the best content type', () => {
+    const res = getBestContentType({
+      content: {
+        'application/json': { schema: { $ref: '#/components/schemas/TestObject' } },
+      },
+    });
+
+    assert.deepStrictEqual(res, [
+      {
+        schema: {
+          $ref: '#/components/schemas/TestObject',
+        },
+      },
+      'json',
+    ]);
+  });
+
+  test('should handle empty content', () => {
+    const res = getBestContentType({
+      content: {},
+    });
+
+    assert.deepStrictEqual(res, [null, null]);
   });
 });
