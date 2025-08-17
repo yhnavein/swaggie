@@ -54,8 +54,8 @@ function renderSchema(
   }
 
   const result: string[] = [];
-  if (schema.description) {
-    result.push(renderComment(schema.description));
+  if (schema.description ?? schema.title) {
+    result.push(renderComment(schema.description ?? schema.title));
   }
 
   if ('x-enumNames' in schema || 'x-enum-varnames' in schema) {
@@ -153,7 +153,7 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
   const enumValues = def.enum.map((el) => (isString ? `"${el}"` : el));
 
   for (let index = 0; index < enumNames.length; index++) {
-    res += `  ${enumNames[index]} = ${enumValues[index]},\n`;
+    res += `  ${escapePropName(enumNames[index])} = ${enumValues[index]},\n`;
   }
   return `${res}}\n`;
 }
@@ -173,7 +173,9 @@ function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
   let res = `export enum ${name} {\n`;
   for (const v of def.oneOf) {
     if ('const' in v) {
-      res += `  ${v.title} = ${typeof v.const === 'string' ? `"${v.const}"` : v.const},\n`;
+      res += `  ${escapePropName(v.title)} = ${
+        typeof v.const === 'string' ? `"${v.const}"` : v.const
+      },\n`;
     }
   }
 

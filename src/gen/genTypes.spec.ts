@@ -54,6 +54,7 @@ export interface B {}`
             type: 'integer',
             format: 'int32',
             enum: [0, 1],
+            title: 'Just a simple enum',
           },
           StringEnum: {
             type: 'string',
@@ -68,6 +69,7 @@ export interface B {}`
       assertEqualIgnoringWhitespace(
         res,
         `
+/** Just a simple enum */
 export type SimpleEnum = 0 | 1;
 
 /** Feature is activated or not */
@@ -125,12 +127,70 @@ export enum XEnumsString {
       );
     });
 
+    test('should handle enums with invalid characters in names', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          XEnums: {
+            type: 'integer',
+            format: 'int32',
+            enum: [5, 4, 3, 2, 1, 0],
+            'x-enumNames': [
+              '1High',
+              'High-Low',
+              'Medium.Low',
+              'Low&Low',
+              'Really Low',
+              'Seriously,Low?',
+            ],
+          },
+          XEnumVarnames: {
+            type: 'integer',
+            format: 'int32',
+            enum: [5, 4, 3, 2, 1, 0],
+            'x-enum-varnames': [
+              '1High',
+              'High-Low',
+              'Medium.Low',
+              'Low&Low',
+              'Really Low',
+              'Seriously,Low?',
+            ],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export enum XEnums {
+  "1High" = 5,
+  "High-Low" = 4,
+  "Medium.Low" = 3,
+  "Low&Low" = 2,
+  "Really Low" = 1,
+  "Seriously, Low?" = 0,
+}
+
+export enum XEnumVarnames {
+  "1High" = 5,
+  "High-Low" = 4,
+  "Medium.Low" = 3,
+  "Low&Low" = 2,
+  "Really Low" = 1,
+  "Seriously, Low?" = 0,
+}`
+      );
+    });
+
     test('should handle OpenApi 3.1 enums', () => {
       const res = generateTypes(
         prepareSchemas({
           Priority: {
             type: 'integer',
             format: 'int32',
+            title: 'Priority',
             oneOf: [
               { title: 'High', const: 2, description: 'High priority' },
               { title: 'Medium', const: 1, description: 'Medium priority' },
@@ -146,6 +206,18 @@ export enum XEnumsString {
               { title: 'Small', const: 'S', description: 'Small size' },
             ],
           },
+          BadNames: {
+            type: 'string',
+            description: 'How big the feature is',
+            oneOf: [
+              { title: '1High', const: '1H', description: '1High' },
+              { title: 'High-Low', const: 'H', description: 'High-Low size' },
+              { title: 'Medium.Low', const: 'M', description: 'Medium.Low size' },
+              { title: 'Low&Low', const: 'S', description: 'Low&Low size' },
+              { title: 'Really Low', const: 'R', description: 'Really Low size' },
+              { title: 'Seriously, Low?', const: 'S', description: 'Seriously, Low? size' },
+            ],
+          },
         }),
         opts,
         false
@@ -154,6 +226,7 @@ export enum XEnumsString {
       assertEqualIgnoringWhitespace(
         res,
         `
+/** Priority */
 export enum Priority {
   High = 2,
   Medium = 1,
@@ -165,6 +238,16 @@ export enum Size {
   Large = "L",
   Medium = "M",
   Small = "S",
+}
+
+/** How big the feature is */
+export enum BadNames {
+  "1High" = "1H",
+  "High-Low" = "H",
+  "Medium.Low" = "M",
+  "Low&Low" = "S",
+  "Really Low" = "R",
+  "Seriously, Low?" = "S",
 }`
       );
     });
