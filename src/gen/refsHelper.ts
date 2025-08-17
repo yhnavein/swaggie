@@ -55,7 +55,7 @@ function findDirectRefs(obj: any, options: ClientOptions, refs: Set<string>) {
 
   // If the object is deprecated and we want to skip deprecated objects,
   // we won't process it and anything below it
-  if (options.skipDeprecated && 'deprecated' in obj && obj.deprecated) {
+  if (options.skipDeprecated && obj.deprecated) {
     return;
   }
 

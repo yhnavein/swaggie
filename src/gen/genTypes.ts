@@ -46,11 +46,16 @@ function renderSchema(
   options: ClientOptions
 ): string {
   const safeName = getSafeIdentifier(name);
+  if (!safeName) {
+    console.warn(`Skipping schema ${name} because it is not a valid identifier`);
+    return '';
+  }
 
   // This is an interesting case, because it is allowed but not likely to be used
   // as it is just a reference to another schema object
   if ('$ref' in schema) {
-    return `export type ${safeName} = ${getSafeIdentifier(schema.$ref.split('/').pop())};`;
+    const refName = getSafeIdentifier(schema.$ref.split('/').pop());
+    return `export type ${safeName} = ${refName || 'unknown'};`;
   }
 
   const result: string[] = [];

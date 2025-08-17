@@ -61,6 +61,10 @@ const reservedKeywords = new Set([
  * Escaping is done by adding an underscore prefix.
  */
 export function escapeIdentifier(name?: string | null): string {
+  if (!name) {
+    return name;
+  }
+
   if (reservedKeywords.has(name) || /^[0-9]/.test(name)) {
     return `_${name}`;
   }
