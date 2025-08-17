@@ -15,7 +15,7 @@ export function loadAllTemplateFiles(templateName: string | null) {
 
   if (!fs.existsSync(templatesDir)) {
     throw new Error(
-      `Could not found directory with the template (we tried ${templatesDir}). Template name is correct?`
+      `Could not find directory with the template (we tried ${templatesDir}). Is the template name correct?`
     );
   }
   engine = new Eta({ views: templatesDir });

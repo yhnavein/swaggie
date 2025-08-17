@@ -12,7 +12,7 @@ describe('loadAllTemplateFiles', () => {
   test('should handle loading wrong template', () => {
     assert.throws(() => {
       loadAllTemplateFiles('non-existent');
-    }, /Could not found/);
+    }, /Could not find/);
   });
 
   test('should handle empty template name', () => {

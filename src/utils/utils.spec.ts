@@ -23,6 +23,16 @@ describe('escapeIdentifier', () => {
     { input: 'Burrito', expected: 'Burrito' },
     { input: 'return', expected: '_return' },
     { input: '1test', expected: '_1test' },
+    { input: 'class', expected: '_class' },
+    { input: 'function', expected: '_function' },
+    { input: 'var', expected: '_var' },
+    { input: 'let', expected: '_let' },
+    { input: 'const', expected: '_const' },
+    { input: '123', expected: '_123' },
+    { input: '0variable', expected: '_0variable' },
+    { input: 'validIdentifier', expected: 'validIdentifier' },
+    { input: '_validIdentifier', expected: '_validIdentifier' },
+    { input: '$validIdentifier', expected: '$validIdentifier' },
   ];
 
   for (const { input, expected } of testCases) {

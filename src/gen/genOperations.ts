@@ -158,11 +158,15 @@ function getOperationDocs(op: ApiOperation): string[] {
 /**
  * Marks parameters as skippable based on their position relative to the last required parameter.
  *
- * This function iterates through the list of parameters and finds the last required parameter
- * (where `optional` is false). All parameters that come after this required parameter are marked
- * as skippable. This is useful, as we can skip such parameters when calling the generated function.
+ * In TypeScript/JavaScript, optional parameters must come after required ones. This function
+ * finds the last required parameter and marks all subsequent optional parameters as "skippable",
+ * meaning they can be omitted from function calls without affecting the parameter order.
  *
- * @param params - Array of operation parameters to analyze and mark as skippable. (in-place modification)
+ * @example
+ * Parameters: [required1, optional1, required2, optional2, optional3]
+ * Result:     [required1, optional1, required2, optional2?, optional3?]
+ *
+ * @param params - Array of operation parameters to analyze and mark as skippable (modified in-place)
  */
 function markParametersAsSkippable(params: IOperationParam[]): void {
   const lastRequiredParamIndex = params.map((p) => !p.optional).lastIndexOf(true);
@@ -176,10 +180,12 @@ function markParametersAsSkippable(params: IOperationParam[]): void {
 }
 
 /**
- * This function will replace path template expressions with ${encodeURIComponent('paramName')} placeholders
- * The end result will be a string that is effectively a template (i.e. you should wrap end result with backticks)
- * This method is not really safe, but it will point out the potential issues with the path template expressions
- * So that the developer can see actual problem in the compiled code (as opposed to having a runtime issues)
+ * Converts OpenAPI path templates to TypeScript template literal format.
+ * Transforms '{paramName}' to '${encodeURIComponent(`${paramName}`)}'.
+ * The result should be wrapped in backticks to create a template literal.
+ *
+ * @example
+ * '/users/{userId}/posts/{postId}' → '/users/${encodeURIComponent(`${userId}`)}/posts/${encodeURIComponent(`${postId}`)}'
  */
 function prepareUrl(path: string): string {
   return path.replace(

@@ -95,6 +95,11 @@ function getPathOperation(
   return op;
 }
 
+/**
+ * Extracts a safe group name from the operation's tags.
+ * Uses the first tag as the group name, or 'default' if no tags exist.
+ * Removes invalid characters and ensures the name doesn't start with a number.
+ */
 function getOperationGroupName(op: OA3.OperationObject): string {
   let name = op.tags?.length ? op.tags[0] : 'default';
   name = name.replace(/[^$_a-z0-9]+/gi, '');

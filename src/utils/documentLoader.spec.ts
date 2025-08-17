@@ -63,4 +63,40 @@ describe('loadSpecDocument', () => {
     assert(spec);
     assert(spec.paths);
   });
+
+  test('should handle nonexistent local file', async () => {
+    const path = `${__dirname}/../../test/nonexistent.yml`;
+    
+    try {
+      await loadSpecDocument(path);
+      assert.fail('Expected error to be thrown');
+    } catch (e) {
+      assert(e.message.includes('ENOENT') || e.message.includes('no such file'));
+    }
+  });
+
+  test('should handle malformed JSON file', async () => {
+    const malformedUrl = 'https://example.com/malformed.json';
+    mockAgent.get('https://example.com').intercept({
+      path: '/malformed.json',
+    }).reply(200, '{"invalid": json}');
+
+    try {
+      await loadSpecDocument(malformedUrl);
+      assert.fail('Expected error to be thrown');
+    } catch (e) {
+      assert(e instanceof SyntaxError);
+    }
+  });
+
+  test('should handle passing an object directly', async () => {
+    const mockSpec = {
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+    };
+
+    const spec = await loadSpecDocument(mockSpec);
+    assert.deepStrictEqual(spec, mockSpec);
+  });
 });

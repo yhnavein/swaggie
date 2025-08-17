@@ -755,14 +755,14 @@ export interface AuthenticationData extends LoginPart {
 
 describe('renderComment', () => {
   test('should render proper multiline comment with trimming', () => {
-    const comment = `   Quite a lenghty comment
+    const comment = `   Quite a lengthy comment
    With at least two lines    `;
     const res = renderComment(comment);
 
     assert.strictEqual(
       res,
       ` /**
-  * Quite a lenghty comment
+  * Quite a lengthy comment
   * With at least two lines
   */`
     );

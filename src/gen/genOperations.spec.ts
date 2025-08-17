@@ -711,45 +711,42 @@ describe('fixDuplicateOperations', () => {
     assert.notStrictEqual(res[1].operationId, res[0].operationId);
   });
 
-  // TODO: If someone wants to adjust code to fix this issue, then please go ahead :)
-  /*
-  it(`handle 3 operations with the same operationId even after fix`, () => {
-    const ops = [
-      {
-        operationId: 'getPetById',
-        method: 'get',
-        path: '/pet/{petId}',
-        parameters: [],
-        responses: {},
-        group: null,
-      },
-      {
-        operationId: 'getPetById',
-        method: 'post',
-        path: '/pet/{petId}',
-        parameters: [],
-        responses: {},
-        group: null,
-      },
-      {
-        operationId: 'getPetById1',
-        method: 'post',
-        path: '/pet/{petId}',
-        parameters: [],
-        responses: {},
-        group: null,
-      },
-    ] as ApiOperation[];
+  // test('handle 3 operations with complex duplicate scenarios', () => {
+  //   const ops: ApiOperation[] = [
+  //     {
+  //       operationId: 'getPetById',
+  //       method: 'get',
+  //       path: '/pet/{petId}',
+  //       parameters: [],
+  //       responses: {},
+  //       group: null,
+  //     },
+  //     {
+  //       operationId: 'getPetById',
+  //       method: 'post',
+  //       path: '/pet/{petId}',
+  //       parameters: [],
+  //       responses: {},
+  //       group: null,
+  //     },
+  //     {
+  //       operationId: 'getPetById1',
+  //       method: 'put',
+  //       path: '/pet/{petId}',
+  //       parameters: [],
+  //       responses: {},
+  //       group: null,
+  //     },
+  //   ];
 
-    const res = fixDuplicateOperations(ops);
+  //   const res = fixDuplicateOperations(ops);
 
-    console.log('Ops', ops.map(e => e.operationId));
-    console.log('Res', res.map(e => e.operationId));
-
-    expect(res[0].operationId).not.to.be.equal(res[1].operationId);
-    expect(res[1].operationId).not.to.be.equal(res[2].operationId);
-  });
-*/
+  //   assert.strictEqual(res[0].operationId, 'getPetById');
+  //   // Second occurence of getPetById should be renamed to getPetById2
+  //   // to not affect already existing getPetById1 operation
+  //   assert.strictEqual(res[1].operationId, 'getPetById2');
+  //   assert.strictEqual(res[2].operationId, 'getPetById1');
+  // });
 });
 
 describe('getOperationName', () => {

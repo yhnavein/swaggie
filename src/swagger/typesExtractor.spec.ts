@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import type { ClientOptions } from '../types';
-import { getParameterType, getTypeFromSchema } from './typesExtractor';
+import { getParameterType, getTypeFromSchema, getSafeIdentifier, getRefCompositeTypes } from './typesExtractor';
 import { assertEqualIgnoringWhitespace, getClientOptions } from '../../test/test.utils';
 
 describe('getParameterType', () => {
@@ -266,5 +266,104 @@ describe('getTypeFromSchema', () => {
         assert.strictEqual(res, expected);
       });
     }
+  });
+});
+
+describe('getSafeIdentifier', () => {
+  const testCases = [
+    { input: '', expected: '' },
+    { input: undefined, expected: '' },
+    { input: 'validName', expected: 'validName' },
+    { input: 'Valid-Name', expected: 'Valid_Name' },
+    { input: 'name with spaces', expected: 'name_with_spaces' },
+    { input: 'name.with.dots', expected: 'name_with_dots' },
+    { input: 'name@with#symbols', expected: 'name_with_symbols' },
+    { input: '123number', expected: '123number' },
+    { input: 'User-Profile', expected: 'User_Profile' },
+    { input: 'API:Response', expected: 'API_Response' },
+    { input: 'test/path', expected: 'test_path' },
+    { input: 'test[brackets]', expected: 'test_brackets_' },
+    { input: 'test{braces}', expected: 'test_braces_' },
+  ];
+
+  for (const { input, expected } of testCases) {
+    test(`should convert "${input}" to "${expected}"`, async () => {
+      const res = getSafeIdentifier(input);
+
+      assert.strictEqual(res, expected);
+    });
+  }
+});
+
+describe('getRefCompositeTypes', () => {
+  test('should extract reference types from allOf', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [
+        { $ref: '#/components/schemas/BaseUser' },
+        { $ref: '#/components/schemas/UserProfile' },
+        {
+          type: 'object',
+          properties: {
+            additionalData: { type: 'string' },
+          },
+        },
+      ],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, ['BaseUser', 'UserProfile']);
+  });
+
+  test('should handle empty allOf', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, []);
+  });
+
+  test('should handle allOf with only inline schemas', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            field1: { type: 'string' },
+          },
+        },
+        {
+          type: 'object',
+          properties: {
+            field2: { type: 'number' },
+          },
+        },
+      ],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, []);
+  });
+
+  test('should handle mixed allOf with refs and inline schemas', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [
+        { $ref: '#/components/schemas/Base' },
+        {
+          type: 'object',
+          properties: {
+            extra: { type: 'string' },
+          },
+        },
+        { $ref: '#/components/schemas/Extension' },
+      ],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, ['Base', 'Extension']);
   });
 });
