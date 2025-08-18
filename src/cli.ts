@@ -34,9 +34,13 @@ program
   .option('-b, --baseUrl <string>', 'Base URL that will be used as a default value in the clients')
   .option(
     '-t, --template <string>',
-    'Template used forgenerating API client. Default: "axios". Other: "fetch", "ng1", "ng2", "swr-axios", "xior", "tsq-xior"'
+    'Template used for generating API client. Default: "axios". Other: "fetch", "ng1", "ng2", "swr-axios", "xior", "tsq-xior"'
   )
   .option('--preferAny', 'Use "any" type instead of "unknown"')
+  .option(
+    '--skipDeprecated',
+    'Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code'
+  )
   .option(
     '--servicePrefix <string>',
     'Prefix for service names. Useful when you have multiple APIs and you want to avoid name collisions'

@@ -22,6 +22,7 @@ export const axios = Axios.create({
 
 export const petClient = {
     /**
+   * Add a new pet to the store
    * @param body  
    */
   addPet(body: Pet ,
@@ -38,6 +39,7 @@ export const petClient = {
   },
 
   /**
+   * Deletes a pet
    * @param apiKey (optional) (API name: api_key)
    * @param petId  
    */
@@ -58,6 +60,8 @@ export const petClient = {
   },
 
   /**
+   * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
@@ -76,6 +80,9 @@ export const petClient = {
   },
 
   /**
+   * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+   * @deprecated
    * @param tags (optional) 
    */
   findPetsByTags(tags?: string[] | null,
@@ -94,6 +101,8 @@ export const petClient = {
   },
 
   /**
+   * Find pet by ID
+   * Returns a single pet
    * @param petId  
    */
   getPetById(petId: number ,
@@ -109,6 +118,8 @@ export const petClient = {
   },
 
   /**
+   * Update an existing pet
+   * Update an existing pet by Id
    * @param body  
    */
   updatePet(body: Pet ,
@@ -128,6 +139,7 @@ export const petClient = {
   },
 
   /**
+   * Updates a pet in the store with form data
    * @param petId  
    * @param name (optional) 
    * @param status (optional) 
@@ -151,6 +163,7 @@ export const petClient = {
   },
 
   /**
+   * uploads an image
    * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
@@ -177,6 +190,8 @@ export const petClient = {
 
 export const storeClient = {
     /**
+   * Delete purchase order by ID
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * @param orderId  
    */
   deleteOrder(orderId: number ,
@@ -191,8 +206,6 @@ export const storeClient = {
     });
   },
 
-  /**
-   */
   getInventory($config?: AxiosRequestConfig
   ): AxiosPromise<{ [key: string]: number }> {
     const url = `/store/inventory`;
@@ -205,6 +218,8 @@ export const storeClient = {
   },
 
   /**
+   * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    */
   getOrderById(orderId: number ,
@@ -220,6 +235,8 @@ export const storeClient = {
   },
 
   /**
+   * Place an order for a pet
+   * Place a new order in the store
    * @param body (optional) 
    */
   placeOrder(body?: Order | null,
@@ -239,6 +256,8 @@ export const storeClient = {
 
 export const userClient = {
     /**
+   * Create user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    */
   createUser(body?: User | null,
@@ -255,6 +274,7 @@ export const userClient = {
   },
 
   /**
+   * Creates list of users with given input array
    * @param body (optional) 
    */
   createUsersWithListInput(body?: User[] | null,
@@ -271,6 +291,8 @@ export const userClient = {
   },
 
   /**
+   * Delete user
+   * This can only be done by the logged in user.
    * @param username  
    */
   deleteUser(username: string ,
@@ -286,6 +308,7 @@ export const userClient = {
   },
 
   /**
+   * Get user by user name
    * @param username  
    */
   getUserByName(username: string ,
@@ -301,6 +324,7 @@ export const userClient = {
   },
 
   /**
+   * Logs user into the system
    * @param username (optional) 
    * @param password (optional) 
    */
@@ -321,8 +345,6 @@ export const userClient = {
     });
   },
 
-  /**
-   */
   logoutUser($config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/logout`;
@@ -335,6 +357,8 @@ export const userClient = {
   },
 
   /**
+   * Update user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @param username  
    */
@@ -421,17 +445,6 @@ export interface Order {
   status?: ("placed" | "approved" | "delivered");
   complete?: boolean;}
 
-export interface Customer {
-  id?: number;
-  username?: string;
-  address?: Address[];}
-
-export interface Address {
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;}
-
 export interface Category {
   id?: number;
   name?: string;}
@@ -459,8 +472,3 @@ export interface Pet {
   tags?: Tag[];
 /** pet status in the store */
   status?: ("available" | "pending" | "sold");}
-
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;}

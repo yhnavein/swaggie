@@ -25,6 +25,7 @@ export const http = xior.create({
 
 export const petClient = {
     /**
+   * Add a new pet to the store
    * @param body  
    */
   addPet(body: Pet ,
@@ -41,6 +42,7 @@ export const petClient = {
   },
 
   /**
+   * Deletes a pet
    * @param apiKey (optional) (API name: api_key)
    * @param petId  
    */
@@ -61,6 +63,8 @@ export const petClient = {
   },
 
   /**
+   * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
@@ -79,6 +83,9 @@ export const petClient = {
   },
 
   /**
+   * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+   * @deprecated
    * @param tags (optional) 
    */
   findPetsByTags(tags?: string[] | null,
@@ -97,6 +104,8 @@ export const petClient = {
   },
 
   /**
+   * Find pet by ID
+   * Returns a single pet
    * @param petId  
    */
   getPetById(petId: number ,
@@ -112,6 +121,8 @@ export const petClient = {
   },
 
   /**
+   * Update an existing pet
+   * Update an existing pet by Id
    * @param body  
    */
   updatePet(body: Pet ,
@@ -131,6 +142,7 @@ export const petClient = {
   },
 
   /**
+   * Updates a pet in the store with form data
    * @param petId  
    * @param name (optional) 
    * @param status (optional) 
@@ -154,6 +166,7 @@ export const petClient = {
   },
 
   /**
+   * uploads an image
    * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
@@ -180,6 +193,8 @@ export const petClient = {
 
 
   /**
+   * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
@@ -200,6 +215,9 @@ export function usepetfindPetsByStatus<TData = Pet[], TError = Error>(  status?:
 usepetfindPetsByStatus.queryKeys = ['pet', 'petfindPetsByStatus'];
 
   /**
+   * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+   * @deprecated
    * @param tags (optional) 
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
@@ -220,6 +238,8 @@ export function usepetfindPetsByTags<TData = Pet[], TError = Error>(  tags?: str
 usepetfindPetsByTags.queryKeys = ['pet', 'petfindPetsByTags'];
 
   /**
+   * Find pet by ID
+   * Returns a single pet
    * @param petId  
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
@@ -241,6 +261,8 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
 
   export const storeClient = {
     /**
+   * Delete purchase order by ID
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * @param orderId  
    */
   deleteOrder(orderId: number ,
@@ -255,8 +277,6 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
     });
   },
 
-  /**
-   */
   getInventory($config?: XiorRequestConfig
   ): Promise<XiorResponse<{ [key: string]: number }>> {
     const url = `/store/inventory`;
@@ -269,6 +289,8 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
   },
 
   /**
+   * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    */
   getOrderById(orderId: number ,
@@ -284,6 +306,8 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
   },
 
   /**
+   * Place an order for a pet
+   * Place a new order in the store
    * @param body (optional) 
    */
   placeOrder(body?: Order | null,
@@ -302,11 +326,7 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
 };
 
 
-  /**
-   * @param $config (optional) Additional configuration for TanStack Query
-   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
-   */
-export function usestoreInventory<TData = { [key: string]: number }, TError = Error>($config?: Omit<
+  export function usestoreInventory<TData = { [key: string]: number }, TError = Error>($config?: Omit<
   UseQueryOptions<{ [key: string]: number }, TError, TData>,
   'queryKey' | 'queryFn'
 >,
@@ -321,6 +341,8 @@ export function usestoreInventory<TData = { [key: string]: number }, TError = Er
 usestoreInventory.queryKeys = ['store', 'storeInventory'];
 
   /**
+   * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
@@ -342,6 +364,8 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
 
   export const userClient = {
     /**
+   * Create user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    */
   createUser(body?: User | null,
@@ -358,6 +382,7 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
   },
 
   /**
+   * Creates list of users with given input array
    * @param body (optional) 
    */
   createUsersWithListInput(body?: User[] | null,
@@ -374,6 +399,8 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
   },
 
   /**
+   * Delete user
+   * This can only be done by the logged in user.
    * @param username  
    */
   deleteUser(username: string ,
@@ -389,6 +416,7 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
   },
 
   /**
+   * Get user by user name
    * @param username  
    */
   getUserByName(username: string ,
@@ -404,6 +432,7 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
   },
 
   /**
+   * Logs user into the system
    * @param username (optional) 
    * @param password (optional) 
    */
@@ -424,8 +453,6 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
     });
   },
 
-  /**
-   */
   logoutUser($config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     const url = `/user/logout`;
@@ -438,6 +465,8 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
   },
 
   /**
+   * Update user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @param username  
    */
@@ -459,6 +488,7 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
 
 
   /**
+   * Get user by user name
    * @param username  
    * @param $config (optional) Additional configuration for TanStack Query
    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
@@ -479,6 +509,7 @@ export function useuserUserByName<TData = User, TError = Error>(  username: stri
 useuserUserByName.queryKeys = ['user', 'userUserByName'];
 
   /**
+   * Logs user into the system
    * @param username (optional) 
    * @param password (optional) 
    * @param $config (optional) Additional configuration for TanStack Query
@@ -500,11 +531,7 @@ export function useuserloginUser<TData = string, TError = Error>(  username?: st
 }
 useuserloginUser.queryKeys = ['user', 'userloginUser'];
 
-  /**
-   * @param $config (optional) Additional configuration for TanStack Query
-   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
-   */
-export function useuserlogoutUser<TData = unknown, TError = Error>($config?: Omit<
+  export function useuserlogoutUser<TData = unknown, TError = Error>($config?: Omit<
   UseQueryOptions<unknown, TError, TData>,
   'queryKey' | 'queryFn'
 >,
@@ -526,17 +553,6 @@ useuserlogoutUser.queryKeys = ['user', 'userlogoutUser'];
 /** Order Status */
   status?: ("placed" | "approved" | "delivered");
   complete?: boolean;}
-
-export interface Customer {
-  id?: number;
-  username?: string;
-  address?: Address[];}
-
-export interface Address {
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;}
 
 export interface Category {
   id?: number;
@@ -565,8 +581,3 @@ export interface Pet {
   tags?: Tag[];
 /** pet status in the store */
   status?: ("available" | "pending" | "sold");}
-
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;}

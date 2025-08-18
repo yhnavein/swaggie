@@ -1,15 +1,20 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import { getCompositeTypes, getTypeFromSchema } from '../swagger';
+import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
 import type { ClientOptions } from '../types';
+import { escapePropName } from '../utils';
+import { findAllUsedRefs } from './refsHelper';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
+ * This function will also traverse all the spec to see if the types are actually used.
+ * Circular dependencies will mark the types as used - this is acknowledged.
  * @returns String containing all TypeScript types in the document.
  */
 export default function generateTypes(
   spec: OA3.Document,
-  options: ClientOptions
+  options: ClientOptions,
+  skipUnused: boolean = true
 ): string {
   const result: string[] = [];
 
@@ -18,90 +23,105 @@ export default function generateTypes(
     return '';
   }
 
+  const usedRefs = new Set<string>();
+  if (skipUnused) {
+    findAllUsedRefs(spec, options, usedRefs);
+  }
+
   for (const schemaName of schemaKeys) {
+    if (skipUnused && !usedRefs.has(schemaName)) {
+      continue;
+    }
+
     const schema = spec.components.schemas[schemaName];
-    result.push(renderType(schemaName, schema, options));
+    result.push(renderSchema(schemaName, schema, options));
   }
 
   return result.join('\n');
 }
 
-function renderType(
+function renderSchema(
   name: string,
   schema: OA3.ReferenceObject | OA3.SchemaObject,
   options: ClientOptions
 ): string {
+  const safeName = getSafeIdentifier(name);
+  if (!safeName) {
+    console.warn(`Skipping schema ${name} because it is not a valid identifier`);
+    return '';
+  }
+
   // This is an interesting case, because it is allowed but not likely to be used
   // as it is just a reference to another schema object
   if ('$ref' in schema) {
-    return `export type ${name} = ${schema.$ref.split('/').pop()};`;
+    const refName = getSafeIdentifier(schema.$ref.split('/').pop());
+    return `export type ${safeName} = ${refName || 'unknown'};`;
   }
 
   const result: string[] = [];
-  if (schema.description) {
-    result.push(renderComment(schema.description));
+  if (schema.description ?? schema.title) {
+    result.push(renderComment(schema.description ?? schema.title));
   }
 
   if ('x-enumNames' in schema || 'x-enum-varnames' in schema) {
-    result.push(renderExtendedEnumType(name, schema));
+    result.push(renderExtendedEnumType(safeName, schema));
     return result.join('\n');
   }
   if ('enum' in schema) {
-    result.push(renderEnumType(name, schema));
+    result.push(renderEnumType(safeName, schema));
     return result.join('\n');
   }
 
   // OpenAPI 3.1 enums support. We need to check if the schema is an object and has a oneOf property
   if ('oneOf' in schema && schema.type !== 'object' && schema.type) {
-    result.push(renderOpenApi31Enum(name, schema));
+    result.push(renderOpenApi31Enum(safeName, schema));
     return result.join('\n');
   }
 
   if ('allOf' in schema) {
-    const types = getCompositeTypes(schema);
+    const types = getRefCompositeTypes(schema);
     const extensions = types ? `extends ${types.join(', ')} ` : '';
-    result.push(`export interface ${name} ${extensions}{`);
+    result.push(`export interface ${safeName} ${extensions}{`);
 
     const mergedSchema = getMergedCompositeObjects(schema);
     result.push(generateObjectTypeContents(mergedSchema, options));
   } else if ('oneOf' in schema || 'anyOf' in schema) {
     const typeDefinition = getTypesFromAnyOrOneOf(schema, options);
-    result.push(`export type ${name} = ${typeDefinition};`);
+    result.push(`export type ${safeName} = ${typeDefinition};`);
 
     return `${result.join('\n')}\n`;
   } else if (schema.type === 'array') {
     // This case is quite rare but is definitely possible that a schema definition is
     // an array of something. In this case it's just a type reference
-    result.push(
-      `export type ${name} = ${generateItemsType(schema.items, options)}[];`
-    );
+    result.push(`export type ${safeName} = ${generateItemsType(schema.items, options)}[];`);
     return result.join('\n');
   } else {
-    result.push(`export interface ${name} {`);
+    result.push(`export interface ${safeName} {`);
     result.push(generateObjectTypeContents(schema, options));
   }
 
   return `${result.join('\n')}}\n`;
 }
 
-function getTypesFromAnyOrOneOf(
-  schema: OA3.SchemaObject,
-  options: ClientOptions
-) {
-  const types = getCompositeTypes(schema);
-  const mergedSchema = getMergedCompositeObjects(schema);
-  const typeContents = generateObjectTypeContents(mergedSchema, options);
-  if (typeContents) {
-    types.push(`{ ${typeContents} }`);
+/**
+ * Generates the type definition for an `anyOf` or `oneOf` schema.
+ * @param schema - The schema object to generate the type definition for.
+ * @param options - The options for the generation.
+ * @returns The type definition for the `anyOf` or `oneOf` schema.
+ */
+function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions) {
+  const composite = schema.allOf || schema.oneOf || schema.anyOf;
+  if (!composite) {
+    return '';
   }
 
-  return types.join(' | ');
+  return composite.map((s) => getTypeFromSchema(s, options)).join(' | ');
 }
 
-function generateObjectTypeContents(
-  schema: OA3.SchemaObject,
-  options: ClientOptions
-) {
+/**
+ * Generates the inline contents of an object type.
+ */
+function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOptions) {
   const result: string[] = [];
   const required = schema.required || [];
   const props = Object.keys(schema.properties || {});
@@ -115,14 +135,12 @@ function generateObjectTypeContents(
   return result.join('\n');
 }
 
-function generateItemsType(
-  schema: OA3.ReferenceObject | OA3.SchemaObject,
-  options: ClientOptions
-) {
+function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: ClientOptions) {
   const fallbackType = options.preferAny ? 'any' : 'unknown';
 
   if ('$ref' in schema) {
-    return schema.$ref.split('/').pop() ?? fallbackType;
+    const refName = schema.$ref.split('/').pop();
+    return getSafeIdentifier(refName) || fallbackType;
   }
 
   // Schema object is not supported at the moment, but it can be added if needed
@@ -140,7 +158,7 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
   const enumValues = def.enum.map((el) => (isString ? `"${el}"` : el));
 
   for (let index = 0; index < enumNames.length; index++) {
-    res += `  ${enumNames[index]} = ${enumValues[index]},\n`;
+    res += `  ${escapePropName(enumNames[index])} = ${enumValues[index]},\n`;
   }
   return `${res}}\n`;
 }
@@ -149,9 +167,7 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
  * Render simple enum types (just a union of values)
  */
 function renderEnumType(name: string, def: OA3.SchemaObject) {
-  const values = def.enum
-    .map((v) => (typeof v === 'number' ? v : `"${v}"`))
-    .join(' | ');
+  const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
   return `export type ${name} = ${values};\n`;
 }
 
@@ -162,7 +178,9 @@ function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
   let res = `export enum ${name} {\n`;
   for (const v of def.oneOf) {
     if ('const' in v) {
-      res += `  ${v.title} = ${typeof v.const === 'string' ? `"${v.const}"` : v.const},\n`;
+      res += `  ${escapePropName(v.title)} = ${
+        typeof v.const === 'string' ? `"${v.const}"` : v.const
+      },\n`;
     }
   }
 
@@ -170,7 +188,7 @@ function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
 }
 
 function renderTypeProp(
-  prop: string,
+  propName: string,
   definition: OA3.ReferenceObject | OA3.SchemaObject,
   required: boolean,
   options: ClientOptions
@@ -178,11 +196,14 @@ function renderTypeProp(
   const lines: string[] = [];
   const type = getTypeFromSchema(definition, options);
 
-  if ('description' in definition) {
-    lines.push(renderComment(definition.description));
+  if ('description' in definition || 'title' in definition) {
+    lines.push(renderComment(definition.description ?? definition.title));
   }
   const optionalMark = required ? '' : '?';
-  lines.push(`  ${prop}${optionalMark}: ${type};`);
+  // If prop name is not a valid identifier, we need to wrap it in quotes.
+  // We can't use getSafeIdentifier here because it will affect the data model.
+  const safePropName = escapePropName(propName);
+  lines.push(`  ${safePropName}${optionalMark}: ${type};`);
 
   return lines.join('\n');
 }
@@ -218,10 +239,7 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject) {
 function isObject(item?: object): item is Record<string, object> {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
-function deepMerge<T extends Record<string, any>>(
-  target: T,
-  ...sources: Partial<T>[]
-): T {
+function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
   if (!sources.length) return target;
   const source = sources.shift();
 
@@ -234,9 +252,7 @@ function deepMerge<T extends Record<string, any>>(
         if (!target[key]) {
           Object.assign(target, { [key]: source[key] });
         } else if (Array.isArray(target[key])) {
-          (target[key] as any[]) = Array.from(
-            new Set([...target[key], ...source[key]])
-          );
+          (target[key] as any[]) = Array.from(new Set([...target[key], ...source[key]]));
         }
       } else {
         Object.assign(target, { [key]: source[key] });

@@ -13,13 +13,13 @@ describe('generateTypes', () => {
   const opts = getClientOptions();
 
   test('should handle empty components properly', () => {
-    const res = generateTypes(getDocument({ components: {} }), opts);
+    const res = generateTypes(getDocument({ components: {} }), opts, false);
 
     assert.strictEqual(res, '');
   });
 
   test('should handle empty components schemas properly', () => {
-    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts);
+    const res = generateTypes(getDocument({ components: { schemas: {} } }), opts, false);
 
     assert.strictEqual(res, '');
   });
@@ -34,7 +34,8 @@ describe('generateTypes', () => {
           type: 'string',
         },
       }),
-      opts
+      opts,
+      false
     );
 
     assertEqualIgnoringWhitespace(
@@ -53,6 +54,7 @@ export interface B {}`
             type: 'integer',
             format: 'int32',
             enum: [0, 1],
+            title: 'Just a simple enum',
           },
           StringEnum: {
             type: 'string',
@@ -60,12 +62,14 @@ export interface B {}`
             enum: ['Active', 'Disabled'],
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
         res,
         `
+/** Just a simple enum */
 export type SimpleEnum = 0 | 1;
 
 /** Feature is activated or not */
@@ -95,7 +99,8 @@ export type StringEnum = "Active" | "Disabled";`
             'x-enumNames': ['Large', 'Medium', 'Small'],
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -122,12 +127,70 @@ export enum XEnumsString {
       );
     });
 
+    test('should handle enums with invalid characters in names', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          XEnums: {
+            type: 'integer',
+            format: 'int32',
+            enum: [5, 4, 3, 2, 1, 0],
+            'x-enumNames': [
+              '1High',
+              'High-Low',
+              'Medium.Low',
+              'Low&Low',
+              'Really Low',
+              'Seriously,Low?',
+            ],
+          },
+          XEnumVarnames: {
+            type: 'integer',
+            format: 'int32',
+            enum: [5, 4, 3, 2, 1, 0],
+            'x-enum-varnames': [
+              '1High',
+              'High-Low',
+              'Medium.Low',
+              'Low&Low',
+              'Really Low',
+              'Seriously,Low?',
+            ],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export enum XEnums {
+  "1High" = 5,
+  "High-Low" = 4,
+  "Medium.Low" = 3,
+  "Low&Low" = 2,
+  "Really Low" = 1,
+  "Seriously, Low?" = 0,
+}
+
+export enum XEnumVarnames {
+  "1High" = 5,
+  "High-Low" = 4,
+  "Medium.Low" = 3,
+  "Low&Low" = 2,
+  "Really Low" = 1,
+  "Seriously, Low?" = 0,
+}`
+      );
+    });
+
     test('should handle OpenApi 3.1 enums', () => {
       const res = generateTypes(
         prepareSchemas({
           Priority: {
             type: 'integer',
             format: 'int32',
+            title: 'Priority',
             oneOf: [
               { title: 'High', const: 2, description: 'High priority' },
               { title: 'Medium', const: 1, description: 'Medium priority' },
@@ -143,13 +206,27 @@ export enum XEnumsString {
               { title: 'Small', const: 'S', description: 'Small size' },
             ],
           },
+          BadNames: {
+            type: 'string',
+            description: 'How big the feature is',
+            oneOf: [
+              { title: '1High', const: '1H', description: '1High' },
+              { title: 'High-Low', const: 'H', description: 'High-Low size' },
+              { title: 'Medium.Low', const: 'M', description: 'Medium.Low size' },
+              { title: 'Low&Low', const: 'S', description: 'Low&Low size' },
+              { title: 'Really Low', const: 'R', description: 'Really Low size' },
+              { title: 'Seriously, Low?', const: 'S', description: 'Seriously, Low? size' },
+            ],
+          },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
         res,
         `
+/** Priority */
 export enum Priority {
   High = 2,
   Medium = 1,
@@ -161,6 +238,16 @@ export enum Size {
   Large = "L",
   Medium = "M",
   Small = "S",
+}
+
+/** How big the feature is */
+export enum BadNames {
+  "1High" = "1H",
+  "High-Low" = "H",
+  "Medium.Low" = "M",
+  "Low&Low" = "S",
+  "Really Low" = "R",
+  "Seriously, Low?" = "S",
 }`
       );
     });
@@ -198,9 +285,11 @@ export enum Size {
             properties: {
               login: {
                 type: 'string',
+                description: 'Login description',
               },
               password: {
                 type: 'string',
+                title: 'Password',
               },
             },
           },
@@ -208,14 +297,17 @@ export enum Size {
             type: 'object',
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
         res,
         `
 export interface AuthenticationData {
+/** Login description */
   login?: string;
+/** Password */
   password?: string;
 }
 
@@ -248,7 +340,8 @@ export interface Empty {}
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -259,6 +352,55 @@ export interface AuthenticationData {
   password: string;
   rememberMe?: boolean;
 }`
+      );
+    });
+
+    test(`should handle component names with special characters`, () => {
+      const res = generateTypes(
+        prepareSchemas({
+          'Authentication-Data': {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              },
+              obj: {
+                $ref: '#/components/schemas/Object.Name',
+              },
+            },
+          },
+          'Data Object': {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              },
+              auth: {
+                $ref: '#/components/schemas/Authentication-Data',
+              },
+            },
+          },
+          'Object.Name': {
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+              },
+              data: {
+                $ref: '#/components/schemas/Data Object',
+              },
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export interface Authentication_Data { token?: string; obj?: Object_Name; }
+export interface Data_Object { token?: string; auth?: Authentication_Data; }
+export interface Object_Name { token?: string; data?: Data_Object; }`
       );
     });
   });
@@ -284,7 +426,8 @@ export interface AuthenticationData {
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -342,7 +485,8 @@ export type ObjectArray = UserViewModel[];
             },
           },
         }),
-        opts
+        opts,
+        false
       );
 
       assertEqualIgnoringWhitespace(
@@ -377,7 +521,8 @@ export interface ComplexObject {
               ],
             },
           }),
-          opts
+          opts,
+          false
         );
 
         assertEqualIgnoringWhitespace(
@@ -416,7 +561,8 @@ export interface AuthenticationData extends BasicAuth {
               ],
             },
           }),
-          opts
+          opts,
+          false
         );
 
         assertEqualIgnoringWhitespace(
@@ -447,7 +593,8 @@ export interface AuthenticationData extends LoginPart, PasswordPart {
               },
             },
           }),
-          opts
+          opts,
+          false
         );
 
         assertEqualIgnoringWhitespace(
@@ -474,7 +621,8 @@ export interface AuthenticationData extends LoginPart {
                 [type]: [{ $ref: '#/components/schemas/BasicAuth' }],
               },
             }),
-            opts
+            opts,
+            false
           );
 
           assertEqualIgnoringWhitespace(res, 'export type AuthenticationData = BasicAuth;');
@@ -490,7 +638,8 @@ export interface AuthenticationData extends LoginPart {
                 ],
               },
             }),
-            opts
+            opts,
+            false
           );
 
           assertEqualIgnoringWhitespace(
@@ -516,7 +665,8 @@ export interface AuthenticationData extends LoginPart {
                 ],
               },
             }),
-            opts
+            opts,
+            false
           );
 
           assertEqualIgnoringWhitespace(
@@ -526,19 +676,93 @@ export interface AuthenticationData extends LoginPart {
         });
       });
     }
+
+    test('should handle nullable array schema property', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Auth: {
+            anyOf: [
+              {
+                items: {
+                  $ref: '#/components/schemas/TestType',
+                },
+                type: 'array',
+              },
+              {
+                type: 'null',
+              },
+            ],
+            default: [],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(res, `export type Auth = TestType[] | null;`);
+    });
+
+    test('should handle union of all primitive types', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Madness: {
+            anyOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'number',
+                },
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'boolean',
+                },
+              },
+              {
+                type: 'null',
+              },
+            ],
+            default: [],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export type Madness = string | number | boolean | string[] | number[] | boolean[] | null;`
+      );
+    });
   });
 });
 
 describe('renderComment', () => {
   test('should render proper multiline comment with trimming', () => {
-    const comment = `   Quite a lenghty comment
+    const comment = `   Quite a lengthy comment
    With at least two lines    `;
     const res = renderComment(comment);
 
     assert.strictEqual(
       res,
       ` /**
-  * Quite a lenghty comment
+  * Quite a lengthy comment
   * With at least two lines
   */`
     );

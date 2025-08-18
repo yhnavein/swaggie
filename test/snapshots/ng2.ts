@@ -82,7 +82,8 @@ export class petService extends BaseService {
     super(httpClient, baseUrl);
   }
 
-  /**
+    /**
+   * Add a new pet to the store
    * @param body  
    * @return Success
    */
@@ -99,7 +100,8 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Deletes a pet
    * @param apiKey (optional) (API name: api_key)
    * @param petId  
    * @return Success
@@ -117,7 +119,9 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    * @return Success
    */
@@ -134,7 +138,10 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+   * @deprecated
    * @param tags (optional) 
    * @return Success
    */
@@ -151,7 +158,9 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Find pet by ID
+   * Returns a single pet
    * @param petId  
    * @return Success
    */
@@ -167,7 +176,9 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Update an existing pet
+   * Update an existing pet by Id
    * @param body  
    * @return Success
    */
@@ -184,7 +195,8 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Updates a pet in the store with form data
    * @param petId  
    * @param name (optional) 
    * @param status (optional) 
@@ -207,7 +219,8 @@ export class petService extends BaseService {
     );
   }
 
-/**
+  /**
+   * uploads an image
    * @param body (optional) 
    * @param petId  
    * @param additionalMetadata (optional) 
@@ -242,7 +255,9 @@ export class storeService extends BaseService {
     super(httpClient, baseUrl);
   }
 
-  /**
+    /**
+   * Delete purchase order by ID
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * @param orderId  
    * @return Success
    */
@@ -258,9 +273,6 @@ export class storeService extends BaseService {
     );
   }
 
-/**
-   * @return Success
-   */
   getInventory(
     config?: any
   ): Observable<{ [key: string]: number }> {
@@ -272,7 +284,9 @@ export class storeService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    * @return Success
    */
@@ -288,7 +302,9 @@ export class storeService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Place an order for a pet
+   * Place a new order in the store
    * @param body (optional) 
    * @return Success
    */
@@ -318,7 +334,9 @@ export class userService extends BaseService {
     super(httpClient, baseUrl);
   }
 
-  /**
+    /**
+   * Create user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @return Success
    */
@@ -335,7 +353,8 @@ export class userService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Creates list of users with given input array
    * @param body (optional) 
    * @return Success
    */
@@ -352,7 +371,9 @@ export class userService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Delete user
+   * This can only be done by the logged in user.
    * @param username  
    * @return Success
    */
@@ -368,7 +389,8 @@ export class userService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Get user by user name
    * @param username  
    * @return Success
    */
@@ -384,7 +406,8 @@ export class userService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Logs user into the system
    * @param username (optional) 
    * @param password (optional) 
    * @return Success
@@ -404,9 +427,6 @@ export class userService extends BaseService {
     );
   }
 
-/**
-   * @return Success
-   */
   logoutUser(
     config?: any
   ): Observable<unknown> {
@@ -418,7 +438,9 @@ export class userService extends BaseService {
     );
   }
 
-/**
+  /**
+   * Update user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @param username  
    * @return Success
@@ -506,17 +528,6 @@ export interface Order {
   status?: ("placed" | "approved" | "delivered");
   complete?: boolean;}
 
-export interface Customer {
-  id?: number;
-  username?: string;
-  address?: Address[];}
-
-export interface Address {
-  street?: string;
-  city?: string;
-  state?: string;
-  zip?: string;}
-
 export interface Category {
   id?: number;
   name?: string;}
@@ -544,8 +555,3 @@ export interface Pet {
   tags?: Tag[];
 /** pet status in the store */
   status?: ("available" | "pending" | "sold");}
-
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;}

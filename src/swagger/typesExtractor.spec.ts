@@ -1,8 +1,8 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import type { OpenAPIV3 as OA3 } from 'openapi-types';
+import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import type { ClientOptions } from '../types';
-import { getParameterType, getTypeFromSchema } from './typesExtractor';
+import { getParameterType, getTypeFromSchema, getSafeIdentifier, getRefCompositeTypes } from './typesExtractor';
 import { assertEqualIgnoringWhitespace, getClientOptions } from '../../test/test.utils';
 
 describe('getParameterType', () => {
@@ -86,7 +86,7 @@ describe('getTypeFromSchema', () => {
     ];
 
     for (const { schema, expected } of testCases) {
-      test(`should process ${schema} correctly`, async () => {
+      test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
         assert.strictEqual(res, expected);
@@ -215,8 +215,8 @@ describe('getTypeFromSchema', () => {
       { schema: { type: 'number' }, expected: 'number' },
       { schema: { type: 'integer' }, expected: 'number' },
       { schema: { type: 'boolean' }, expected: 'boolean' },
-      { schema: { $ref: '' }, expected: '' },
-      { schema: { $ref: '#/components/' }, expected: '' },
+      { schema: { $ref: '' }, expected: 'unknown' },
+      { schema: { $ref: '#/components/' }, expected: 'unknown' },
       { schema: { $ref: '#/components/schema/Test' }, expected: 'Test' },
       { schema: null, expected: 'unknown' },
       { schema: undefined, expected: 'unknown' },
@@ -224,11 +224,146 @@ describe('getTypeFromSchema', () => {
     ];
 
     for (const { schema, expected } of testCases) {
-      test(`should process ${schema} correctly`, async () => {
+      test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
         assert.strictEqual(res, expected);
       });
     }
+  });
+
+  describe('composites', () => {
+    type TestCase = {
+      schema: OA31.SchemaObject;
+      expected: string;
+    };
+
+    const testCases: TestCase[] = [
+      { schema: { allOf: [{ type: 'string' }, { type: 'number' }] }, expected: 'string & number' },
+      { schema: { oneOf: [{ type: 'string' }, { type: 'number' }] }, expected: 'string | number' },
+      {
+        schema: { anyOf: [{ type: 'number' }, { type: 'string' }, { type: 'null' }] },
+        expected: 'number | string | null',
+      },
+      {
+        schema: {
+          anyOf: [
+            { type: 'number' },
+            { type: 'array', items: { type: 'string' } },
+            { type: 'array', items: { type: 'number' } },
+            { type: 'null' },
+          ],
+        },
+        expected: 'number | string[] | number[] | null',
+      },
+      { schema: {}, expected: 'unknown' },
+    ];
+
+    for (const { schema, expected } of testCases) {
+      test(`should ${JSON.stringify(schema)} match ${expected}`, async () => {
+        const res = getTypeFromSchema(schema, opts);
+
+        assert.strictEqual(res, expected);
+      });
+    }
+  });
+});
+
+describe('getSafeIdentifier', () => {
+  const testCases = [
+    { input: '', expected: '' },
+    { input: undefined, expected: '' },
+    { input: 'validName', expected: 'validName' },
+    { input: 'Valid-Name', expected: 'Valid_Name' },
+    { input: 'name with spaces', expected: 'name_with_spaces' },
+    { input: 'name.with.dots', expected: 'name_with_dots' },
+    { input: 'name@with#symbols', expected: 'name_with_symbols' },
+    { input: '123number', expected: '123number' },
+    { input: 'User-Profile', expected: 'User_Profile' },
+    { input: 'API:Response', expected: 'API_Response' },
+    { input: 'test/path', expected: 'test_path' },
+    { input: 'test[brackets]', expected: 'test_brackets_' },
+    { input: 'test{braces}', expected: 'test_braces_' },
+  ];
+
+  for (const { input, expected } of testCases) {
+    test(`should convert "${input}" to "${expected}"`, async () => {
+      const res = getSafeIdentifier(input);
+
+      assert.strictEqual(res, expected);
+    });
+  }
+});
+
+describe('getRefCompositeTypes', () => {
+  test('should extract reference types from allOf', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [
+        { $ref: '#/components/schemas/BaseUser' },
+        { $ref: '#/components/schemas/UserProfile' },
+        {
+          type: 'object',
+          properties: {
+            additionalData: { type: 'string' },
+          },
+        },
+      ],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, ['BaseUser', 'UserProfile']);
+  });
+
+  test('should handle empty allOf', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, []);
+  });
+
+  test('should handle allOf with only inline schemas', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            field1: { type: 'string' },
+          },
+        },
+        {
+          type: 'object',
+          properties: {
+            field2: { type: 'number' },
+          },
+        },
+      ],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, []);
+  });
+
+  test('should handle mixed allOf with refs and inline schemas', () => {
+    const schema: OA3.SchemaObject = {
+      allOf: [
+        { $ref: '#/components/schemas/Base' },
+        {
+          type: 'object',
+          properties: {
+            extra: { type: 'string' },
+          },
+        },
+        { $ref: '#/components/schemas/Extension' },
+      ],
+    };
+
+    const res = getRefCompositeTypes(schema);
+
+    assert.deepStrictEqual(res, ['Base', 'Extension']);
   });
 });

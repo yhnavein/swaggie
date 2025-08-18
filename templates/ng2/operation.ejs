@@ -1,10 +1,16 @@
-/**
+<% if(it.hasJSDocs) { %>
+  /**
+<% if(it.docs && it.docs.length > 0) { %>
+   * <%~ it.docs.join('\n   * ') %>
+<% } %>
+
 <% it.parameters.forEach((parameter) => { %>
    * @param <%= parameter.name %> <%= parameter.optional ? '(optional)' : '' %> <%= parameter.name !== parameter.originalName ? `(API name: ${parameter.originalName})` : '' %>
 
 <% }); -%>
    * @return Success
    */
+<% } %>
   <%= it.name %>(
     <% it.parameters.forEach((parameter) => { %>
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
