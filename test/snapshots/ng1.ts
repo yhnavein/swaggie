@@ -130,7 +130,6 @@ export class petService extends BaseService {
 
     /**
    * Add a new pet to the store
-   * Add a new pet to the store
    * @param body  
    * @return Success
    */
@@ -165,8 +164,8 @@ export class petService extends BaseService {
   }
 
   /**
-   * Multiple status values can be provided with comma separated strings
    * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    * @return Success
    */
@@ -185,8 +184,8 @@ export class petService extends BaseService {
   }
 
   /**
-   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * @deprecated
    * @param tags (optional) 
    * @return Success
@@ -206,8 +205,8 @@ export class petService extends BaseService {
   }
 
   /**
-   * Returns a single pet
    * Find pet by ID
+   * Returns a single pet
    * @param petId  
    * @return Success
    */
@@ -223,8 +222,8 @@ export class petService extends BaseService {
   }
 
   /**
-   * Update an existing pet by Id
    * Update an existing pet
+   * Update an existing pet by Id
    * @param body  
    * @return Success
    */
@@ -300,8 +299,8 @@ export class storeService extends BaseService {
   }
 
     /**
-   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * Delete purchase order by ID
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * @param orderId  
    * @return Success
    */
@@ -316,11 +315,6 @@ export class storeService extends BaseService {
     );
   }
 
-  /**
-   * Returns a map of status codes to quantities
-   * Returns pet inventories by status
-   * @return Success
-   */
   getInventory(    config?: IRequestShortcutConfig
   ): IPromise<{ [key: string]: number }> {
     let url = `/store/inventory?`;
@@ -332,8 +326,8 @@ export class storeService extends BaseService {
   }
 
   /**
-   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    * @return Success
    */
@@ -349,8 +343,8 @@ export class storeService extends BaseService {
   }
 
   /**
-   * Place a new order in the store
    * Place an order for a pet
+   * Place a new order in the store
    * @param body (optional) 
    * @return Success
    */
@@ -375,8 +369,8 @@ export class userService extends BaseService {
   }
 
     /**
-   * This can only be done by the logged in user.
    * Create user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @return Success
    */
@@ -394,7 +388,6 @@ export class userService extends BaseService {
 
   /**
    * Creates list of users with given input array
-   * Creates list of users with given input array
    * @param body (optional) 
    * @return Success
    */
@@ -411,8 +404,8 @@ export class userService extends BaseService {
   }
 
   /**
-   * This can only be done by the logged in user.
    * Delete user
+   * This can only be done by the logged in user.
    * @param username  
    * @return Success
    */
@@ -467,10 +460,6 @@ export class userService extends BaseService {
     );
   }
 
-  /**
-   * Logs out current logged in user session
-   * @return Success
-   */
   logoutUser(    config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = `/user/logout?`;
@@ -482,8 +471,8 @@ export class userService extends BaseService {
   }
 
   /**
-   * This can only be done by the logged in user.
    * Update user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @param username  
    * @return Success

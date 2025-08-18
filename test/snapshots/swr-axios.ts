@@ -31,7 +31,6 @@ interface SwrConfig extends SWRConfiguration {
 export const petClient = {
     /**
    * Add a new pet to the store
-   * Add a new pet to the store
    * @param body  
    */
   addPet(body: Pet ,
@@ -69,8 +68,8 @@ export const petClient = {
   },
 
     /**
-   * Multiple status values can be provided with comma separated strings
    * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
@@ -89,8 +88,8 @@ export const petClient = {
   },
 
     /**
-   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * @deprecated
    * @param tags (optional) 
    */
@@ -110,8 +109,8 @@ export const petClient = {
   },
 
     /**
-   * Returns a single pet
    * Find pet by ID
+   * Returns a single pet
    * @param petId  
    */
   getPetById(petId: number ,
@@ -127,8 +126,8 @@ export const petClient = {
   },
 
     /**
-   * Update an existing pet by Id
    * Update an existing pet
+   * Update an existing pet by Id
    * @param body  
    */
   updatePet(body: Pet ,
@@ -197,9 +196,9 @@ export const petClient = {
 
   };
 
-  /**
-  * Multiple status values can be provided with comma separated strings
+    /**
    * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    */
 export function usepetfindPetsByStatus(  status?: ("available" | "pending" | "sold") | null,
@@ -231,9 +230,9 @@ const { data, error, mutate } = useSWR<Pet[]>(
   };
 }
 
-  /**
-  * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+    /**
    * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * @deprecated
    * @param tags (optional) 
    */
@@ -266,9 +265,9 @@ const { data, error, mutate } = useSWR<Pet[]>(
   };
 }
 
-  /**
-  * Returns a single pet
+    /**
    * Find pet by ID
+   * Returns a single pet
    * @param petId  
    */
 export function usepetPetById(  petId: number ,
@@ -298,8 +297,8 @@ const { data, error, mutate } = useSWR<Pet>(
 
   export const storeClient = {
     /**
-   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * Delete purchase order by ID
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * @param orderId  
    */
   deleteOrder(orderId: number ,
@@ -314,11 +313,7 @@ const { data, error, mutate } = useSWR<Pet>(
     });
   },
 
-    /**
-   * Returns a map of status codes to quantities
-   * Returns pet inventories by status
-   */
-  getInventory(  $config?: AxiosRequestConfig
+    getInventory(  $config?: AxiosRequestConfig
   ): AxiosPromise<{ [key: string]: number }> {
     const url = `/store/inventory`;
 
@@ -330,8 +325,8 @@ const { data, error, mutate } = useSWR<Pet>(
   },
 
     /**
-   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    */
   getOrderById(orderId: number ,
@@ -347,8 +342,8 @@ const { data, error, mutate } = useSWR<Pet>(
   },
 
     /**
-   * Place a new order in the store
    * Place an order for a pet
+   * Place a new order in the store
    * @param body (optional) 
    */
   placeOrder(body?: Order | null,
@@ -366,11 +361,7 @@ const { data, error, mutate } = useSWR<Pet>(
 
   };
 
-  /**
-  * Returns a map of status codes to quantities
-   * Returns pet inventories by status
-   */
-export function usestoreInventory(  $config?: SwrConfig
+  export function usestoreInventory(  $config?: SwrConfig
   ) {
   const url = `/store/inventory`;
   const { axios: $axiosConf, key, ...config } = $config || {};
@@ -394,9 +385,9 @@ const { data, error, mutate } = useSWR<{ [key: string]: number }>(
   };
 }
 
-  /**
-  * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+    /**
    * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    */
 export function usestoreOrderById(  orderId: number ,
@@ -426,8 +417,8 @@ const { data, error, mutate } = useSWR<Order>(
 
   export const userClient = {
     /**
-   * This can only be done by the logged in user.
    * Create user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    */
   createUser(body?: User | null,
@@ -445,7 +436,6 @@ const { data, error, mutate } = useSWR<Order>(
 
     /**
    * Creates list of users with given input array
-   * Creates list of users with given input array
    * @param body (optional) 
    */
   createUsersWithListInput(body?: User[] | null,
@@ -462,8 +452,8 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
-   * This can only be done by the logged in user.
    * Delete user
+   * This can only be done by the logged in user.
    * @param username  
    */
   deleteUser(username: string ,
@@ -516,10 +506,7 @@ const { data, error, mutate } = useSWR<Order>(
     });
   },
 
-    /**
-   * Logs out current logged in user session
-   */
-  logoutUser(  $config?: AxiosRequestConfig
+    logoutUser(  $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/logout`;
 
@@ -531,8 +518,8 @@ const { data, error, mutate } = useSWR<Order>(
   },
 
     /**
-   * This can only be done by the logged in user.
    * Update user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @param username  
    */
@@ -552,8 +539,8 @@ const { data, error, mutate } = useSWR<Order>(
 
   };
 
-  /**
-  * Get user by user name
+    /**
+   * Get user by user name
    * @param username  
    */
 export function useuserUserByName(  username: string ,
@@ -581,8 +568,8 @@ const { data, error, mutate } = useSWR<User>(
   };
 }
 
-  /**
-  * Logs user into the system
+    /**
+   * Logs user into the system
    * @param username (optional) 
    * @param password (optional) 
    */
@@ -618,10 +605,7 @@ const { data, error, mutate } = useSWR<string>(
   };
 }
 
-  /**
-  * Logs out current logged in user session
-   */
-export function useuserlogoutUser(  $config?: SwrConfig
+  export function useuserlogoutUser(  $config?: SwrConfig
   ) {
   const url = `/user/logout`;
   const { axios: $axiosConf, key, ...config } = $config || {};

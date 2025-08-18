@@ -1,6 +1,7 @@
-/**
+<% if(it.hasJSDocs) { %>
+  /**
 <% if(it.docs && it.docs.length > 0) { %>
-  * <%~ it.docs.join('\n   * ') %>
+   * <%~ it.docs.join('\n   * ') %>
 <% } %>
 
 <% it.parameters.forEach((parameter) => { %>
@@ -8,6 +9,7 @@
 
 <% }); -%>
    */
+<% } %>
 export function <%= it.swrOpName %>(<% it.parameters.forEach((parameter) => { %>
   <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>

@@ -121,8 +121,10 @@ export function prepareOperations(
       });
     }
 
+    const docs = getOperationDocs(op);
     return {
-      docs: getOperationDocs(op),
+      docs,
+      hasJSDocs: docs && docs.length > 0 && params.length > 0,
       returnType,
       responseContentType,
       method: op.method.toUpperCase(),
@@ -143,11 +145,13 @@ export function prepareOperations(
  */
 function getOperationDocs(op: ApiOperation): string[] {
   const result = [];
-  if (op.description) {
-    result.push(op.description);
+  const summary = op.summary?.trim();
+  const description = op.description?.trim();
+  if (summary) {
+    result.push(summary);
   }
-  if (op.summary) {
-    result.push(op.summary);
+  if (description && description !== summary) {
+    result.push(description);
   }
   if (op.deprecated) {
     result.push('@deprecated');

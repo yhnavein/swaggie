@@ -1,3 +1,4 @@
+<% if(it.hasJSDocs) { %>
   /**
 <% if(it.docs && it.docs.length > 0) { %>
    * <%~ it.docs.join('\n   * ') %>
@@ -9,6 +10,7 @@
 <% }); -%>
    * @return Success
    */
+<% } %>
   <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>

@@ -21,7 +21,6 @@ export const defaults = {
 export const petClient = {
     /**
    * Add a new pet to the store
-   * Add a new pet to the store
    * @param body  
    */
   addPet(body: Pet ,
@@ -59,8 +58,8 @@ export const petClient = {
   },
 
   /**
-   * Multiple status values can be provided with comma separated strings
    * Finds Pets by status
+   * Multiple status values can be provided with comma separated strings
    * @param status (optional) 
    */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
@@ -77,8 +76,8 @@ export const petClient = {
   },
 
   /**
-   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * Finds Pets by tags
+   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
    * @deprecated
    * @param tags (optional) 
    */
@@ -96,8 +95,8 @@ export const petClient = {
   },
 
   /**
-   * Returns a single pet
    * Find pet by ID
+   * Returns a single pet
    * @param petId  
    */
   getPetById(petId: number ,
@@ -113,8 +112,8 @@ export const petClient = {
   },
 
   /**
-   * Update an existing pet by Id
    * Update an existing pet
+   * Update an existing pet by Id
    * @param body  
    */
   updatePet(body: Pet ,
@@ -180,8 +179,8 @@ export const petClient = {
 };
 export const storeClient = {
     /**
-   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * Delete purchase order by ID
+   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
    * @param orderId  
    */
   deleteOrder(orderId: number ,
@@ -196,10 +195,6 @@ export const storeClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
-  /**
-   * Returns a map of status codes to quantities
-   * Returns pet inventories by status
-   */
   getInventory($config?: RequestInit
   ): Promise<{ [key: string]: number }> {
     const url = `${defaults.baseUrl}/store/inventory?`;
@@ -212,8 +207,8 @@ export const storeClient = {
   },
 
   /**
-   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * Find purchase order by ID
+   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
    * @param orderId  
    */
   getOrderById(orderId: number ,
@@ -229,8 +224,8 @@ export const storeClient = {
   },
 
   /**
-   * Place a new order in the store
    * Place an order for a pet
+   * Place a new order in the store
    * @param body (optional) 
    */
   placeOrder(body?: Order | null,
@@ -249,8 +244,8 @@ export const storeClient = {
 };
 export const userClient = {
     /**
-   * This can only be done by the logged in user.
    * Create user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    */
   createUser(body?: User | null,
@@ -268,7 +263,6 @@ export const userClient = {
 
   /**
    * Creates list of users with given input array
-   * Creates list of users with given input array
    * @param body (optional) 
    */
   createUsersWithListInput(body?: User[] | null,
@@ -285,8 +279,8 @@ export const userClient = {
   },
 
   /**
-   * This can only be done by the logged in user.
    * Delete user
+   * This can only be done by the logged in user.
    * @param username  
    */
   deleteUser(username: string ,
@@ -337,9 +331,6 @@ export const userClient = {
     .then((response) => response.json() as Promise<string>);
   },
 
-  /**
-   * Logs out current logged in user session
-   */
   logoutUser($config?: RequestInit
   ): Promise<unknown> {
     const url = `${defaults.baseUrl}/user/logout?`;
@@ -352,8 +343,8 @@ export const userClient = {
   },
 
   /**
-   * This can only be done by the logged in user.
    * Update user
+   * This can only be done by the logged in user.
    * @param body (optional) 
    * @param username  
    */

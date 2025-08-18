@@ -581,16 +581,28 @@ describe('prepareOperations', () => {
           responses: {},
           group: null,
         },
+        // We expect to see description only once as it's the same as summary
+        {
+          operationId: 'updatePet',
+          method: 'patch',
+          path: '/pet/{petId}',
+          description: 'Updates a single pet',
+          summary: 'Updates a single pet',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
       ];
 
-      const [op1, op2] = prepareOperations(ops, opts);
+      const [op1, op2, op3] = prepareOperations(ops, opts);
 
-      assert.deepStrictEqual(op1.docs, ['Returns a single pet', 'Find pet by ID']);
+      assert.deepStrictEqual(op1.docs, ['Find pet by ID', 'Returns a single pet']);
       assert.deepStrictEqual(op2.docs, [
-        'Returns a single pet (old)',
         'Find pet by ID',
+        'Returns a single pet (old)',
         '@deprecated',
       ]);
+      assert.deepStrictEqual(op3.docs, ['Updates a single pet']);
     });
   });
 
