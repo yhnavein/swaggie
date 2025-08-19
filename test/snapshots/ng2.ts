@@ -273,6 +273,11 @@ export class storeService extends BaseService {
     );
   }
 
+  /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   * @return Success
+   */
   getInventory(
     config?: any
   ): Observable<{ [key: string]: number }> {
@@ -427,6 +432,10 @@ export class userService extends BaseService {
     );
   }
 
+  /**
+   * Logs out current logged in user session
+   * @return Success
+   */
   logoutUser(
     config?: any
   ): Observable<unknown> {
