@@ -277,6 +277,10 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
     });
   },
 
+  /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   */
   getInventory($config?: XiorRequestConfig
   ): Promise<XiorResponse<{ [key: string]: number }>> {
     const url = `/store/inventory`;
@@ -326,7 +330,13 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
 };
 
 
-  export function usestoreInventory<TData = { [key: string]: number }, TError = Error>($config?: Omit<
+  /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   * @param $config (optional) Additional configuration for TanStack Query
+   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+   */
+export function usestoreInventory<TData = { [key: string]: number }, TError = Error>($config?: Omit<
   UseQueryOptions<{ [key: string]: number }, TError, TData>,
   'queryKey' | 'queryFn'
 >,
@@ -453,6 +463,9 @@ usestoreOrderById.queryKeys = ['store', 'storeOrderById'];
     });
   },
 
+  /**
+   * Logs out current logged in user session
+   */
   logoutUser($config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     const url = `/user/logout`;
@@ -531,7 +544,12 @@ export function useuserloginUser<TData = string, TError = Error>(  username?: st
 }
 useuserloginUser.queryKeys = ['user', 'userloginUser'];
 
-  export function useuserlogoutUser<TData = unknown, TError = Error>($config?: Omit<
+  /**
+   * Logs out current logged in user session
+   * @param $config (optional) Additional configuration for TanStack Query
+   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+   */
+export function useuserlogoutUser<TData = unknown, TError = Error>($config?: Omit<
   UseQueryOptions<unknown, TError, TData>,
   'queryKey' | 'queryFn'
 >,

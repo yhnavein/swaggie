@@ -195,6 +195,10 @@ export const storeClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
+  /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   */
   getInventory($config?: RequestInit
   ): Promise<{ [key: string]: number }> {
     const url = `${defaults.baseUrl}/store/inventory?`;
@@ -331,6 +335,9 @@ export const userClient = {
     .then((response) => response.json() as Promise<string>);
   },
 
+  /**
+   * Logs out current logged in user session
+   */
   logoutUser($config?: RequestInit
   ): Promise<unknown> {
     const url = `${defaults.baseUrl}/user/logout?`;

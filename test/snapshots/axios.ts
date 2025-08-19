@@ -206,6 +206,10 @@ export const storeClient = {
     });
   },
 
+  /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   */
   getInventory($config?: AxiosRequestConfig
   ): AxiosPromise<{ [key: string]: number }> {
     const url = `/store/inventory`;
@@ -345,6 +349,9 @@ export const userClient = {
     });
   },
 
+  /**
+   * Logs out current logged in user session
+   */
   logoutUser($config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/logout`;

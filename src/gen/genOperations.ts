@@ -124,7 +124,7 @@ export function prepareOperations(
     const docs = getOperationDocs(op);
     return {
       docs,
-      hasJSDocs: docs && docs.length > 0 && params.length > 0,
+      hasJSDocs: docs.length > 0 || params.length > 0,
       returnType,
       responseContentType,
       method: op.method.toUpperCase(),
@@ -332,6 +332,7 @@ interface IOperation {
   query: IOperationParam[];
   body: IBodyParam;
   headers: IOperationParam[];
+  hasJSDocs: boolean;
 }
 
 interface IOperationParam {

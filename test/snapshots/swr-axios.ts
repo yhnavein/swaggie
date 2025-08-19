@@ -313,7 +313,11 @@ const { data, error, mutate } = useSWR<Pet>(
     });
   },
 
-    getInventory(  $config?: AxiosRequestConfig
+    /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   */
+  getInventory(  $config?: AxiosRequestConfig
   ): AxiosPromise<{ [key: string]: number }> {
     const url = `/store/inventory`;
 
@@ -361,7 +365,11 @@ const { data, error, mutate } = useSWR<Pet>(
 
   };
 
-  export function usestoreInventory(  $config?: SwrConfig
+    /**
+   * Returns pet inventories by status
+   * Returns a map of status codes to quantities
+   */
+export function usestoreInventory(  $config?: SwrConfig
   ) {
   const url = `/store/inventory`;
   const { axios: $axiosConf, key, ...config } = $config || {};
@@ -506,7 +514,10 @@ const { data, error, mutate } = useSWR<Order>(
     });
   },
 
-    logoutUser(  $config?: AxiosRequestConfig
+    /**
+   * Logs out current logged in user session
+   */
+  logoutUser(  $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/logout`;
 
@@ -605,7 +616,10 @@ const { data, error, mutate } = useSWR<string>(
   };
 }
 
-  export function useuserlogoutUser(  $config?: SwrConfig
+    /**
+   * Logs out current logged in user session
+   */
+export function useuserlogoutUser(  $config?: SwrConfig
   ) {
   const url = `/user/logout`;
   const { axios: $axiosConf, key, ...config } = $config || {};

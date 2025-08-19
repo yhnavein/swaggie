@@ -603,6 +603,57 @@ describe('prepareOperations', () => {
         '@deprecated',
       ]);
       assert.deepStrictEqual(op3.docs, ['Updates a single pet']);
+
+      assert.strictEqual(op1.hasJSDocs, true);
+      assert.strictEqual(op2.hasJSDocs, true);
+      assert.strictEqual(op3.hasJSDocs, true);
+    });
+
+    test('should include description and summary in JSDocs', () => {
+      const ops: ApiOperation[] = [
+        // We don't expect docs for this operation
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+        // We expect to see summary - so JSDocs should be generated
+        {
+          operationId: 'getPetByIdDeprecated',
+          method: 'get',
+          path: '/pet/byId/{petId}',
+          summary: 'Find pet by ID',
+          deprecated: true,
+          parameters: [],
+          responses: {},
+          group: null,
+        },
+        // There are parameters, so JSDocs should be generated
+        {
+          operationId: 'updatePet',
+          method: 'patch',
+          path: '/pet/{petId}',
+          parameters: [
+            {
+              name: 'petId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [op1, op2, op3] = prepareOperations(ops, opts);
+
+      assert.strictEqual(op1.hasJSDocs, false);
+      assert.strictEqual(op2.hasJSDocs, true);
+      assert.strictEqual(op3.hasJSDocs, true);
     });
   });
 
