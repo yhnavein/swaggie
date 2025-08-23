@@ -85,6 +85,61 @@ describe('prepareOperations', () => {
       );
     });
 
+    test('should escape parameter names that are used internally', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          parameters: [
+            {
+              name: 'url',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: '$config',
+              in: 'query',
+              required: false,
+              allowEmptyValue: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'axios',
+              in: 'query',
+              required: false,
+              allowEmptyValue: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'http',
+              in: 'header',
+              required: false,
+              schema: {
+                type: 'string',
+              },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [{ parameters }] = prepareOperations(ops, opts);
+
+      assert.deepStrictEqual(
+        parameters.map((p) => p.name),
+        ['_url', '_config', '_axios', '_http']
+      );
+    });
+
     test('should handle empty parameters', () => {
       const ops: ApiOperation[] = [
         {

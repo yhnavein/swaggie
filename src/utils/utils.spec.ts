@@ -24,6 +24,8 @@ describe('escapeIdentifier', () => {
     { input: 'return', expected: '_return' },
     { input: '1test', expected: '_1test' },
     { input: 'class', expected: '_class' },
+    { input: '$config', expected: '_$config' },
+    { input: 'url', expected: '_url' },
     { input: 'function', expected: '_function' },
     { input: 'var', expected: '_var' },
     { input: 'let', expected: '_let' },

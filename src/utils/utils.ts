@@ -53,6 +53,20 @@ const reservedKeywords = new Set([
   'while',
   'with',
   'yield',
+
+  // Some of the variables that are used internally in the generated code. We can't allow
+  // user to use them as parameter names.
+  '$config',
+  'axios',
+  'cacheUrl',
+  'config',
+  'data',
+  'error',
+  'http',
+  'key',
+  'mutate',
+  'url',
+  'xior',
 ]);
 
 /**
