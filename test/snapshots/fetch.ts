@@ -19,10 +19,10 @@ export const defaults = {
 };
 
 export const petClient = {
-    /**
-   * Add a new pet to the store
-   * @param body  
-   */
+   /**
+  * Add a new pet to the store
+  * @param body
+  */
   addPet(body: Pet ,
     $config?: RequestInit
   ): Promise<Pet> {
@@ -36,11 +36,11 @@ export const petClient = {
     .then((response) => response.json() as Promise<Pet>);
   },
 
-  /**
-   * Deletes a pet
-   * @param apiKey (optional) (API name: api_key)
-   * @param petId  
-   */
+ /**
+  * Deletes a pet
+  * @param apiKey (optional) (API name: api_key)
+  * @param petId
+  */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
     $config?: RequestInit
@@ -57,11 +57,11 @@ export const petClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
-  /**
-   * Finds Pets by status
-   * Multiple status values can be provided with comma separated strings
-   * @param status (optional) 
-   */
+ /**
+  * Finds Pets by status
+  * Multiple status values can be provided with comma separated strings
+  * @param status (optional)
+  */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
     $config?: RequestInit
   ): Promise<Pet[]> {
@@ -75,12 +75,12 @@ export const petClient = {
     .then((response) => response.json() as Promise<Pet[]>);
   },
 
-  /**
-   * Finds Pets by tags
-   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
-   * @deprecated
-   * @param tags (optional) 
-   */
+ /**
+  * Finds Pets by tags
+  * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+  * @deprecated
+  * @param tags (optional)
+  */
   findPetsByTags(tags?: string[] | null,
     $config?: RequestInit
   ): Promise<Pet[]> {
@@ -94,11 +94,11 @@ export const petClient = {
     .then((response) => response.json() as Promise<Pet[]>);
   },
 
-  /**
-   * Find pet by ID
-   * Returns a single pet
-   * @param petId  
-   */
+ /**
+  * Find pet by ID
+  * Returns a single pet
+  * @param petId
+  */
   getPetById(petId: number ,
     $config?: RequestInit
   ): Promise<Pet> {
@@ -111,11 +111,11 @@ export const petClient = {
     .then((response) => response.json() as Promise<Pet>);
   },
 
-  /**
-   * Update an existing pet
-   * Update an existing pet by Id
-   * @param body  
-   */
+ /**
+  * Update an existing pet
+  * Update an existing pet by Id
+  * @param body
+  */
   updatePet(body: Pet ,
     $config?: RequestInit
   ): Promise<Pet> {
@@ -132,12 +132,12 @@ export const petClient = {
     .then((response) => response.json() as Promise<Pet>);
   },
 
-  /**
-   * Updates a pet in the store with form data
-   * @param petId  
-   * @param name (optional) 
-   * @param status (optional) 
-   */
+ /**
+  * Updates a pet in the store with form data
+  * @param petId
+  * @param name (optional)
+  * @param status (optional)
+  */
   updatePetWithForm(petId: number ,
     name?: string | null,
     status?: string | null,
@@ -154,12 +154,12 @@ export const petClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
-  /**
-   * uploads an image
-   * @param body (optional) 
-   * @param petId  
-   * @param additionalMetadata (optional) 
-   */
+ /**
+  * uploads an image
+  * @param body (optional)
+  * @param petId
+  * @param additionalMetadata (optional)
+  */
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
@@ -178,11 +178,11 @@ export const petClient = {
 
 };
 export const storeClient = {
-    /**
-   * Delete purchase order by ID
-   * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
-   * @param orderId  
-   */
+   /**
+  * Delete purchase order by ID
+  * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
+  * @param orderId
+  */
   deleteOrder(orderId: number ,
     $config?: RequestInit
   ): Promise<unknown> {
@@ -195,10 +195,10 @@ export const storeClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
-  /**
-   * Returns pet inventories by status
-   * Returns a map of status codes to quantities
-   */
+ /**
+  * Returns pet inventories by status
+  * Returns a map of status codes to quantities
+  */
   getInventory($config?: RequestInit
   ): Promise<{ [key: string]: number }> {
     const url = `${defaults.baseUrl}/store/inventory?`;
@@ -210,11 +210,11 @@ export const storeClient = {
     .then((response) => response.json() as Promise<{ [key: string]: number }>);
   },
 
-  /**
-   * Find purchase order by ID
-   * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
-   * @param orderId  
-   */
+ /**
+  * Find purchase order by ID
+  * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+  * @param orderId
+  */
   getOrderById(orderId: number ,
     $config?: RequestInit
   ): Promise<Order> {
@@ -227,11 +227,11 @@ export const storeClient = {
     .then((response) => response.json() as Promise<Order>);
   },
 
-  /**
-   * Place an order for a pet
-   * Place a new order in the store
-   * @param body (optional) 
-   */
+ /**
+  * Place an order for a pet
+  * Place a new order in the store
+  * @param body (optional)
+  */
   placeOrder(body?: Order | null,
     $config?: RequestInit
   ): Promise<Order> {
@@ -247,11 +247,11 @@ export const storeClient = {
 
 };
 export const userClient = {
-    /**
-   * Create user
-   * This can only be done by the logged in user.
-   * @param body (optional) 
-   */
+   /**
+  * Create user
+  * This can only be done by the logged in user.
+  * @param body (optional)
+  */
   createUser(body?: User | null,
     $config?: RequestInit
   ): Promise<User> {
@@ -265,10 +265,10 @@ export const userClient = {
     .then((response) => response.json() as Promise<User>);
   },
 
-  /**
-   * Creates list of users with given input array
-   * @param body (optional) 
-   */
+ /**
+  * Creates list of users with given input array
+  * @param body (optional)
+  */
   createUsersWithListInput(body?: User[] | null,
     $config?: RequestInit
   ): Promise<User> {
@@ -282,11 +282,11 @@ export const userClient = {
     .then((response) => response.json() as Promise<User>);
   },
 
-  /**
-   * Delete user
-   * This can only be done by the logged in user.
-   * @param username  
-   */
+ /**
+  * Delete user
+  * This can only be done by the logged in user.
+  * @param username
+  */
   deleteUser(username: string ,
     $config?: RequestInit
   ): Promise<unknown> {
@@ -299,10 +299,10 @@ export const userClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
-  /**
-   * Get user by user name
-   * @param username  
-   */
+ /**
+  * Get user by user name
+  * @param username
+  */
   getUserByName(username: string ,
     $config?: RequestInit
   ): Promise<User> {
@@ -315,11 +315,11 @@ export const userClient = {
     .then((response) => response.json() as Promise<User>);
   },
 
-  /**
-   * Logs user into the system
-   * @param username (optional) 
-   * @param password (optional) 
-   */
+ /**
+  * Logs user into the system
+  * @param username (optional)
+  * @param password (optional)
+  */
   loginUser(username?: string | null,
     password?: string | null,
     $config?: RequestInit
@@ -335,9 +335,7 @@ export const userClient = {
     .then((response) => response.json() as Promise<string>);
   },
 
-  /**
-   * Logs out current logged in user session
-   */
+/** Logs out current logged in user session */
   logoutUser($config?: RequestInit
   ): Promise<unknown> {
     const url = `${defaults.baseUrl}/user/logout?`;
@@ -349,12 +347,12 @@ export const userClient = {
     .then((response) => response.json() as Promise<unknown>);
   },
 
-  /**
-   * Update user
-   * This can only be done by the logged in user.
-   * @param body (optional) 
-   * @param username  
-   */
+ /**
+  * Update user
+  * This can only be done by the logged in user.
+  * @param body (optional)
+  * @param username
+  */
   updateUser(body: FormData | null | undefined,
     username: string ,
     $config?: RequestInit

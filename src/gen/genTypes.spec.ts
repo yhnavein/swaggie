@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
-import generateTypes, { renderComment } from './genTypes';
+import generateTypes from './genTypes';
 import {
   assertEqualIgnoringWhitespace,
   getClientOptions,
@@ -751,49 +751,6 @@ export interface AuthenticationData extends LoginPart {
       );
     });
   });
-});
-
-describe('renderComment', () => {
-  test('should render proper multiline comment with trimming', () => {
-    const comment = `   Quite a lengthy comment
-   With at least two lines    `;
-    const res = renderComment(comment);
-
-    assert.strictEqual(
-      res,
-      ` /**
-  * Quite a lengthy comment
-  * With at least two lines
-  */`
-    );
-  });
-
-  const testCases = [
-    {
-      comment: 'One liner',
-      expected: '/** One liner */',
-    },
-    {
-      comment: '   One liner   ',
-      expected: '/** One liner */',
-    },
-    {
-      comment: null,
-      expected: null,
-    },
-    {
-      comment: '',
-      expected: null,
-    },
-  ];
-
-  for (const { comment, expected } of testCases) {
-    test(`should render proper comment for "${comment}"`, () => {
-      const res = renderComment(comment);
-
-      assert.strictEqual(res, expected);
-    });
-  }
 });
 
 type ExtendedSchema = {
