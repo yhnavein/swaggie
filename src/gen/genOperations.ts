@@ -7,13 +7,14 @@ import {
   getBestResponse,
   orderBy,
   renderFile,
-  type MyContentType,
   getBestContentType,
 } from '../utils';
 import { generateBarrelFile } from './createBarrel';
 import type { ApiOperation, ClientOptions } from '../types';
 import { escapeIdentifier } from '../utils';
 import { getOperations } from '../swagger';
+import { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
+import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
  * Function that will analyze paths in the spec and generate the code for all the operations.
@@ -121,10 +122,8 @@ export function prepareOperations(
       });
     }
 
-    const docs = getOperationDocs(op);
     return {
-      docs,
-      hasJSDocs: docs.length > 0 || params.length > 0,
+      jsDocs: prepareJsDocsForOperation(op, params),
       returnType,
       responseContentType,
       method: op.method.toUpperCase(),
@@ -312,41 +311,4 @@ function getRequestBody(reqBody: OA3.ReferenceObject | OA3.RequestBodyObject): I
     }
   }
   return null;
-}
-
-interface ClientData {
-  clientName: string;
-  camelCaseName: string;
-  operations: IOperation[];
-  baseUrl: string;
-}
-
-interface IOperation {
-  docs?: string[];
-  returnType: string;
-  responseContentType: string;
-  method: string;
-  name: string;
-  url: string;
-  parameters: IOperationParam[];
-  query: IOperationParam[];
-  body: IBodyParam;
-  headers: IOperationParam[];
-  hasJSDocs: boolean;
-}
-
-interface IOperationParam {
-  originalName: string;
-  name?: string;
-  type?: string;
-  value?: string;
-  /** Whether the parameter is optional */
-  optional?: boolean;
-  /** Whether the parameter can be skipped. Skipped means that parameter can be skipped in the parameter list */
-  skippable?: boolean;
-  original?: OA3.ParameterObject | OA3.RequestBodyObject;
-}
-
-interface IBodyParam extends IOperationParam {
-  contentType?: MyContentType;
 }

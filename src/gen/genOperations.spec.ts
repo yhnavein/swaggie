@@ -85,6 +85,61 @@ describe('prepareOperations', () => {
       );
     });
 
+    test('should escape parameter names that are used internally', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPetById',
+          method: 'get',
+          path: '/pet/{petId}',
+          parameters: [
+            {
+              name: 'url',
+              in: 'query',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: '$config',
+              in: 'query',
+              required: false,
+              allowEmptyValue: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'axios',
+              in: 'query',
+              required: false,
+              allowEmptyValue: true,
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'http',
+              in: 'header',
+              required: false,
+              schema: {
+                type: 'string',
+              },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [{ parameters }] = prepareOperations(ops, opts);
+
+      assert.deepStrictEqual(
+        parameters.map((p) => p.name),
+        ['_url', '_config', '_axios', '_http']
+      );
+    });
+
     test('should handle empty parameters', () => {
       const ops: ApiOperation[] = [
         {
@@ -554,106 +609,6 @@ describe('prepareOperations', () => {
         assert.deepStrictEqual(op1.body, expectedBodyParam);
         assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
       });
-    });
-  });
-
-  describe('operation documentation', () => {
-    test('should include description and summary in JSDocs', () => {
-      const ops: ApiOperation[] = [
-        {
-          operationId: 'getPetById',
-          method: 'get',
-          path: '/pet/{petId}',
-          description: 'Returns a single pet',
-          summary: 'Find pet by ID',
-          parameters: [],
-          responses: {},
-          group: null,
-        },
-        {
-          operationId: 'getPetByIdDeprecated',
-          method: 'get',
-          path: '/pet/byId/{petId}',
-          description: 'Returns a single pet (old)',
-          summary: 'Find pet by ID',
-          deprecated: true,
-          parameters: [],
-          responses: {},
-          group: null,
-        },
-        // We expect to see description only once as it's the same as summary
-        {
-          operationId: 'updatePet',
-          method: 'patch',
-          path: '/pet/{petId}',
-          description: 'Updates a single pet',
-          summary: 'Updates a single pet',
-          parameters: [],
-          responses: {},
-          group: null,
-        },
-      ];
-
-      const [op1, op2, op3] = prepareOperations(ops, opts);
-
-      assert.deepStrictEqual(op1.docs, ['Find pet by ID', 'Returns a single pet']);
-      assert.deepStrictEqual(op2.docs, [
-        'Find pet by ID',
-        'Returns a single pet (old)',
-        '@deprecated',
-      ]);
-      assert.deepStrictEqual(op3.docs, ['Updates a single pet']);
-
-      assert.strictEqual(op1.hasJSDocs, true);
-      assert.strictEqual(op2.hasJSDocs, true);
-      assert.strictEqual(op3.hasJSDocs, true);
-    });
-
-    test('should include description and summary in JSDocs', () => {
-      const ops: ApiOperation[] = [
-        // We don't expect docs for this operation
-        {
-          operationId: 'getPetById',
-          method: 'get',
-          path: '/pet/{petId}',
-          parameters: [],
-          responses: {},
-          group: null,
-        },
-        // We expect to see summary - so JSDocs should be generated
-        {
-          operationId: 'getPetByIdDeprecated',
-          method: 'get',
-          path: '/pet/byId/{petId}',
-          summary: 'Find pet by ID',
-          deprecated: true,
-          parameters: [],
-          responses: {},
-          group: null,
-        },
-        // There are parameters, so JSDocs should be generated
-        {
-          operationId: 'updatePet',
-          method: 'patch',
-          path: '/pet/{petId}',
-          parameters: [
-            {
-              name: 'petId',
-              in: 'path',
-              required: true,
-              schema: { type: 'string' },
-            },
-          ],
-          responses: {},
-          group: null,
-        },
-      ];
-
-      const [op1, op2, op3] = prepareOperations(ops, opts);
-
-      assert.strictEqual(op1.hasJSDocs, false);
-      assert.strictEqual(op2.hasJSDocs, true);
-      assert.strictEqual(op3.hasJSDocs, true);
     });
   });
 

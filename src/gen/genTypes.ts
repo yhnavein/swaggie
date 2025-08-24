@@ -4,6 +4,7 @@ import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../s
 import type { ClientOptions } from '../types';
 import { escapePropName } from '../utils';
 import { findAllUsedRefs } from './refsHelper';
+import { renderComment } from './jsDocs';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
@@ -206,20 +207,6 @@ function renderTypeProp(
   lines.push(`  ${safePropName}${optionalMark}: ${type};`);
 
   return lines.join('\n');
-}
-
-export function renderComment(comment: string | null) {
-  if (!comment) {
-    return null;
-  }
-
-  const commentLines = comment.split('\n');
-
-  if (commentLines.length === 1) {
-    return `/** ${comment.trim()} */`;
-  }
-
-  return ` /**\n${commentLines.map((line) => `  * ${line.trim()}`).join('\n')}\n  */`;
 }
 
 function getMergedCompositeObjects(schema: OA3.SchemaObject) {
