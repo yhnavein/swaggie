@@ -13,9 +13,12 @@ function getOperationDocs(
   const summary = op.summary?.trim();
   const description = op.description?.trim();
   if (summary) {
-    result.push(summary);
+    // We want to include summary only if it's not a subset of description
+    if (!description || !description.startsWith(summary)) {
+      result.push(summary);
+    }
   }
-  if (description && description !== summary) {
+  if (description) {
     result.push(description);
   }
   if (op.deprecated) {

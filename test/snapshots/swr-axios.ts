@@ -126,7 +126,6 @@ export const petClient = {
   },
 
    /**
-  * Update an existing pet
   * Update an existing pet by Id
   * @param body
   */

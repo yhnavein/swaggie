@@ -217,7 +217,6 @@ export class petService extends BaseService {
   }
 
  /**
-  * Update an existing pet
   * Update an existing pet by Id
   * @param body
   */

@@ -48,6 +48,24 @@ describe('prepareJsDocsForOperation', () => {
     );
   });
 
+  test('should skip summary if it is a subset of description', () => {
+    const op = {
+      summary: 'Single line comment',
+      description: 'Single line comment.\nAdditional description',
+      deprecated: false,
+    };
+    const params: IOperationParam[] = [];
+    const jsdocs = prepareJsDocsForOperation(op, params);
+
+    assertEqualIgnoringWhitespace(
+      jsdocs,
+      `/**
+  * Single line comment.
+  * Additional description
+  */`
+    );
+  });
+
   test('should handle long descriptions', () => {
     const op = {
       description:
