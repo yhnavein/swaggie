@@ -73,29 +73,6 @@ describe('prepareJsDocsForOperation', () => {
     );
   });
 
-  test('should handle HTML tags in description', () => {
-    const op = {
-      description:
-        'Title\n\n<p>Some description</p><br><p>Some more description</p><br/>\nOh, <a href="https://example.com">link</a> and some <strong>bold</strong> text<br/>\n<i>Italics</i> as well as <code>code</code> or <em>emphasis</em> or <pre>pre</pre>',
-      deprecated: true,
-    };
-    const params: IOperationParam[] = [];
-    const jsdocs = prepareJsDocsForOperation(op, params);
-
-    assertEqualIgnoringWhitespace(
-      jsdocs,
-      `/**
-  * Title
-  *
-  * Some description
-  * Some more description
-  * Oh, [link](https://example.com) and some **bold** text
-  * Italics as well as \`code\` or *emphasis* or \`pre\`
-  * @deprecated
-  */`
-    );
-  });
-
   test('should handle params alone', () => {
     const op = {
       summary: '',
@@ -153,6 +130,10 @@ describe('renderComment', () => {
       expected: '/** One liner */',
     },
     {
+      comment: 'a <= b < c && d >= e > f',
+      expected: '/** a &le; b &lt; c && d &ge; e &gt; f */',
+    },
+    {
       comment: null,
       expected: null,
     },
@@ -169,4 +150,75 @@ describe('renderComment', () => {
       assert.strictEqual(res, expected);
     });
   }
+
+  test('should handle HTML tags in description', () => {
+    const op = {
+      description:
+        '<h1>Title</h1>\n\n<p>Some description</p><br><p>Some more description</p><br/>\nOh, <a href="https://example.com">link</a> and some <strong>bold</strong> text<br/>\n<i>Italics</i> as well as <code>code</code> or <em>emphasis</em> or <pre>pre</pre>',
+      deprecated: true,
+    };
+    const params: IOperationParam[] = [];
+    const jsdocs = prepareJsDocsForOperation(op, params);
+
+    assertEqualIgnoringWhitespace(
+      jsdocs,
+      ` /**
+  * # Title
+  *
+  * Some description
+  *
+  * Some more description
+  *
+  * Oh, [link](https://example.com) and some **bold** text
+  *
+  * *Italics* as well as \`code\` or *emphasis* or \`pre\`
+  * @deprecated
+  */`
+    );
+  });
+
+  test('should handle unknown or unclosed tags as well', () => {
+    const op = {
+      description:
+        '<title>Title</title><brief explanation>\nSome description\n</brief explanations>\n<pre> and <code> and <i> and <em> and <strong> and <a>like this</a>',
+      deprecated: false,
+    };
+    const params: IOperationParam[] = [];
+    const jsdocs = prepareJsDocsForOperation(op, params);
+
+    assert.strictEqual(
+      jsdocs,
+      ` /**
+  * &lt;title&gt;Title&lt;/title&gt;&lt;brief explanation&gt;
+  * Some description
+  * &lt;/brief explanations&gt;
+  * &lt;pre&gt; and &lt;code&gt; and &lt;i&gt; and &lt;em&gt; and &lt;strong&gt; and &lt;a&gt;like this&lt;/a&gt;
+  */`
+    );
+  });
+
+  test('should handle title tags', () => {
+    const op = {
+      description:
+        '<h1>Title</h1>\n<h2>Subtitle</h2><h3>Subsubtitle</h3><h4>Subsubsubtitle</h4>\n<h5>Subsubsubsubtitle</h5>\n<h6>Subsubsubsubsubtitle</h6>',
+      deprecated: false,
+    };
+    const params: IOperationParam[] = [];
+    const jsdocs = prepareJsDocsForOperation(op, params);
+
+    assert.strictEqual(
+      jsdocs,
+      ` /**
+  * # Title
+  *
+  * ## Subtitle
+  * ### Subsubtitle
+  * #### Subsubsubtitle
+  *
+  * ##### Subsubsubsubtitle
+  *
+  * ###### Subsubsubsubsubtitle
+  */`
+    );
+  });
 });

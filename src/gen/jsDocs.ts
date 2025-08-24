@@ -24,6 +24,40 @@ function getOperationDocs(
   return result;
 }
 
+/**
+ * Strips specific HTML tags and converts them to a simple markdown.
+ * Unknown or unclosed tags are encoded to HTML entities.
+ * @param str - The string to strip the tags from.
+ */
+function stripSpecificHtmlTags(str: string) {
+  // Replace specific problematic tags with better alternatives
+  return (
+    str
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<p(\s[^>]*)?>/gi, '')
+      .replace(/<b>(.*?)<\/b>/gi, '**$1**')
+      .replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
+      .replace(/<i>(.*?)<\/i>/gi, '*$1*')
+      .replace(/<em>(.*?)<\/em>/gi, '*$1*')
+      .replace(/<code>(.*?)<\/code>/gi, '`$1`')
+      .replace(/<pre>(.*?)<\/pre>/gi, '`$1`')
+      // Replace h1 - h6 with markdown headers
+      .replace(
+        /<h([1-6])>(.*?)<\/h\1>/gi,
+        (match, level, content) => '#'.repeat(parseInt(level)) + ' ' + content + '\n'
+      )
+      // Replace links with markdown links
+      .replace(/<a href="([^"]+)">([^<]+)<\/a>/gi, '[$2]($1)')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/\<=/g, '&le;')
+      .replace(/\>=/g, '&ge;')
+      .replace(/\</g, '&lt;')
+      .replace(/\>/g, '&gt;')
+      .trim()
+  );
+}
+
 export function prepareJsDocsForOperation(
   op: Pick<ApiOperation, 'summary' | 'description' | 'deprecated'>,
   params: IOperationParam[]
@@ -48,11 +82,14 @@ export function renderComment(comment: string | null) {
     return null;
   }
 
-  const commentLines = comment.split('\n');
+  const mdComment = stripSpecificHtmlTags(comment);
+  const commentLines = mdComment.split('\n');
 
   if (commentLines.length === 1) {
-    return `/** ${comment.trim()} */`;
+    return `/** ${mdComment.trim()} */`;
   }
 
-  return ` /**\n${commentLines.map((line) => `  * ${line.trim()}`).join('\n')}\n  */`;
+  return ` /**\n${commentLines
+    .map((line) => (line.trim() === '' ? '  *' : `  * ${line.trim()}`))
+    .join('\n')}\n  */`;
 }

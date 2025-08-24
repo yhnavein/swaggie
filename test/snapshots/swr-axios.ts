@@ -298,7 +298,7 @@ const { data, error, mutate } = useSWR<Pet>(
   export const storeClient = {
    /**
   * Delete purchase order by ID
-  * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
+  * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
   * @param orderId
   */
   deleteOrder(orderId: number ,
@@ -330,7 +330,7 @@ const { data, error, mutate } = useSWR<Pet>(
 
    /**
   * Find purchase order by ID
-  * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+  * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
   * @param orderId
   */
   getOrderById(orderId: number ,
@@ -395,7 +395,7 @@ const { data, error, mutate } = useSWR<{ [key: string]: number }>(
 
    /**
   * Find purchase order by ID
-  * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+  * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
   * @param orderId
   */
 export function usestoreOrderById(  orderId: number ,

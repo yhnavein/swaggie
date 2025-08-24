@@ -262,7 +262,7 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
   export const storeClient = {
    /**
   * Delete purchase order by ID
-  * For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
+  * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
   * @param orderId
   */
   deleteOrder(orderId: number ,
@@ -294,7 +294,7 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
 
  /**
   * Find purchase order by ID
-  * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+  * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
   * @param orderId
   */
   getOrderById(orderId: number ,
@@ -352,7 +352,7 @@ usestoreInventory.queryKeys = ['store', 'storeInventory'];
 
    /**
   * Find purchase order by ID
-  * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+  * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
   * @param orderId
   * @param $config (optional) Additional configuration for TanStack Query
   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
