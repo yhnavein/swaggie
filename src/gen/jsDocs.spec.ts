@@ -15,7 +15,7 @@ describe('prepareJsDocsForOperation', () => {
     const params: IOperationParam[] = [];
     const jsdocs = prepareJsDocsForOperation(op, params);
 
-    assert.strictEqual(jsdocs, null);
+    assert.strictEqual(jsdocs, '');
   });
 
   test('should handle single line comment', () => {
@@ -153,11 +153,15 @@ describe('renderComment', () => {
     },
     {
       comment: null,
-      expected: null,
+      expected: '',
+    },
+    {
+      comment: undefined,
+      expected: '',
     },
     {
       comment: '',
-      expected: null,
+      expected: '',
     },
   ];
 

@@ -67,7 +67,7 @@ export function prepareJsDocsForOperation(
 ) {
   const docs = getOperationDocs(op);
   if (docs.length === 0 && params.length === 0) {
-    return null;
+    return '';
   }
 
   const result = docs;
@@ -82,7 +82,7 @@ export function prepareJsDocsForOperation(
 
 export function renderComment(comment: string | null) {
   if (!comment) {
-    return null;
+    return '';
   }
 
   const mdComment = stripSpecificHtmlTags(comment);
