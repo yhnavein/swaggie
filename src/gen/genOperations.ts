@@ -138,27 +138,6 @@ export function prepareOperations(
 }
 
 /**
- * Prepares content for the operation docs. We will use description and summary if they are defined
- * in the spec. Additionally we will add deprecation tag if the operation is deprecated.
- * This function should include JSDocs asterisks to make comments look nice.
- */
-function getOperationDocs(op: ApiOperation): string[] {
-  const result = [];
-  const summary = op.summary?.trim();
-  const description = op.description?.trim();
-  if (summary) {
-    result.push(summary);
-  }
-  if (description && description !== summary) {
-    result.push(description);
-  }
-  if (op.deprecated) {
-    result.push('@deprecated');
-  }
-  return result;
-}
-
-/**
  * Marks parameters as skippable based on their position relative to the last required parameter.
  *
  * In TypeScript/JavaScript, optional parameters must come after required ones. This function
@@ -250,13 +229,14 @@ export function getParams(
   }
 
   const result = params
-    .filter((p) => !where || where.includes(p.in))
+    .filter((p) => p.name && (!where || where.includes(p.in)))
     .map((p) => ({
       originalName: p.name,
       name: getParamName(p.name),
       type: getParameterType(p, options),
       optional: p.required === undefined || p.required === null ? true : !p.required,
       original: p,
+      jsDoc: p.description?.trim(),
     }));
 
   if (options.modifiers?.parameters) {
@@ -285,7 +265,11 @@ export function getParams(
 /**
  * Escapes param name so it can be used as a valid identifier in the generated code
  */
-export function getParamName(name: string): string {
+export function getParamName(name?: string | null): string {
+  if (!name) {
+    return name;
+  }
+
   return escapeIdentifier(
     name
       .split('.')

@@ -72,9 +72,9 @@ export function prepareJsDocsForOperation(
 
   const result = docs;
   for (const param of params) {
-    const paramLine = `@param ${param.name} ${param.optional ? '(optional)' : ''} ${
-      param.name !== param.originalName ? `(API name: ${param.originalName})` : ''
-    }`;
+    const paramLine = `@param ${param.name}${param.optional ? ' (optional)' : ''}${
+      param.name !== param.originalName ? ` (API name: ${param.originalName})` : ''
+    }${param.jsDoc ? ` - ${param.jsDoc}` : ''}`;
     result.push(paramLine);
   }
   return renderComment(result.join('\n'));

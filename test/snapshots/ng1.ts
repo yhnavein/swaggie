@@ -147,7 +147,7 @@ export class petService extends BaseService {
  /**
   * Deletes a pet
   * @param apiKey (optional) (API name: api_key)
-  * @param petId
+  * @param petId - ID of the pet
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
@@ -164,7 +164,7 @@ export class petService extends BaseService {
  /**
   * Finds Pets by status
   * Multiple status values can be provided with comma separated strings
-  * @param status (optional)
+  * @param status (optional) - Status values that need to be considered for filter
   */
   findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
         config?: IRequestShortcutConfig
@@ -184,7 +184,7 @@ export class petService extends BaseService {
   * Finds Pets by tags
   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   * @deprecated
-  * @param tags (optional)
+  * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
         config?: IRequestShortcutConfig
@@ -203,7 +203,7 @@ export class petService extends BaseService {
  /**
   * Find pet by ID
   * Returns a single pet
-  * @param petId
+  * @param petId - ID of the pet
   */
   getPetById(petId: number ,
         config?: IRequestShortcutConfig
@@ -234,9 +234,9 @@ export class petService extends BaseService {
 
  /**
   * Updates a pet in the store with form data
-  * @param petId
-  * @param name (optional)
-  * @param status (optional)
+  * @param petId - ID of the pet
+  * @param name (optional) - Name of pet that needs to be updated
+  * @param status (optional) - Status of pet that needs to be updated
   */
   updatePetWithForm(petId: number ,
     name?: string | null,
@@ -261,8 +261,8 @@ export class petService extends BaseService {
  /**
   * uploads an image
   * @param body (optional)
-  * @param petId
-  * @param additionalMetadata (optional)
+  * @param petId - ID of the pet
+  * @param additionalMetadata (optional) - Additional Metadata
   */
   uploadFile(body: File | null | undefined,
     petId: number ,
@@ -292,7 +292,7 @@ export class storeService extends BaseService {
    /**
   * Delete purchase order by ID
   * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
-  * @param orderId
+  * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
         config?: IRequestShortcutConfig
@@ -322,7 +322,7 @@ export class storeService extends BaseService {
  /**
   * Find purchase order by ID
   * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
-  * @param orderId
+  * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
         config?: IRequestShortcutConfig
@@ -396,7 +396,7 @@ export class userService extends BaseService {
  /**
   * Delete user
   * This can only be done by the logged in user.
-  * @param username
+  * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
         config?: IRequestShortcutConfig
@@ -411,7 +411,7 @@ export class userService extends BaseService {
 
  /**
   * Get user by user name
-  * @param username
+  * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
         config?: IRequestShortcutConfig
@@ -426,8 +426,8 @@ export class userService extends BaseService {
 
  /**
   * Logs user into the system
-  * @param username (optional)
-  * @param password (optional)
+  * @param username (optional) - The user name for login
+  * @param password (optional) - The password for login in clear text
   */
   loginUser(username?: string | null,
     password?: string | null,
@@ -462,7 +462,7 @@ export class userService extends BaseService {
   * Update user
   * This can only be done by the logged in user.
   * @param body (optional)
-  * @param username
+  * @param username - name that needs to be updated
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
