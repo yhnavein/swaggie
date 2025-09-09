@@ -42,6 +42,7 @@ export interface IOperationParam {
   /** Whether the parameter can be skipped. Skipped means that parameter can be skipped in the parameter list */
   skippable?: boolean;
   original?: OA3.ParameterObject | OA3.RequestBodyObject;
+  jsDoc?: string;
 }
 
 export interface IBodyParam extends IOperationParam {

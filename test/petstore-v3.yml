@@ -190,13 +190,7 @@ paths:
       description: Returns a single pet
       operationId: getPetById
       parameters:
-        - name: petId
-          in: path
-          description: ID of pet to return
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/PetIdParam'
       responses:
         '200':
           description: successful operation
@@ -223,13 +217,7 @@ paths:
       description: ''
       operationId: updatePetWithForm
       parameters:
-        - name: petId
-          in: path
-          description: ID of pet that needs to be updated
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/PetIdParam'
         - name: name
           in: query
           description: Name of pet that needs to be updated
@@ -260,13 +248,7 @@ paths:
           required: false
           schema:
             type: string
-        - name: petId
-          in: path
-          description: Pet id to delete
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/PetIdParam'
       responses:
         '400':
           description: Invalid pet value
@@ -282,13 +264,7 @@ paths:
       description: ''
       operationId: uploadFile
       parameters:
-        - name: petId
-          in: path
-          description: ID of pet to update
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/PetIdParam'
         - name: additionalMetadata
           in: query
           description: Additional Metadata
@@ -598,6 +574,15 @@ externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'
 components:
+  parameters:
+    PetIdParam:
+      name: petId
+      in: path
+      description: ID of the pet
+      required: true
+      schema:
+        type: integer
+        format: int64
   schemas:
     Order:
       x-swagger-router-model: io.swagger.petstore.model.Order

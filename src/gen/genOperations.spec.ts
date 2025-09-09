@@ -851,6 +851,31 @@ describe('getParams', () => {
     assert.strictEqual(param2.optional, true);
   });
 
+  test('should filter out parameters with no name', () => {
+    const originalParams: OA3.ParameterObject[] = [
+      {
+        name: '',
+        in: 'query',
+        required: true,
+      },
+      {
+        name: null,
+        in: 'query',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      { name: undefined, in: 'query', required: false, schema: { type: 'string' } },
+    ];
+    const opts = getClientOptions({
+      modifiers: {},
+    });
+
+    const paramList = getParams(originalParams, opts);
+    assert.strictEqual(paramList.length, 0);
+  });
+
   test('should apply modifiers for parameters', () => {
     const originalParams: OA3.ParameterObject[] = [
       {

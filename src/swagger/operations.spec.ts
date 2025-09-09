@@ -202,4 +202,117 @@ describe('getOperations', () => {
     ];
     assert.deepStrictEqual(res, validResp);
   });
+
+  test('should handle valid referenced parameters', () => {
+    const inheritedParams: OA3.ReferenceObject[] = [
+      {
+        $ref: '#/components/parameters/SortByParam',
+      },
+    ];
+
+    const spec = getDocument({
+      components: {
+        parameters: {
+          SortByParam: {
+            name: 'sortBy',
+            in: 'query',
+            schema: { type: 'string' },
+            required: true,
+          },
+          FilterParam: {
+            name: 'filter',
+            in: 'query',
+            schema: { type: 'string' },
+            required: false,
+          },
+          PageSizeParam: {
+            name: 'pageSize',
+            in: 'header',
+            schema: { type: 'number' },
+            required: true,
+          },
+        },
+      },
+      paths: {
+        '/api/pokemon': {
+          get: {
+            operationId: 'A',
+            parameters: [
+              {
+                $ref: '#/components/parameters/FilterParam',
+              },
+              {
+                $ref: '#/components/parameters/PageSizeParam',
+              },
+            ],
+            responses: {},
+          },
+          patch: {
+            operationId: 'C',
+            parameters: [
+              // SortBy is slightly different from the inherited parameters
+              // and this version should be used instead
+              {
+                name: 'sortBy',
+                in: 'query',
+                schema: { enum: ['asc', 'desc'], type: 'string' },
+                required: false,
+              },
+            ],
+            responses: {},
+          },
+          // parameters that should be inherited by all operations above
+          parameters: inheritedParams,
+        },
+      },
+    });
+
+    const res = getOperations(spec);
+
+    const validResp: ApiOperation[] = [
+      {
+        group: 'default',
+        operationId: 'A',
+        method: 'get',
+        parameters: [
+          {
+            name: 'filter',
+            in: 'query',
+            schema: { type: 'string' },
+            required: false,
+          },
+          {
+            name: 'pageSize',
+            in: 'header',
+            schema: { type: 'number' },
+            required: true,
+          },
+          {
+            name: 'sortBy',
+            in: 'query',
+            schema: { type: 'string' },
+            required: true,
+          },
+        ],
+        path: '/api/pokemon',
+        responses: {},
+      },
+      {
+        group: 'default',
+        operationId: 'C',
+        method: 'patch',
+        parameters: [
+          {
+            name: 'sortBy',
+            in: 'query',
+            schema: { enum: ['asc', 'desc'], type: 'string' },
+            required: false,
+          },
+        ],
+        path: '/api/pokemon',
+        responses: {},
+      },
+    ];
+    assert.deepStrictEqual(res, validResp);
+  });
 });
