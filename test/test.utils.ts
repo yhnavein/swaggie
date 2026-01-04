@@ -40,34 +40,39 @@ export function getClientOptions(opts: Partial<ClientOptions> = {}): ClientOptio
 }
 
 /**
- * Helper function to mock undici.request for a specific URL with file content
+ * Helper function to mock fetch for a specific URL with file content
  */
-export async function mockRequestWithFile(mockRequest: Mock<any>, url: string, filename: string) {
+export async function mockFetchWithFile(mockFetch: Mock<any>, url: string, filename: string) {
   const fileContent = await Bun.file(path.join(__dirname, '../test', filename)).text();
 
-  mockRequest.mockImplementation(async (requestUrl: string) => {
+  mockFetch.mockImplementation(async (requestUrl: string) => {
     if (requestUrl === url) {
-      return {
-        body: {
-          text: async () => fileContent,
-        },
-      };
+      return new Response(fileContent, {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
     throw new Error(`Unexpected request to: ${requestUrl}`);
   });
 }
 
 /**
- * Helper function to mock undici.request with direct content
+ * Helper function to mock fetch with direct content
  */
-export function mockRequestWithContent(mockRequest: Mock<any>, url: string, content: string) {
-  mockRequest.mockImplementation(async (requestUrl: string) => {
+export function mockFetchWithContent(
+  mockFetch: Mock<any>,
+  url: string,
+  content: string,
+  status = 200
+) {
+  mockFetch.mockImplementation(async (requestUrl: string) => {
     if (requestUrl === url) {
-      return {
-        body: {
-          text: async () => content,
-        },
-      };
+      return new Response(content, {
+        status,
+        statusText: status === 200 ? 'OK' : 'Error',
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
     throw new Error(`Unexpected request to: ${requestUrl}`);
   });

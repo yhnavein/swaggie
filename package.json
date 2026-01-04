@@ -53,8 +53,7 @@
     "commander": "^14.0.2",
     "eta": "^4.5.0",
     "js-yaml": "^4.1.0",
-    "nanocolors": "^0.2.0",
-    "undici": "^6.21.1"
+    "nanocolors": "^0.2.0"
   },
   "devDependencies": {
     "@types/js-yaml": "4.0.9",

@@ -1,20 +1,16 @@
-import { test, describe, beforeEach, expect, spyOn, mock } from 'bun:test';
+import { test, describe, beforeEach, expect, spyOn } from 'bun:test';
 
 import { runCodeGenerator, applyConfigFile } from './';
-import { mockRequestWithFile } from '../test/test.utils';
+import { mockFetchWithFile } from '../test/test.utils';
 
 import type { CliOptions } from './types';
 
-// Mock the undici module at the top level
-const mockRequest = mock();
-
-mock.module('undici', () => ({
-  request: mockRequest,
-}));
-
 describe('runCodeGenerator', () => {
+  let mockFetch: ReturnType<typeof spyOn>;
+
   beforeEach(() => {
-    mockRequest.mockReset();
+    // Spy on the global fetch function
+    mockFetch = spyOn(global, 'fetch');
   });
 
   test('fails with no parameters provided', async () => {
@@ -105,8 +101,8 @@ describe('runCodeGenerator', () => {
   });
 
   test('works with proper --config provided', async () => {
-    await mockRequestWithFile(
-      mockRequest,
+    await mockFetchWithFile(
+      mockFetch,
       'https://raw.githubusercontent.com/readmeio/oas-examples/refs/heads/main/3.0/json/petstore.json',
       'petstore-v3.json'
     );

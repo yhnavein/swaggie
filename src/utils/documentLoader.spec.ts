@@ -1,27 +1,23 @@
-import { test, describe, beforeEach, expect, mock } from 'bun:test';
+import { test, describe, beforeEach, expect, spyOn } from 'bun:test';
 import { loadSpecDocument } from './documentLoader';
-import { mockRequestWithContent, mockRequestWithFile } from '../../test/test.utils';
+import { mockFetchWithContent, mockFetchWithFile } from '../../test/test.utils';
 
-// URLs are not used to fetch anything. We are mocking the undici.request function
+// URLs are not used to fetch anything. We are mocking the global fetch function
 const petstore3 = {
   json: 'https://petstore.swagger.io/v3/swagger.json',
   yaml: 'https://petstore.swagger.io/v3/swagger.yaml',
 };
 
-// Mock the undici module at the top level
-const mockRequest = mock();
-
-mock.module('undici', () => ({
-  request: mockRequest,
-}));
-
 describe('loadSpecDocument', () => {
+  let mockFetch: ReturnType<typeof spyOn>;
+
   beforeEach(() => {
-    mockRequest.mockReset();
+    // Spy on the global fetch function
+    mockFetch = spyOn(global, 'fetch');
   });
 
   test('should resolve a JSON spec from url', async () => {
-    await mockRequestWithFile(mockRequest, petstore3.json, 'petstore-v3.json');
+    await mockFetchWithFile(mockFetch, petstore3.json, 'petstore-v3.json');
 
     const spec = await loadSpecDocument(petstore3.json);
     expect(spec).toBeDefined();
@@ -29,7 +25,7 @@ describe('loadSpecDocument', () => {
   });
 
   test('should resolve a YAML spec from url', async () => {
-    await mockRequestWithFile(mockRequest, petstore3.yaml, 'petstore-v3.yml');
+    await mockFetchWithFile(mockFetch, petstore3.yaml, 'petstore-v3.yml');
 
     const spec = await loadSpecDocument(petstore3.yaml);
     expect(spec).toBeDefined();
@@ -38,7 +34,7 @@ describe('loadSpecDocument', () => {
 
   test('should resolve a YAML spec from an extensionless url', async () => {
     const urlWithoutExtension = petstore3.yaml.replace('.yaml', '');
-    await mockRequestWithFile(mockRequest, urlWithoutExtension, 'petstore-v3.yml');
+    await mockFetchWithFile(mockFetch, urlWithoutExtension, 'petstore-v3.yml');
 
     const spec = await loadSpecDocument(urlWithoutExtension);
     expect(spec).toBeDefined();
@@ -47,7 +43,7 @@ describe('loadSpecDocument', () => {
 
   test('should resolve a JSON spec from an extensionless url', async () => {
     const urlWithoutExtension = petstore3.json.replace('.json', '');
-    await mockRequestWithFile(mockRequest, urlWithoutExtension, 'petstore-v3.json');
+    await mockFetchWithFile(mockFetch, urlWithoutExtension, 'petstore-v3.json');
 
     const spec = await loadSpecDocument(urlWithoutExtension);
     expect(spec).toBeDefined();
@@ -74,7 +70,7 @@ describe('loadSpecDocument', () => {
 
   test('should handle malformed JSON file', async () => {
     const malformedUrl = 'https://example.com/malformed.json';
-    mockRequestWithContent(mockRequest, malformedUrl, '{"invalid": json}');
+    mockFetchWithContent(mockFetch, malformedUrl, '{"invalid": json}');
 
     try {
       await loadSpecDocument(malformedUrl);
