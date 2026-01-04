@@ -1,8 +1,12 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import type { ClientOptions } from '../types';
-import { getParameterType, getTypeFromSchema, getSafeIdentifier, getRefCompositeTypes } from './typesExtractor';
+import {
+  getParameterType,
+  getTypeFromSchema,
+  getSafeIdentifier,
+  getRefCompositeTypes,
+} from './typesExtractor';
 import { assertEqualIgnoringWhitespace, getClientOptions } from '../../test/test.utils';
 
 describe('getParameterType', () => {
@@ -30,7 +34,7 @@ describe('getParameterType', () => {
       test(`should process ${param} correctly`, async () => {
         const res = getParameterType(param, options);
 
-        assert.strictEqual(res, expected);
+        expect(res).toBe(expected);
       });
     }
   });
@@ -50,7 +54,7 @@ describe('getParameterType', () => {
 
     const res = getParameterType(param, options);
 
-    assert.strictEqual(res, 'Item[]');
+    expect(res).toBe('Item[]');
   });
 });
 
@@ -89,7 +93,7 @@ describe('getTypeFromSchema', () => {
       test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
-        assert.strictEqual(res, expected);
+        expect(res).toBe(expected);
       });
     }
 
@@ -227,7 +231,7 @@ describe('getTypeFromSchema', () => {
       test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
-        assert.strictEqual(res, expected);
+        expect(res).toBe(expected);
       });
     }
   });
@@ -263,7 +267,7 @@ describe('getTypeFromSchema', () => {
       test(`should ${JSON.stringify(schema)} match ${expected}`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
-        assert.strictEqual(res, expected);
+        expect(res).toBe(expected);
       });
     }
   });
@@ -290,7 +294,7 @@ describe('getSafeIdentifier', () => {
     test(`should convert "${input}" to "${expected}"`, async () => {
       const res = getSafeIdentifier(input);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 });
@@ -312,7 +316,7 @@ describe('getRefCompositeTypes', () => {
 
     const res = getRefCompositeTypes(schema);
 
-    assert.deepStrictEqual(res, ['BaseUser', 'UserProfile']);
+    expect(res).toEqual(['BaseUser', 'UserProfile']);
   });
 
   test('should handle empty allOf', () => {
@@ -322,7 +326,7 @@ describe('getRefCompositeTypes', () => {
 
     const res = getRefCompositeTypes(schema);
 
-    assert.deepStrictEqual(res, []);
+    expect(res).toEqual([]);
   });
 
   test('should handle allOf with only inline schemas', () => {
@@ -345,7 +349,7 @@ describe('getRefCompositeTypes', () => {
 
     const res = getRefCompositeTypes(schema);
 
-    assert.deepStrictEqual(res, []);
+    expect(res).toEqual([]);
   });
 
   test('should handle mixed allOf with refs and inline schemas', () => {
@@ -364,6 +368,6 @@ describe('getRefCompositeTypes', () => {
 
     const res = getRefCompositeTypes(schema);
 
-    assert.deepStrictEqual(res, ['Base', 'Extension']);
+    expect(res).toEqual(['Base', 'Extension']);
   });
 });

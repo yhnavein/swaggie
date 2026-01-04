@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { findAllUsedRefs } from './refsHelper';
@@ -19,7 +18,7 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 0);
+    expect(refs.size).toBe(0);
   });
 
   test('should handle spec with no schemas', () => {
@@ -41,7 +40,7 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 0);
+    expect(refs.size).toBe(0);
   });
 
   test('should handle circular dependencies without infinite loop', () => {
@@ -85,9 +84,9 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 2);
-    assert(refs.has('NodeA'));
-    assert(refs.has('NodeB'));
+    expect(refs.size).toBe(2);
+    expect(refs.has('NodeA')).toBe(true);
+    expect(refs.has('NodeB')).toBe(true);
   });
 
   test('should handle deep nested schema references', () => {
@@ -143,11 +142,11 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 3);
-    assert(refs.has('Level1'));
-    assert(refs.has('Level2'));
-    assert(refs.has('Level3'));
-    assert(!refs.has('UnusedSchema'));
+    expect(refs.size).toBe(3);
+    expect(refs.has('Level1')).toBe(true);
+    expect(refs.has('Level2')).toBe(true);
+    expect(refs.has('Level3')).toBe(true);
+    expect(refs.has('UnusedSchema')).toBe(false);
   });
 
   test('should handle deprecated schemas when skipDeprecated is true', () => {
@@ -213,10 +212,10 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, skipDeprecatedOptions, refs);
 
-    assert.strictEqual(refs.size, 1);
-    assert(refs.has('ActiveSchema'));
-    assert(!refs.has('DeprecatedSchema'));
-    assert(!refs.has('ReferencedByDeprecated'));
+    expect(refs.size).toBe(1);
+    expect(refs.has('ActiveSchema')).toBe(true);
+    expect(refs.has('DeprecatedSchema')).toBe(false);
+    expect(refs.has('ReferencedByDeprecated')).toBe(false);
   });
 
   test('should handle schema with deprecated flag when skipDeprecated is true', () => {
@@ -274,11 +273,11 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, skipDeprecatedOptions, refs);
 
-    assert.strictEqual(refs.size, 3);
-    assert(refs.has('ValidSchema'));
-    assert(refs.has('DeprecatedSchema')); // Should be included as it's directly referenced
-    assert(refs.has('AnotherValidSchema'));
-    assert(!refs.has('NestedDeprecated')); // Should not be included as DeprecatedSchema's deps are skipped
+    expect(refs.size).toBe(3);
+    expect(refs.has('ValidSchema')).toBe(true);
+    expect(refs.has('DeprecatedSchema')).toBe(true); // Should be included as it's directly referenced
+    expect(refs.has('AnotherValidSchema')).toBe(true);
+    expect(refs.has('NestedDeprecated')).toBe(false); // Should not be included as DeprecatedSchema's deps are skipped
   });
 
   test('should handle malformed $ref strings gracefully', () => {
@@ -325,8 +324,8 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 1);
-    assert(refs.has('ValidSchema'));
+    expect(refs.size).toBe(1);
+    expect(refs.has('ValidSchema')).toBe(true);
   });
 
   test('should handle references in allOf/oneOf/anyOf structures', () => {
@@ -416,14 +415,14 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 6);
-    assert(refs.has('CompositeSchema'));
-    assert(refs.has('BaseSchema'));
-    assert(refs.has('OptionA'));
-    assert(refs.has('OptionB'));
-    assert(refs.has('AnyA'));
-    assert(refs.has('AnyB'));
-    assert(!refs.has('UnusedSchema'));
+    expect(refs.size).toBe(6);
+    expect(refs.has('CompositeSchema')).toBe(true);
+    expect(refs.has('BaseSchema')).toBe(true);
+    expect(refs.has('OptionA')).toBe(true);
+    expect(refs.has('OptionB')).toBe(true);
+    expect(refs.has('AnyA')).toBe(true);
+    expect(refs.has('AnyB')).toBe(true);
+    expect(refs.has('UnusedSchema')).toBe(false);
   });
 
   test('should handle references in array items', () => {
@@ -473,9 +472,9 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 2);
-    assert(refs.has('ArrayItem'));
-    assert(refs.has('NestedItem'));
+    expect(refs.size).toBe(2);
+    expect(refs.has('ArrayItem')).toBe(true);
+    expect(refs.has('NestedItem')).toBe(true);
   });
 
   test('should handle references in request bodies and parameters', () => {
@@ -551,12 +550,12 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 5);
-    assert(refs.has('QueryParamSchema'));
-    assert(refs.has('RequestSchema'));
-    assert(refs.has('RequestData'));
-    assert(refs.has('ResponseSchema'));
-    assert(refs.has('ResponseData'));
+    expect(refs.size).toBe(5);
+    expect(refs.has('QueryParamSchema')).toBe(true);
+    expect(refs.has('RequestSchema')).toBe(true);
+    expect(refs.has('RequestData')).toBe(true);
+    expect(refs.has('ResponseSchema')).toBe(true);
+    expect(refs.has('ResponseData')).toBe(true);
   });
 
   test('should handle null and undefined values gracefully', () => {
@@ -603,8 +602,8 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 1);
-    assert(refs.has('ValidSchema'));
+    expect(refs.size).toBe(1);
+    expect(refs.has('ValidSchema')).toBe(true);
   });
 
   test('should not include orphaned schemas that only reference each other', () => {
@@ -660,11 +659,11 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 1);
-    assert(refs.has('UsedSchema'));
-    assert(!refs.has('OrphanA'));
-    assert(!refs.has('OrphanB'));
-    assert(!refs.has('OrphanC'));
+    expect(refs.size).toBe(1);
+    expect(refs.has('UsedSchema')).toBe(true);
+    expect(refs.has('OrphanA')).toBe(false);
+    expect(refs.has('OrphanB')).toBe(false);
+    expect(refs.has('OrphanC')).toBe(false);
   });
 
   test('should handle missing schema reference gracefully', () => {
@@ -702,8 +701,8 @@ describe('refsHelper - findAllUsedRefs', () => {
 
     findAllUsedRefs(spec, defaultOptions, refs);
 
-    assert.strictEqual(refs.size, 0);
-    assert(!refs.has('NonExistentSchema'));
-    assert(!refs.has('ExistingSchema'));
+    expect(refs.size).toBe(0);
+    expect(refs.has('NonExistentSchema')).toBe(false);
+    expect(refs.has('ExistingSchema')).toBe(false);
   });
 });

@@ -1,6 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
-import fs from 'node:fs';
+import { test, describe, expect } from 'bun:test';
 
 import { runCodeGenerator } from '../src/index';
 import type { FullAppOptions, Template } from '../src/types';
@@ -24,12 +22,12 @@ describe('petstore snapshots', () => {
       const [generatedCode] = await runCodeGenerator(parameters);
 
       if (process.env.UPDATE_SNAPSHOTS) {
-        fs.writeFileSync(snapshotFile, generatedCode, 'utf8');
+        await Bun.file(snapshotFile).write(generatedCode);
         // No need to assert anything when updating snapshots
       } else {
-        const existingSnapshot = fs.readFileSync(snapshotFile, 'utf8');
+        const existingSnapshot = await Bun.file(snapshotFile).text();
 
-        assert.strictEqual(existingSnapshot, generatedCode);
+        expect(existingSnapshot).toBe(generatedCode);
       }
     });
   }

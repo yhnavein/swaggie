@@ -10,7 +10,8 @@
     "sourceMap": false,
     "newLine": "lf",
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["bun-types"]
   },
   "exclude": ["node_modules", "dist", "coverage", "test/snapshots"]
 }

@@ -1,21 +1,20 @@
-import { test, describe, beforeEach } from 'node:test';
-import assert from 'node:assert';
-import { MockAgent, setGlobalDispatcher } from 'undici';
+import { test, describe, beforeEach, expect, spyOn, mock } from 'bun:test';
 
 import { runCodeGenerator, applyConfigFile } from './';
-import { mockRequest } from '../test/test.utils';
+import { mockRequestWithFile } from '../test/test.utils';
+
 import type { CliOptions } from './types';
 
-describe('runCodeGenerator', () => {
-  let mockAgent: MockAgent;
+// Mock the undici module at the top level
+const mockRequest = mock();
 
+mock.module('undici', () => ({
+  request: mockRequest,
+}));
+
+describe('runCodeGenerator', () => {
   beforeEach(() => {
-    // Create a new MockAgent
-    mockAgent = new MockAgent();
-    // Make sure that we don't actually make real requests
-    mockAgent.disableNetConnect();
-    // Set the mocked agent as the global dispatcher
-    setGlobalDispatcher(mockAgent);
+    mockRequest.mockReset();
   });
 
   test('fails with no parameters provided', async () => {
@@ -23,9 +22,9 @@ describe('runCodeGenerator', () => {
 
     try {
       await runCodeGenerator(parameters);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.message.includes('You need to provide'));
+      expect(e.message).toContain('You need to provide');
     }
   });
 
@@ -36,9 +35,9 @@ describe('runCodeGenerator', () => {
 
     try {
       await runCodeGenerator(parameters);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.message.includes('You need to provide'));
+      expect(e.message).toContain('You need to provide');
     }
   });
 
@@ -50,9 +49,9 @@ describe('runCodeGenerator', () => {
 
     try {
       await runCodeGenerator(parameters);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.message.includes('You need to provide'));
+      expect(e.message).toContain('You need to provide');
     }
   });
 
@@ -63,9 +62,9 @@ describe('runCodeGenerator', () => {
 
     try {
       await runCodeGenerator(parameters);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.message.includes('You need to provide'));
+      expect(e.message).toContain('You need to provide');
     }
   });
 
@@ -76,7 +75,7 @@ describe('runCodeGenerator', () => {
     };
 
     const conf = await runCodeGenerator(parameters);
-    assert(conf);
+    expect(conf).toBeDefined();
   });
 
   test('fails when wrong --config provided', async () => {
@@ -86,9 +85,9 @@ describe('runCodeGenerator', () => {
 
     try {
       await runCodeGenerator(parameters);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.toString().includes('Could not correctly load config file'));
+      expect(e.message).toContain('Could not correctly load config file');
     }
   });
 
@@ -99,15 +98,15 @@ describe('runCodeGenerator', () => {
 
     try {
       await runCodeGenerator(parameters);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.toString().includes('Could not correctly load config file'));
+      expect(e.message).toContain('Could not correctly load config file');
     }
   });
 
   test('works with proper --config provided', async () => {
-    mockRequest(
-      mockAgent,
+    await mockRequestWithFile(
+      mockRequest,
       'https://raw.githubusercontent.com/readmeio/oas-examples/refs/heads/main/3.0/json/petstore.json',
       'petstore-v3.json'
     );
@@ -118,10 +117,10 @@ describe('runCodeGenerator', () => {
 
     try {
       const res = await runCodeGenerator(parameters);
-      assert(res);
+      expect(res).toBeDefined();
     } catch (e) {
       console.log(e);
-      assert(e.toString().includes('Could not correctly load config file'));
+      expect(e.message).toContain('Could not correctly load config file');
     }
   });
 });
@@ -132,12 +131,12 @@ describe('applyConfigFile', () => {
 
     const conf = await applyConfigFile(parameters);
 
-    assert(conf);
-    assert.deepStrictEqual(conf.queryParamsSerialization, {
+    expect(conf).toBeDefined();
+    expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'repeat',
       allowDots: true,
     });
-    assert.strictEqual(conf.template, 'axios');
+    expect(conf.template).toBe('axios');
   });
 
   test('should load configuration from config file', async () => {
@@ -147,17 +146,17 @@ describe('applyConfigFile', () => {
 
     const conf = await applyConfigFile(parameters);
 
-    assert(conf);
-    assert.strictEqual(conf.baseUrl, 'https://google.pl');
-    assert.strictEqual(
+    expect(conf).toBeDefined();
+    expect(conf.baseUrl).toBe('https://google.pl');
+    expect(
       conf.src,
       'https://raw.githubusercontent.com/readmeio/oas-examples/refs/heads/main/3.0/json/petstore.json'
     );
-    assert.deepStrictEqual(conf.queryParamsSerialization, {
+    expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'repeat',
       allowDots: true,
     });
-    assert.strictEqual(conf.template, 'xior');
+    expect(conf.template).toBe('xior');
   });
 
   test('should treat inline parameters with a higher priority', async () => {
@@ -172,11 +171,11 @@ describe('applyConfigFile', () => {
 
     const conf = await applyConfigFile(parameters);
 
-    assert(conf);
-    assert.strictEqual(conf.baseUrl, 'https://wp.pl');
-    assert.strictEqual(conf.src, './test/petstore-v3.yml');
-    assert.strictEqual(conf.template, 'fetch');
-    assert.deepStrictEqual(conf.queryParamsSerialization, {
+    expect(conf).toBeDefined();
+    expect(conf.baseUrl).toBe('https://wp.pl');
+    expect(conf.src).toBe('./test/petstore-v3.yml');
+    expect(conf.template).toBe('fetch');
+    expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'indices',
       allowDots: false,
     });

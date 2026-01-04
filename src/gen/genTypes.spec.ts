@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
 import generateTypes from './genTypes';
@@ -15,13 +14,13 @@ describe('generateTypes', () => {
   test('should handle empty components properly', () => {
     const res = generateTypes(getDocument({ components: {} }), opts, false);
 
-    assert.strictEqual(res, '');
+    expect(res).toBe('');
   });
 
   test('should handle empty components schemas properly', () => {
     const res = generateTypes(getDocument({ components: { schemas: {} } }), opts, false);
 
-    assert.strictEqual(res, '');
+    expect(res).toBe('');
   });
 
   test('should handle schema with reference only', () => {

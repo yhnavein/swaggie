@@ -1,91 +1,86 @@
-import { test, describe, beforeEach } from 'node:test';
-import assert from 'node:assert';
-import { MockAgent, setGlobalDispatcher } from 'undici';
-
+import { test, describe, beforeEach, expect, mock } from 'bun:test';
 import { loadSpecDocument } from './documentLoader';
-import { mockRequest } from '../../test/test.utils';
+import { mockRequestWithContent, mockRequestWithFile } from '../../test/test.utils';
 
-// URLs are not used to fetch anything. We are faking responses through SinonJS
+// URLs are not used to fetch anything. We are mocking the undici.request function
 const petstore3 = {
   json: 'https://petstore.swagger.io/v3/swagger.json',
   yaml: 'https://petstore.swagger.io/v3/swagger.yaml',
 };
 
-describe('loadSpecDocument', () => {
-  let mockAgent: MockAgent;
+// Mock the undici module at the top level
+const mockRequest = mock();
 
+mock.module('undici', () => ({
+  request: mockRequest,
+}));
+
+describe('loadSpecDocument', () => {
   beforeEach(() => {
-    // Create a new MockAgent
-    mockAgent = new MockAgent();
-    // Make sure that we don't actually make real requests
-    mockAgent.disableNetConnect();
-    // Set the mocked agent as the global dispatcher
-    setGlobalDispatcher(mockAgent);
+    mockRequest.mockReset();
   });
 
   test('should resolve a JSON spec from url', async () => {
-    mockRequest(mockAgent, petstore3.json, 'petstore-v3.json');
+    await mockRequestWithFile(mockRequest, petstore3.json, 'petstore-v3.json');
 
     const spec = await loadSpecDocument(petstore3.json);
-    assert(spec);
-    assert(spec.paths);
+    expect(spec).toBeDefined();
+    expect(spec.paths).toBeDefined();
   });
 
   test('should resolve a YAML spec from url', async () => {
-    mockRequest(mockAgent, petstore3.yaml, 'petstore-v3.yml');
+    await mockRequestWithFile(mockRequest, petstore3.yaml, 'petstore-v3.yml');
 
     const spec = await loadSpecDocument(petstore3.yaml);
-    assert(spec);
-    assert(spec.paths);
+    expect(spec).toBeDefined();
+    expect(spec.paths).toBeDefined();
   });
 
   test('should resolve a YAML spec from an extensionless url', async () => {
     const urlWithoutExtension = petstore3.yaml.replace('.yaml', '');
-    mockRequest(mockAgent, urlWithoutExtension, 'petstore-v3.yml');
+    await mockRequestWithFile(mockRequest, urlWithoutExtension, 'petstore-v3.yml');
 
     const spec = await loadSpecDocument(urlWithoutExtension);
-    assert(spec);
-    assert(spec.paths);
+    expect(spec).toBeDefined();
+    expect(spec.paths).toBeDefined();
   });
 
   test('should resolve a JSON spec from an extensionless url', async () => {
     const urlWithoutExtension = petstore3.json.replace('.json', '');
-    mockRequest(mockAgent, urlWithoutExtension, 'petstore-v3.json');
+    await mockRequestWithFile(mockRequest, urlWithoutExtension, 'petstore-v3.json');
 
     const spec = await loadSpecDocument(urlWithoutExtension);
-    assert(spec);
-    assert(spec.paths);
+    expect(spec).toBeDefined();
+    expect(spec.paths).toBeDefined();
   });
 
   test('should resolve a YAML spec from local file', async () => {
     const path = `${__dirname}/../../test/petstore-v3.yml`;
     const spec = await loadSpecDocument(path);
-    assert(spec);
-    assert(spec.paths);
+    expect(spec).toBeDefined();
+    expect(spec.paths).toBeDefined();
   });
 
   test('should handle nonexistent local file', async () => {
     const path = `${__dirname}/../../test/nonexistent.yml`;
-    
+
     try {
       await loadSpecDocument(path);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e.message.includes('ENOENT') || e.message.includes('no such file'));
+      expect(e.message.includes('ENOENT') || e.message.includes('no such file')).toBe(true);
     }
   });
 
   test('should handle malformed JSON file', async () => {
     const malformedUrl = 'https://example.com/malformed.json';
-    mockAgent.get('https://example.com').intercept({
-      path: '/malformed.json',
-    }).reply(200, '{"invalid": json}');
+    mockRequestWithContent(mockRequest, malformedUrl, '{"invalid": json}');
 
     try {
       await loadSpecDocument(malformedUrl);
-      assert.fail('Expected error to be thrown');
+      throw new Error('Expected error to be thrown');
     } catch (e) {
-      assert(e instanceof SyntaxError);
+      expect(e instanceof SyntaxError).toBe(true);
     }
   });
 
@@ -97,6 +92,6 @@ describe('loadSpecDocument', () => {
     };
 
     const spec = await loadSpecDocument(mockSpec);
-    assert.deepStrictEqual(spec, mockSpec);
+    expect(spec).toEqual(mockSpec);
   });
 });
