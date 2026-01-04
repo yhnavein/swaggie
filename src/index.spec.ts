@@ -111,13 +111,9 @@ describe('runCodeGenerator', () => {
       config: './test/sample-config.json',
     };
 
-    try {
-      const res = await runCodeGenerator(parameters);
-      expect(res).toBeDefined();
-    } catch (e) {
-      console.log(e);
-      expect(e.message).toContain('Could not correctly load config file');
-    }
+    expect(async () => {
+      await runCodeGenerator(parameters);
+    }).not.toThrow('Could not correctly load config file');
   });
 });
 
