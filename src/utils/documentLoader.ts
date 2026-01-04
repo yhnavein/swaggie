@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import YAML from 'js-yaml';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
-import { request } from 'undici';
 
 /**
  * Function that loads an OpenAPI document from a path or URL
@@ -25,8 +24,11 @@ function loadFile(src: string): Promise<OA3.Document | any> {
 }
 
 async function loadFromUrl(url: string) {
-  const { body } = await request(url);
-  const contents = await body.text();
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load API from '${url}': ${response.statusText}`);
+  }
+  const contents = await response.text();
   return parseFileContents(contents, url);
 }
 

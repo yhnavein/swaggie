@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getOperations } from './operations';
@@ -10,7 +9,7 @@ describe('getOperations', () => {
   test('should handle empty operation list', () => {
     const res = getOperations(getDocument());
 
-    assert.strictEqual(res.length, 0);
+    expect(res.length).toBe(0);
   });
 
   test('should handle one operation list', () => {
@@ -43,7 +42,7 @@ describe('getOperations', () => {
         tags: ['System'],
       },
     ];
-    assert.deepStrictEqual(res, validResp);
+    expect(res).toEqual(validResp);
   });
 
   test('should handle empty operationId or tags', () => {
@@ -103,7 +102,7 @@ describe('getOperations', () => {
         responses: {},
       },
     ];
-    assert.deepStrictEqual(res, validResp);
+    expect(res).toEqual(validResp);
   });
 
   test('should handle inheritance of parameters', () => {
@@ -200,7 +199,7 @@ describe('getOperations', () => {
         responses: {},
       },
     ];
-    assert.deepStrictEqual(res, validResp);
+    expect(res).toEqual(validResp);
   });
 
   test('should handle valid referenced parameters', () => {
@@ -313,6 +312,6 @@ describe('getOperations', () => {
         responses: {},
       },
     ];
-    assert.deepStrictEqual(res, validResp);
+    expect(res).toEqual(validResp);
   });
 });

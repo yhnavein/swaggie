@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import {
@@ -11,6 +10,7 @@ import {
 } from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions } from '../../test/test.utils';
+import { IBodyParam } from './types';
 
 describe('prepareOperations', () => {
   const opts = getClientOptions();
@@ -57,32 +57,26 @@ describe('prepareOperations', () => {
 
       const [res] = prepareOperations(ops, opts);
 
-      assert.strictEqual(res.name, 'getPetById');
-      assert.strictEqual(res.method, 'GET');
-      assert.strictEqual(res.body, null);
-      assert.strictEqual(res.returnType, 'unknown');
+      expect(res.name).toBe('getPetById');
+      expect(res.method).toBe('GET');
+      expect(res.body).toBeNull();
+      expect(res.returnType).toBe('unknown');
 
       const headerParam = res.headers.pop();
-      assert.strictEqual(headerParam.name, 'orgID');
-      assert.strictEqual(headerParam.originalName, 'Org-ID');
-      assert.strictEqual(headerParam.type, 'string');
-      assert.strictEqual(headerParam.optional, false);
+      expect(headerParam.name).toBe('orgID');
+      expect(headerParam.originalName).toBe('Org-ID');
+      expect(headerParam.type).toBe('string');
+      expect(headerParam.optional).toBe(false);
 
       const queryParam = res.query.pop();
-      assert.strictEqual(queryParam.name, 'orgType');
-      assert.strictEqual(queryParam.originalName, 'OrgType');
-      assert.strictEqual(queryParam.type, 'string');
-      assert.strictEqual(queryParam.optional, true);
+      expect(queryParam.name).toBe('orgType');
+      expect(queryParam.originalName).toBe('OrgType');
+      expect(queryParam.type).toBe('string');
+      expect(queryParam.optional).toBe(true);
 
-      assert.strictEqual(res.parameters.length, 3);
-      assert.deepStrictEqual(
-        res.parameters.map((p) => p.name),
-        ['orgID', 'orgType', 'petId']
-      );
-      assert.deepStrictEqual(
-        res.parameters.map((p) => p.skippable ?? false),
-        [false, true, true]
-      );
+      expect(res.parameters.length).toBe(3);
+      expect(res.parameters.map((p) => p.name)).toEqual(['orgID', 'orgType', 'petId']);
+      expect(res.parameters.map((p) => p.skippable ?? false)).toEqual([false, true, true]);
     });
 
     test('should escape parameter names that are used internally', () => {
@@ -134,10 +128,7 @@ describe('prepareOperations', () => {
 
       const [{ parameters }] = prepareOperations(ops, opts);
 
-      assert.deepStrictEqual(
-        parameters.map((p) => p.name),
-        ['_url', '_config', '_axios', '_http']
-      );
+      expect(parameters.map((p) => p.name)).toEqual(['_url', '_config', '_axios', '_http']);
     });
 
     test('should handle empty parameters', () => {
@@ -161,8 +152,8 @@ describe('prepareOperations', () => {
 
       const [op1, op2] = prepareOperations(ops, opts);
 
-      assert.deepStrictEqual(op1.parameters, []);
-      assert.deepStrictEqual(op2.parameters, []);
+      expect(op1.parameters).toEqual([]);
+      expect(op2.parameters).toEqual([]);
     });
 
     test('should prepare URL correctly', () => {
@@ -194,9 +185,9 @@ describe('prepareOperations', () => {
 
       const [op1, op2, op3] = prepareOperations(ops, opts);
 
-      assert.strictEqual(op1.url, '/pet/${encodeURIComponent(`${petId}`)}');
-      assert.strictEqual(op2.url, '/users/${encodeURIComponent(`${userId}`)}/Wrong{/Path}');
-      assert.strictEqual(op3.url, '/users/{}/Wrong{');
+      expect(op1.url).toBe('/pet/${encodeURIComponent(`${petId}`)}');
+      expect(op2.url).toBe('/users/${encodeURIComponent(`${userId}`)}/Wrong{/Path}');
+      expect(op3.url).toBe('/users/{}/Wrong{');
     });
 
     test('should not mark parameters as skippable if there is required parameter after them', () => {
@@ -248,11 +239,8 @@ describe('prepareOperations', () => {
 
       const [{ parameters }] = prepareOperations(ops, opts);
 
-      assert.strictEqual(parameters.length, 4);
-      assert.deepStrictEqual(
-        parameters.map((p) => p.skippable ?? false),
-        [false, false, false, true]
-      );
+      expect(parameters.length).toBe(4);
+      expect(parameters.map((p) => p.skippable ?? false)).toEqual([false, false, false, true]);
     });
 
     describe('requestBody (JSON)', () => {
@@ -278,17 +266,17 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, opts);
-        const expectedBodyParam = {
+        const expectedBodyParam: IBodyParam = {
           contentType: 'json',
           name: 'body',
           optional: false,
           originalName: 'body',
           type: 'Pet',
-          original: ops[0].requestBody,
+          original: ops[0].requestBody as OA3.RequestBodyObject,
         };
 
-        assert.deepStrictEqual(op1.body, expectedBodyParam);
-        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
+        expect(op1.body).toEqual(expectedBodyParam);
+        expect(op1.parameters).toEqual([expectedBodyParam]);
       });
 
       type TestCase = {
@@ -355,18 +343,18 @@ describe('prepareOperations', () => {
           ];
 
           const [op1] = prepareOperations(ops, opts);
-          const expectedBodyParam = {
+          const expectedBodyParam: IBodyParam = {
             contentType: 'json',
             name: 'body',
             optional: true,
             skippable: true,
             originalName: 'body',
             type: expectedType,
-            original: ops[0].requestBody,
+            original: ops[0].requestBody as OA3.RequestBodyObject,
           };
 
-          assert.deepStrictEqual(op1.body, expectedBodyParam);
-          assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
+          expect(op1.body).toEqual(expectedBodyParam);
+          expect(op1.parameters).toEqual([expectedBodyParam]);
         });
       }
 
@@ -403,19 +391,19 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, opts);
-        const expectedBodyParam = {
+        const expectedBodyParam: IBodyParam = {
           contentType: 'json',
           name: 'petBody',
           optional: false,
           originalName: 'pet-body',
           type: 'Pet',
-          original: ops[0].requestBody,
+          original: ops[0].requestBody as OA3.RequestBodyObject,
         };
 
-        assert.deepStrictEqual(op1.body, expectedBodyParam);
-        assert.strictEqual(op1.parameters.length, 2);
-        assert.deepStrictEqual(op1.parameters[0], expectedBodyParam);
-        assert.strictEqual(op1.parameters[1].name, 'orgId');
+        expect(op1.body).toEqual(expectedBodyParam);
+        expect(op1.parameters.length).toBe(2);
+        expect(op1.parameters[0]).toEqual(expectedBodyParam);
+        expect(op1.parameters[1].name).toBe('orgId');
       });
 
       test('should support x-position attributes', () => {
@@ -470,7 +458,7 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, opts);
-        const expectedBodyParam = {
+        const expectedBodyParam: IBodyParam = {
           name: 'pet',
           optional: false,
           originalName: 'pet',
@@ -478,15 +466,12 @@ describe('prepareOperations', () => {
         };
 
         op1.body.original = undefined;
-        assert.strictEqual(op1.body.name, expectedBodyParam.name);
-        assert.strictEqual(op1.body.optional, expectedBodyParam.optional);
-        assert.strictEqual(op1.body.originalName, expectedBodyParam.originalName);
-        assert.strictEqual(op1.body.type, expectedBodyParam.type);
-        assert.strictEqual(op1.parameters.length, 4);
-        assert.deepStrictEqual(
-          op1.parameters.map((p) => p.name),
-          ['orgId', 'wild', 'pet', 'countryId']
-        );
+        expect(op1.body.name).toBe(expectedBodyParam.name);
+        expect(op1.body.optional).toBe(expectedBodyParam.optional);
+        expect(op1.body.originalName).toBe(expectedBodyParam.originalName);
+        expect(op1.body.type).toBe(expectedBodyParam.type);
+        expect(op1.parameters.length).toBe(4);
+        expect(op1.parameters.map((p) => p.name)).toEqual(['orgId', 'wild', 'pet', 'countryId']);
       });
     });
 
@@ -513,17 +498,17 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, opts);
-        const expectedBodyParam = {
+        const expectedBodyParam: IBodyParam = {
           contentType: 'urlencoded',
           name: 'body',
           optional: false,
           originalName: 'body',
           type: 'Pet',
-          original: ops[0].requestBody,
+          original: ops[0].requestBody as OA3.RequestBodyObject,
         };
 
-        assert.deepStrictEqual(op1.body, expectedBodyParam);
-        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
+        expect(op1.body).toEqual(expectedBodyParam);
+        expect(op1.parameters).toEqual([expectedBodyParam]);
       });
     });
 
@@ -551,17 +536,17 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, opts);
-        const expectedBodyParam = {
+        const expectedBodyParam: IBodyParam = {
           contentType: 'binary',
           name: 'body',
           optional: false,
           originalName: 'body',
           type: 'File',
-          original: ops[0].requestBody,
+          original: ops[0].requestBody as OA3.RequestBodyObject,
         };
 
-        assert.deepStrictEqual(op1.body, expectedBodyParam);
-        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
+        expect(op1.body).toEqual(expectedBodyParam);
+        expect(op1.parameters).toEqual([expectedBodyParam]);
       });
     });
 
@@ -597,17 +582,17 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, opts);
-        const expectedBodyParam = {
+        const expectedBodyParam: IBodyParam = {
           contentType: 'form-data',
           name: 'body',
           optional: false,
           originalName: 'body',
           type: 'FormData',
-          original: ops[0].requestBody,
+          original: ops[0].requestBody as OA3.RequestBodyObject,
         };
 
-        assert.deepStrictEqual(op1.body, expectedBodyParam);
-        assert.deepStrictEqual(op1.parameters, [expectedBodyParam]);
+        expect(op1.body).toEqual(expectedBodyParam);
+        expect(op1.parameters).toEqual([expectedBodyParam]);
       });
     });
   });
@@ -640,8 +625,8 @@ describe('prepareOperations', () => {
 
       const operations = prepareOperations(ops, opts);
 
-      assert.deepStrictEqual(operations.length, 1);
-      assert.deepStrictEqual(operations[0].name, 'getPetById');
+      expect(operations.length).toBe(1);
+      expect(operations[0].name).toBe('getPetById');
     });
   });
 });
@@ -656,7 +641,7 @@ describe('fixDuplicateOperations', () => {
     test(`should handle ${input} as input`, () => {
       const res = fixDuplicateOperations(input);
 
-      assert.deepStrictEqual(res, expected);
+      expect(res).toEqual(expected);
     });
   }
 
@@ -675,7 +660,7 @@ describe('fixDuplicateOperations', () => {
     const res = fixDuplicateOperations(ops);
 
     // Basically it should be the same
-    assert.deepStrictEqual(res, ops);
+    expect(res).toEqual(ops);
   });
 
   test('handle 2 different operations', () => {
@@ -701,7 +686,7 @@ describe('fixDuplicateOperations', () => {
     const res = fixDuplicateOperations(ops);
 
     // Basically it should be the same
-    assert.deepStrictEqual(res, ops);
+    expect(res).toEqual(ops);
   });
 
   test('handle 2 operations with the same operationId', () => {
@@ -726,7 +711,7 @@ describe('fixDuplicateOperations', () => {
 
     const res = fixDuplicateOperations(ops);
 
-    assert.notStrictEqual(res[1].operationId, res[0].operationId);
+    expect(res[1].operationId).not.toBe(res[0].operationId);
   });
 
   // test('handle 3 operations with complex duplicate scenarios', () => {
@@ -793,7 +778,7 @@ describe('getOperationName', () => {
     test(`should handle ${JSON.stringify(input)}`, () => {
       const res = getOperationName(input.opId, input.group);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 });
@@ -814,7 +799,7 @@ describe('getParamName', () => {
     test(`should handle ${JSON.stringify(input)}`, () => {
       const res = getParamName(input);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 });
@@ -842,13 +827,13 @@ describe('getParams', () => {
 
     const [param1, param2] = getParams(originalParams, opts);
 
-    assert.strictEqual(param1.name, 'test1');
-    assert.strictEqual(param1.type, 'unknown');
-    assert.strictEqual(param1.optional, false);
+    expect(param1.name).toBe('test1');
+    expect(param1.type).toBe('unknown');
+    expect(param1.optional).toBe(false);
 
-    assert.strictEqual(param2.name, 'test2');
-    assert.strictEqual(param2.type, 'string');
-    assert.strictEqual(param2.optional, true);
+    expect(param2.name).toBe('test2');
+    expect(param2.type).toBe('string');
+    expect(param2.optional).toBe(true);
   });
 
   test('should filter out parameters with no name', () => {
@@ -873,7 +858,7 @@ describe('getParams', () => {
     });
 
     const paramList = getParams(originalParams, opts);
-    assert.strictEqual(paramList.length, 0);
+    expect(paramList.length).toBe(0);
   });
 
   test('should apply modifiers for parameters', () => {
@@ -913,16 +898,16 @@ describe('getParams', () => {
 
     const [param1, param2, param3] = getParams(originalParams, opts);
 
-    assert.strictEqual(param1.name, 'test1');
-    assert.strictEqual(param1.type, 'unknown');
-    assert.strictEqual(param1.optional, true);
+    expect(param1.name).toBe('test1');
+    expect(param1.type).toBe('unknown');
+    expect(param1.optional).toBe(true);
 
-    assert.strictEqual(param2.name, 'test2');
-    assert.strictEqual(param2.originalName, 'test 2');
-    assert.strictEqual(param2.type, 'string');
-    assert.strictEqual(param2.optional, false);
+    expect(param2.name).toBe('test2');
+    expect(param2.originalName).toBe('test 2');
+    expect(param2.type).toBe('string');
+    expect(param2.optional).toBe(false);
 
-    assert.strictEqual(param3, undefined);
+    expect(param3).toBeUndefined();
   });
 
   test('should ignore unrecognized modifiers', () => {
@@ -962,18 +947,18 @@ describe('getParams', () => {
 
     const [param1, param2, param3] = getParams(originalParams, opts);
 
-    assert.strictEqual(param1.name, 'test1');
-    assert.strictEqual(param1.type, 'unknown');
-    assert.strictEqual(param1.optional, false);
+    expect(param1.name).toBe('test1');
+    expect(param1.type).toBe('unknown');
+    expect(param1.optional).toBe(false);
 
-    assert.strictEqual(param2.name, 'test2');
-    assert.strictEqual(param2.originalName, 'test 2');
-    assert.strictEqual(param2.type, 'string');
-    assert.strictEqual(param2.optional, false);
+    expect(param2.name).toBe('test2');
+    expect(param2.originalName).toBe('test 2');
+    expect(param2.type).toBe('string');
+    expect(param2.optional).toBe(false);
 
-    assert.strictEqual(param3.name, 'test3');
-    assert.strictEqual(param3.type, 'number');
-    assert.strictEqual(param3.optional, false);
+    expect(param3.name).toBe('test3');
+    expect(param3.type).toBe('number');
+    expect(param3.optional).toBe(false);
   });
 
   // It's because path parameters are by default required. And changing it
@@ -999,9 +984,9 @@ describe('getParams', () => {
 
     const [param] = getParams(originalParams, opts);
 
-    assert.strictEqual(param.name, 'test');
-    assert.strictEqual(param.type, 'string');
-    assert.strictEqual(param.optional, false);
+    expect(param.name).toBe('test');
+    expect(param.type).toBe('string');
+    expect(param.optional).toBe(false);
   });
 });
 

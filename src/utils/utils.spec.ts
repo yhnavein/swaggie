@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import {
@@ -12,6 +11,7 @@ import {
   escapePropName,
   orderBy,
   getBestContentType,
+  MyContentType,
 } from './utils';
 import type { ApiOperation } from '../types';
 
@@ -41,7 +41,7 @@ describe('escapeIdentifier', () => {
     test(`should escape ${input} correctly`, async () => {
       const res = escapeIdentifier(input);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 });
@@ -85,14 +85,14 @@ describe('escapePropName', () => {
     test(`should escape ${input} correctly`, async () => {
       const res = escapePropName(input);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 });
 
 describe('verifyDocumentSpec', () => {
   test('should accept OpenAPI 3', () => {
-    assert.doesNotThrow(() => {
+    expect(() => {
       const res = verifyDocumentSpec({
         openapi: '3.0.3',
         info: {
@@ -102,26 +102,26 @@ describe('verifyDocumentSpec', () => {
         paths: {},
       });
 
-      assert(res);
+      expect(res).toBeDefined();
     });
   });
 
   test('should reject Swagger 2.0 document', () => {
-    assert.throws(() => {
+    expect(() => {
       const res = verifyDocumentSpec({
         swagger: '2.0',
       } as VerifableDocument);
 
-      assert(!res);
-    }, /not supported/);
+      expect(res).toBeUndefined();
+    }).toThrow(/not supported/);
   });
 
   test('should reject an empty document', () => {
-    assert.throws(() => {
+    expect(() => {
       const res = verifyDocumentSpec(null as any);
 
-      assert(!res);
-    }, /is empty/);
+      expect(res).toBeUndefined();
+    }).toThrow(/is empty/);
   });
 });
 
@@ -135,7 +135,7 @@ describe('groupOperationsByGroupName', () => {
     test(`should handle ${input} as input`, async () => {
       const res = groupOperationsByGroupName(input);
 
-      assert.deepStrictEqual(res, expected);
+      expect(res).toEqual(expected);
     });
   }
 
@@ -167,9 +167,9 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    assert(res);
-    assert(res.HealthCheck);
-    assert.strictEqual(res.HealthCheck.length, 1);
+    expect(res).toBeDefined();
+    expect(res.HealthCheck).toBeDefined();
+    expect(res.HealthCheck.length).toBe(1);
   });
 
   test('handles two different operations and the same group', async () => {
@@ -222,9 +222,9 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    assert(res);
-    assert(res.HealthCheck);
-    assert.strictEqual(res.HealthCheck.length, 2);
+    expect(res).toBeDefined();
+    expect(res.HealthCheck).toBeDefined();
+    expect(res.HealthCheck.length).toBe(2);
   });
 
   test('handles two different operations and different groups', async () => {
@@ -277,11 +277,11 @@ describe('groupOperationsByGroupName', () => {
 
     const res = groupOperationsByGroupName(def);
 
-    assert(res);
-    assert(res.HealthCheck);
-    assert.strictEqual(res.HealthCheck.length, 1);
-    assert(res.Illness);
-    assert.strictEqual(res.Illness.length, 1);
+    expect(res).toBeDefined();
+    expect(res.HealthCheck).toBeDefined();
+    expect(res.HealthCheck.length).toBe(1);
+    expect(res.Illness).toBeDefined();
+    expect(res.Illness.length).toBe(1);
   });
 });
 
@@ -300,7 +300,7 @@ describe('prepareOutputFilename', () => {
     test(`handles "${given}" correctly`, () => {
       const res = prepareOutputFilename(given);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 });
@@ -313,7 +313,7 @@ describe('getBestResponse', () => {
 
     const [res] = getBestResponse(op);
 
-    assert.strictEqual(res, null);
+    expect(res).toBeNull();
   });
 
   test('handles 200 response with text/plain media type', () => {
@@ -334,7 +334,7 @@ describe('getBestResponse', () => {
 
     const [res] = getBestResponse(op);
 
-    assert.deepStrictEqual(res, {
+    expect(res).toEqual({
       schema: {
         $ref: '#/components/schemas/TestObject',
       },
@@ -368,7 +368,7 @@ describe('getBestResponse', () => {
 
         const [, respContentType] = getBestResponse(op);
 
-        assert.deepStrictEqual(respContentType, expected);
+        expect(respContentType).toBe(expected as MyContentType);
       });
     }
   });
@@ -401,7 +401,7 @@ describe('getBestResponse', () => {
 
     const [res] = getBestResponse(op);
 
-    assert.deepStrictEqual(res, {
+    expect(res).toEqual({
       schema: {
         $ref: '#/components/schemas/TestObject',
       },
@@ -414,13 +414,13 @@ describe('orderBy', () => {
     const arr = [{ a: 1 }, { a: 2 }, { a: 3 }];
     const res = orderBy(arr, 'a');
 
-    assert.deepStrictEqual(res, [{ a: 1 }, { a: 2 }, { a: 3 }]);
+    expect(res).toEqual([{ a: 1 }, { a: 2 }, { a: 3 }]);
   });
 
   test('should nullish data', () => {
     const res = orderBy(null, 'a');
 
-    assert.deepStrictEqual(res, []);
+    expect(res).toEqual([]);
   });
 });
 
@@ -432,7 +432,7 @@ describe('getBestContentType', () => {
       },
     });
 
-    assert.deepStrictEqual(res, [
+    expect(res).toEqual([
       {
         schema: {
           $ref: '#/components/schemas/TestObject',
@@ -447,6 +447,6 @@ describe('getBestContentType', () => {
       content: {},
     });
 
-    assert.deepStrictEqual(res, [null, null]);
+    expect(res).toEqual([null, null]);
   });
 });

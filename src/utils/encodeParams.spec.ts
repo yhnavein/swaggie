@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 
 /** This file tests a code that will be generated and is hardcoded into the templates */
 
@@ -194,7 +193,7 @@ describe('encodeParams', () => {
         test(`should handle ${JSON.stringify(input)}`, () => {
           const res = encodeParams(input, null, el.opts);
 
-          assert.strictEqual(res, exp);
+          expect(res).toBe(exp);
         });
       }
     });

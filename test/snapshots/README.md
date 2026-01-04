@@ -9,4 +9,4 @@ Do not make any manual changes in this directory.
 
 ## Updating snapshots
 
-To update the snapshots, run `UPDATE_SNAPSHOTS=1 yarn test`
+To update the snapshots, run `UPDATE_SNAPSHOTS=1 bun test`

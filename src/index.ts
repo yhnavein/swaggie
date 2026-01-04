@@ -55,7 +55,7 @@ export async function applyConfigFile(options: Partial<FullAppOptions>): Promise
     return prepareAppOptions({ ...parsedConfig, ...options });
   } catch (e) {
     return Promise.reject(
-      'Could not correctly load config file. It does not exist or you cannot access it'
+      new Error('Could not correctly load config file. It does not exist or you cannot access it')
     );
   }
 }

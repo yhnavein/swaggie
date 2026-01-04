@@ -9,7 +9,7 @@ api.config.json
 yarn.lock
 .prettierrc
 .editorconfig
-yarn-error.log
+bun.lock
 package-lock.json
 swaggie.svg
 

@@ -1,8 +1,7 @@
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
-import { test, describe, beforeEach, afterEach } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, beforeEach, afterEach, expect } from 'bun:test';
 
 import { loadAllTemplateFiles, renderFile } from './templateManager';
 
@@ -10,21 +9,19 @@ const GOOD_FILE = 'client.ejs';
 
 describe('loadAllTemplateFiles', () => {
   test('should handle loading wrong template', () => {
-    assert.throws(() => {
-      loadAllTemplateFiles('non-existent');
-    }, /Could not find/);
+    expect(() => loadAllTemplateFiles('non-existent')).toThrow(/Could not find/);
   });
 
   test('should handle empty template name', () => {
-    assert.throws(() => {
+    expect(() => {
       loadAllTemplateFiles('');
-    }, /No template/);
+    }).toThrow(/No template/);
   });
 
   test('should handle null template', () => {
-    assert.throws(() => {
+    expect(() => {
       loadAllTemplateFiles(null);
-    }, /No template/);
+    }).toThrow(/No template/);
   });
 });
 
@@ -41,7 +38,7 @@ describe('render', () => {
       operations: [],
     });
 
-    assert(templateFunction.includes('testClient'));
+    expect(templateFunction).toContain('testClient');
   });
 
   test('should render template that is complex (multiple levels of includes)', () => {
@@ -65,8 +62,8 @@ describe('render', () => {
       ],
     });
 
-    assert(templateFunction.includes('testClient'));
-    assert(templateFunction.includes('TestName'));
+    expect(templateFunction).toContain('testClient');
+    expect(templateFunction).toContain('TestName');
   });
 });
 
@@ -94,7 +91,7 @@ describe('custom templates', () => {
       operations: [],
     });
 
-    assert(templateFunction.includes('testClient'));
+    expect(templateFunction).toContain('testClient');
   });
 
   afterEach(() => {

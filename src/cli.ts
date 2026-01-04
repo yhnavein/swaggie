@@ -2,6 +2,8 @@
 
 import { bold, cyan, red } from 'nanocolors';
 import { Command, Option } from 'commander';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { type CodeGenResult, runCodeGenerator } from './index';
 import type { FullAppOptions } from './types';
@@ -11,9 +13,11 @@ const arrayFormatOption = new Option(
   'Determines how arrays should be serialized'
 ).choices(['indices', 'repeat', 'brackets']);
 
+const packageJson = readPackageJson();
+
 const program = new Command();
 program
-  .version(require('../package.json').version)
+  .version(packageJson.version)
   .option(
     '-c, --config <path>',
     'The path to the configuration JSON file. You can do all the set up there instead of parameters in the CLI',
@@ -72,4 +76,12 @@ function error(e: any) {
   const msg = e instanceof Error ? e.message : e;
   console.error(red(msg));
   process.exit(1);
+}
+
+function readPackageJson() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+  } catch (e) {
+    throw new Error('Could not read package.json file');
+  }
 }

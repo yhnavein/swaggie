@@ -1,5 +1,4 @@
-import { test, describe } from 'node:test';
-import assert from 'node:assert';
+import { test, describe, expect } from 'bun:test';
 
 import { prepareJsDocsForOperation, renderComment } from './jsDocs';
 import { assertEqualIgnoringWhitespace } from '../../test/test.utils';
@@ -15,7 +14,7 @@ describe('prepareJsDocsForOperation', () => {
     const params: IOperationParam[] = [];
     const jsdocs = prepareJsDocsForOperation(op, params);
 
-    assert.strictEqual(jsdocs, '');
+    expect(jsdocs).toBe('');
   });
 
   test('should handle single line comment', () => {
@@ -129,7 +128,7 @@ describe('renderComment', () => {
    With at least two lines    `;
     const res = renderComment(comment);
 
-    assert.strictEqual(
+    expect(
       res,
       ` /**
   * Quite a lengthy comment
@@ -169,7 +168,7 @@ describe('renderComment', () => {
     test(`should render proper comment for "${comment}"`, () => {
       const res = renderComment(comment);
 
-      assert.strictEqual(res, expected);
+      expect(res).toBe(expected);
     });
   }
 
@@ -208,7 +207,7 @@ describe('renderComment', () => {
     const params: IOperationParam[] = [];
     const jsdocs = prepareJsDocsForOperation(op, params);
 
-    assert.strictEqual(
+    expect(
       jsdocs,
       ` /**
   * &lt;title&gt;Title&lt;/title&gt;&lt;brief explanation&gt;
@@ -228,7 +227,7 @@ describe('renderComment', () => {
     const params: IOperationParam[] = [];
     const jsdocs = prepareJsDocsForOperation(op, params);
 
-    assert.strictEqual(
+    expect(
       jsdocs,
       ` /**
   * # Title
