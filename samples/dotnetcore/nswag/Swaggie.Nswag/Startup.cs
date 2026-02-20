@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 
 namespace Swaggie.Nswag;
 
@@ -22,21 +19,8 @@ public class Startup
   public void ConfigureServices(IServiceCollection services)
   {
     services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
-    JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-    {
-      // Automatically converts DotNetNames to jsFriendlyNames
-      ContractResolver = new CamelCasePropertyNamesContractResolver()
-    };
 
-    services.AddControllers()
-      .AddNewtonsoftJson(x =>
-      {
-        // Ignores potential reference loop problems
-        x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-        // Serializes dotnet enums to strings (you can remove it if you prefer numbers instead)
-        x.SerializerSettings.Converters.Add(new StringEnumConverter());
-      });
+    services.AddControllers();
 
     services.AddHttpContextAccessor();
 
