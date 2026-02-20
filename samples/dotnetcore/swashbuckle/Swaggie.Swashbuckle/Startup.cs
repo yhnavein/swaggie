@@ -26,11 +26,11 @@ public class Startup
   {
     services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
 
-        services.ConfigureHttpJsonOptions(opts =>
-        {
-            opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            opts.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
-        });
+    services.ConfigureHttpJsonOptions(opts =>
+    {
+      opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+      opts.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+    });
 
     services.AddControllers();
 
@@ -42,7 +42,7 @@ public class Startup
       services.AddSwaggerGen(c =>
       {
         c.SchemaGeneratorOptions.UseOneOfForPolymorphism = true;
-                c.SupportNonNullableReferenceTypes();
+        c.SupportNonNullableReferenceTypes();
         c.OperationFilter<FromQueryModelFilter>();
         c.SchemaFilter<XEnumNamesSchemaFilter>();
         c.CustomOperationIds(e =>
@@ -77,7 +77,7 @@ public class Startup
 
     if (!_isProduction)
     {
-      app.UseSwagger();
+      app.UseSwagger(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1; });
       app.UseSwaggerUI(c =>
       {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sample Api");

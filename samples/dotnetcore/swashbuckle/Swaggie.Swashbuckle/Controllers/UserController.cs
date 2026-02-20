@@ -13,7 +13,7 @@ public class UserController : Controller
 {
   [HttpGet("")]
   [Produces(typeof(IList<UserViewModel>))]
-  public IActionResult GetUsers([FromQuery] UserRole? role)
+  public IActionResult GetUsers([FromQuery]UserRole? role)
   {
     var allUsers = new[]
     {
@@ -36,28 +36,34 @@ public class UserController : Controller
 
   [HttpGet("filter")]
   [Produces(typeof(FilterTestResponse))]
-  public IActionResult TestFilters([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery, Required] Dictionary<string, int> someDict)
+  public IActionResult TestFilters([FromQuery(Name = "filter")]UserFilter? filter,
+    [FromQuery(Name = "secondFilter")]UserFilter? secondFilter,
+    [FromQuery, Required]Dictionary<string, int> someDict)
   {
     Console.WriteLine("filter: " + JsonConvert.SerializeObject(filter));
     Console.WriteLine("secondFilter: " + JsonConvert.SerializeObject(secondFilter));
     Console.WriteLine("someDict: " + JsonConvert.SerializeObject(someDict));
     var result = new FilterTestResponse
     {
-      filter = filter,
-      secondFilter = secondFilter,
-      someDict = someDict
+      filter = filter, secondFilter = secondFilter, someDict = someDict
     };
 
     return Ok(result);
   }
 
+  /// <summary>
+  /// Creates new user
+  /// </summary>
   [HttpPost("")]
   [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status201Created)]
-  public IActionResult CreateUser([FromBody, Required] UserViewModel user)
+  public IActionResult CreateUser([FromBody, Required]UserViewModel user)
   {
     return Created("some-url", user);
   }
 
+  /// <summary>
+  /// Uploads user avatar
+  /// </summary>
   [HttpPost("avatar")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -70,11 +76,14 @@ public class UserController : Controller
     return Ok($"File uploaded successfully. Size: {file?.Length ?? 0} bytes");
   }
 
+  /// <summary>
+  /// Updates user properties
+  /// </summary>
   [HttpPut("properties")]
   [Consumes("application/x-www-form-urlencoded")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public IActionResult UpdateUserProperties([FromForm, Required] UserUpdateModel userUpdate)
+  public IActionResult UpdateUserProperties([FromForm, Required]UserUpdateModel userUpdate)
   {
     Console.WriteLine("userUpdate: " + JsonConvert.SerializeObject(userUpdate));
 
@@ -86,7 +95,7 @@ public class UserController : Controller
   [Consumes("multipart/form-data")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public IActionResult UpdateUserProfile([FromForm, Required] UserProfileUpdateModel profileUpdate)
+  public IActionResult UpdateUserProfile([FromForm, Required]UserProfileUpdateModel profileUpdate)
   {
     Console.WriteLine("profileUpdate: " + JsonConvert.SerializeObject(profileUpdate));
 
@@ -96,7 +105,7 @@ public class UserController : Controller
 
   [HttpDelete("{id:long}")]
   [Produces(typeof(void))]
-  public IActionResult DeleteUser([FromRoute] long id)
+  public IActionResult DeleteUser([FromRoute]long id)
   {
     return NoContent();
   }
