@@ -390,6 +390,22 @@ export interface AuthenticationData {
               },
             },
           },
+          DeepNestedObject: {
+            type: 'object',
+            properties: {
+              'nested object': {
+                type: 'object',
+                properties: {
+                  'EC2 & ECS': {
+                    $ref: '#/components/schemas/Object.Name',
+                  },
+                  'Some/Strange + Names <=#$%&*?>': {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
         }),
         opts,
         false
@@ -399,7 +415,8 @@ export interface AuthenticationData {
         res,
         `export interface Authentication_Data { token?: string; obj?: Object_Name; }
 export interface Data_Object { token?: string; auth?: Authentication_Data; }
-export interface Object_Name { token?: string; data?: Data_Object; }`
+export interface Object_Name { token?: string; data?: Data_Object; }
+export interface DeepNestedObject { "nested object"?: { "EC2 & ECS"?: Object_Name; "Some/Strange + Names <=#$%&*?>"?: string; }; }`
       );
     });
   });
