@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import YAML from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 /**
@@ -41,7 +41,7 @@ function readLocalFile(filePath: string) {
 function parseFileContents(contents: string, path: string): object {
   // If the path ends with .yaml or .yml, parse as YAML
   if (/.ya?ml$/i.test(path)) {
-    return YAML.load(contents) as object;
+    return parseYaml(contents);
   }
   // If the path ends with .json, parse as JSON
   if (/.json$/i.test(path)) {
@@ -54,5 +54,5 @@ function parseFileContents(contents: string, path: string): object {
     return JSON.parse(contents);
   }
 
-  return YAML.load(contents) as object;
+  return parseYaml(contents);
 }
