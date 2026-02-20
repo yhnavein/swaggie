@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Generate TypeScript REST client code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
