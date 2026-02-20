@@ -181,6 +181,36 @@ describe('getTypeFromSchema', () => {
       }`
       );
     });
+
+    test('should process deep objects with special characters correctly', () => {
+      const schema: OA3.SchemaObject = {
+        type: 'object',
+        properties: {
+          deep: {
+            type: 'object',
+            properties: {
+              'EC2 & ECS': {
+                $ref: '#/components/schemas/User',
+              },
+              'Some/Strange + Names <=#$%&*?>': {
+                type: 'string',
+              },
+            },
+          },
+        },
+      };
+      const res = getTypeFromSchema(schema, opts);
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `{
+        deep?: {
+          "EC2 & ECS"?: User;
+          "Some/Strange + Names <=#$%&*?>"?: string;
+        };
+      }`
+      );
+    });
   });
 
   describe('enums', () => {

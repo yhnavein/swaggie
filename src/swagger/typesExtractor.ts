@@ -1,5 +1,6 @@
 import type { ClientOptions } from '../types';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
+import { escapePropName } from '../utils';
 
 /**
  * Converts a parameter object to a TypeScript type.
@@ -107,8 +108,9 @@ function getTypeFromObject(
     for (const prop of props) {
       const propDefinition = schema.properties[prop];
       const isRequired = required.includes(prop);
+      const safePropName = escapePropName(prop);
       result.push(
-        `${prop}${isRequired ? '' : '?'}: ${getTypeFromSchema(propDefinition, options)};`
+        `${safePropName}${isRequired ? '' : '?'}: ${getTypeFromSchema(propDefinition, options)};`
       );
     }
 
