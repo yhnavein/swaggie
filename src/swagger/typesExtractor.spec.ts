@@ -356,6 +356,25 @@ describe('getTypeFromSchema', () => {
         schema: { type: 'object', properties: { name: { type: 'string' } }, nullable: true },
         expected: '{ name?: string; } | null',
       },
+      {
+        schema: { nullable: true },
+        expected: 'unknown | null',
+      },
+      {
+        schema: { allOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+        expected: 'string & number | null',
+      },
+      {
+        schema: { oneOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+        expected: 'string | number | null',
+      },
+      {
+        schema: {
+          oneOf: [{ type: 'string' }, { type: 'number' }, { type: 'null' }],
+          nullable: true,
+        } as OA3.SchemaObject,
+        expected: 'string | number | null',
+      },
     ];
 
     for (const { schema, expected } of testCases) {
