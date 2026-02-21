@@ -295,7 +295,7 @@ describe('prepareOperations', () => {
             nullable: true,
             type: 'array',
           },
-          expectedType: 'number[]',
+          expectedType: 'number[] | null',
         },
         {
           schema: {

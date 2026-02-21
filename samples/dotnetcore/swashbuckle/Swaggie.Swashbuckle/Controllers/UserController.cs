@@ -111,68 +111,73 @@ public class UserController : Controller
   }
 }
 
-public class UserUpdateModel
+public record UserUpdateModel
 {
   public string Name { get; set; }
   public string Email { get; set; }
 }
 
-public class UserProfileUpdateModel
+public record UserProfileUpdateModel
 {
   public string Name { get; set; }
   public string Bio { get; set; }
   public IFormFile Avatar { get; set; }
 }
 
-public class UserViewModel
+public record UserViewModel
 {
+  [Required]
   public string Name { get; set; }
 
+  [Required]
   public long Id { get; set; }
 
+  [Required]
   public string Email { get; set; }
 
-  public UserRole Role { get; set; }
+  public UserRole? Role { get; set; }
 
-  [Required]
   public Dictionary<int, string> SomeDict { get; set; } = new();
 
   public PagedResult<string> AuditEvents { get; set; } = new();
 }
 
-public class UserFilter
+public record UserFilter
 {
   /// <summary>
   /// Name of the user. Can be partial name match
   /// </summary>
+  [Required]
   public string Name { get; set; }
 
   /// <summary>
   /// Ids of the users
   /// </summary>
-  public List<long> Ids { get; set; } = new();
+  public List<long>? Ids { get; set; } = new();
 
   /// <summary>
   /// User's email. Can be a partial match
   /// </summary>
-  public string Email { get; set; }
+  public string? Email { get; set; }
 
   /// <summary>
   /// Search by user role(s)
   /// </summary>
-  public List<UserRole> Roles { get; set; } = new();
+  public List<UserRole>? Roles { get; set; } = new();
 
-  public UserLog UserLog { get; set; } = new();
+  public UserLog? UserLog { get; set; } = new();
 }
 
-public class PagedResult<T>
+public record PagedResult<T>
 {
+  [Required]
   public IList<T> Items { get; set; }
 
+  [Required]
   public int TotalCount { get; set; }
 }
 
-public class UserLog
+public record UserLog
 {
   /// <summary>
   /// Who created user. Can be partial name match
@@ -197,9 +202,9 @@ public enum UserRole
   Guest = 2
 }
 
-public class FilterTestResponse
+public record FilterTestResponse
 {
   public UserFilter? filter { get; set; }
   public UserFilter? secondFilter { get; set; }
-  public Dictionary<string, int> someDict { get; set; }
+  public Dictionary<string, int>? someDict { get; set; }
 }

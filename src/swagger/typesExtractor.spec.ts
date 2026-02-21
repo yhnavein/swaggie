@@ -221,7 +221,7 @@ describe('getTypeFromSchema', () => {
       };
       const res = getTypeFromSchema(schema, opts);
 
-      assertEqualIgnoringWhitespace(res, `("Admin" | "User" | "Guest")`);
+      assertEqualIgnoringWhitespace(res, `"Admin" | "User" | "Guest"`);
     });
 
     test('should process numeric enums correctly', () => {
@@ -231,7 +231,7 @@ describe('getTypeFromSchema', () => {
       };
       const res = getTypeFromSchema(schema, opts);
 
-      assertEqualIgnoringWhitespace(res, '(1 | 2 | 3)');
+      assertEqualIgnoringWhitespace(res, '1 | 2 | 3');
     });
   });
 
@@ -295,6 +295,71 @@ describe('getTypeFromSchema', () => {
 
     for (const { schema, expected } of testCases) {
       test(`should ${JSON.stringify(schema)} match ${expected}`, async () => {
+        const res = getTypeFromSchema(schema, opts);
+
+        expect(res).toBe(expected);
+      });
+    }
+  });
+
+  describe('OpenAPI 3.0 nullable', () => {
+    type TestCase = {
+      schema: OA3.SchemaObject;
+      expected: string;
+    };
+    const testCases: TestCase[] = [
+      { schema: { type: 'array', items: {}, nullable: true }, expected: 'unknown[] | null' },
+      {
+        schema: { type: 'array', items: { $ref: '#/components/schemas/Item' }, nullable: true },
+        expected: 'Item[] | null',
+      },
+      {
+        schema: { type: 'array', items: { type: 'string' }, nullable: true },
+        expected: 'string[] | null',
+      },
+      {
+        schema: { type: 'array', items: { type: 'number' }, nullable: true },
+        expected: 'number[] | null',
+      },
+      {
+        schema: { type: 'array', items: { type: 'boolean', nullable: true }, nullable: true },
+        expected: '(boolean | null)[] | null',
+      },
+      {
+        schema: {
+          type: 'array',
+          items: { type: 'string', enum: ['Admin', 'User', 'Guest'], nullable: true },
+        },
+        expected: '("Admin" | "User" | "Guest" | null)[]',
+      },
+      {
+        schema: { type: 'boolean', nullable: true },
+        expected: 'boolean | null',
+      },
+      {
+        schema: { type: 'string', format: 'date-time', nullable: true },
+        expected: 'Date | null',
+      },
+      {
+        schema: { type: 'string', nullable: true },
+        expected: 'string | null',
+      },
+      {
+        schema: { type: 'number', nullable: true },
+        expected: 'number | null',
+      },
+      {
+        schema: { type: 'object', nullable: true },
+        expected: 'unknown | null',
+      },
+      {
+        schema: { type: 'object', properties: { name: { type: 'string' } }, nullable: true },
+        expected: '{ name?: string; } | null',
+      },
+    ];
+
+    for (const { schema, expected } of testCases) {
+      test(`should process ${JSON.stringify(schema)} correctly`, async () => {
         const res = getTypeFromSchema(schema, opts);
 
         expect(res).toBe(expected);

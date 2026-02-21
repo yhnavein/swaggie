@@ -83,9 +83,9 @@ function serializeQueryParam(obj: any) {
 export type UserRole = 'Admin' | 'User' | 'Guest';
 
 export interface UserViewModel {
-  name?: string;
-  id?: number;
-  email?: string;
+  name: string;
+  id: number;
+  email: string;
   role?: UserRole;
 }
 ```

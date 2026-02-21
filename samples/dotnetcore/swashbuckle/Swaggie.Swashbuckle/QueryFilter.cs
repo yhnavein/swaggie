@@ -43,7 +43,7 @@ public class FromQueryModelFilter : IOperationFilter
     operation.Parameters = CreateParameters(actionParameters, operation.Parameters, context);
   }
 
-  private List<IOpenApiParameter> CreateParameters(
+  private static List<IOpenApiParameter>? CreateParameters(
     IList<ParameterDescriptor> actionParameters,
     IList<IOpenApiParameter> operationParameters,
     OperationFilterContext context)
@@ -56,7 +56,7 @@ public class FromQueryModelFilter : IOperationFilter
     return newParameters.Count != 0 ? newParameters : null;
   }
 
-  private static IOpenApiParameter CreateParameter(
+  private static IOpenApiParameter? CreateParameter(
     ParameterDescriptor actionParameter,
     IList<IOpenApiParameter> operationParameters,
     OperationFilterContext context)

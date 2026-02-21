@@ -62,7 +62,7 @@ export const petClient = {
   * Multiple status values can be provided with comma separated strings
   * @param status (optional) - Status values that need to be considered for filter
   */
-  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
+  findPetsByStatus(status?: "available" | "pending" | "sold" | null,
     $config?: RequestInit
   ): Promise<Pet[]> {
     const url = `${defaults.baseUrl}/pet/findByStatus?${defaults.paramsSerializer({'status': status,
@@ -431,7 +431,7 @@ export interface Order {
   quantity?: number;
   shipDate?: Date;
 /** Order Status */
-  status?: ("placed" | "approved" | "delivered");
+  status?: "placed" | "approved" | "delivered";
   complete?: boolean;}
 
 export interface Category {
@@ -460,4 +460,4 @@ export interface Pet {
   photoUrls: string[];
   tags?: Tag[];
 /** pet status in the store */
-  status?: ("available" | "pending" | "sold");}
+  status?: "available" | "pending" | "sold";}

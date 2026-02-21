@@ -77,7 +77,7 @@ public class Startup
 
     if (!_isProduction)
     {
-      app.UseSwagger(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1; });
+      app.UseSwagger();
       app.UseSwaggerUI(c =>
       {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sample Api");

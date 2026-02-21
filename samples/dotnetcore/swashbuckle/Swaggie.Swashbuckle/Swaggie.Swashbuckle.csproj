@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Nullable>warnings</Nullable>
+    <Nullable>enable</Nullable>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
 
@@ -16,6 +16,6 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="dotnet tool restore" />
     <Exec EnvironmentVariables="ASPNETCORE_ENVIRONMENT=dev"
-      Command="dotnet swagger tofile --output bin/api.json $(OutputPath)\$(AssemblyName).dll v1 " />
+      Command="dotnet swagger tofile --output bin/api.json $(OutputPath)$(AssemblyName).dll v1 " />
   </Target>
 </Project>
