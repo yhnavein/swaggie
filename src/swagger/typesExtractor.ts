@@ -43,11 +43,29 @@ export function getTypeFromSchema(
     return unknownType;
   }
 
-  const isNullableSuffix = 'nullable' in schema && schema.nullable === true ? ' | null' : '';
   if ('$ref' in schema) {
     const refName = schema.$ref.split('/').pop();
-    return (getSafeIdentifier(refName) || unknownType) + isNullableSuffix;
+    return getSafeIdentifier(refName) || unknownType;
   }
+
+  if (schema.type === 'null') {
+    return 'null';
+  }
+
+  const isNullableSuffix = 'nullable' in schema && schema.nullable === true ? ' | null' : '';
+  const type = getTypeFromSchemaInternal(schema, options);
+
+  if (isNullableSuffix && type.endsWith('| null')) {
+    return type;
+  }
+  return type + isNullableSuffix;
+}
+
+function getTypeFromSchemaInternal(
+  schema: OA3.SchemaObject | OA31.SchemaObject,
+  options: Partial<ClientOptions>
+): string {
+  const unknownType = options.preferAny ? 'any' : 'unknown';
 
   if ('allOf' in schema || 'oneOf' in schema || 'anyOf' in schema) {
     return getTypeFromComposites(schema as OA3.SchemaObject, options);
@@ -55,31 +73,27 @@ export function getTypeFromSchema(
 
   if (schema.type === 'array') {
     if (schema.items) {
-      return `${getNestedTypeFromSchema(schema.items, options)}[]${isNullableSuffix}`;
+      return `${getNestedTypeFromSchema(schema.items, options)}[]`;
     }
-    return `${unknownType}[]${isNullableSuffix}`;
+    return `${unknownType}[]`;
   }
   if (schema.type === 'object') {
-    return getTypeFromObject(schema, options) + isNullableSuffix;
+    return getTypeFromObject(schema, options);
   }
-  if (schema.type === 'null') {
-    return 'null';
-  }
-
   if ('enum' in schema) {
-    return `${schema.enum.map((v) => JSON.stringify(v)).join(' | ')}${isNullableSuffix}`;
+    return `${schema.enum.map((v) => JSON.stringify(v)).join(' | ')}`;
   }
   if (schema.type === 'integer' || schema.type === 'number') {
-    return 'number' + isNullableSuffix;
+    return 'number';
   }
   if (schema.type === 'string' && (schema.format === 'date-time' || schema.format === 'date')) {
-    return (options.dateFormat === 'string' ? 'string' : 'Date') + isNullableSuffix;
+    return options.dateFormat === 'string' ? 'string' : 'Date';
   }
   if (schema.type === 'string') {
-    return (schema.format === 'binary' ? 'File' : 'string') + isNullableSuffix;
+    return schema.format === 'binary' ? 'File' : 'string';
   }
   if (schema.type === 'boolean') {
-    return 'boolean' + isNullableSuffix;
+    return 'boolean';
   }
   return unknownType;
 }
