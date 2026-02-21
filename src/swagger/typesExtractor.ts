@@ -43,9 +43,10 @@ export function getTypeFromSchema(
     return unknownType;
   }
 
+  const isNullableSuffix = 'nullable' in schema && schema.nullable === true ? ' | null' : '';
   if ('$ref' in schema) {
     const refName = schema.$ref.split('/').pop();
-    return getSafeIdentifier(refName) || unknownType;
+    return (getSafeIdentifier(refName) || unknownType) + isNullableSuffix;
   }
 
   if ('allOf' in schema || 'oneOf' in schema || 'anyOf' in schema) {
@@ -54,33 +55,43 @@ export function getTypeFromSchema(
 
   if (schema.type === 'array') {
     if (schema.items) {
-      return `${getTypeFromSchema(schema.items, options)}[]`;
+      return `${getNestedTypeFromSchema(schema.items, options)}[]${isNullableSuffix}`;
     }
-    return `${unknownType}[]`;
+    return `${unknownType}[]${isNullableSuffix}`;
   }
   if (schema.type === 'object') {
-    return getTypeFromObject(schema, options);
+    return getTypeFromObject(schema, options) + isNullableSuffix;
   }
   if (schema.type === 'null') {
     return 'null';
   }
 
   if ('enum' in schema) {
-    return `(${schema.enum.map((v) => JSON.stringify(v)).join(' | ')})`;
+    return `${schema.enum.map((v) => JSON.stringify(v)).join(' | ')}${isNullableSuffix}`;
   }
   if (schema.type === 'integer' || schema.type === 'number') {
-    return 'number';
+    return 'number' + isNullableSuffix;
   }
   if (schema.type === 'string' && (schema.format === 'date-time' || schema.format === 'date')) {
-    return options.dateFormat === 'string' ? 'string' : 'Date';
+    return (options.dateFormat === 'string' ? 'string' : 'Date') + isNullableSuffix;
   }
   if (schema.type === 'string') {
-    return schema.format === 'binary' ? 'File' : 'string';
+    return (schema.format === 'binary' ? 'File' : 'string') + isNullableSuffix;
   }
   if (schema.type === 'boolean') {
-    return 'boolean';
+    return 'boolean' + isNullableSuffix;
   }
   return unknownType;
+}
+
+function getNestedTypeFromSchema(
+  schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
+  options: Partial<ClientOptions>
+): string {
+  if (('nullable' in schema && schema.nullable === true) || ('enum' in schema && schema.enum)) {
+    return `(${getTypeFromSchema(schema, options)})`;
+  }
+  return getTypeFromSchema(schema, options);
 }
 
 /**

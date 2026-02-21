@@ -419,6 +419,59 @@ export interface Object_Name { token?: string; data?: Data_Object; }
 export interface DeepNestedObject { "nested object"?: { "EC2 & ECS"?: Object_Name; "Some/Strange + Names <=#$%&*?>"?: string; }; }`
       );
     });
+
+    test('should handle nullable object properties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          AuthenticationData: {
+            type: 'object',
+            required: ['login', 'password', 'tenant'],
+            properties: {
+              login: {
+                // ReadOnly or WriteOnly are not yet supported
+                // As we don't have a way to distinguish how dev will use
+                // generated types in his app
+                readOnly: true,
+                type: 'string',
+              },
+              password: {
+                writeOnly: true,
+                type: 'string',
+              },
+              tenant: {
+                type: 'string',
+                // nullable is only supported in OpenAPI 3.0
+                nullable: true,
+              } as OA3.SchemaObject,
+              region: {
+                type: 'number',
+                // nullable is only supported in OpenAPI 3.0
+                nullable: true,
+              } as OA3.SchemaObject,
+              rememberMe: {
+                type: 'boolean',
+                // nullable is only supported in OpenAPI 3.0
+                nullable: true,
+              } as OA3.SchemaObject,
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export interface AuthenticationData {
+  login: string;
+  password: string;
+  tenant: string | null;
+  region?: number | null;
+  rememberMe?: boolean | null;
+}`
+      );
+    });
   });
 
   describe('arrays', () => {
