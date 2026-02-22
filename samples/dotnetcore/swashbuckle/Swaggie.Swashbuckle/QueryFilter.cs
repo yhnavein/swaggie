@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
-using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.OpenApi;
 
 namespace Swaggie.Swashbuckle;
 
@@ -43,9 +43,9 @@ public class FromQueryModelFilter : IOperationFilter
     operation.Parameters = CreateParameters(actionParameters, operation.Parameters, context);
   }
 
-  private List<OpenApiParameter> CreateParameters(
+  private static List<IOpenApiParameter> CreateParameters(
     IList<ParameterDescriptor> actionParameters,
-    IList<OpenApiParameter> operationParameters,
+    IList<IOpenApiParameter> operationParameters,
     OperationFilterContext context)
   {
     var newParameters = actionParameters
@@ -56,9 +56,9 @@ public class FromQueryModelFilter : IOperationFilter
     return newParameters.Count != 0 ? newParameters : null;
   }
 
-  private static OpenApiParameter CreateParameter(
+  private static IOpenApiParameter CreateParameter(
     ParameterDescriptor actionParameter,
-    IList<OpenApiParameter> operationParameters,
+    IList<IOpenApiParameter> operationParameters,
     OperationFilterContext context)
   {
     var operationParamNames = operationParameters.Select(p => p.Name);

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Swaggie.Swashbuckle.Controllers;
 
@@ -13,7 +13,7 @@ public class UserController : Controller
 {
   [HttpGet("")]
   [Produces(typeof(IList<UserViewModel>))]
-  public IActionResult GetUsers([FromQuery] UserRole? role)
+  public IActionResult GetUsers([FromQuery]UserRole? role)
   {
     var allUsers = new[]
     {
@@ -36,28 +36,34 @@ public class UserController : Controller
 
   [HttpGet("filter")]
   [Produces(typeof(FilterTestResponse))]
-  public IActionResult TestFilters([FromQuery(Name = "filter")] UserFilter? filter, [FromQuery(Name = "secondFilter")] UserFilter? secondFilter, [FromQuery, Required] Dictionary<string, int> someDict)
+  public IActionResult TestFilters([FromQuery(Name = "filter")]UserFilter? filter,
+    [FromQuery(Name = "secondFilter")]UserFilter? secondFilter,
+    [FromQuery, Required]Dictionary<string, int> someDict)
   {
-    Console.WriteLine("filter: " + JsonConvert.SerializeObject(filter));
-    Console.WriteLine("secondFilter: " + JsonConvert.SerializeObject(secondFilter));
-    Console.WriteLine("someDict: " + JsonConvert.SerializeObject(someDict));
+    Console.WriteLine("filter: " + JsonSerializer.Serialize(filter));
+    Console.WriteLine("secondFilter: " + JsonSerializer.Serialize(secondFilter));
+    Console.WriteLine("someDict: " + JsonSerializer.Serialize(someDict));
     var result = new FilterTestResponse
     {
-      filter = filter,
-      secondFilter = secondFilter,
-      someDict = someDict
+      filter = filter, secondFilter = secondFilter, someDict = someDict
     };
 
     return Ok(result);
   }
 
+  /// <summary>
+  /// Creates new user
+  /// </summary>
   [HttpPost("")]
   [ProducesResponseType(typeof(UserViewModel), StatusCodes.Status201Created)]
-  public IActionResult CreateUser([FromBody, Required] UserViewModel user)
+  public IActionResult CreateUser([FromBody, Required]UserViewModel user)
   {
     return Created("some-url", user);
   }
 
+  /// <summary>
+  /// Uploads user avatar
+  /// </summary>
   [HttpPost("avatar")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -70,13 +76,16 @@ public class UserController : Controller
     return Ok($"File uploaded successfully. Size: {file?.Length ?? 0} bytes");
   }
 
+  /// <summary>
+  /// Updates user properties
+  /// </summary>
   [HttpPut("properties")]
   [Consumes("application/x-www-form-urlencoded")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public IActionResult UpdateUserProperties([FromForm, Required] UserUpdateModel userUpdate)
+  public IActionResult UpdateUserProperties([FromForm, Required]UserUpdateModel userUpdate)
   {
-    Console.WriteLine("userUpdate: " + JsonConvert.SerializeObject(userUpdate));
+    Console.WriteLine("userUpdate: " + JsonSerializer.Serialize(userUpdate));
 
     // Here you would typically update the user in your database
     return Ok($"User updated: Name = {userUpdate.Name}, Email = {userUpdate.Email}");
@@ -86,9 +95,9 @@ public class UserController : Controller
   [Consumes("multipart/form-data")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status400BadRequest)]
-  public IActionResult UpdateUserProfile([FromForm, Required] UserProfileUpdateModel profileUpdate)
+  public IActionResult UpdateUserProfile([FromForm, Required]UserProfileUpdateModel profileUpdate)
   {
-    Console.WriteLine("profileUpdate: " + JsonConvert.SerializeObject(profileUpdate));
+    Console.WriteLine("profileUpdate: " + JsonSerializer.Serialize(profileUpdate));
 
     // Here you would typically update the user's profile in your database
     return Ok($"Profile updated: Name = {profileUpdate.Name}, Bio = {profileUpdate.Bio}");
@@ -96,26 +105,26 @@ public class UserController : Controller
 
   [HttpDelete("{id:long}")]
   [Produces(typeof(void))]
-  public IActionResult DeleteUser([FromRoute] long id)
+  public IActionResult DeleteUser([FromRoute]long id)
   {
     return NoContent();
   }
 }
 
-public class UserUpdateModel
+public record UserUpdateModel
 {
   public string Name { get; set; }
   public string Email { get; set; }
 }
 
-public class UserProfileUpdateModel
+public record UserProfileUpdateModel
 {
   public string Name { get; set; }
   public string Bio { get; set; }
   public IFormFile Avatar { get; set; }
 }
 
-public class UserViewModel
+public record UserViewModel
 {
   public string Name { get; set; }
 
@@ -125,13 +134,12 @@ public class UserViewModel
 
   public UserRole Role { get; set; }
 
-  [Required]
   public Dictionary<int, string> SomeDict { get; set; } = new();
 
   public PagedResult<string> AuditEvents { get; set; } = new();
 }
 
-public class UserFilter
+public record UserFilter
 {
   /// <summary>
   /// Name of the user. Can be partial name match
@@ -156,14 +164,14 @@ public class UserFilter
   public UserLog UserLog { get; set; } = new();
 }
 
-public class PagedResult<T>
+public record PagedResult<T>
 {
   public IList<T> Items { get; set; }
 
   public int TotalCount { get; set; }
 }
 
-public class UserLog
+public record UserLog
 {
   /// <summary>
   /// Who created user. Can be partial name match
@@ -188,9 +196,9 @@ public enum UserRole
   Guest = 2
 }
 
-public class FilterTestResponse
+public record FilterTestResponse
 {
-  public UserFilter? filter { get; set; }
-  public UserFilter? secondFilter { get; set; }
+  public UserFilter filter { get; set; }
+  public UserFilter secondFilter { get; set; }
   public Dictionary<string, int> someDict { get; set; }
 }

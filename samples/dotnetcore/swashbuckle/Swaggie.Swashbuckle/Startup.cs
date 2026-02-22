@@ -1,15 +1,14 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
+using Microsoft.OpenApi;
 
 namespace Swaggie.Swashbuckle;
 
@@ -26,21 +25,14 @@ public class Startup
   public void ConfigureServices(IServiceCollection services)
   {
     services.Configure<KestrelServerOptions>(options => { options.AllowSynchronousIO = true; });
-    JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+
+    services.ConfigureHttpJsonOptions(opts =>
     {
-      // Automatically converts DotNetNames to jsFriendlyNames
-      ContractResolver = new CamelCasePropertyNamesContractResolver()
-    };
+      opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+      opts.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+    });
 
-    services.AddControllers()
-      .AddNewtonsoftJson(x =>
-      {
-        // Ignores potential reference loop problems
-        x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-        // Serializes dotnet enums to strings (you can remove it if you prefer numbers instead)
-        x.SerializerSettings.Converters.Add(new StringEnumConverter());
-      });
+    services.AddControllers();
 
     services.AddHttpContextAccessor();
 
@@ -50,6 +42,8 @@ public class Startup
       services.AddSwaggerGen(c =>
       {
         c.SchemaGeneratorOptions.UseOneOfForPolymorphism = true;
+        c.SupportNonNullableReferenceTypes();
+        c.SchemaFilter<NonNullableRequiredSchemaFilter>();
         c.OperationFilter<FromQueryModelFilter>();
         c.SchemaFilter<XEnumNamesSchemaFilter>();
         c.CustomOperationIds(e =>
@@ -61,7 +55,6 @@ public class Startup
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
       });
-      services.AddSwaggerGenNewtonsoftSupport();
     }
   }
 
@@ -84,7 +77,7 @@ public class Startup
 
     if (!_isProduction)
     {
-      app.UseSwagger();
+      app.UseSwagger(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1; });
       app.UseSwaggerUI(c =>
       {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sample Api");

@@ -2,7 +2,8 @@
 
 ## ASP.NET Core Swashbuckle configuration
 
-You can open `Swaggie.Swashbuckle/Swaggie.Swashbuckle.sln` in Rider or VS to see the sample ASP.NET Core project with Swashbuckle configured. It is working out of the box and it requires `dotnet 6.0`. It should be compatible with other dotnet versions as well.
+You can open `Swaggie.Swashbuckle/Swaggie.Swashbuckle.sln` in Rider or VS to see the sample ASP.NET Core project with Swashbuckle configured. It is working out of the box and it requires `dotnet 10.0`.
+Due to the recent breaking change in .NET 10 and Microsoft.OpenApi v2, these examples may work only in dotnet 10. If you want to integrate it with older version, then take a look in the repository history.
 
 ## Swaggie result
 
@@ -18,75 +19,55 @@ This is how the generated API Client in TypeScript looks like:
 // </auto-generated>
 //----------------------
 // ReSharper disable InconsistentNaming
+// deno-lint-ignore-file
 
-import Axios, { AxiosPromise, AxiosRequestConfig } from 'axios';
+import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from 'xior';
 
-export const axios = Axios.create({
+export const http = xior.create({
   baseURL: '',
+  paramsSerializer: (params) =>
+    encodeParams(params, true, null, {
+      allowDots: true,
+      arrayFormat: 'repeat',
+    }),
 });
 
 export const userClient = {
-  /**
-   * @param body (optional)
-   */
+  /** @param body */
   createUser(
-    body: UserViewModel | null | undefined,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<UserViewModel> {
-    let url = '/user';
+    body: UserViewModel,
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<UserViewModel>> {
+    const url = `/user`;
 
-    return axios.request<UserViewModel>({
+    return http.request<UserViewModel>({
       url: url,
       method: 'POST',
       data: body,
       ...$config,
     });
   },
-
-  /**
-   * @param id
-   */
-  deleteUser(id: number, $config?: AxiosRequestConfig): AxiosPromise<any> {
-    let url = '/user/{id}';
-
-    url = url.replace('{id}', encodeURIComponent('' + id));
-
-    return axios.request<any>({
-      url: url,
-      method: 'DELETE',
-      ...$config,
-    });
-  },
-
-  /**
-   */
-  getUsers($config?: AxiosRequestConfig): AxiosPromise<UserViewModel[]> {
-    let url = '/user';
-
-    return axios.request<UserViewModel[]>({
-      url: url,
-      method: 'GET',
-      ...$config,
-    });
-  },
+  //...
 };
 
-function serializeQueryParam(obj: any) {
-  if (obj === null || obj === undefined) return '';
-  if (obj instanceof Date) return obj.toJSON();
-  if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
-  return Object.keys(obj)
-    .reduce((a: any, b) => a.push(b + '=' + obj[b]) && a, [])
-    .join('&');
+export interface StringPagedResult {
+  items?: string[];
+  totalCount?: number;
 }
 
-export type UserRole = 'Admin' | 'User' | 'Guest';
+export enum UserRole {
+  Admin = 0,
+  User = 1,
+  Guest = 2,
+}
 
 export interface UserViewModel {
   name?: string;
   id?: number;
   email?: string;
   role?: UserRole;
+  someDict: { [key: string]: string };
+  auditEvents?: StringPagedResult;
 }
 ```
 
@@ -97,3 +78,56 @@ Whenever API is built Swagger definitions are regenerated and saved on the disk.
 Please take a look on the `PostBuild` task in `Swaggie.Swashbuckle/Swaggie.Swashbuckle.csproj` to see how it works.
 
 The benefits from this approach are that it's much faster and you don't have to have an API running to be able to use Swaggie.
+
+## .NET 10 and Microsoft.OpenApi v2
+
+### What changed
+
+There is one breaking change evident when migrating to .NET 10 with Microsoft.OpenApi v2: how Swashbuckle determines which properties are required and which are nullable in the generated OpenAPI spec.
+
+In the old Microsoft.OpenApi v1, this information came from the `Newtonsoft.Json contract resolver` (via `AddSwaggerGenNewtonsoftSupport()`), which applied these rules automatically:
+
+- Non-nullable value types (`double`, `int`, `bool`, `DateTime`) → added to required
+- Nullable value types (`double?`, `int?`) → marked `nullable: true`
+- Reference types (`string`, class types, `IList<T>`) → marked `nullable: true` by default, regardless of whether `<Nullable>enable</Nullable>` was set
+
+In the new Microsoft.OpenApi v2, `Newtonsoft.Json` no longer drives schema generation. Swashbuckle now relies on:
+
+- `[Required]` attributes → property added to required
+- NRT metadata (via `SupportNonNullableReferenceTypes()`) → non-nullable reference types added to required, nullable reference types marked `nullable: true` — but only when `<Nullable>enable</Nullable>` is set, because NRT metadata is only emitted into the compiled assembly when NRT is enabled
+
+The consequence: if `<Nullable>enable</Nullable>` is not set, Swashbuckle has no signal for reference types and treats them all as optional. Non-nullable value types also lose their required status since the `Newtonsoft.Json` heuristic is gone. This can be a significant breaking change to your generated spec.
+
+You have two options:
+
+### Option 1 — Enable `<Nullable>enable</Nullable>`
+
+Add this to all your projects in the solution: `<Nullable>enable</Nullable>`
+
+With this enabled:
+
+- Annotate genuinely nullable reference properties with ? (`string?`, `MyClass?`, `IList<T>?`) — these will appear as `nullable: true` in the spec and will not be in required
+- Leave non-nullable reference properties without ? — these will appear in required
+- For EF Core entities or DI-managed classes where the compiler can't verify initialization, use = null! to suppress compiler warnings while keeping the non-nullable intent
+- Non-nullable value types (double, int) are still not added to required by Swashbuckle even with NRT enabled — this is the remaining gap (see below)
+
+This is the most correct long-term approach, but it requires annotating your entire codebase and fixing compiler warnings throughout.
+
+### Option 2 — Use `NonNullableRequiredSchemaFilter`
+
+This project includes a custom Swashbuckle schema filter (`NonNullableRequiredSchemaFilter.cs`) that restores the previous behaviour without requiring NRT to be enabled. It is registered in `Startup.cs` alongside the other schema filters.
+The filter uses `System.Reflection.NullabilityInfoContext` (available since .NET 6) to inspect property nullability at runtime, and covers two cases:
+
+- Non-nullable value types (`double`, `int`, `bool`, `DateTime`, etc.) → added to required. Detection is straightforward: `Nullable.GetUnderlyingType(type)` != null identifies double?/int? and excludes them; plain value types are always included.
+- Non-nullable reference types (`string`, class types, `IList<T>`, etc.) → added to required, nullable ones (`string?`, `MyClass?`) marked nullable: true. This half only works correctly when `<Nullable>enable</Nullable>` is set, because NullabilityInfoContext reads the [Nullable]/[NullableContext] IL attributes that the compiler emits — and those attributes are only present when NRT is enabled. Without NRT, all reference types report `NullabilityState.Unknown`, and the filter would incorrectly mark all of them as required.
+
+In summary:
+
+| Scenario                 | Value types in required | Reference types in required / nullable                                                      |
+| ------------------------ | ----------------------- | ------------------------------------------------------------------------------------------- |
+| No NRT, no filter        | No                      | No (all treated as optional)                                                                |
+| No NRT, with filter      | Yes                     | No (all marked required, none nullable — incorrect)                                         |
+| NRT enabled, no filter   | No                      | Partial (only works when compiler emits NRT metadata — requires initializer or constructor) |
+| NRT enabled, with filter | Yes                     | Yes (correct)                                                                               |
+
+The filter and NRT are complementary, not alternatives. The filter fixes the value-type gap that exists even with NRT enabled, and NRT fixes the reference-type half that the filter alone cannot handle correctly.
