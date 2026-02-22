@@ -43,6 +43,7 @@ public class Startup
       {
         c.SchemaGeneratorOptions.UseOneOfForPolymorphism = true;
         c.SupportNonNullableReferenceTypes();
+        c.SchemaFilter<NonNullableRequiredSchemaFilter>();
         c.OperationFilter<FromQueryModelFilter>();
         c.SchemaFilter<XEnumNamesSchemaFilter>();
         c.CustomOperationIds(e =>
@@ -54,7 +55,6 @@ public class Startup
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
       });
-      services.AddSwaggerGenNewtonsoftSupport();
     }
   }
 

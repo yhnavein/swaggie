@@ -10,12 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.1.4" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="dotnet tool restore" />
     <Exec EnvironmentVariables="ASPNETCORE_ENVIRONMENT=dev"
-      Command="dotnet swagger tofile --output bin/api.json $(OutputPath)\$(AssemblyName).dll v1 " />
+      Command="dotnet swagger tofile --output bin/api.json $(OutputPath)$(AssemblyName).dll v1 " />
   </Target>
 </Project>
