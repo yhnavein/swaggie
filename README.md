@@ -301,7 +301,7 @@ function error(e) {
 | Content types: `JSON`, `text`, `multipart/form-data`                           | Multiple request types (only one will be used)  |
 | Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to other spec files                  |
 | Different types of enum definitions (+ OpenAPI 3.1 support for enums)          | OpenAPI callbacks                               |
-| Paths inheritance, comments (descriptions)                                     | OpenAPI webhooks                                |
+| Paths inheritance, comments (descriptions), nullable                           | OpenAPI webhooks                                |
 | Getting documents from remote locations or as path reference (local file)      |                                                 |
 | Grouping endpoints by tags + handle gracefully duplicate operation ids         |                                                 |
 

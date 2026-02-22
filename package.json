@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.5.2",
+  "version": "1.5.3-beta.1",
   "description": "Generate TypeScript REST client code from an OpenAPI spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -10,7 +10,7 @@
   "homepage": "https://github.com/yhnavein/swaggie",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yhnavein/swaggie.git"
+    "url": "git+https://github.com/yhnavein/swaggie.git"
   },
   "bugs": {
     "url": "https://github.com/yhnavein/swaggie/issues"
