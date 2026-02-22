@@ -2,7 +2,8 @@
 
 ## ASP.NET Core Swashbuckle configuration
 
-You can open `Swaggie.Swashbuckle/Swaggie.Swashbuckle.sln` in Rider or VS to see the sample ASP.NET Core project with Swashbuckle configured. It is working out of the box and it requires `dotnet 6.0`. It should be compatible with other dotnet versions as well.
+You can open `Swaggie.Swashbuckle/Swaggie.Swashbuckle.sln` in Rider or VS to see the sample ASP.NET Core project with Swashbuckle configured. It is working out of the box and it requires `dotnet 10.0`.
+Due to the recent breaking change in .NET 10 and Microsoft.OpenApi v2, these examples may work only in dotnet 10. If you want to integrate it with older version, then take a look in the repository history.
 
 ## Swaggie result
 

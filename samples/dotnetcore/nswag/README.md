@@ -2,7 +2,7 @@
 
 ## ASP.NET Core NSwag configuration
 
-You can open `Swaggie.Nswag/Swaggie.Nswag.sln` in Rider or VS to see the sample ASP.NET Core project with NSwag configured. It is working out of the box and it requires `dotnet 8.0`. It should be compatible with other dotnet versions as well.
+You can open `Swaggie.Nswag/Swaggie.Nswag.sln` in Rider or VS to see the sample ASP.NET Core project with NSwag configured. It is working out of the box and it requires `dotnet 10.0`. It should be compatible with other dotnet versions as well.
 
 ## Concerns
 
