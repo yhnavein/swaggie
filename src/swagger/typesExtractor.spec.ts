@@ -1,11 +1,12 @@
 import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
-import { resolveOptions, type ClientOptions } from '../types';
+import { type ClientOptions } from '../types';
 import {
   getParameterType,
   getTypeFromSchema,
   getSafeIdentifier,
   getRefCompositeTypes,
+  resolveOptions,
 } from './typesExtractor';
 import { assertEqualIgnoringWhitespace, getClientOptions } from '../../test/test.utils';
 

@@ -1,19 +1,18 @@
 import { camel } from 'case';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { getParameterType } from '../swagger';
+import { getParameterType, getOperations } from '../swagger';
 import {
   groupOperationsByGroupName,
   getBestResponse,
   orderBy,
   renderFile,
   getBestContentType,
+  escapeIdentifier,
 } from '../utils';
 import { generateBarrelFile } from './createBarrel';
 import type { ApiOperation, AppOptions } from '../types';
-import { escapeIdentifier } from '../utils';
-import { getOperations } from '../swagger';
-import { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
+import type { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
 import { prepareJsDocsForOperation } from './jsDocs';
 
 /**

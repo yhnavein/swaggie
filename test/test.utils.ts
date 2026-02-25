@@ -3,7 +3,7 @@ import { expect, Mock } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import type { AppOptions, ClientOptions } from '../src/types';
-import { resolveOptions } from '../src/types';
+import { resolveOptions } from '../src/swagger';
 
 /**
  * Returns a valid OpenAPI 3.0 document with the minimal required fields.

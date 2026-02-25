@@ -1,5 +1,5 @@
-import { ApiOperation } from '../types';
-import { IOperationParam } from './types';
+import type { ApiOperation } from '../types';
+import type { IOperationParam } from './types';
 
 /**
  * Prepares content for the operation docs. We will use description and summary if they are defined

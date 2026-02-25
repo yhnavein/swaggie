@@ -1,5 +1,5 @@
-import type { AppOptions } from '../types';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
+import type { AppOptions, ClientOptions } from '../types';
 import { escapePropName } from '../utils';
 
 /**
@@ -255,4 +255,33 @@ export function getRefCompositeTypes(schema: OA3.SchemaObject) {
   return schema.allOf
     .filter((v) => '$ref' in v)
     .map((s: OA3.ReferenceObject) => getSafeIdentifier(s.$ref.split('/').pop()));
+}
+
+/** Default values applied to every field of AppOptions that has a default. */
+export const APP_DEFAULTS: Partial<AppOptions> = {
+  template: 'axios',
+  servicePrefix: '',
+  nullableStrategy: 'ignore',
+  queryParamsSerialization: {
+    allowDots: true,
+    arrayFormat: 'repeat',
+  },
+};
+
+/**
+ * Fills in all AppOptions defaults for a partial ClientOptions object.
+ * Used at the boundary between public API / test helpers and the internal pipeline.
+ */
+export function resolveOptions(opts: Partial<ClientOptions>): AppOptions {
+  return {
+    src: opts.src ?? '',
+    ...opts,
+    template: opts.template ?? APP_DEFAULTS.template,
+    servicePrefix: opts.servicePrefix ?? APP_DEFAULTS.servicePrefix,
+    nullableStrategy: opts.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
+    queryParamsSerialization: {
+      ...APP_DEFAULTS.queryParamsSerialization,
+      ...opts.queryParamsSerialization,
+    },
+  };
 }

@@ -3,8 +3,8 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateCode from './gen';
 import type { AppOptions, CliOptions, FullAppOptions } from './types';
-import { APP_DEFAULTS } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
+import { APP_DEFAULTS } from './swagger';
 
 /**
  * Runs the whole code generation process.

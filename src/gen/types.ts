@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { MyContentType } from '../utils';
+import type { MyContentType } from '../utils';
 
 export interface ClientData {
   clientName: string;

@@ -4,7 +4,7 @@ import { runCodeGenerator, applyConfigFile, prepareAppOptions } from './';
 import { mockFetchWithFile } from '../test/test.utils';
 
 import type { CliOptions } from './types';
-import { APP_DEFAULTS } from './types';
+import { APP_DEFAULTS } from './swagger';
 
 describe('runCodeGenerator', () => {
   let mockFetch: ReturnType<typeof spyOn>;
