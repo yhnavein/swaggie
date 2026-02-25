@@ -201,12 +201,7 @@ function renderTypeProp(
     lines.push(renderComment(definition.description ?? definition.title));
   }
 
-  // When nullableAsOptional strategy is set, nullable properties are treated as optional
-  const isNullableAsOptional =
-    options.nullableStrategy === 'nullableAsOptional' &&
-    !('$ref' in definition) &&
-    (definition as OA3.SchemaObject).nullable === true;
-  const isOptional = !required || isNullableAsOptional;
+  const isOptional = !required || isNullableAsOptional(definition, options);
   const optionalMark = isOptional ? '?' : '';
   // If prop name is not a valid identifier, we need to wrap it in quotes.
   // We can't use getSafeIdentifier here because it will affect the data model.
@@ -214,6 +209,26 @@ function renderTypeProp(
   lines.push(`  ${safePropName}${optionalMark}: ${type};`);
 
   return lines.join('\n');
+}
+
+/**
+ * When nullableAsOptional strategy is set, nullable properties are treated as optional.
+ * Supports both OA3.0 (nullable: true) and OA3.1 (type: ["string", "null"]).
+ * @returns True if the property should be treated as optional, false otherwise.
+ */
+function isNullableAsOptional(
+  definition: OA3.ReferenceObject | OA3.SchemaObject,
+  options: ClientOptions
+) {
+  if ('$ref' in definition) {
+    return false;
+  }
+
+  return (
+    options.nullableStrategy === 'nullableAsOptional' &&
+    (definition.nullable === true ||
+      (Array.isArray(definition.type) && definition.type.includes('null')))
+  );
 }
 
 function getMergedCompositeObjects(schema: OA3.SchemaObject) {

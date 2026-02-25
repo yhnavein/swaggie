@@ -52,6 +52,12 @@ export function getTypeFromSchema(
     return 'null';
   }
 
+  // OpenAPI 3.1 nullable: type is an array containing 'null', e.g. ["string", "null"]
+  if (Array.isArray(schema.type)) {
+    return getTypeFromOA31ArrayType(schema as OA31.SchemaObject, options);
+  }
+
+  // OpenAPI 3.0 nullable: nullable: true
   const isNullable = 'nullable' in schema && schema.nullable === true;
   const strategy = options.nullableStrategy ?? 'ignore';
   const isNullableSuffix = isNullable && strategy === 'include' ? ' | null' : '';
@@ -61,6 +67,58 @@ export function getTypeFromSchema(
     return type;
   }
   return type + isNullableSuffix;
+}
+
+/**
+ * Handles OpenAPI 3.1 schemas where `type` is an array (e.g. `["string", "null"]`).
+ * The presence of `"null"` in the array is the OA3.1 way of marking a field as nullable.
+ * Respects `nullableStrategy` the same way as OA3.0 `nullable: true`.
+ */
+function getTypeFromOA31ArrayType(
+  schema: OA31.SchemaObject,
+  options: Partial<ClientOptions>
+): string {
+  const unknownType = options.preferAny ? 'any' : 'unknown';
+  const types = schema.type as string[];
+  const isNullable = types.includes('null');
+  const nonNullTypes = types.filter((t) => t !== 'null');
+
+  // Build the base type from the non-null types
+  let baseType: string;
+  if (nonNullTypes.length === 0) {
+    baseType = 'null';
+  } else if (nonNullTypes.length === 1) {
+    // Synthesize a single-type schema to reuse existing resolution logic
+    const singleTypeSchema = { ...schema, type: nonNullTypes[0] } as OA31.SchemaObject;
+    baseType = getTypeFromSchemaInternal(singleTypeSchema, options);
+  } else {
+    // Multiple non-null types — resolve each independently and join as a union
+    baseType = nonNullTypes
+      .map((t) => getTypeFromSchemaInternal({ ...schema, type: t } as OA31.SchemaObject, options))
+      .join(' | ');
+  }
+
+  if (!isNullable) {
+    return baseType || unknownType;
+  }
+
+  // All types were 'null' — just return 'null' regardless of strategy
+  if (nonNullTypes.length === 0) {
+    return 'null';
+  }
+
+  const strategy = options.nullableStrategy ?? 'ignore';
+  if (strategy === 'include') {
+    // We don't want multiple nulls in the type string
+    if (baseType.endsWith('| null')) {
+      return baseType;
+    }
+    return `${baseType} | null`;
+  }
+
+  // 'ignore' and 'nullableAsOptional' — null is stripped from the type itself
+  // (for nullableAsOptional, the optionality is applied at the property level in genTypes.ts)
+  return baseType || unknownType;
 }
 
 function getTypeFromSchemaInternal(
@@ -105,11 +163,22 @@ function getNestedTypeFromSchema(
   options: Partial<ClientOptions>
 ): string {
   const strategy = options.nullableStrategy ?? 'ignore';
-  const isNullableAndActive =
+
+  // OA3.0 nullable: true
+  const isOA30NullableAndActive =
     'nullable' in schema && schema.nullable === true && strategy === 'include';
-  if (isNullableAndActive || ('enum' in schema && schema.enum)) {
+
+  // OA3.1 nullable: type array containing 'null'
+  const isOA31NullableAndActive =
+    'type' in schema &&
+    Array.isArray(schema.type) &&
+    schema.type.includes('null') &&
+    strategy === 'include';
+
+  if (isOA30NullableAndActive || isOA31NullableAndActive || ('enum' in schema && schema.enum)) {
     return `(${getTypeFromSchema(schema, options)})`;
   }
+
   return getTypeFromSchema(schema, options);
 }
 

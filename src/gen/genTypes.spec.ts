@@ -516,6 +516,70 @@ export interface AuthenticationData {
         );
       });
     });
+
+    describe('OA3.1 nullable (type array)', () => {
+      const sampleSchema = prepareSchemas({
+        AuthenticationData: {
+          type: 'object',
+          required: ['login', 'tenant'],
+          properties: {
+            login: { type: 'string' },
+            tenant: { type: ['string', 'null'] },
+            region: { type: ['number', 'null'] },
+          },
+        },
+      });
+
+      test('strategy: include — nullable fields get | null type', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'include' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  tenant: string | null;
+  region?: number | null;
+}`
+        );
+      });
+
+      test('strategy: ignore (default) — null is stripped, types are plain', () => {
+        const res = generateTypes(sampleSchema, opts, false);
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  tenant: string;
+  region?: number;
+}`
+        );
+      });
+
+      test('strategy: nullableAsOptional — required nullable fields become optional', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'nullableAsOptional' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  tenant?: string;
+  region?: number;
+}`
+        );
+      });
+    });
   });
 
   describe('arrays', () => {

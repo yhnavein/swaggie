@@ -313,14 +313,14 @@ function error(e) {
 
 | Supported                                                                      | Not supported                                   |
 | ------------------------------------------------------------------------------ | ----------------------------------------------- |
-| OpenAPI 3                                                                      | Swagger, Open API 2.0                           |
+| OpenAPI 3, OpenAPI 3.1, OpenAPI 3.2                                            | Swagger, Open API 2.0                           |
 | `allOf`, `oneOf`, `anyOf`, `$ref` to schemas                                   | `not`                                           |
-| Spec formats: `JSON`, `YAML`                                                   | Very complex query params                       |
+| Spec formats: `JSON`, `YAML`                                                   | VERY complex query params                       |
 | Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (only one will be used) |
 | Content types: `JSON`, `text`, `multipart/form-data`                           | Multiple request types (only one will be used)  |
-| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to other spec files                  |
-| Different types of enum definitions (+ OpenAPI 3.1 support for enums)          | OpenAPI callbacks                               |
-| Paths inheritance, comments (descriptions), nullable                           | OpenAPI webhooks                                |
+| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to external spec files               |
+| Different types of enum definitions                                            | OpenAPI callbacks                               |
+| Paths inheritance, comments (descriptions), nullable, `["<TYPE>", null]`       | OpenAPI webhooks                                |
 | Getting documents from remote locations or as path reference (local file)      |                                                 |
 | Grouping endpoints by tags + handle gracefully duplicate operation ids         |                                                 |
 
