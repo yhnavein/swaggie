@@ -626,6 +626,7 @@ components:
           example: fehguy
         address:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/Address'
           xml:
@@ -688,6 +689,7 @@ components:
           example: 12345
         phone:
           type: string
+          nullable: true
           example: 12345
         userStatus:
           type: integer
@@ -725,6 +727,7 @@ components:
           $ref: '#/components/schemas/Category'
         photoUrls:
           type: array
+          nullable: true
           xml:
             wrapped: true
           items:

@@ -288,17 +288,6 @@ describe('prepareOperations', () => {
         { schema: { type: 'string' }, expectedType: 'string' },
         {
           schema: {
-            items: {
-              format: 'int64',
-              type: 'integer',
-            },
-            nullable: true,
-            type: 'array',
-          },
-          expectedType: 'number[] | null',
-        },
-        {
-          schema: {
             oneOf: [{ $ref: '#/components/schemas/User' }],
           },
           expectedType: 'User',
@@ -357,6 +346,30 @@ describe('prepareOperations', () => {
           expect(op1.parameters).toEqual([expectedBodyParam]);
         });
       }
+
+      test('should handle nullable requestBody schema with nullableStrategy: include', () => {
+        const includeOpts = getClientOptions({ nullableStrategy: 'include' });
+        const nullableSchema: OA3.SchemaObject = {
+          items: { format: 'int64', type: 'integer' },
+          nullable: true,
+          type: 'array',
+        };
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              content: { 'application/json': { schema: nullableSchema } },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, includeOpts);
+        expect(op1.body.type).toBe('number[] | null');
+      });
 
       test('should handle requestBody along with other parameters', () => {
         const ops: ExtendedApiOperation[] = [

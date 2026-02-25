@@ -402,7 +402,7 @@ export interface User {
   lastName?: string;
   email?: string;
   password?: string;
-  phone?: string;
+  phone?: string | null;
 /** User Status */
   userStatus?: number;}
 
@@ -414,7 +414,7 @@ export interface Pet {
   id?: number;
   name: string;
   category?: Category;
-  photoUrls: string[];
+  photoUrls: string[] | null;
   tags?: Tag[];
 /** pet status in the store */
   status?: "available" | "pending" | "sold";}

@@ -200,7 +200,14 @@ function renderTypeProp(
   if ('description' in definition || 'title' in definition) {
     lines.push(renderComment(definition.description ?? definition.title));
   }
-  const optionalMark = required ? '' : '?';
+
+  // When nullableAsOptional strategy is set, nullable properties are treated as optional
+  const isNullableAsOptional =
+    options.nullableStrategy === 'nullableAsOptional' &&
+    !('$ref' in definition) &&
+    (definition as OA3.SchemaObject).nullable === true;
+  const isOptional = !required || isNullableAsOptional;
+  const optionalMark = isOptional ? '?' : '';
   // If prop name is not a valid identifier, we need to wrap it in quotes.
   // We can't use getSafeIdentifier here because it will affect the data model.
   const safePropName = escapePropName(propName);

@@ -251,10 +251,9 @@ export enum BadNames {
       );
     });
 
-    //     it("should handle NSwag's enum correctly", () => {
+    //     test("should handle NSwag's enum correctly", () => {
     //       const res = generateTypes(
-    //         getDocument(),
-    //         {
+    //         prepareSchemas({
     //           SomeEnum: {
     //             type: 'integer',
     //             format: 'int32',
@@ -263,15 +262,20 @@ export enum BadNames {
     //               Active: 0,
     //               Disabled: 1,
     //             },
-    //           },
-    //         },
-    //         {} as any
+    //           } as any,
+    //         }),
+    //         opts,
+    //         false
     //       );
 
-    //       expect(res).to.be.equal(`export enum SomeEnum {
+    //       assertEqualIgnoringWhitespace(
+    //         res,
+    //         `
+    // export enum SomeEnum {
     //   Active = 0,
     //   Disabled = 1,
-    // }`);
+    // }`
+    //       );
     //     });
   });
 
@@ -420,49 +424,52 @@ export interface DeepNestedObject { "nested object"?: { "EC2 & ECS"?: Object_Nam
       );
     });
 
-    test('should handle nullable object properties', () => {
-      const res = generateTypes(
-        prepareSchemas({
-          AuthenticationData: {
-            type: 'object',
-            required: ['login', 'password', 'tenant'],
-            properties: {
-              login: {
-                // ReadOnly or WriteOnly are not yet supported
-                // As we don't have a way to distinguish how dev will use
-                // generated types in his app
-                readOnly: true,
-                type: 'string',
-              },
-              password: {
-                writeOnly: true,
-                type: 'string',
-              },
-              tenant: {
-                type: 'string',
-                // nullable is only supported in OpenAPI 3.0
-                nullable: true,
-              } as OA3.SchemaObject,
-              region: {
-                type: 'number',
-                // nullable is only supported in OpenAPI 3.0
-                nullable: true,
-              } as OA3.SchemaObject,
-              rememberMe: {
-                type: 'boolean',
-                // nullable is only supported in OpenAPI 3.0
-                nullable: true,
-              } as OA3.SchemaObject,
+    describe('nullableStrategy', () => {
+      const sampleSchema = prepareSchemas({
+        AuthenticationData: {
+          type: 'object',
+          required: ['login', 'password', 'tenant'],
+          properties: {
+            login: {
+              // ReadOnly or WriteOnly are not yet supported
+              // As we don't have a way to distinguish how dev will use
+              // generated types in his app
+              readOnly: true,
+              type: 'string',
             },
+            password: {
+              writeOnly: true,
+              type: 'string',
+            },
+            tenant: {
+              type: 'string',
+              // nullable is only supported in OpenAPI 3.0
+              nullable: true,
+            } as OA3.SchemaObject,
+            region: {
+              type: 'number',
+              // nullable is only supported in OpenAPI 3.0
+              nullable: true,
+            } as OA3.SchemaObject,
+            rememberMe: {
+              type: 'boolean',
+              // nullable is only supported in OpenAPI 3.0
+              nullable: true,
+            } as OA3.SchemaObject,
           },
-        }),
-        opts,
-        false
-      );
+        },
+      });
 
-      assertEqualIgnoringWhitespace(
-        res,
-        `
+      test('should handle nullable object properties with strategy: include', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'include' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
 export interface AuthenticationData {
   login: string;
   password: string;
@@ -470,7 +477,44 @@ export interface AuthenticationData {
   region?: number | null;
   rememberMe?: boolean | null;
 }`
-      );
+        );
+      });
+
+      test('should handle nullable object properties with strategy: ignore (default)', () => {
+        const res = generateTypes(sampleSchema, opts, false);
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  password: string;
+  tenant: string;
+  region?: number;
+  rememberMe?: boolean;
+}`
+        );
+      });
+
+      test('should handle nullable object properties with strategy: nullableAsOptional', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'nullableAsOptional' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  password: string;
+  tenant?: string;
+  region?: number;
+  rememberMe?: boolean;
+}`
+        );
+      });
     });
   });
 

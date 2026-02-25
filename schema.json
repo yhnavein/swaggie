@@ -98,6 +98,16 @@
           ],
           "type": "string"
         },
+        "nullableStrategy": {
+          "type": "string",
+          "default": "ignore",
+          "description": "Controls how OpenAPI 'nullable' is translated into TypeScript types",
+          "enum": [
+            "include",
+            "nullableAsOptional",
+            "ignore"
+          ]
+        },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },

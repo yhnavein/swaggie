@@ -98,7 +98,7 @@ export function prepareOperations(
     const [respObject, responseContentType] = getBestResponse(op);
     const returnType = getParameterType(respObject, options);
 
-    const body = getRequestBody(op.requestBody);
+    const body = getRequestBody(op.requestBody, options);
     const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
     const params = getParams(op.parameters as OA3.ParameterObject[], options);
 
@@ -278,7 +278,10 @@ export function getParamName(name?: string | null): string {
   );
 }
 
-function getRequestBody(reqBody: OA3.ReferenceObject | OA3.RequestBodyObject): IBodyParam | null {
+function getRequestBody(
+  reqBody: OA3.ReferenceObject | OA3.RequestBodyObject,
+  options: Partial<ClientOptions>
+): IBodyParam | null {
   if (reqBody && 'content' in reqBody) {
     const [bodyContent, contentType] = getBestContentType(reqBody);
     const isFormData = contentType === 'form-data';
@@ -287,7 +290,7 @@ function getRequestBody(reqBody: OA3.ReferenceObject | OA3.RequestBodyObject): I
       return {
         originalName: reqBody['x-name'] ?? 'body',
         name: getParamName(reqBody['x-name'] ?? 'body'),
-        type: isFormData ? 'FormData' : getParameterType(bodyContent, {}),
+        type: isFormData ? 'FormData' : getParameterType(bodyContent, options),
         optional: !reqBody.required,
         original: reqBody,
         contentType,

@@ -307,83 +307,162 @@ describe('getTypeFromSchema', () => {
       schema: OA3.SchemaObject;
       expected: string;
     };
-    const testCases: TestCase[] = [
-      { schema: { type: 'array', items: {}, nullable: true }, expected: 'unknown[] | null' },
-      {
-        schema: { type: 'array', items: { $ref: '#/components/schemas/Item' }, nullable: true },
-        expected: 'Item[] | null',
-      },
-      {
-        schema: { type: 'array', items: { type: 'string' }, nullable: true },
-        expected: 'string[] | null',
-      },
-      {
-        schema: { type: 'array', items: { type: 'number' }, nullable: true },
-        expected: 'number[] | null',
-      },
-      {
-        schema: { type: 'array', items: { type: 'boolean', nullable: true }, nullable: true },
-        expected: '(boolean | null)[] | null',
-      },
-      {
-        schema: {
-          type: 'array',
-          items: { type: 'string', enum: ['Admin', 'User', 'Guest'], nullable: true },
+
+    describe('strategy: include', () => {
+      const includeOpts = getClientOptions({ nullableStrategy: 'include' });
+
+      const testCases: TestCase[] = [
+        { schema: { type: 'array', items: {}, nullable: true }, expected: 'unknown[] | null' },
+        {
+          schema: { type: 'array', items: { $ref: '#/components/schemas/Item' }, nullable: true },
+          expected: 'Item[] | null',
         },
-        expected: '("Admin" | "User" | "Guest" | null)[]',
-      },
-      {
-        schema: { type: 'boolean', nullable: true },
-        expected: 'boolean | null',
-      },
-      {
-        schema: { type: 'string', format: 'date-time', nullable: true },
-        expected: 'Date | null',
-      },
-      {
-        schema: { type: 'string', nullable: true },
-        expected: 'string | null',
-      },
-      {
-        schema: { type: 'number', nullable: true },
-        expected: 'number | null',
-      },
-      {
-        schema: { type: 'object', nullable: true },
-        expected: 'unknown | null',
-      },
-      {
-        schema: { type: 'object', properties: { name: { type: 'string' } }, nullable: true },
-        expected: '{ name?: string; } | null',
-      },
-      {
-        schema: { nullable: true },
-        expected: 'unknown | null',
-      },
-      {
-        schema: { allOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
-        expected: 'string & number | null',
-      },
-      {
-        schema: { oneOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
-        expected: 'string | number | null',
-      },
-      {
-        schema: {
-          oneOf: [{ type: 'string' }, { type: 'number' }, { type: 'null' }],
-          nullable: true,
-        } as OA3.SchemaObject,
-        expected: 'string | number | null',
-      },
-    ];
+        {
+          schema: { type: 'array', items: { type: 'string' }, nullable: true },
+          expected: 'string[] | null',
+        },
+        {
+          schema: { type: 'array', items: { type: 'number' }, nullable: true },
+          expected: 'number[] | null',
+        },
+        {
+          schema: { type: 'array', items: { type: 'boolean', nullable: true }, nullable: true },
+          expected: '(boolean | null)[] | null',
+        },
+        {
+          schema: {
+            type: 'array',
+            items: { type: 'string', enum: ['Admin', 'User', 'Guest'], nullable: true },
+          },
+          expected: '("Admin" | "User" | "Guest" | null)[]',
+        },
+        {
+          schema: { type: 'boolean', nullable: true },
+          expected: 'boolean | null',
+        },
+        {
+          schema: { type: 'string', format: 'date-time', nullable: true },
+          expected: 'Date | null',
+        },
+        {
+          schema: { type: 'string', nullable: true },
+          expected: 'string | null',
+        },
+        {
+          schema: { type: 'number', nullable: true },
+          expected: 'number | null',
+        },
+        {
+          schema: { type: 'object', nullable: true },
+          expected: 'unknown | null',
+        },
+        {
+          schema: { type: 'object', properties: { name: { type: 'string' } }, nullable: true },
+          expected: '{ name?: string; } | null',
+        },
+        {
+          schema: { nullable: true },
+          expected: 'unknown | null',
+        },
+        {
+          schema: { allOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+          expected: 'string & number | null',
+        },
+        {
+          schema: { oneOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+          expected: 'string | number | null',
+        },
+        {
+          schema: {
+            oneOf: [{ type: 'string' }, { type: 'number' }, { type: 'null' }],
+            nullable: true,
+          } as OA3.SchemaObject,
+          expected: 'string | number | null',
+        },
+      ];
 
-    for (const { schema, expected } of testCases) {
-      test(`should process ${JSON.stringify(schema)} correctly`, async () => {
-        const res = getTypeFromSchema(schema, opts);
+      for (const { schema, expected } of testCases) {
+        test(`should process ${JSON.stringify(schema)} correctly`, async () => {
+          const res = getTypeFromSchema(schema, includeOpts);
 
-        expect(res).toBe(expected);
-      });
-    }
+          expect(res).toBe(expected);
+        });
+      }
+    });
+
+    describe('strategy: ignore (default)', () => {
+      const ignoreOpts = getClientOptions({ nullableStrategy: 'ignore' });
+      const defaultOpts = getClientOptions();
+
+      const testCases: TestCase[] = [
+        { schema: { type: 'string', nullable: true }, expected: 'string' },
+        { schema: { type: 'number', nullable: true }, expected: 'number' },
+        { schema: { type: 'boolean', nullable: true }, expected: 'boolean' },
+        {
+          schema: { type: 'string', format: 'date-time', nullable: true },
+          expected: 'Date',
+        },
+        { schema: { type: 'array', items: {}, nullable: true }, expected: 'unknown[]' },
+        {
+          schema: { type: 'array', items: { $ref: '#/components/schemas/Item' }, nullable: true },
+          expected: 'Item[]',
+        },
+        {
+          schema: { type: 'array', items: { type: 'boolean', nullable: true }, nullable: true },
+          expected: 'boolean[]',
+        },
+        { schema: { nullable: true }, expected: 'unknown' },
+        {
+          schema: { allOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+          expected: 'string & number',
+        },
+        {
+          schema: { oneOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+          expected: 'string | number',
+        },
+      ];
+
+      for (const { schema, expected } of testCases) {
+        test(`[ignore] should process ${JSON.stringify(schema)} as ${expected}`, async () => {
+          expect(getTypeFromSchema(schema, ignoreOpts)).toBe(expected);
+        });
+
+        test(`[default] should process ${JSON.stringify(schema)} as ${expected}`, async () => {
+          expect(getTypeFromSchema(schema, defaultOpts)).toBe(expected);
+        });
+      }
+    });
+
+    describe('strategy: nullableAsOptional', () => {
+      const optionalOpts = getClientOptions({ nullableStrategy: 'nullableAsOptional' });
+
+      const testCases: TestCase[] = [
+        // nullableAsOptional does not affect the type string itself — no | null suffix
+        { schema: { type: 'string', nullable: true }, expected: 'string' },
+        { schema: { type: 'number', nullable: true }, expected: 'number' },
+        { schema: { type: 'boolean', nullable: true }, expected: 'boolean' },
+        {
+          schema: { type: 'string', format: 'date-time', nullable: true },
+          expected: 'Date',
+        },
+        { schema: { type: 'array', items: {}, nullable: true }, expected: 'unknown[]' },
+        {
+          schema: { type: 'array', items: { $ref: '#/components/schemas/Item' }, nullable: true },
+          expected: 'Item[]',
+        },
+        { schema: { nullable: true }, expected: 'unknown' },
+        {
+          schema: { allOf: [{ type: 'string' }, { type: 'number' }], nullable: true },
+          expected: 'string & number',
+        },
+      ];
+
+      for (const { schema, expected } of testCases) {
+        test(`should process ${JSON.stringify(schema)} as ${expected}`, async () => {
+          expect(getTypeFromSchema(schema, optionalOpts)).toBe(expected);
+        });
+      }
+    });
   });
 });
 

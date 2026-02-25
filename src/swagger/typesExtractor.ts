@@ -52,7 +52,9 @@ export function getTypeFromSchema(
     return 'null';
   }
 
-  const isNullableSuffix = 'nullable' in schema && schema.nullable === true ? ' | null' : '';
+  const isNullable = 'nullable' in schema && schema.nullable === true;
+  const strategy = options.nullableStrategy ?? 'ignore';
+  const isNullableSuffix = isNullable && strategy === 'include' ? ' | null' : '';
   const type = getTypeFromSchemaInternal(schema, options);
 
   if (isNullableSuffix && type.endsWith('| null')) {
@@ -102,7 +104,10 @@ function getNestedTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
   options: Partial<ClientOptions>
 ): string {
-  if (('nullable' in schema && schema.nullable === true) || ('enum' in schema && schema.enum)) {
+  const strategy = options.nullableStrategy ?? 'ignore';
+  const isNullableAndActive =
+    'nullable' in schema && schema.nullable === true && strategy === 'include';
+  if (isNullableAndActive || ('enum' in schema && schema.enum)) {
     return `(${getTypeFromSchema(schema, options)})`;
   }
   return getTypeFromSchema(schema, options);

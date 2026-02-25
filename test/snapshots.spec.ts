@@ -17,6 +17,7 @@ describe('petstore snapshots', () => {
           allowDots: true,
           arrayFormat: 'repeat',
         },
+        nullableStrategy: 'include',
       };
 
       const [generatedCode] = await runCodeGenerator(parameters);

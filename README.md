@@ -103,6 +103,7 @@ Sample configuration looks like this:
   "preferAny": true,
   "servicePrefix": "",
   "dateFormat": "Date", // "string" | "Date"
+  "nullableStrategy": "ignore", // "ignore" | "include" | "nullableAsOptional"
   "queryParamsSerialization": {
     "arrayFormat": "repeat", // "repeat" | "brackets" | "indices"
     "allowDots": true
@@ -160,6 +161,24 @@ Once you know what your backend expects, you can adjust the configuration file a
     "allowDots": true
   }
 }
+```
+
+### Nullable Strategy
+
+OpenAPI 3.0 allows marking fields as `nullable: true`. Swaggie provides three strategies for translating this into TypeScript, controlled by the `nullableStrategy` option:
+
+| Value                  | Description                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `"ignore"` (default)   | `nullable: true` is ignored. Types are generated as if `nullable` was not set.     |
+| `"include"`            | `nullable: true` appends `\| null` to the TypeScript type (e.g. `string \| null`). |
+| `"nullableAsOptional"` | `nullable: true` makes the property optional (`?`) instead of adding `\| null`.    |
+
+**Examples** for a schema with `tenant: { type: 'string', nullable: true }` (required):
+
+```typescript
+// nullableStrategy: "ignore"   →  tenant: string;
+// nullableStrategy: "include"  →  tenant: string | null;
+// nullableStrategy: "nullableAsOptional"  →  tenant?: string;
 ```
 
 ### Code Quality
