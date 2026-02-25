@@ -3,11 +3,11 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import generateOperations from './genOperations';
 import generateTypes from './genTypes';
 import { saveFile, prepareOutputFilename } from '../utils';
-import type { ClientOptions } from '../types';
+import type { AppOptions } from '../types';
 
 export default async function generateCode(
   spec: OA3.Document,
-  options: ClientOptions
+  options: AppOptions
 ): Promise<string> {
   let fileContents = await generateOperations(spec, options);
   fileContents += generateTypes(spec, options);

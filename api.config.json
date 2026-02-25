@@ -5,6 +5,7 @@
   "template": "tsq-xior",
   "preferAny": true,
   "dateFormat": "string",
+  "nullableStrategy": "ignore",
   "queryParamsSerialization": {
     "arrayFormat": "indices",
     "allowDots": false

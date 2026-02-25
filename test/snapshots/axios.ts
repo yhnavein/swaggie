@@ -64,7 +64,7 @@ export const petClient = {
   * Multiple status values can be provided with comma separated strings
   * @param status (optional) - Status values that need to be considered for filter
   */
-  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
+  findPetsByStatus(status?: "available" | "pending" | "sold" | null,
     $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     const url = `/pet/findByStatus`;
@@ -446,7 +446,7 @@ export interface Order {
   quantity?: number;
   shipDate?: Date;
 /** Order Status */
-  status?: ("placed" | "approved" | "delivered");
+  status?: "placed" | "approved" | "delivered";
   complete?: boolean;}
 
 export interface Category {
@@ -460,7 +460,7 @@ export interface User {
   lastName?: string;
   email?: string;
   password?: string;
-  phone?: string;
+  phone?: string | null;
 /** User Status */
   userStatus?: number;}
 
@@ -472,7 +472,7 @@ export interface Pet {
   id?: number;
   name: string;
   category?: Category;
-  photoUrls: string[];
+  photoUrls: string[] | null;
   tags?: Tag[];
 /** pet status in the store */
-  status?: ("available" | "pending" | "sold");}
+  status?: "available" | "pending" | "sold";}

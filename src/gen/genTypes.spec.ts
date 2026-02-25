@@ -251,10 +251,9 @@ export enum BadNames {
       );
     });
 
-    //     it("should handle NSwag's enum correctly", () => {
+    //     test("should handle NSwag's enum correctly", () => {
     //       const res = generateTypes(
-    //         getDocument(),
-    //         {
+    //         prepareSchemas({
     //           SomeEnum: {
     //             type: 'integer',
     //             format: 'int32',
@@ -263,15 +262,20 @@ export enum BadNames {
     //               Active: 0,
     //               Disabled: 1,
     //             },
-    //           },
-    //         },
-    //         {} as any
+    //           } as any,
+    //         }),
+    //         opts,
+    //         false
     //       );
 
-    //       expect(res).to.be.equal(`export enum SomeEnum {
+    //       assertEqualIgnoringWhitespace(
+    //         res,
+    //         `
+    // export enum SomeEnum {
     //   Active = 0,
     //   Disabled = 1,
-    // }`);
+    // }`
+    //       );
     //     });
   });
 
@@ -418,6 +422,163 @@ export interface Data_Object { token?: string; auth?: Authentication_Data; }
 export interface Object_Name { token?: string; data?: Data_Object; }
 export interface DeepNestedObject { "nested object"?: { "EC2 & ECS"?: Object_Name; "Some/Strange + Names <=#$%&*?>"?: string; }; }`
       );
+    });
+
+    describe('nullableStrategy', () => {
+      const sampleSchema = prepareSchemas({
+        AuthenticationData: {
+          type: 'object',
+          required: ['login', 'password', 'tenant'],
+          properties: {
+            login: {
+              // ReadOnly or WriteOnly are not yet supported
+              // As we don't have a way to distinguish how dev will use
+              // generated types in his app
+              readOnly: true,
+              type: 'string',
+            },
+            password: {
+              writeOnly: true,
+              type: 'string',
+            },
+            tenant: {
+              type: 'string',
+              // nullable is only supported in OpenAPI 3.0
+              nullable: true,
+            } as OA3.SchemaObject,
+            region: {
+              type: 'number',
+              // nullable is only supported in OpenAPI 3.0
+              nullable: true,
+            } as OA3.SchemaObject,
+            rememberMe: {
+              type: 'boolean',
+              // nullable is only supported in OpenAPI 3.0
+              nullable: true,
+            } as OA3.SchemaObject,
+          },
+        },
+      });
+
+      test('should handle nullable object properties with strategy: include', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'include' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  password: string;
+  tenant: string | null;
+  region?: number | null;
+  rememberMe?: boolean | null;
+}`
+        );
+      });
+
+      test('should handle nullable object properties with strategy: ignore (default)', () => {
+        const res = generateTypes(sampleSchema, opts, false);
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  password: string;
+  tenant: string;
+  region?: number;
+  rememberMe?: boolean;
+}`
+        );
+      });
+
+      test('should handle nullable object properties with strategy: nullableAsOptional', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'nullableAsOptional' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  password: string;
+  tenant?: string;
+  region?: number;
+  rememberMe?: boolean;
+}`
+        );
+      });
+    });
+
+    describe('OA3.1 nullable (type array)', () => {
+      const sampleSchema = prepareSchemas({
+        AuthenticationData: {
+          type: 'object',
+          required: ['login', 'tenant'],
+          properties: {
+            login: { type: 'string' },
+            tenant: { type: ['string', 'null'] },
+            region: { type: ['number', 'null'] },
+          },
+        },
+      });
+
+      test('strategy: include — nullable fields get | null type', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'include' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  tenant: string | null;
+  region?: number | null;
+}`
+        );
+      });
+
+      test('strategy: ignore (default) — null is stripped, types are plain', () => {
+        const res = generateTypes(sampleSchema, opts, false);
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  tenant: string;
+  region?: number;
+}`
+        );
+      });
+
+      test('strategy: nullableAsOptional — required nullable fields become optional', () => {
+        const res = generateTypes(
+          sampleSchema,
+          getClientOptions({ nullableStrategy: 'nullableAsOptional' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export interface AuthenticationData {
+  login: string;
+  tenant?: string;
+  region?: number;
+}`
+        );
+      });
     });
   });
 

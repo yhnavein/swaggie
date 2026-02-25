@@ -103,6 +103,7 @@ Sample configuration looks like this:
   "preferAny": true,
   "servicePrefix": "",
   "dateFormat": "Date", // "string" | "Date"
+  "nullableStrategy": "ignore", // "ignore" | "include" | "nullableAsOptional"
   "queryParamsSerialization": {
     "arrayFormat": "repeat", // "repeat" | "brackets" | "indices"
     "allowDots": true
@@ -160,6 +161,24 @@ Once you know what your backend expects, you can adjust the configuration file a
     "allowDots": true
   }
 }
+```
+
+### Nullable Strategy
+
+OpenAPI 3.0 allows marking fields as `nullable: true`. Swaggie provides three strategies for translating this into TypeScript, controlled by the `nullableStrategy` option:
+
+| Value                  | Description                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `"ignore"` (default)   | `nullable: true` is ignored. Types are generated as if `nullable` was not set.     |
+| `"include"`            | `nullable: true` appends `\| null` to the TypeScript type (e.g. `string \| null`). |
+| `"nullableAsOptional"` | `nullable: true` makes the property optional (`?`) instead of adding `\| null`.    |
+
+**Examples** for a schema with `tenant: { type: 'string', nullable: true }` (required):
+
+```typescript
+// nullableStrategy: "ignore"   →  tenant: string;
+// nullableStrategy: "include"  →  tenant: string | null;
+// nullableStrategy: "nullableAsOptional"  →  tenant?: string;
 ```
 
 ### Code Quality
@@ -294,14 +313,14 @@ function error(e) {
 
 | Supported                                                                      | Not supported                                   |
 | ------------------------------------------------------------------------------ | ----------------------------------------------- |
-| OpenAPI 3                                                                      | Swagger, Open API 2.0                           |
+| OpenAPI 3, OpenAPI 3.1, OpenAPI 3.2                                            | Swagger, Open API 2.0                           |
 | `allOf`, `oneOf`, `anyOf`, `$ref` to schemas                                   | `not`                                           |
-| Spec formats: `JSON`, `YAML`                                                   | Very complex query params                       |
+| Spec formats: `JSON`, `YAML`                                                   | VERY complex query params                       |
 | Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (only one will be used) |
 | Content types: `JSON`, `text`, `multipart/form-data`                           | Multiple request types (only one will be used)  |
-| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to other spec files                  |
-| Different types of enum definitions (+ OpenAPI 3.1 support for enums)          | OpenAPI callbacks                               |
-| Paths inheritance, comments (descriptions)                                     | OpenAPI webhooks                                |
+| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to external spec files               |
+| Different types of enum definitions                                            | OpenAPI callbacks                               |
+| Paths inheritance, comments (descriptions), nullable, `["<TYPE>", null]`       | OpenAPI webhooks                                |
 | Getting documents from remote locations or as path reference (local file)      |                                                 |
 | Grouping endpoints by tags + handle gracefully duplicate operation ids         |                                                 |
 

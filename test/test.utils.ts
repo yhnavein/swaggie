@@ -2,7 +2,8 @@ import path from 'node:path';
 import { expect, Mock } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import type { ClientOptions } from '../src/types';
+import type { AppOptions, ClientOptions } from '../src/types';
+import { resolveOptions } from '../src/swagger';
 
 /**
  * Returns a valid OpenAPI 3.0 document with the minimal required fields.
@@ -23,11 +24,11 @@ export function getDocument(document: Partial<OA3.Document> = {}): OA3.Document 
 }
 
 /**
- * Returns a valid ClientOptions object with the minimal required fields.
- * And it allows to easily override any of the fields.
+ * Returns a fully resolved AppOptions object suitable for passing to internal gen functions.
+ * Accepts a partial ClientOptions for easy overrides in tests.
  */
-export function getClientOptions(opts: Partial<ClientOptions> = {}): ClientOptions {
-  return {
+export function getClientOptions(opts: Partial<ClientOptions> = {}): AppOptions {
+  return resolveOptions({
     src: 'http://example.com/swagger.json',
     out: 'output.ts',
     template: 'xior',
@@ -36,7 +37,7 @@ export function getClientOptions(opts: Partial<ClientOptions> = {}): ClientOptio
       arrayFormat: 'repeat',
     },
     ...opts,
-  };
+  });
 }
 
 /**

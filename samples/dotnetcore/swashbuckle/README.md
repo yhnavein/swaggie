@@ -62,9 +62,9 @@ export enum UserRole {
 }
 
 export interface UserViewModel {
-  name?: string;
-  id?: number;
-  email?: string;
+  name: string;
+  id: number;
+  email: string;
   role?: UserRole;
   someDict: { [key: string]: string };
   auditEvents?: StringPagedResult;

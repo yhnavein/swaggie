@@ -126,13 +126,16 @@ public record UserProfileUpdateModel
 
 public record UserViewModel
 {
+  [Required]
   public string Name { get; set; }
 
+  [Required]
   public long Id { get; set; }
 
+  [Required]
   public string Email { get; set; }
 
-  public UserRole Role { get; set; }
+  public UserRole? Role { get; set; }
 
   public Dictionary<int, string> SomeDict { get; set; } = new();
 
@@ -144,30 +147,33 @@ public record UserFilter
   /// <summary>
   /// Name of the user. Can be partial name match
   /// </summary>
+  [Required]
   public string Name { get; set; }
 
   /// <summary>
   /// Ids of the users
   /// </summary>
-  public List<long> Ids { get; set; } = new();
+  public List<long>? Ids { get; set; } = new();
 
   /// <summary>
   /// User's email. Can be a partial match
   /// </summary>
-  public string Email { get; set; }
+  public string? Email { get; set; }
 
   /// <summary>
   /// Search by user role(s)
   /// </summary>
-  public List<UserRole> Roles { get; set; } = new();
+  public List<UserRole>? Roles { get; set; } = new();
 
-  public UserLog UserLog { get; set; } = new();
+  public UserLog? UserLog { get; set; } = new();
 }
 
 public record PagedResult<T>
 {
+  [Required]
   public IList<T> Items { get; set; }
 
+  [Required]
   public int TotalCount { get; set; }
 }
 

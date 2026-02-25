@@ -373,6 +373,50 @@ describe('getBestResponse', () => {
     }
   });
 
+  test('resolves $ref response from components/responses', () => {
+    const op: OA3.OperationObject = {
+      responses: {
+        '200': {
+          $ref: '#/components/responses/SuccessResponse',
+        },
+      },
+    };
+    const components: OA3.ComponentsObject = {
+      responses: {
+        SuccessResponse: {
+          description: 'Success',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/TestObject',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const [res, contentType] = getBestResponse(op, components);
+
+    expect(res).toEqual({ schema: { $ref: '#/components/schemas/TestObject' } });
+    expect(contentType).toBe('json');
+  });
+
+  test('returns null when $ref response is not found in components', () => {
+    const op: OA3.OperationObject = {
+      responses: {
+        '200': {
+          $ref: '#/components/responses/MissingResponse',
+        },
+      },
+    };
+
+    const [res, contentType] = getBestResponse(op, {});
+
+    expect(res).toBeNull();
+    expect(contentType).toBeNull();
+  });
+
   test('handles multiple responses', () => {
     const op: OA3.OperationObject = {
       responses: {

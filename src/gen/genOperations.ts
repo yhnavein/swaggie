@@ -1,19 +1,18 @@
 import { camel } from 'case';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import { getParameterType } from '../swagger';
+import { getParameterType, getOperations } from '../swagger';
 import {
   groupOperationsByGroupName,
   getBestResponse,
   orderBy,
   renderFile,
   getBestContentType,
+  escapeIdentifier,
 } from '../utils';
 import { generateBarrelFile } from './createBarrel';
-import type { ApiOperation, ClientOptions } from '../types';
-import { escapeIdentifier } from '../utils';
-import { getOperations } from '../swagger';
-import { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
+import type { ApiOperation, AppOptions } from '../types';
+import type { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
 import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
@@ -21,11 +20,11 @@ import { prepareJsDocsForOperation } from './jsDocs';
  */
 export default async function generateOperations(
   spec: OA3.Document,
-  options: ClientOptions
+  options: AppOptions
 ): Promise<string> {
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
-  const servicePrefix = options.servicePrefix ?? '';
+  const servicePrefix = options.servicePrefix;
   let result = renderFile('baseClient.ejs', {
     servicePrefix,
     baseUrl: options.baseUrl,
@@ -34,7 +33,7 @@ export default async function generateOperations(
 
   for (const name in groups) {
     const group = groups[name];
-    const clientData = prepareClient(servicePrefix + name, group, options);
+    const clientData = prepareClient(servicePrefix + name, group, spec.components, options);
 
     if (!clientData) {
       continue;
@@ -56,9 +55,10 @@ export default async function generateOperations(
 function prepareClient(
   name: string,
   operations: ApiOperation[],
-  options: ClientOptions
+  components: OA3.ComponentsObject | undefined,
+  options: AppOptions
 ): ClientData | null {
-  const preparedOperations = prepareOperations(operations, options);
+  const preparedOperations = prepareOperations(operations, options, components);
 
   if (preparedOperations.length === 0) {
     return null;
@@ -86,7 +86,8 @@ function prepareClient(
  */
 export function prepareOperations(
   operations: ApiOperation[],
-  options: ClientOptions
+  options: AppOptions,
+  components?: OA3.ComponentsObject
 ): IOperation[] {
   let ops = fixDuplicateOperations(operations);
 
@@ -95,10 +96,10 @@ export function prepareOperations(
   }
 
   return ops.map((op) => {
-    const [respObject, responseContentType] = getBestResponse(op);
+    const [respObject, responseContentType] = getBestResponse(op, components);
     const returnType = getParameterType(respObject, options);
 
-    const body = getRequestBody(op.requestBody);
+    const body = getRequestBody(op.requestBody, components, options);
     const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
     const params = getParams(op.parameters as OA3.ParameterObject[], options);
 
@@ -221,7 +222,7 @@ export function getOperationName(opId: string | null, group?: string | null) {
 
 export function getParams(
   params: OA3.ParameterObject[],
-  options: ClientOptions,
+  options: AppOptions,
   where?: string[]
 ): IOperationParam[] {
   if (!params || params.length < 1) {
@@ -278,21 +279,41 @@ export function getParamName(name?: string | null): string {
   );
 }
 
-function getRequestBody(reqBody: OA3.ReferenceObject | OA3.RequestBodyObject): IBodyParam | null {
-  if (reqBody && 'content' in reqBody) {
-    const [bodyContent, contentType] = getBestContentType(reqBody);
-    const isFormData = contentType === 'form-data';
-
-    if (bodyContent) {
-      return {
-        originalName: reqBody['x-name'] ?? 'body',
-        name: getParamName(reqBody['x-name'] ?? 'body'),
-        type: isFormData ? 'FormData' : getParameterType(bodyContent, {}),
-        optional: !reqBody.required,
-        original: reqBody,
-        contentType,
-      };
-    }
+function getRequestBody(
+  rawReqBody: OA3.ReferenceObject | OA3.RequestBodyObject,
+  components: OA3.ComponentsObject | undefined,
+  options: AppOptions
+): IBodyParam | null {
+  if (!rawReqBody) {
+    return null;
   }
+
+  let reqBody: OA3.RequestBodyObject;
+  if ('$ref' in rawReqBody) {
+    const refName = rawReqBody.$ref.replace('#/components/requestBodies/', '');
+    const resolved = components?.requestBodies?.[refName];
+    if (!resolved || '$ref' in resolved) {
+      console.error(`RequestBody $ref '${rawReqBody.$ref}' not found in components/requestBodies`);
+      return null;
+    }
+    reqBody = resolved;
+  } else {
+    reqBody = rawReqBody;
+  }
+
+  const [bodyContent, contentType] = getBestContentType(reqBody);
+  const isFormData = contentType === 'form-data';
+
+  if (bodyContent) {
+    return {
+      originalName: reqBody['x-name'] ?? 'body',
+      name: getParamName(reqBody['x-name'] ?? 'body'),
+      type: isFormData ? 'FormData' : getParameterType(bodyContent, options),
+      optional: !reqBody.required,
+      original: reqBody,
+      contentType,
+    };
+  }
+
   return null;
 }

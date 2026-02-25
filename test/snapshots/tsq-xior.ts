@@ -67,7 +67,7 @@ export const petClient = {
   * Multiple status values can be provided with comma separated strings
   * @param status (optional) - Status values that need to be considered for filter
   */
-  findPetsByStatus(status?: ("available" | "pending" | "sold") | null,
+  findPetsByStatus(status?: "available" | "pending" | "sold" | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/findByStatus`;
@@ -198,7 +198,7 @@ export const petClient = {
   * @param $config (optional) Additional configuration for TanStack Query
   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
  */
-export function usepetfindPetsByStatus<TData = Pet[], TError = Error>(  status?: ("available" | "pending" | "sold") | null,
+export function usepetfindPetsByStatus<TData = Pet[], TError = Error>(  status?: "available" | "pending" | "sold" | null,
     $config?: Omit<
   UseQueryOptions<Pet[], TError, TData>,
   'queryKey' | 'queryFn'
@@ -565,7 +565,7 @@ useuserlogoutUser.queryKeys = ['user', 'userlogoutUser'];
   quantity?: number;
   shipDate?: Date;
 /** Order Status */
-  status?: ("placed" | "approved" | "delivered");
+  status?: "placed" | "approved" | "delivered";
   complete?: boolean;}
 
 export interface Category {
@@ -579,7 +579,7 @@ export interface User {
   lastName?: string;
   email?: string;
   password?: string;
-  phone?: string;
+  phone?: string | null;
 /** User Status */
   userStatus?: number;}
 
@@ -591,7 +591,7 @@ export interface Pet {
   id?: number;
   name: string;
   category?: Category;
-  photoUrls: string[];
+  photoUrls: string[] | null;
   tags?: Tag[];
 /** pet status in the store */
-  status?: ("available" | "pending" | "sold");}
+  status?: "available" | "pending" | "sold";}

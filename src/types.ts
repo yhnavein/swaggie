@@ -22,6 +22,13 @@ export interface ClientOptions {
   servicePrefix?: string;
   /** How date should be handled. It does not do any special serialization */
   dateFormat?: DateSupport;
+  /**
+   * Controls how OpenAPI 'nullable' is translated into TypeScript types. Default: 'ignore'.
+   * 'include' - 'nullable: true' appends `| null` to the TypeScript type (e.g. `string | null`).
+   * 'nullableAsOptional' - 'nullable: true' makes the property optional (`?`) instead of adding `| null`.
+   * 'ignore' - 'nullable: true' is ignored.
+   */
+  nullableStrategy?: NullableStrategy;
   /** Options for query parameters serialization */
   queryParamsSerialization: QueryParamsSerializationOptions;
 
@@ -48,6 +55,22 @@ export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior' 
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date';
 export type ArrayFormat = 'indices' | 'repeat' | 'brackets';
+export type NullableStrategy = 'include' | 'nullableAsOptional' | 'ignore';
+
+/**
+ * Internal options type used throughout the app after `prepareAppOptions` has run.
+ * All fields that have defaults are required here so the rest of the codebase never
+ * needs to perform its own `?? fallback` logic.
+ */
+export interface AppOptions extends ClientOptions {
+  template: Template;
+  servicePrefix: string;
+  nullableStrategy: NullableStrategy;
+  queryParamsSerialization: {
+    allowDots: boolean;
+    arrayFormat: ArrayFormat;
+  };
+}
 
 /**
  * Local type that represent Operation as understood by Swaggie
