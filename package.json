@@ -1,7 +1,7 @@
 {
   "name": "swaggie",
   "version": "1.6.0",
-  "description": "Generate TypeScript REST client code from an OpenAPI spec",
+  "description": "Generate a fully typed TypeScript API client from your OpenAPI 3 spec",
   "author": {
     "name": "Piotr Dabrowski",
     "url": "https://github.com/yhnavein"
@@ -35,7 +35,10 @@
   "keywords": [
     "swagger",
     "openapi",
+    "oapi",
     "openapi 3.0",
+    "openapi 3.1",
+    "openapi 3.2",
     "rest",
     "rest client",
     "fetch",
