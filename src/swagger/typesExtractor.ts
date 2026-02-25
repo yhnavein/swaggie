@@ -1,4 +1,4 @@
-import type { ClientOptions } from '../types';
+import type { AppOptions } from '../types';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import { escapePropName } from '../utils';
 
@@ -16,7 +16,7 @@ import { escapePropName } from '../utils';
  */
 export function getParameterType(
   param: OA3.ParameterObject | OA3.MediaTypeObject,
-  options: Partial<ClientOptions>
+  options: AppOptions
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
@@ -24,7 +24,7 @@ export function getParameterType(
     return unknownType;
   }
 
-  return getTypeFromSchema(param.schema, options);
+  return getTypeFromSchemaResolved(param.schema, options);
 }
 
 /**
@@ -35,7 +35,18 @@ export function getParameterType(
  */
 export function getTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
-  options: Partial<ClientOptions>
+  options: AppOptions
+): string {
+  return getTypeFromSchemaResolved(schema, options);
+}
+
+/**
+ * Internal implementation of getTypeFromSchema that operates on fully-resolved AppOptions.
+ * All private functions in this module call this version directly to avoid redundant resolution.
+ */
+function getTypeFromSchemaResolved(
+  schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
+  options: AppOptions
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
@@ -59,8 +70,7 @@ export function getTypeFromSchema(
 
   // OpenAPI 3.0 nullable: nullable: true
   const isNullable = 'nullable' in schema && schema.nullable === true;
-  const strategy = options.nullableStrategy ?? 'ignore';
-  const isNullableSuffix = isNullable && strategy === 'include' ? ' | null' : '';
+  const isNullableSuffix = isNullable && options.nullableStrategy === 'include' ? ' | null' : '';
   const type = getTypeFromSchemaInternal(schema, options);
 
   if (isNullableSuffix && type.endsWith('| null')) {
@@ -74,10 +84,7 @@ export function getTypeFromSchema(
  * The presence of `"null"` in the array is the OA3.1 way of marking a field as nullable.
  * Respects `nullableStrategy` the same way as OA3.0 `nullable: true`.
  */
-function getTypeFromOA31ArrayType(
-  schema: OA31.SchemaObject,
-  options: Partial<ClientOptions>
-): string {
+function getTypeFromOA31ArrayType(schema: OA31.SchemaObject, options: AppOptions): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
   const types = schema.type as string[];
   const isNullable = types.includes('null');
@@ -107,8 +114,7 @@ function getTypeFromOA31ArrayType(
     return 'null';
   }
 
-  const strategy = options.nullableStrategy ?? 'ignore';
-  if (strategy === 'include') {
+  if (options.nullableStrategy === 'include') {
     // We don't want multiple nulls in the type string
     if (baseType.endsWith('| null')) {
       return baseType;
@@ -123,7 +129,7 @@ function getTypeFromOA31ArrayType(
 
 function getTypeFromSchemaInternal(
   schema: OA3.SchemaObject | OA31.SchemaObject,
-  options: Partial<ClientOptions>
+  options: AppOptions
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
@@ -160,26 +166,24 @@ function getTypeFromSchemaInternal(
 
 function getNestedTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
-  options: Partial<ClientOptions>
+  options: AppOptions
 ): string {
-  const strategy = options.nullableStrategy ?? 'ignore';
-
   // OA3.0 nullable: true
   const isOA30NullableAndActive =
-    'nullable' in schema && schema.nullable === true && strategy === 'include';
+    'nullable' in schema && schema.nullable === true && options.nullableStrategy === 'include';
 
   // OA3.1 nullable: type array containing 'null'
   const isOA31NullableAndActive =
     'type' in schema &&
     Array.isArray(schema.type) &&
     schema.type.includes('null') &&
-    strategy === 'include';
+    options.nullableStrategy === 'include';
 
   if (isOA30NullableAndActive || isOA31NullableAndActive || ('enum' in schema && schema.enum)) {
-    return `(${getTypeFromSchema(schema, options)})`;
+    return `(${getTypeFromSchemaResolved(schema, options)})`;
   }
 
-  return getTypeFromSchema(schema, options);
+  return getTypeFromSchemaResolved(schema, options);
 }
 
 /**
@@ -188,14 +192,14 @@ function getNestedTypeFromSchema(
  */
 function getTypeFromObject(
   schema: OA3.SchemaObject | OA31.SchemaObject,
-  options: Partial<ClientOptions>
+  options: AppOptions
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
   if (schema.additionalProperties) {
     const extraProps = schema.additionalProperties;
     return `{ [key: string]: ${
-      extraProps === true ? 'any' : getTypeFromSchema(extraProps, options)
+      extraProps === true ? 'any' : getTypeFromSchemaResolved(extraProps, options)
     } }`;
   }
 
@@ -209,7 +213,7 @@ function getTypeFromObject(
       const isRequired = required.includes(prop);
       const safePropName = escapePropName(prop);
       result.push(
-        `${safePropName}${isRequired ? '' : '?'}: ${getTypeFromSchema(propDefinition, options)};`
+        `${safePropName}${isRequired ? '' : '?'}: ${getTypeFromSchemaResolved(propDefinition, options)};`
       );
     }
 
@@ -222,10 +226,12 @@ function getTypeFromObject(
 /**
  * Simplified way of extracting correct type from `anyOf`, `oneOf` or `allOf` schema.
  */
-function getTypeFromComposites(schema: OA3.SchemaObject, options: Partial<ClientOptions>): string {
+function getTypeFromComposites(schema: OA3.SchemaObject, options: AppOptions): string {
   const composite = schema.allOf || schema.oneOf || schema.anyOf;
 
-  return composite.map((s) => getTypeFromSchema(s, options)).join(schema.allOf ? ' & ' : ' | ');
+  return composite
+    .map((s) => getTypeFromSchemaResolved(s, options))
+    .join(schema.allOf ? ' & ' : ' | ');
 }
 
 /**

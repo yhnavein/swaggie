@@ -1,7 +1,7 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
 import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
-import type { ClientOptions } from '../types';
+import type { AppOptions } from '../types';
 import { escapePropName } from '../utils';
 import { findAllUsedRefs } from './refsHelper';
 import { renderComment } from './jsDocs';
@@ -14,7 +14,7 @@ import { renderComment } from './jsDocs';
  */
 export default function generateTypes(
   spec: OA3.Document,
-  options: ClientOptions,
+  options: AppOptions,
   skipUnused: boolean = true
 ): string {
   const result: string[] = [];
@@ -44,7 +44,7 @@ export default function generateTypes(
 function renderSchema(
   name: string,
   schema: OA3.ReferenceObject | OA3.SchemaObject,
-  options: ClientOptions
+  options: AppOptions
 ): string {
   const safeName = getSafeIdentifier(name);
   if (!safeName) {
@@ -110,7 +110,7 @@ function renderSchema(
  * @param options - The options for the generation.
  * @returns The type definition for the `anyOf` or `oneOf` schema.
  */
-function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions) {
+function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: AppOptions) {
   const composite = schema.allOf || schema.oneOf || schema.anyOf;
   if (!composite) {
     return '';
@@ -122,7 +122,7 @@ function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: ClientOptions
 /**
  * Generates the inline contents of an object type.
  */
-function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOptions) {
+function generateObjectTypeContents(schema: OA3.SchemaObject, options: AppOptions) {
   const result: string[] = [];
   const required = schema.required || [];
   const props = Object.keys(schema.properties || {});
@@ -136,7 +136,7 @@ function generateObjectTypeContents(schema: OA3.SchemaObject, options: ClientOpt
   return result.join('\n');
 }
 
-function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: ClientOptions) {
+function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: AppOptions) {
   const fallbackType = options.preferAny ? 'any' : 'unknown';
 
   if ('$ref' in schema) {
@@ -192,7 +192,7 @@ function renderTypeProp(
   propName: string,
   definition: OA3.ReferenceObject | OA3.SchemaObject,
   required: boolean,
-  options: ClientOptions
+  options: AppOptions
 ): string {
   const lines: string[] = [];
   const type = getTypeFromSchema(definition, options);
@@ -218,7 +218,7 @@ function renderTypeProp(
  */
 function isNullableAsOptional(
   definition: OA3.ReferenceObject | OA3.SchemaObject,
-  options: ClientOptions
+  options: AppOptions
 ) {
   if ('$ref' in definition) {
     return false;

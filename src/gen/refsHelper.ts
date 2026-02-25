@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import type { ClientOptions } from '../types';
+import type { AppOptions } from '../types';
 
 /**
  * Finds all of the used refs in the spec using Mark-and-Sweep algorithm.
@@ -9,7 +9,7 @@ import type { ClientOptions } from '../types';
  * @param options - The options for the generation
  * @param refs - The set of used refs. It will be modified in place.
  */
-export function findAllUsedRefs(spec: OA3.Document, options: ClientOptions, refs: Set<string>) {
+export function findAllUsedRefs(spec: OA3.Document, options: AppOptions, refs: Set<string>) {
   // Phase 1: Mark - Find all direct references from non-schema parts of the spec
   const directRefs = new Set<string>();
 
@@ -37,7 +37,7 @@ export function findAllUsedRefs(spec: OA3.Document, options: ClientOptions, refs
 /**
  * Finds direct references from non-schema parts of the OpenAPI spec.
  */
-function findDirectRefs(obj: any, options: ClientOptions, refs: Set<string>) {
+function findDirectRefs(obj: any, options: AppOptions, refs: Set<string>) {
   if (!obj) {
     return;
   }
@@ -82,7 +82,7 @@ function markSchemaAsUsed(
   allSchemas: Record<string, OA3.ReferenceObject | OA3.SchemaObject>,
   visited: Set<string>,
   usedRefs: Set<string>,
-  options: ClientOptions
+  options: AppOptions
 ) {
   // Avoid infinite recursion for circular dependencies
   if (visited.has(schemaName)) {

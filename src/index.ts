@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateCode from './gen';
-import type { ClientOptions, CliOptions, FullAppOptions } from './types';
+import type { AppOptions, CliOptions, FullAppOptions } from './types';
+import { APP_DEFAULTS } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 
 /**
@@ -32,13 +33,13 @@ function verifyOptions(options: Partial<FullAppOptions>) {
   }
 }
 
-function gen(spec: OA3.Document, options: ClientOptions): Promise<string> {
-  loadAllTemplateFiles(options.template || 'axios');
+function gen(spec: OA3.Document, options: AppOptions): Promise<string> {
+  loadAllTemplateFiles(options.template);
 
   return generateCode(spec, options);
 }
 
-export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<ClientOptions> {
+export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<AppOptions> {
   try {
     if (!options.config) {
       return prepareAppOptions(options as CliOptions);
@@ -66,22 +67,18 @@ function readFile(filePath: string): Promise<string> {
   });
 }
 
-export type CodeGenResult = [string, ClientOptions];
-
-const defaultQueryParamsConfig = {
-  allowDots: true,
-  arrayFormat: 'repeat' as const,
-};
+export type CodeGenResult = [string, AppOptions];
 
 /**
  * CLI options are flat, but within the app we use nested objects.
  * This function converts flat options structure to the nested one and
- * merges it with the default values.
- * */
-function prepareAppOptions(cliOpts: CliOptions): FullAppOptions {
+ * merges it with the default values, producing a fully-initialized AppOptions
+ * object where every defaultable field is guaranteed to be present.
+ */
+export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
   const { allowDots, arrayFormat, template, queryParamsSerialization = {}, ...rest } = cliOpts;
   const mergedQueryParamsSerialization = {
-    ...defaultQueryParamsConfig,
+    ...APP_DEFAULTS.queryParamsSerialization,
     ...Object.fromEntries(
       Object.entries(queryParamsSerialization).filter(([_, v]) => v !== undefined)
     ),
@@ -91,7 +88,9 @@ function prepareAppOptions(cliOpts: CliOptions): FullAppOptions {
 
   return {
     ...rest,
+    template: template ?? APP_DEFAULTS.template,
+    servicePrefix: rest.servicePrefix ?? APP_DEFAULTS.servicePrefix,
+    nullableStrategy: rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
     queryParamsSerialization: mergedQueryParamsSerialization,
-    template: template ?? 'axios',
   };
 }

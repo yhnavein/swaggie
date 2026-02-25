@@ -1,6 +1,6 @@
 import { test, describe, expect } from 'bun:test';
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
-import type { ClientOptions } from '../types';
+import { resolveOptions, type ClientOptions } from '../types';
 import {
   getParameterType,
   getTypeFromSchema,
@@ -32,7 +32,7 @@ describe('getParameterType', () => {
 
     for (const { param, options, expected } of testCases) {
       test(`should process ${param} correctly`, async () => {
-        const res = getParameterType(param, options);
+        const res = getParameterType(param, resolveOptions(options));
 
         expect(res).toBe(expected);
       });
@@ -52,7 +52,7 @@ describe('getParameterType', () => {
     };
     const options = {};
 
-    const res = getParameterType(param, options);
+    const res = getParameterType(param, resolveOptions(options));
 
     expect(res).toBe('Item[]');
   });

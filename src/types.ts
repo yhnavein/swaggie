@@ -58,6 +58,50 @@ export type ArrayFormat = 'indices' | 'repeat' | 'brackets';
 export type NullableStrategy = 'include' | 'nullableAsOptional' | 'ignore';
 
 /**
+ * Internal options type used throughout the app after `prepareAppOptions` has run.
+ * All fields that have defaults are required here so the rest of the codebase never
+ * needs to perform its own `?? fallback` logic.
+ */
+export interface AppOptions extends ClientOptions {
+  template: Template;
+  servicePrefix: string;
+  nullableStrategy: NullableStrategy;
+  queryParamsSerialization: {
+    allowDots: boolean;
+    arrayFormat: ArrayFormat;
+  };
+}
+
+/** Default values applied to every field of AppOptions that has a default. */
+export const APP_DEFAULTS: Partial<AppOptions> = {
+  template: 'axios',
+  servicePrefix: '',
+  nullableStrategy: 'ignore',
+  queryParamsSerialization: {
+    allowDots: true,
+    arrayFormat: 'repeat',
+  },
+};
+
+/**
+ * Fills in all AppOptions defaults for a partial ClientOptions object.
+ * Used at the boundary between public API / test helpers and the internal pipeline.
+ */
+export function resolveOptions(opts: Partial<ClientOptions>): AppOptions {
+  return {
+    src: opts.src ?? '',
+    ...opts,
+    template: opts.template ?? APP_DEFAULTS.template,
+    servicePrefix: opts.servicePrefix ?? APP_DEFAULTS.servicePrefix,
+    nullableStrategy: opts.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
+    queryParamsSerialization: {
+      ...APP_DEFAULTS.queryParamsSerialization,
+      ...opts.queryParamsSerialization,
+    },
+  };
+}
+
+/**
  * Local type that represent Operation as understood by Swaggie
  **/
 export interface ApiOperation extends OA3.OperationObject {

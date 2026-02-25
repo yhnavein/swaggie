@@ -1,9 +1,10 @@
 import { test, describe, beforeEach, expect, spyOn } from 'bun:test';
 
-import { runCodeGenerator, applyConfigFile } from './';
+import { runCodeGenerator, applyConfigFile, prepareAppOptions } from './';
 import { mockFetchWithFile } from '../test/test.utils';
 
 import type { CliOptions } from './types';
+import { APP_DEFAULTS } from './types';
 
 describe('runCodeGenerator', () => {
   let mockFetch: ReturnType<typeof spyOn>;
@@ -170,6 +171,146 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'indices',
       allowDots: false,
+    });
+  });
+});
+
+describe('prepareAppOptions', () => {
+  const minimalOpts = {
+    src: 'http://example.com/api.json',
+    queryParamsSerialization: {},
+  } as CliOptions;
+
+  describe('defaults', () => {
+    test('applies default template when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.template).toBe(APP_DEFAULTS.template);
+    });
+
+    test('applies default servicePrefix when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.servicePrefix).toBe(APP_DEFAULTS.servicePrefix);
+    });
+
+    test('applies default nullableStrategy when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.nullableStrategy).toBe(APP_DEFAULTS.nullableStrategy);
+    });
+
+    test('applies default queryParamsSerialization when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.queryParamsSerialization).toEqual(APP_DEFAULTS.queryParamsSerialization);
+    });
+
+    test('result always has all AppOptions fields fully resolved', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.template).toBeDefined();
+      expect(result.servicePrefix).toBeDefined();
+      expect(result.nullableStrategy).toBeDefined();
+      expect(result.queryParamsSerialization.allowDots).toBeDefined();
+      expect(result.queryParamsSerialization.arrayFormat).toBeDefined();
+    });
+  });
+
+  describe('explicit values override defaults', () => {
+    test('respects explicit template', () => {
+      const result = prepareAppOptions({ ...minimalOpts, template: 'fetch' });
+      expect(result.template).toBe('fetch');
+    });
+
+    test('respects explicit servicePrefix', () => {
+      const result = prepareAppOptions({ ...minimalOpts, servicePrefix: 'My' });
+      expect(result.servicePrefix).toBe('My');
+    });
+
+    test('respects nullableStrategy: include', () => {
+      const result = prepareAppOptions({ ...minimalOpts, nullableStrategy: 'include' });
+      expect(result.nullableStrategy).toBe('include');
+    });
+
+    test('respects nullableStrategy: nullableAsOptional', () => {
+      const result = prepareAppOptions({ ...minimalOpts, nullableStrategy: 'nullableAsOptional' });
+      expect(result.nullableStrategy).toBe('nullableAsOptional');
+    });
+
+    test('respects nullableStrategy: ignore', () => {
+      const result = prepareAppOptions({ ...minimalOpts, nullableStrategy: 'ignore' });
+      expect(result.nullableStrategy).toBe('ignore');
+    });
+
+    test('respects explicit queryParamsSerialization', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { arrayFormat: 'indices', allowDots: false },
+      });
+      expect(result.queryParamsSerialization).toEqual({ arrayFormat: 'indices', allowDots: false });
+    });
+  });
+
+  describe('flat CLI options are lifted into queryParamsSerialization', () => {
+    test('flat allowDots overrides nested default', () => {
+      const result = prepareAppOptions({ ...minimalOpts, allowDots: false });
+      expect(result.queryParamsSerialization.allowDots).toBe(false);
+    });
+
+    test('flat arrayFormat overrides nested default', () => {
+      const result = prepareAppOptions({ ...minimalOpts, arrayFormat: 'brackets' });
+      expect(result.queryParamsSerialization.arrayFormat).toBe('brackets');
+    });
+
+    test('flat options take precedence over nested queryParamsSerialization', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { allowDots: true, arrayFormat: 'indices' },
+        allowDots: false,
+        arrayFormat: 'repeat',
+      });
+      expect(result.queryParamsSerialization.allowDots).toBe(false);
+      expect(result.queryParamsSerialization.arrayFormat).toBe('repeat');
+    });
+
+    test('undefined flat options do not override nested queryParamsSerialization', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { arrayFormat: 'brackets', allowDots: false },
+        allowDots: undefined,
+        arrayFormat: undefined,
+      });
+      expect(result.queryParamsSerialization.allowDots).toBe(false);
+      expect(result.queryParamsSerialization.arrayFormat).toBe('brackets');
+    });
+  });
+
+  describe('passthrough of non-defaulted fields', () => {
+    test('preserves src', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.src).toBe('http://example.com/api.json');
+    });
+
+    test('preserves out when provided', () => {
+      const result = prepareAppOptions({ ...minimalOpts, out: './output.ts' });
+      expect(result.out).toBe('./output.ts');
+    });
+
+    test('preserves baseUrl when provided', () => {
+      const result = prepareAppOptions({ ...minimalOpts, baseUrl: '/api' });
+      expect(result.baseUrl).toBe('/api');
+    });
+
+    test('preserves preferAny when provided', () => {
+      const result = prepareAppOptions({ ...minimalOpts, preferAny: true });
+      expect(result.preferAny).toBe(true);
+    });
+
+    test('preserves skipDeprecated when provided', () => {
+      const result = prepareAppOptions({ ...minimalOpts, skipDeprecated: true });
+      expect(result.skipDeprecated).toBe(true);
+    });
+
+    test('preserves modifiers when provided', () => {
+      const modifiers = { parameters: { orgId: 'optional' as const } };
+      const result = prepareAppOptions({ ...minimalOpts, modifiers });
+      expect(result.modifiers).toEqual(modifiers);
     });
   });
 });

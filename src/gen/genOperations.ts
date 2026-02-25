@@ -10,7 +10,7 @@ import {
   getBestContentType,
 } from '../utils';
 import { generateBarrelFile } from './createBarrel';
-import type { ApiOperation, ClientOptions } from '../types';
+import type { ApiOperation, AppOptions } from '../types';
 import { escapeIdentifier } from '../utils';
 import { getOperations } from '../swagger';
 import { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
@@ -21,11 +21,11 @@ import { prepareJsDocsForOperation } from './jsDocs';
  */
 export default async function generateOperations(
   spec: OA3.Document,
-  options: ClientOptions
+  options: AppOptions
 ): Promise<string> {
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
-  const servicePrefix = options.servicePrefix ?? '';
+  const servicePrefix = options.servicePrefix;
   let result = renderFile('baseClient.ejs', {
     servicePrefix,
     baseUrl: options.baseUrl,
@@ -56,7 +56,7 @@ export default async function generateOperations(
 function prepareClient(
   name: string,
   operations: ApiOperation[],
-  options: ClientOptions
+  options: AppOptions
 ): ClientData | null {
   const preparedOperations = prepareOperations(operations, options);
 
@@ -84,10 +84,7 @@ function prepareClient(
  * @param options
  * @returns List of operations prepared for client generation
  */
-export function prepareOperations(
-  operations: ApiOperation[],
-  options: ClientOptions
-): IOperation[] {
+export function prepareOperations(operations: ApiOperation[], options: AppOptions): IOperation[] {
   let ops = fixDuplicateOperations(operations);
 
   if (options.skipDeprecated) {
@@ -221,7 +218,7 @@ export function getOperationName(opId: string | null, group?: string | null) {
 
 export function getParams(
   params: OA3.ParameterObject[],
-  options: ClientOptions,
+  options: AppOptions,
   where?: string[]
 ): IOperationParam[] {
   if (!params || params.length < 1) {
@@ -280,7 +277,7 @@ export function getParamName(name?: string | null): string {
 
 function getRequestBody(
   reqBody: OA3.ReferenceObject | OA3.RequestBodyObject,
-  options: Partial<ClientOptions>
+  options: AppOptions
 ): IBodyParam | null {
   if (reqBody && 'content' in reqBody) {
     const [bodyContent, contentType] = getBestContentType(reqBody);
