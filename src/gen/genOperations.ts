@@ -34,7 +34,7 @@ export default async function generateOperations(
 
   for (const name in groups) {
     const group = groups[name];
-    const clientData = prepareClient(servicePrefix + name, group, options);
+    const clientData = prepareClient(servicePrefix + name, group, spec.components, options);
 
     if (!clientData) {
       continue;
@@ -56,9 +56,10 @@ export default async function generateOperations(
 function prepareClient(
   name: string,
   operations: ApiOperation[],
+  components: OA3.ComponentsObject | undefined,
   options: AppOptions
 ): ClientData | null {
-  const preparedOperations = prepareOperations(operations, options);
+  const preparedOperations = prepareOperations(operations, options, components);
 
   if (preparedOperations.length === 0) {
     return null;
@@ -84,7 +85,11 @@ function prepareClient(
  * @param options
  * @returns List of operations prepared for client generation
  */
-export function prepareOperations(operations: ApiOperation[], options: AppOptions): IOperation[] {
+export function prepareOperations(
+  operations: ApiOperation[],
+  options: AppOptions,
+  components?: OA3.ComponentsObject
+): IOperation[] {
   let ops = fixDuplicateOperations(operations);
 
   if (options.skipDeprecated) {
@@ -92,10 +97,10 @@ export function prepareOperations(operations: ApiOperation[], options: AppOption
   }
 
   return ops.map((op) => {
-    const [respObject, responseContentType] = getBestResponse(op);
+    const [respObject, responseContentType] = getBestResponse(op, components);
     const returnType = getParameterType(respObject, options);
 
-    const body = getRequestBody(op.requestBody, options);
+    const body = getRequestBody(op.requestBody, components, options);
     const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
     const params = getParams(op.parameters as OA3.ParameterObject[], options);
 
@@ -276,23 +281,40 @@ export function getParamName(name?: string | null): string {
 }
 
 function getRequestBody(
-  reqBody: OA3.ReferenceObject | OA3.RequestBodyObject,
+  rawReqBody: OA3.ReferenceObject | OA3.RequestBodyObject,
+  components: OA3.ComponentsObject | undefined,
   options: AppOptions
 ): IBodyParam | null {
-  if (reqBody && 'content' in reqBody) {
-    const [bodyContent, contentType] = getBestContentType(reqBody);
-    const isFormData = contentType === 'form-data';
-
-    if (bodyContent) {
-      return {
-        originalName: reqBody['x-name'] ?? 'body',
-        name: getParamName(reqBody['x-name'] ?? 'body'),
-        type: isFormData ? 'FormData' : getParameterType(bodyContent, options),
-        optional: !reqBody.required,
-        original: reqBody,
-        contentType,
-      };
-    }
+  if (!rawReqBody) {
+    return null;
   }
+
+  let reqBody: OA3.RequestBodyObject;
+  if ('$ref' in rawReqBody) {
+    const refName = rawReqBody.$ref.replace('#/components/requestBodies/', '');
+    const resolved = components?.requestBodies?.[refName];
+    if (!resolved || '$ref' in resolved) {
+      console.error(`RequestBody $ref '${rawReqBody.$ref}' not found in components/requestBodies`);
+      return null;
+    }
+    reqBody = resolved;
+  } else {
+    reqBody = rawReqBody;
+  }
+
+  const [bodyContent, contentType] = getBestContentType(reqBody);
+  const isFormData = contentType === 'form-data';
+
+  if (bodyContent) {
+    return {
+      originalName: reqBody['x-name'] ?? 'body',
+      name: getParamName(reqBody['x-name'] ?? 'body'),
+      type: isFormData ? 'FormData' : getParameterType(bodyContent, options),
+      optional: !reqBody.required,
+      original: reqBody,
+      contentType,
+    };
+  }
+
   return null;
 }

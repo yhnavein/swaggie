@@ -57,18 +57,7 @@ paths:
             - 'write:pets'
             - 'read:pets'
       requestBody:
-        description: Create a new pet in the store
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Pet'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Pet'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Pet'
+        $ref: '#/components/requestBodies/Pet'
     put:
       tags:
         - pet
@@ -441,12 +430,7 @@ paths:
         default:
           description: successful operation
       requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/User'
+        $ref: '#/components/requestBodies/UserArray'
   /user/login:
     get:
       tags:
@@ -766,6 +750,7 @@ components:
       type: object
   requestBodies:
     Pet:
+      required: true
       content:
         application/json:
           schema:

@@ -488,6 +488,94 @@ describe('prepareOperations', () => {
       });
     });
 
+    describe('requestBody ($ref)', () => {
+      test('should resolve requestBody $ref from components/requestBodies', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              $ref: '#/components/requestBodies/PetBody',
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+        const components: OA3.ComponentsObject = {
+          requestBodies: {
+            PetBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Pet' },
+                },
+              },
+            },
+          },
+        };
+
+        const [op1] = prepareOperations(ops, opts, components);
+
+        expect(op1.body).not.toBeNull();
+        expect(op1.body.type).toBe('Pet');
+        expect(op1.body.optional).toBe(false);
+        expect(op1.body.contentType).toBe('json');
+      });
+
+      test('should return null body when requestBody $ref is not found in components', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              $ref: '#/components/requestBodies/MissingBody',
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts, {});
+
+        expect(op1.body).toBeNull();
+      });
+
+      test('should resolve returnType from a $ref response via components', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'getPets',
+            method: 'get',
+            path: '/pets',
+            parameters: [],
+            responses: {
+              '200': {
+                $ref: '#/components/responses/PetsResponse',
+              },
+            },
+            group: null,
+          },
+        ];
+        const components: OA3.ComponentsObject = {
+          responses: {
+            PetsResponse: {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Pet' },
+                },
+              },
+            },
+          },
+        };
+
+        const [op1] = prepareOperations(ops, opts, components);
+
+        expect(op1.returnType).toBe('Pet');
+      });
+    });
+
     describe('requestBody (x-www-form-urlencoded)', () => {
       test('should handle requestBody with ref type', () => {
         const ops: ApiOperation[] = [

@@ -171,16 +171,47 @@ export function groupOperationsByGroupName(operations: ApiOperation[]) {
  * Other media types are not supported at this time.
  * @returns Response or reference of the success response
  */
-export function getBestResponse(op: OA3.OperationObject): [OA3.MediaTypeObject, MyContentType] {
+export function getBestResponse(
+  op: OA3.OperationObject,
+  components?: OA3.ComponentsObject
+): [OA3.MediaTypeObject, MyContentType] {
   const NOT_FOUND = 100000;
   const lowestCode = Object.keys(op.responses).sort().shift() ?? NOT_FOUND;
 
-  const resp = lowestCode === NOT_FOUND ? op.responses[0] : op.responses[lowestCode.toString()];
+  const rawResp = lowestCode === NOT_FOUND ? op.responses[0] : op.responses[lowestCode.toString()];
+  const resp = resolveResponseRef(rawResp, components);
 
   if (resp && 'content' in resp) {
     return getBestContentType(resp);
   }
   return [null, null];
+}
+
+/**
+ * Resolves a $ref in a response object to the actual response object from components/responses.
+ * If the response is already an object (not a reference), it is returned as-is.
+ */
+function resolveResponseRef(
+  resp: OA3.ReferenceObject | OA3.ResponseObject,
+  components?: OA3.ComponentsObject
+): OA3.ResponseObject | null {
+  if (!resp) {
+    return null;
+  }
+
+  if (!('$ref' in resp)) {
+    return resp;
+  }
+
+  const refName = resp.$ref.replace('#/components/responses/', '');
+  const resolved = components?.responses?.[refName];
+
+  if (!resolved) {
+    console.error(`Response $ref '${resp.$ref}' not found in components/responses`);
+    return null;
+  }
+
+  return resolved as OA3.ResponseObject;
 }
 
 /** This method tries to fix potentially wrong out parameter given from commandline */
@@ -206,7 +237,7 @@ export function orderBy<T>(arr: T[] | null | undefined, key: string) {
   return arr.concat().sort(sortByKey(key));
 }
 
-const sortByKey = (key: string) => (a, b) => a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0;
+const sortByKey = (key: string) => (a, b) => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
 
 const orderedContentTypes = [
   'application/json',
