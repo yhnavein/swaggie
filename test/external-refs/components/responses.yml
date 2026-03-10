@@ -1,0 +1,10 @@
+components:
+  responses:
+    PetsResponse:
+      description: Pets response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: ./schemas.yml#/components/schemas/Pet

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
+import { resolveExternalFileRefs } from './refResolver';
 
 /**
  * Function that loads an OpenAPI document from a path or URL
@@ -32,10 +33,15 @@ async function loadFromUrl(url: string) {
   return parseFileContents(contents, url);
 }
 
-function readLocalFile(filePath: string) {
-  return new Promise((res, rej) =>
-    fs.readFile(filePath, 'utf8', (err, contents) => (err ? rej(err) : res(contents)))
-  ).then((contents: string) => parseFileContents(contents, filePath));
+async function readLocalFile(filePath: string) {
+  const contents = await new Promise((res, rej) =>
+    fs.readFile(filePath, 'utf8', (err, loadedContents) =>
+      err ? rej(err) : res(loadedContents)
+    )
+  );
+  const spec = parseFileContents(contents as string, filePath) as OA3.Document;
+
+  return resolveExternalFileRefs(spec, filePath);
 }
 
 function parseFileContents(contents: string, path: string): object {

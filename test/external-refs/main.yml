@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: External Refs Test API
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      operationId: getPets
+      parameters:
+        - $ref: ./components/parameters.yml#/components/parameters/OrgId
+      responses:
+        '200':
+          $ref: ./components/responses.yml#/components/responses/PetsResponse
+    post:
+      operationId: createPet
+      requestBody:
+        $ref: ./components/request-bodies.yml#/components/requestBodies/CreatePetBody
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: ./components/schemas.yml#/components/schemas/Pet
+components:
+  schemas:
+    ExistingRootModel:
+      type: object
+      properties:
+        id:
+          type: string

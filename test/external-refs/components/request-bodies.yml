@@ -1,0 +1,8 @@
+components:
+  requestBodies:
+    CreatePetBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yml#/components/schemas/Pet
