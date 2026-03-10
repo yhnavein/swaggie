@@ -1,0 +1,3 @@
+x:
+  b:
+    $ref: ./circular-a.yml#/x/a

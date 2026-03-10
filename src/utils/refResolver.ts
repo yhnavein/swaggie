@@ -24,6 +24,10 @@ interface RefContext {
   resolvingRefs: Set<string>;
 }
 
+type ResolvedRef =
+  | { type: 'ref'; value: string }
+  | { type: 'inline'; value: unknown };
+
 /**
  * Resolves external file refs into local component refs.
  * For now we only support local file refs (no http/https) and component targets.
@@ -65,7 +69,15 @@ async function rewriteRefsInNode(node: unknown, currentFilePath: string, context
   const record = node as Record<string, unknown>;
 
   if (typeof record.$ref === 'string') {
-    record.$ref = await resolveRef(record.$ref, currentFilePath, context);
+    const resolved = await resolveRef(record.$ref, currentFilePath, context);
+    if (resolved.type === 'ref') {
+      record.$ref = resolved.value;
+    } else if (Object.keys(record).length === 1) {
+      for (const key of Object.keys(record)) {
+        delete record[key];
+      }
+      Object.assign(record, resolved.value as object);
+    }
   }
 
   const values = Object.values(record);
@@ -74,10 +86,14 @@ async function rewriteRefsInNode(node: unknown, currentFilePath: string, context
   }
 }
 
-async function resolveRef(rawRef: string, currentFilePath: string, context: RefContext): Promise<string> {
+async function resolveRef(
+  rawRef: string,
+  currentFilePath: string,
+  context: RefContext
+): Promise<ResolvedRef> {
   if (rawRef.startsWith('#/')) {
     if (path.resolve(currentFilePath) === context.rootSpecPath) {
-      return rawRef;
+      return { type: 'ref', value: rawRef };
     }
 
     return importRefFromFile(path.resolve(currentFilePath), rawRef, rawRef, context);
@@ -113,14 +129,28 @@ async function importRefFromFile(
   pointer: string,
   rawRef: string,
   context: RefContext
-): Promise<string> {
-  const targetInfo = parseComponentPointer(pointer, rawRef);
+): Promise<ResolvedRef> {
+  const targetInfo = parseImportTarget(pointer);
   const target = await getValueByPointer(sourceFilePath, pointer, context);
-
   const importKey = `${sourceFilePath}${pointer}`;
+
+  if (!targetInfo) {
+    if (context.resolvingRefs.has(importKey)) {
+      throw new Error(
+        `Circular non-component external ref is not supported: '${rawRef}'`
+      );
+    }
+
+    const targetCopy = structuredClone(target);
+    context.resolvingRefs.add(importKey);
+    await rewriteRefsInNode(targetCopy, sourceFilePath, context);
+    context.resolvingRefs.delete(importKey);
+
+    return { type: 'inline', value: targetCopy };
+  }
   const existingRef = context.importedRefs.get(importKey);
   if (existingRef) {
-    return existingRef;
+    return { type: 'ref', value: existingRef };
   }
 
   const section = targetInfo.section;
@@ -138,35 +168,44 @@ async function importRefFromFile(
   await rewriteRefsInNode(targetCopy, sourceFilePath, context);
   context.resolvingRefs.delete(importKey);
 
-  return localRef;
+  return { type: 'ref', value: localRef };
 }
 
-function parseComponentPointer(
-  pointer: string,
-  rawRef: string
-): { section: ComponentSection; name: string } {
+function parseImportTarget(pointer: string): { section: ComponentSection; name: string } | null {
   const parts = pointer
     .replace(/^#\//, '')
     .split('/')
     .map(unescapePointerSegment);
 
+  if (parts.length === 2) {
+    const [legacySection, name] = parts;
+    if (legacySection === 'parameters') {
+      return { section: 'parameters', name };
+    }
+    if (legacySection === 'responses') {
+      return { section: 'responses', name };
+    }
+    if (legacySection === 'requestBodies') {
+      return { section: 'requestBodies', name };
+    }
+    if (legacySection === 'definitions') {
+      return { section: 'schemas', name };
+    }
+  }
+
   if (parts.length !== 3 || parts[0] !== 'components') {
-    throw new Error(
-      `Only refs to #/components/{section}/{name} are supported for external files. Found: '${rawRef}'`
-    );
+    return null;
   }
 
   const section = parts[1] as ComponentSection;
   const name = parts[2];
 
   if (!SUPPORTED_COMPONENT_SECTIONS.has(section)) {
-    throw new Error(
-      `Unsupported external ref section '${section}' in '${rawRef}'. Supported: schemas, parameters, requestBodies, responses`
-    );
+    return null;
   }
 
   if (!name) {
-    throw new Error(`Invalid external ref target in '${rawRef}'`);
+    return null;
   }
 
   return { section, name };

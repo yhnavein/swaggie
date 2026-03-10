@@ -87,6 +87,17 @@ describe('runCodeGenerator', () => {
     expect(code).toContain('getPets(');
   });
 
+  test('works with external refs to legacy root-level parameters', async () => {
+    const parameters = {
+      src: './test/external-refs/main-legacy-parameters.yml',
+      out: './.tmp/test-external-legacy-params/',
+    };
+
+    const [code] = await runCodeGenerator(parameters);
+    expect(code).toContain('getUserRoles');
+    expect(code).toContain('userId: string');
+  });
+
   test('fails when wrong --config provided', async () => {
     const parameters = {
       config: './test/nonexistent-config.json',

@@ -172,12 +172,14 @@ describe('loadSpecDocument', () => {
     );
   });
 
-  test('should reject unsupported external ref targets', async () => {
+  test('should inline external refs that point outside components', async () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-unsupported-target.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
 
-    await expect(loadSpecDocument(specPath)).rejects.toThrow(
-      'Only refs to #/components/{section}/{name} are supported'
-    );
+    const schema =
+      spec.paths['/test'].get.responses['200'].content['application/json'].schema;
+    expect(schema.type).toBe('array');
+    expect(schema.items.$ref).toBe('#/components/schemas/Pet');
   });
 
   test('should fail when external ref file does not exist', async () => {
@@ -192,10 +194,13 @@ describe('loadSpecDocument', () => {
     await expect(loadSpecDocument(specPath)).rejects.toThrow('Could not resolve ref pointer');
   });
 
-  test('should reject unsupported component sections for external refs', async () => {
+  test('should inline unsupported component sections for external refs', async () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-unsupported-section.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
 
-    await expect(loadSpecDocument(specPath)).rejects.toThrow('Unsupported external ref section');
+    const headerSchema =
+      spec.paths['/test'].get.responses['200'].headers['x-correlation-id'].schema;
+    expect(headerSchema.type).toBe('string');
   });
 
   test('should reject external refs with invalid pointer fragment format', async () => {
@@ -210,10 +215,10 @@ describe('loadSpecDocument', () => {
     await expect(loadSpecDocument(specPath)).rejects.toThrow('Unsupported $ref format');
   });
 
-  test('should reject external refs with empty component names', async () => {
+  test('should inline external refs with empty component names as unresolved and fail', async () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-invalid-target.yml');
 
-    await expect(loadSpecDocument(specPath)).rejects.toThrow('Invalid external ref target');
+    await expect(loadSpecDocument(specPath)).rejects.toThrow('Could not resolve ref pointer');
   });
 
   test('should support extensionless JSON external component files', async () => {
@@ -224,6 +229,91 @@ describe('loadSpecDocument', () => {
       spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
     expect(schemaRef).toMatch(/^#\/components\/schemas\//);
     expect(Object.keys(spec.components.schemas || {})).toContain('Box');
+  });
+
+  test('should support external refs to legacy root-level parameters', async () => {
+    const specPath = path.join(__dirname, '../../test/external-refs/main-legacy-parameters.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
+
+    const ref = spec.paths['/system/users/{userId}/roles'].parameters[0].$ref;
+    expect(ref).toMatch(/^#\/components\/parameters\//);
+
+    const paramName = ref.split('/').pop();
+    const resolved = spec.components.parameters[paramName];
+    expect(resolved.name).toBe('userId');
+    expect(resolved.in).toBe('path');
+    expect(resolved.required).toBe(true);
+  });
+
+  test('should support external refs to legacy root-level responses', async () => {
+    const specPath = path.join(__dirname, '../../test/external-refs/main-legacy-responses.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
+
+    const ref = spec.paths['/test'].get.responses['200'].$ref;
+    expect(ref).toMatch(/^#\/components\/responses\//);
+
+    const responseName = ref.split('/').pop();
+    expect(spec.components.responses[responseName].content['application/json'].schema.type).toBe(
+      'string'
+    );
+  });
+
+  test('should support external refs to legacy root-level requestBodies', async () => {
+    const specPath = path.join(
+      __dirname,
+      '../../test/external-refs/main-legacy-request-bodies.yml'
+    );
+    const spec = (await loadSpecDocument(specPath)) as any;
+
+    const ref = spec.paths['/test'].post.requestBody.$ref;
+    expect(ref).toMatch(/^#\/components\/requestBodies\//);
+
+    const bodyName = ref.split('/').pop();
+    const schema = spec.components.requestBodies[bodyName].content['application/json'].schema;
+    expect(schema.type).toBe('object');
+  });
+
+  test('should map legacy root-level definitions to components schemas', async () => {
+    const specPath = path.join(__dirname, '../../test/external-refs/main-legacy-definitions.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
+
+    const ref =
+      spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
+    expect(ref).toMatch(/^#\/components\/schemas\//);
+
+    const schemaName = ref.split('/').pop();
+    expect(spec.components.schemas[schemaName].properties.id.type).toBe('string');
+  });
+
+  test('should fail on circular non-component external refs', async () => {
+    const specPath = path.join(
+      __dirname,
+      '../../test/external-refs/main-circular-non-components.yml'
+    );
+
+    await expect(loadSpecDocument(specPath)).rejects.toThrow(
+      'Circular non-component external ref is not supported'
+    );
+  });
+
+  test('should support extensionless YAML external files', async () => {
+    const specPath = path.join(__dirname, '../../test/external-refs/main-extensionless-yaml.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
+
+    const ref =
+      spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
+    expect(ref).toMatch(/^#\/components\/schemas\//);
+    expect(Object.keys(spec.components.schemas || {})).toContain('PlainModel');
+  });
+
+  test('should support .json external files', async () => {
+    const specPath = path.join(__dirname, '../../test/external-refs/main-json-ext.yml');
+    const spec = (await loadSpecDocument(specPath)) as any;
+
+    const ref =
+      spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
+    expect(ref).toMatch(/^#\/components\/schemas\//);
+    expect(Object.keys(spec.components.schemas || {})).toContain('JsonBox');
   });
 });
 
