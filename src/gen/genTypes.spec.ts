@@ -325,6 +325,26 @@ export enum BadNames {
   });
 
   describe('objects', () => {
+    test('should indent property JSDoc comments inside object declarations', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Pet: {
+            type: 'object',
+            properties: {
+              status: {
+                type: 'string',
+                description: 'pet status in the store',
+              },
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      expect(res).toContain('  /** pet status in the store */\n  status?: string;');
+    });
+
     test('should handle obj with no required fields', () => {
       const res = generateTypes(
         prepareSchemas({

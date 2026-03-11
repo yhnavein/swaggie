@@ -3,24 +3,28 @@ export type Order = {
   petId?: number;
   quantity?: number;
   shipDate?: Date;
-/** Order Status */
+  /** Order Status */
   status?: "placed" | "approved" | "delivered";
-  complete?: boolean;};
+  complete?: boolean;
+};
 
 export type Customer = {
   id?: number;
   username?: string;
-  address?: Address[] | null;};
+  address?: Address[] | null;
+};
 
 export type Address = {
   street?: string;
   city?: string;
   state?: string;
-  zip?: string;};
+  zip?: string;
+};
 
 export type Category = {
   id?: number;
-  name?: string;};
+  name?: string;
+};
 
 export type User = {
   id?: number;
@@ -30,12 +34,14 @@ export type User = {
   email?: string;
   password?: string;
   phone?: string | null;
-/** User Status */
-  userStatus?: number;};
+  /** User Status */
+  userStatus?: number;
+};
 
 export type Tag = {
   id?: number;
-  name?: string;};
+  name?: string;
+};
 
 export type Pet = {
   id?: number;
@@ -43,10 +49,12 @@ export type Pet = {
   category?: Category;
   photoUrls: string[] | null;
   tags?: Tag[];
-/** pet status in the store */
-  status?: "available" | "pending" | "sold";};
+  /** pet status in the store */
+  status?: "available" | "pending" | "sold";
+};
 
 export type ApiResponse = {
   code?: number;
   type?: string;
-  message?: string;};
+  message?: string;
+};

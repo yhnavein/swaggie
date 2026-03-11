@@ -445,13 +445,15 @@ export interface Order {
   petId?: number;
   quantity?: number;
   shipDate?: Date;
-/** Order Status */
+  /** Order Status */
   status?: "placed" | "approved" | "delivered";
-  complete?: boolean;}
+  complete?: boolean;
+}
 
 export interface Category {
   id?: number;
-  name?: string;}
+  name?: string;
+}
 
 export interface User {
   id?: number;
@@ -461,12 +463,14 @@ export interface User {
   email?: string;
   password?: string;
   phone?: string | null;
-/** User Status */
-  userStatus?: number;}
+  /** User Status */
+  userStatus?: number;
+}
 
 export interface Tag {
   id?: number;
-  name?: string;}
+  name?: string;
+}
 
 export interface Pet {
   id?: number;
@@ -474,5 +478,6 @@ export interface Pet {
   category?: Category;
   photoUrls: string[] | null;
   tags?: Tag[];
-/** pet status in the store */
-  status?: "available" | "pending" | "sold";}
+  /** pet status in the store */
+  status?: "available" | "pending" | "sold";
+}

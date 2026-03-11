@@ -109,14 +109,14 @@ function renderSchema(
     if (useTypeAliases) {
       result.push(`export type ${safeName} = {`);
       result.push(objectContents);
-      return `${result.join('\n')}};\n`;
+      return `${result.join('\n')}\n};\n`;
     }
 
     result.push(`export interface ${safeName} {`);
     result.push(objectContents);
   }
 
-  return `${result.join('\n')}}\n`;
+  return `${result.join('\n')}\n}\n`;
 }
 
 /**
@@ -213,7 +213,10 @@ function renderTypeProp(
   const type = getTypeFromSchema(definition, options);
 
   if ('description' in definition || 'title' in definition) {
-    lines.push(renderComment(definition.description ?? definition.title));
+    const renderedComment = renderComment(definition.description ?? definition.title);
+    if (renderedComment) {
+      lines.push(indentComment(renderedComment, '  '));
+    }
   }
 
   const isOptional = !required || isNullableAsOptional(definition, options);
@@ -224,6 +227,13 @@ function renderTypeProp(
   lines.push(`  ${safePropName}${optionalMark}: ${type};`);
 
   return lines.join('\n');
+}
+
+function indentComment(comment: string, indent: string): string {
+  return comment
+    .split('\n')
+    .map((line) => `${indent}${line}`)
+    .join('\n');
 }
 
 /**
