@@ -399,6 +399,15 @@ describe('prepareAppOptions', () => {
       expect(result.enumDeclarationStyle).toBe('enum');
     });
 
+    test('flat nullables overrides nullableStrategy', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        nullableStrategy: 'ignore',
+        nullables: 'include',
+      });
+      expect(result.nullableStrategy).toBe('include');
+    });
+
     test('undefined flat options do not override nested queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,

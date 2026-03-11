@@ -72,21 +72,23 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 **Available options:**
 
 ```
--V, --version             Output the version number
--c, --config <path>       Path to a JSON configuration file
--s, --src <url|path>      URL or file path to the OpenAPI spec
--o, --out <filePath>      Output file path (omit to print to stdout)
--b, --baseUrl <string>    Default base URL for the generated client (default: "")
--t, --template <string>   Template to use for code generation (default: "axios")
- -m, --mode <mode>         Generation mode: "full" or "schemas" (default: "full")
- -d, --schemaStyle <style> Schema object style: "interface" or "type" (default: "interface")
+-V, --version              Output the version number
+-c, --config <path>        Path to a JSON configuration file
+-s, --src <url|path>       URL or file path to the OpenAPI spec
+-o, --out <filePath>       Output file path (omit to print to stdout)
+-b, --baseUrl <string>     Default base URL for the generated client (default: "")
+-t, --template <string>    Template to use for code generation (default: "axios")
+-m, --mode <mode>          Generation mode: "full" or "schemas" (default: "full")
+-d, --schemaStyle <style>  Schema object style: "interface" or "type" (default: "interface")
     --enumStyle <style>    Enum style for plain string enums: "union" or "enum" (default: "union")
-     --preferAny           Use "any" instead of "unknown" for untyped values (default: false)
-    --skipDeprecated      Exclude deprecated operations from the output (default: false)
-    --servicePrefix       Prefix for service names — useful when generating multiple APIs
-    --allowDots           Use dot notation to serialize nested object query params
-    --arrayFormat         How arrays are serialized: "indices", "repeat", or "brackets"
--h, --help                Show help
+    --dateFormat <format>  Date handling in schemas: "Date" or "string"
+    --nullables <strategy> Nullable handling: "include", "nullableAsOptional", or "ignore"
+    --preferAny            Use "any" instead of "unknown" for untyped values (default: false)
+    --skipDeprecated       Exclude deprecated operations from the output (default: false)
+    --servicePrefix        Prefix for service names — useful when generating multiple APIs
+    --allowDots            Use dot notation to serialize nested object query params
+    --arrayFormat          How arrays are serialized: "indices", "repeat", or "brackets"
+-h, --help                 Show help
 ```
 
 ### Formatting the Output

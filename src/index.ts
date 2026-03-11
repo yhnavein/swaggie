@@ -84,6 +84,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     mode,
     schemaStyle,
     enumStyle,
+    nullables,
     template,
     queryParamsSerialization = {},
     ...rest
@@ -101,7 +102,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     ...rest,
     template: template ?? APP_DEFAULTS.template,
     servicePrefix: rest.servicePrefix ?? APP_DEFAULTS.servicePrefix,
-    nullableStrategy: rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
+    nullableStrategy: nullables ?? rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
     generationMode: mode ?? rest.generationMode ?? APP_DEFAULTS.generationMode,
     schemaDeclarationStyle:
       schemaStyle ?? rest.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,

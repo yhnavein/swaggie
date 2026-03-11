@@ -54,6 +54,7 @@ export interface CliOptions extends FullAppOptions {
   mode?: GenerationMode;
   schemaStyle?: SchemaDeclarationStyle;
   enumStyle?: EnumDeclarationStyle;
+  nullables?: NullableStrategy;
 }
 
 export interface FullAppOptions extends ClientOptions {

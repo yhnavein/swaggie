@@ -27,6 +27,14 @@ const enumStyleOption = new Option(
   '--enumStyle <style>',
   'Enum declaration style for plain string enums'
 ).choices(['union', 'enum']);
+const dateFormatOption = new Option(
+  '--dateFormat <format>',
+  'How date fields are emitted in generated types'
+).choices(['Date', 'string']);
+const nullableStrategyOption = new Option(
+  '--nullables <strategy>',
+  "Controls how OpenAPI 'nullable' is translated into TypeScript types"
+).choices(['include', 'nullableAsOptional', 'ignore']);
 
 const program = new Command();
 program
@@ -69,7 +77,9 @@ program
   .addOption(arrayFormatOption)
   .addOption(modeOption)
   .addOption(schemaStyleOption)
-  .addOption(enumStyleOption);
+  .addOption(enumStyleOption)
+  .addOption(dateFormatOption)
+  .addOption(nullableStrategyOption);
 
 program.parse(process.argv);
 
