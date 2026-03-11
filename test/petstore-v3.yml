@@ -683,6 +683,13 @@ components:
       xml:
         name: user
       type: object
+      oneOf:
+        - required:
+            - id
+            - email
+        - required:
+            - id
+            - username
     Tag:
       x-swagger-router-model: io.swagger.petstore.model.Tag
       properties:

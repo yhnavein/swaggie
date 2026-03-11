@@ -711,17 +711,21 @@ export interface Category {
   name?: string;
 }
 
-export interface User {
-  id?: number;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  password?: string;
-  phone?: string | null;
-  /** User Status */
-  userStatus?: number;
-}
+export type User = { id: number;
+username?: string;
+firstName?: string;
+lastName?: string;
+email: string;
+password?: string;
+phone?: string | null;
+userStatus?: number; } | { id: number;
+username: string;
+firstName?: string;
+lastName?: string;
+email?: string;
+password?: string;
+phone?: string | null;
+userStatus?: number; };
 
 export interface Tag {
   id?: number;

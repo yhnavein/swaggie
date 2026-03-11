@@ -192,7 +192,8 @@ function getNestedTypeFromSchema(
  */
 function getTypeFromObject(
   schema: OA3.SchemaObject | OA31.SchemaObject,
-  options: AppOptions
+  options: AppOptions,
+  requiredOverride?: string[]
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
@@ -205,7 +206,7 @@ function getTypeFromObject(
 
   if (schema.properties) {
     const props = Object.keys(schema.properties);
-    const required = schema.required || [];
+    const required = requiredOverride ?? schema.required ?? [];
     const result: string[] = [];
 
     for (const prop of props) {
@@ -229,9 +230,62 @@ function getTypeFromObject(
 function getTypeFromComposites(schema: OA3.SchemaObject, options: AppOptions): string {
   const composite = schema.allOf || schema.oneOf || schema.anyOf;
 
+  if (!composite) {
+    return options.preferAny ? 'any' : 'unknown';
+  }
+
+  const isUnionComposite = !!schema.oneOf || !!schema.anyOf;
+  const hasParentObjectShape = !!schema.properties || !!schema.additionalProperties;
+
+  if (isUnionComposite && hasParentObjectShape) {
+    const fallbackType = options.preferAny ? 'any' : 'unknown';
+    const parentObjectType = getTypeFromObject(schema, options);
+    const parentRequired = schema.required || [];
+    const parentPropSet = new Set(Object.keys(schema.properties || {}));
+
+    return composite
+      .map((subSchema) => {
+        if (!('$ref' in subSchema) && isRequiredOnlyCompositeBranch(subSchema)) {
+          const branchRequired = subSchema.required || [];
+          const validRequired = branchRequired.filter((name) => {
+            const isKnown = parentPropSet.has(name);
+            if (!isKnown) {
+              console.warn(
+                `Composite required key '${name}' is not present in schema properties and will be ignored.`
+              );
+            }
+            return isKnown;
+          });
+
+          return getTypeFromObject(schema, options, Array.from(new Set([...parentRequired, ...validRequired])));
+        }
+
+        const subType = getTypeFromSchemaResolved(subSchema, options);
+        if (subType === fallbackType) {
+          return parentObjectType;
+        }
+
+        return `${parentObjectType} & ${subType}`;
+      })
+      .join(' | ');
+  }
+
   return composite
     .map((s) => getTypeFromSchemaResolved(s, options))
     .join(schema.allOf ? ' & ' : ' | ');
+}
+
+function isRequiredOnlyCompositeBranch(schema: OA3.SchemaObject): boolean {
+  return (
+    Array.isArray(schema.required) &&
+    !schema.type &&
+    !schema.properties &&
+    !schema.additionalProperties &&
+    !schema.allOf &&
+    !schema.oneOf &&
+    !schema.anyOf &&
+    !schema.enum
+  );
 }
 
 /**

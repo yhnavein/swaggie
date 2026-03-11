@@ -95,7 +95,7 @@ function renderSchema(
     result.push(`export interface ${safeName} ${extensions}{`);
     result.push(objectContents);
   } else if ('oneOf' in schema || 'anyOf' in schema) {
-    const typeDefinition = getTypesFromAnyOrOneOf(schema, options);
+    const typeDefinition = getTypeFromSchema(schema, options);
     result.push(`export type ${safeName} = ${typeDefinition};`);
 
     return `${result.join('\n')}\n`;
@@ -117,21 +117,6 @@ function renderSchema(
   }
 
   return `${result.join('\n')}\n}\n`;
-}
-
-/**
- * Generates the type definition for an `anyOf` or `oneOf` schema.
- * @param schema - The schema object to generate the type definition for.
- * @param options - The options for the generation.
- * @returns The type definition for the `anyOf` or `oneOf` schema.
- */
-function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: AppOptions) {
-  const composite = schema.allOf || schema.oneOf || schema.anyOf;
-  if (!composite) {
-    return '';
-  }
-
-  return composite.map((s) => getTypeFromSchema(s, options)).join(' | ');
 }
 
 /**

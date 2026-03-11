@@ -1051,6 +1051,50 @@ export interface AuthenticationData extends LoginPart {
         `export type Madness = string | number | boolean | string[] | number[] | boolean[] | null;`
       );
     });
+
+    test('should handle oneOf required-only branches with parent properties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          MemberAccess: {
+            type: 'object',
+            properties: {
+              accessType: {
+                type: 'string',
+              },
+              appId: {
+                type: 'string',
+              },
+              products: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+              isAdmin: {
+                type: 'boolean',
+              },
+            },
+            oneOf: [
+              {
+                required: ['accessType', 'isAdmin'],
+              },
+              {
+                required: ['accessType', 'appId', 'isAdmin'],
+              },
+              {
+                required: ['accessType', 'appId', 'products'],
+              },
+            ],
+          },
+        }),
+        opts,
+        false
+      );
+
+      expect(res).toContain('export type MemberAccess =');
+      expect(res).toContain('accessType: string;');
+      expect(res).not.toContain('unknown | unknown');
+    });
   });
 });
 
