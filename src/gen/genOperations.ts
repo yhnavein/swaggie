@@ -96,45 +96,63 @@ export function prepareOperations(
   }
 
   return ops.map((op) => {
-    const [respObject, responseContentType] = getBestResponse(op, components);
-    const returnType = getParameterType(respObject, options);
+    const operationContext = `${op.method.toUpperCase()} ${op.path} (${op.operationId || 'unknown operationId'})`;
 
-    const body = getRequestBody(op.requestBody, components, options);
-    const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
-    const params = getParams(op.parameters as OA3.ParameterObject[], options);
+    try {
+      const [respObject, responseContentType] = getBestResponse(op, components);
+      const returnType = getParameterType(respObject, options);
 
-    if (body) {
-      params.unshift(body);
-    }
+      const body = getRequestBody(op.requestBody, components, options);
+      const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
+      const params = getParams(op.parameters as OA3.ParameterObject[], options);
+
+      if (body) {
+        params.unshift(body);
+      }
 
     // If all parameters have 'x-position' defined, sort them by it
-    if (params.every((p) => p.original['x-position'])) {
-      params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
+      if (params.every((p) => p.original['x-position'])) {
+        params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
+      }
+
+      markParametersAsSkippable(params);
+
+      const headers = getParams(
+        op.parameters as OA3.ParameterObject[],
+        options,
+        ['header']
+      );
+      // Some libraries need explicit Content-Type for request bodies.
+      if (body?.contentType === 'urlencoded') {
+        upsertFixedHeader(headers, 'Content-Type', 'application/x-www-form-urlencoded');
+      } else if (body?.contentType === 'json' && options.template === 'fetch') {
+        upsertFixedHeader(headers, 'Content-Type', 'application/json');
+      }
+
+      return {
+        jsDocs: prepareJsDocsForOperation(op, params),
+        returnType,
+        responseContentType,
+        method: op.method.toUpperCase(),
+        name: getOperationName(op.operationId, op.group),
+        url: prepareUrl(op.path),
+        parameters: params,
+        query: queryParams,
+        body,
+        headers,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('Invalid schema at')) {
+        throw new Error(
+          `Failed to prepare operation ${operationContext}. ` +
+            'Check if schema is valid for this operation. ' +
+            'Most common culprit is `properties.$ref` (use `schema.$ref` at root, or put `$ref` under a named property).'
+        );
+      }
+
+      throw new Error(`Failed to prepare operation ${operationContext}: ${message}`);
     }
-
-    markParametersAsSkippable(params);
-
-    const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
-    // Some libraries need to know the content type of the request body in case of urlencoded body
-    if (body?.contentType === 'urlencoded') {
-      headers.push({
-        originalName: 'Content-Type',
-        value: 'application/x-www-form-urlencoded',
-      });
-    }
-
-    return {
-      jsDocs: prepareJsDocsForOperation(op, params),
-      returnType,
-      responseContentType,
-      method: op.method.toUpperCase(),
-      name: getOperationName(op.operationId, op.group),
-      url: prepareUrl(op.path),
-      parameters: params,
-      query: queryParams,
-      body,
-      headers,
-    };
   });
 }
 
@@ -316,4 +334,20 @@ function getRequestBody(
   }
 
   return null;
+}
+
+function upsertFixedHeader(headers: IOperationParam[], headerName: string, value: string): void {
+  const headerIndex = headers.findIndex(
+    (header) => header.originalName.toLowerCase() === headerName.toLowerCase()
+  );
+
+  if (headerIndex >= 0) {
+    headers[headerIndex].value = value;
+    return;
+  }
+
+  headers.push({
+    originalName: headerName,
+    value,
+  });
 }

@@ -16,7 +16,8 @@ import { escapePropName } from '../utils';
  */
 export function getParameterType(
   param: OA3.ParameterObject | OA3.MediaTypeObject,
-  options: AppOptions
+  options: AppOptions,
+  context = 'schema'
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
@@ -24,7 +25,7 @@ export function getParameterType(
     return unknownType;
   }
 
-  return getTypeFromSchemaResolved(param.schema, options);
+  return getTypeFromSchemaResolved(param.schema, options, `${context}.schema`);
 }
 
 /**
@@ -35,9 +36,10 @@ export function getParameterType(
  */
 export function getTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
-  options: AppOptions
+  options: AppOptions,
+  context = 'schema'
 ): string {
-  return getTypeFromSchemaResolved(schema, options);
+  return getTypeFromSchemaResolved(schema, options, context);
 }
 
 /**
@@ -46,12 +48,24 @@ export function getTypeFromSchema(
  */
 function getTypeFromSchemaResolved(
   schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
-  options: AppOptions
+  options: AppOptions,
+  context: string
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
   if (!schema) {
     return unknownType;
+  }
+
+  if (typeof schema !== 'object' || Array.isArray(schema)) {
+    if (context.endsWith('.properties.$ref') && typeof schema === 'string') {
+      throw new Error(
+        `Invalid schema at ${context}: string value under properties.$ref is not a valid schema. ` +
+          'Did you mean to use schema.$ref at the root, or wrap it in a named property (for example properties.data.$ref)?'
+      );
+    }
+
+    throw new Error(`Invalid schema at ${context}: expected an object schema, got ${typeof schema}.`);
   }
 
   if ('$ref' in schema) {
@@ -65,13 +79,13 @@ function getTypeFromSchemaResolved(
 
   // OpenAPI 3.1 nullable: type is an array containing 'null', e.g. ["string", "null"]
   if (Array.isArray(schema.type)) {
-    return getTypeFromOA31ArrayType(schema as OA31.SchemaObject, options);
+    return getTypeFromOA31ArrayType(schema as OA31.SchemaObject, options, context);
   }
 
   // OpenAPI 3.0 nullable: nullable: true
   const isNullable = 'nullable' in schema && schema.nullable === true;
   const isNullableSuffix = isNullable && options.nullableStrategy === 'include' ? ' | null' : '';
-  const type = getTypeFromSchemaInternal(schema, options);
+  const type = getTypeFromSchemaInternal(schema, options, context);
 
   if (isNullableSuffix && type.endsWith('| null')) {
     return type;
@@ -84,7 +98,11 @@ function getTypeFromSchemaResolved(
  * The presence of `"null"` in the array is the OA3.1 way of marking a field as nullable.
  * Respects `nullableStrategy` the same way as OA3.0 `nullable: true`.
  */
-function getTypeFromOA31ArrayType(schema: OA31.SchemaObject, options: AppOptions): string {
+function getTypeFromOA31ArrayType(
+  schema: OA31.SchemaObject,
+  options: AppOptions,
+  context: string
+): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
   const types = schema.type as string[];
   const isNullable = types.includes('null');
@@ -97,11 +115,17 @@ function getTypeFromOA31ArrayType(schema: OA31.SchemaObject, options: AppOptions
   } else if (nonNullTypes.length === 1) {
     // Synthesize a single-type schema to reuse existing resolution logic
     const singleTypeSchema = { ...schema, type: nonNullTypes[0] } as OA31.SchemaObject;
-    baseType = getTypeFromSchemaInternal(singleTypeSchema, options);
+    baseType = getTypeFromSchemaInternal(singleTypeSchema, options, context);
   } else {
     // Multiple non-null types — resolve each independently and join as a union
     baseType = nonNullTypes
-      .map((t) => getTypeFromSchemaInternal({ ...schema, type: t } as OA31.SchemaObject, options))
+      .map((t) =>
+        getTypeFromSchemaInternal(
+          { ...schema, type: t } as OA31.SchemaObject,
+          options,
+          `${context}.type`
+        )
+      )
       .join(' | ');
   }
 
@@ -129,22 +153,23 @@ function getTypeFromOA31ArrayType(schema: OA31.SchemaObject, options: AppOptions
 
 function getTypeFromSchemaInternal(
   schema: OA3.SchemaObject | OA31.SchemaObject,
-  options: AppOptions
+  options: AppOptions,
+  context: string
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
 
   if ('allOf' in schema || 'oneOf' in schema || 'anyOf' in schema) {
-    return getTypeFromComposites(schema as OA3.SchemaObject, options);
+    return getTypeFromComposites(schema as OA3.SchemaObject, options, context);
   }
 
   if (schema.type === 'array') {
     if (schema.items) {
-      return `${getNestedTypeFromSchema(schema.items, options)}[]`;
+      return `${getNestedTypeFromSchema(schema.items, options, `${context}.items`)}[]`;
     }
     return `${unknownType}[]`;
   }
   if (schema.type === 'object') {
-    return getTypeFromObject(schema, options);
+    return getTypeFromObject(schema, options, undefined, context);
   }
   if ('enum' in schema) {
     return `${schema.enum.map((v) => JSON.stringify(v)).join(' | ')}`;
@@ -166,7 +191,8 @@ function getTypeFromSchemaInternal(
 
 function getNestedTypeFromSchema(
   schema: OA3.SchemaObject | OA3.ReferenceObject | OA31.SchemaObject,
-  options: AppOptions
+  options: AppOptions,
+  context: string
 ): string {
   // OA3.0 nullable: true
   const isOA30NullableAndActive =
@@ -180,10 +206,10 @@ function getNestedTypeFromSchema(
     options.nullableStrategy === 'include';
 
   if (isOA30NullableAndActive || isOA31NullableAndActive || ('enum' in schema && schema.enum)) {
-    return `(${getTypeFromSchemaResolved(schema, options)})`;
+    return `(${getTypeFromSchemaResolved(schema, options, context)})`;
   }
 
-  return getTypeFromSchemaResolved(schema, options);
+  return getTypeFromSchemaResolved(schema, options, context);
 }
 
 /**
@@ -193,7 +219,8 @@ function getNestedTypeFromSchema(
 function getTypeFromObject(
   schema: OA3.SchemaObject | OA31.SchemaObject,
   options: AppOptions,
-  requiredOverride?: string[]
+  requiredOverride?: string[],
+  context = 'schema'
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
   let objectWithNamedPropsType = '';
@@ -209,7 +236,11 @@ function getTypeFromObject(
       const isRequired = required.includes(prop);
       const safePropName = escapePropName(prop);
       result.push(
-        `${safePropName}${isRequired ? '' : '?'}: ${getTypeFromSchemaResolved(propDefinition, options)};`
+        `${safePropName}${isRequired ? '' : '?'}: ${getTypeFromSchemaResolved(
+          propDefinition,
+          options,
+          `${context}.properties.${prop}`
+        )};`
       );
     }
 
@@ -219,7 +250,9 @@ function getTypeFromObject(
   if (schema.additionalProperties) {
     const extraProps = schema.additionalProperties;
     objectWithIndexSignatureType = `{ [key: string]: ${
-      extraProps === true ? 'any' : getTypeFromSchemaResolved(extraProps, options)
+      extraProps === true
+        ? 'any'
+        : getTypeFromSchemaResolved(extraProps, options, `${context}.additionalProperties`)
     } }`;
   }
 
@@ -241,7 +274,11 @@ function getTypeFromObject(
 /**
  * Simplified way of extracting correct type from `anyOf`, `oneOf` or `allOf` schema.
  */
-function getTypeFromComposites(schema: OA3.SchemaObject, options: AppOptions): string {
+function getTypeFromComposites(
+  schema: OA3.SchemaObject,
+  options: AppOptions,
+  context = 'schema'
+): string {
   const composite = schema.allOf || schema.oneOf || schema.anyOf;
 
   if (!composite) {
@@ -253,7 +290,7 @@ function getTypeFromComposites(schema: OA3.SchemaObject, options: AppOptions): s
 
   if (isUnionComposite && hasParentObjectShape) {
     const fallbackType = options.preferAny ? 'any' : 'unknown';
-    const parentObjectType = getTypeFromObject(schema, options);
+    const parentObjectType = getTypeFromObject(schema, options, undefined, context);
     const parentRequired = schema.required || [];
     const parentPropSet = new Set(Object.keys(schema.properties || {}));
 
@@ -271,10 +308,15 @@ function getTypeFromComposites(schema: OA3.SchemaObject, options: AppOptions): s
             return isKnown;
           });
 
-          return getTypeFromObject(schema, options, Array.from(new Set([...parentRequired, ...validRequired])));
+          return getTypeFromObject(
+            schema,
+            options,
+            Array.from(new Set([...parentRequired, ...validRequired])),
+            context
+          );
         }
 
-        const subType = getTypeFromSchemaResolved(subSchema, options);
+        const subType = getTypeFromSchemaResolved(subSchema, options, `${context}.composite`);
         if (subType === fallbackType) {
           return parentObjectType;
         }
@@ -285,7 +327,7 @@ function getTypeFromComposites(schema: OA3.SchemaObject, options: AppOptions): s
   }
 
   return composite
-    .map((s) => getTypeFromSchemaResolved(s, options))
+    .map((s, index) => getTypeFromSchemaResolved(s, options, `${context}.composite[${index}]`))
     .join(schema.allOf ? ' & ' : ' | ');
 }
 

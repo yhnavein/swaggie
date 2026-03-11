@@ -493,4 +493,25 @@ describe('getBestContentType', () => {
 
     expect(res).toEqual([null, null]);
   });
+
+  test('should prefer json-like +json content when application/json is not present', () => {
+    const res = getBestContentType({
+      content: {
+        'application/problem+json': { schema: { type: 'object' } },
+        'text/plain': { schema: { type: 'string' } },
+      },
+    });
+
+    expect(res).toEqual([{ schema: { type: 'object' } }, 'json']);
+  });
+
+  test('should support wildcard application/*+json content type', () => {
+    const res = getBestContentType({
+      content: {
+        'application/*+json': { schema: { $ref: '#/components/schemas/TestObject' } },
+      },
+    });
+
+    expect(res).toEqual([{ schema: { $ref: '#/components/schemas/TestObject' } }, 'json']);
+  });
 });

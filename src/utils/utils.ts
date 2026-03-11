@@ -240,18 +240,30 @@ export function orderBy<T>(arr: T[] | null | undefined, key: string) {
 const sortByKey = (key: string) => (a, b) => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
 
 const orderedContentTypes = [
-  'application/json',
-  'text/json',
   'text/plain',
   'application/x-www-form-urlencoded',
   'multipart/form-data',
 ];
+const preferredJsonContentTypes = ['application/json', 'text/json'];
 export function getBestContentType(
   reqBody: OA3.RequestBodyObject | OA3.ResponseObject
 ): [OA3.MediaTypeObject, MyContentType] {
   const contentTypes = Object.keys(reqBody.content);
   if (contentTypes.length === 0) {
     return [null, null];
+  }
+
+  const preferredJsonContentType = preferredJsonContentTypes.find((ct) => contentTypes.includes(ct));
+  if (preferredJsonContentType) {
+    const typeObject = reqBody.content[preferredJsonContentType];
+    const type = getContentType(preferredJsonContentType);
+    return [typeObject, type];
+  }
+
+  const jsonLikeContentType = contentTypes.find(isJsonLikeContentType);
+  if (jsonLikeContentType) {
+    const typeObject = reqBody.content[jsonLikeContentType];
+    return [typeObject, 'json'];
   }
 
   const firstContentType = orderedContentTypes.find((ct) => contentTypes.includes(ct));
@@ -264,6 +276,11 @@ export function getBestContentType(
   const typeObject = reqBody.content[contentTypes[0]];
   const type = getContentType(contentTypes[0]);
   return [typeObject, type];
+}
+
+function isJsonLikeContentType(contentType: string): boolean {
+  const normalized = contentType.split(';')[0].trim().toLowerCase();
+  return normalized === 'application/*+json' || /^application\/.+\+json$/.test(normalized);
 }
 
 function getContentType(type: string) {

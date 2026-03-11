@@ -11,6 +11,21 @@ $config?: RequestInit
 '<%= parameter.originalName %>': <%= parameter.name %>,
       <% }); %>})}<% } %>`;
 
+<% if(it.headers && it.headers.length > 0) { %>
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+<% it.headers.forEach((parameter) => { %>
+<% if (parameter.value) { %>
+      '<%= parameter.originalName %>': '<%= parameter.value %>',
+<% } else { %>
+      '<%= parameter.originalName %>': <%= parameter.name %> ?? '',
+<% } %>
+<% }); %>
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: '<%= it.method %>',
 <% if(it.body) { %>
@@ -22,19 +37,24 @@ $config?: RequestInit
       body: <%= it.body.name %>,
 <% } %>
 <% } %>
-<% if(it.headers && it.headers.length > 0) { %>
-      headers: {
-  <% it.headers.forEach((parameter) => { %>
-    <% if (parameter.value) { %>
-  '<%= parameter.originalName %>': '<%= parameter.value %>',
-    <% } else { %>
-  '<%= parameter.originalName %>': <%= parameter.name %> ?? '',
-    <% } %>
-  <% }); %>
-},
+      headers,
+      ...$configRest,
+    })
+<% } else { %>
+    return fetch(url, {
+      method: '<%= it.method %>',
+<% if(it.body) { %>
+<% if(it.body.contentType === 'json') { %>
+      body: JSON.stringify(<%= it.body.name %>),
+<% } else if(it.body.contentType === 'urlencoded') { %>
+      body: new URLSearchParams(<%= it.body.name %> as any),
+<% } else { %>
+      body: <%= it.body.name %>,
+<% } %>
 <% } %>
       ...$config,
     })
+<% } %>
 <% if(it.responseContentType === 'binary') { %>
     .then((response) => response.blob() as Promise<<%~ it.returnType %>>);
 <% } else if(it.responseContentType === 'text') { %>

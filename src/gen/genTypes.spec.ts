@@ -366,6 +366,23 @@ export enum BadNames {
   });
 
   describe('objects', () => {
+    test('should throw a helpful error for invalid properties.$ref in schema component', () => {
+      expect(() =>
+        generateTypes(
+          prepareSchemas({
+            GenericResourceResponse: {
+              type: 'object',
+              properties: {
+                $ref: '#/components/schemas/GenericResource',
+              } as unknown as OA3.SchemaObject['properties'],
+            },
+          }),
+          opts,
+          false
+        )
+      ).toThrow('Invalid schema at components.schemas.GenericResourceResponse.properties.$ref');
+    });
+
     test('should render dictionary object as type alias', () => {
       const res = generateTypes(
         prepareSchemas({
