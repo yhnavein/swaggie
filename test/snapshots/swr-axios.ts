@@ -706,10 +706,8 @@ export interface Order {
   complete?: boolean;
 }
 
-export interface Category {
-  id?: number;
-  name?: string;
-}
+export type Category = { id?: number;
+name?: string; } & { [key: string]: boolean };
 
 export type User = { id: number;
 username?: string;
@@ -732,12 +730,11 @@ export interface Tag {
   name?: string;
 }
 
-export interface Pet {
-  id?: number;
-  name: string;
-  category?: Category;
-  photoUrls: string[] | null;
-  tags?: Tag[];
-  /** pet status in the store */
-  status?: "available" | "pending" | "sold";
-}
+export type Pet = { id?: number;
+name: string;
+category?: Category;
+photoUrls: string[] | null;
+tags?: Tag[];
+status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+
+export type Item = { [key: string]: Tag };

@@ -83,7 +83,15 @@ function renderSchema(
   if ('allOf' in schema) {
     const types = getRefCompositeTypes(schema);
     const mergedSchema = getMergedCompositeObjects(schema);
+    const objectType = getTypeFromSchema(mergedSchema, options);
     const objectContents = generateObjectTypeContents(mergedSchema, options);
+    const hasAdditionalProperties = !!mergedSchema.additionalProperties;
+
+    if (hasAdditionalProperties) {
+      const compositeTypes = [...types, objectType].join(' & ');
+      result.push(`export type ${safeName} = ${compositeTypes};`);
+      return `${result.join('\n')}\n`;
+    }
 
     if (useTypeAliases) {
       const compositeTypes = [...types, `{${objectContents ? `\n${objectContents}\n` : ''}}`].join(' & ');
@@ -105,7 +113,15 @@ function renderSchema(
     result.push(`export type ${safeName} = ${generateItemsType(schema.items, options)}[];`);
     return result.join('\n');
   } else {
+    const objectType = getTypeFromSchema(schema, options);
+    const hasAdditionalProperties = !!schema.additionalProperties;
+
     const objectContents = generateObjectTypeContents(schema, options);
+    if (hasAdditionalProperties) {
+      result.push(`export type ${safeName} = ${objectType};`);
+      return `${result.join('\n')}\n`;
+    }
+
     if (useTypeAliases) {
       result.push(`export type ${safeName} = {`);
       result.push(objectContents);
@@ -241,7 +257,7 @@ function isNullableAsOptional(
   );
 }
 
-function getMergedCompositeObjects(schema: OA3.SchemaObject) {
+function getMergedCompositeObjects(schema: OA3.SchemaObject): OA3.SchemaObject {
   const { allOf, oneOf, anyOf, ...safeSchema } = schema;
   const composite = allOf || oneOf || anyOf || [];
   const subSchemas = composite.filter((v) => !('$ref' in v));
@@ -252,7 +268,7 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject) {
     subSchemas.push(safeSchema);
   }
 
-  return deepMerge({}, ...subSchemas);
+  return deepMerge({}, ...subSchemas) as OA3.SchemaObject;
 }
 
 function isObject(item?: object): item is Record<string, object> {

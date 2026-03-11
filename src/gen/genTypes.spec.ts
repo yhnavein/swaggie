@@ -325,6 +325,54 @@ export enum BadNames {
   });
 
   describe('objects', () => {
+    test('should render dictionary object as type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Workspaces: {
+            type: 'object',
+            additionalProperties: {
+              $ref: '#/components/schemas/WorkspaceAccess',
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Workspaces = { [key: string]: WorkspaceAccess };'
+      );
+    });
+
+    test('should render object with properties and additionalProperties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          WorkspaceAccess: {
+            type: 'object',
+            properties: {
+              products: {
+                type: 'object',
+                additionalProperties: {
+                  $ref: '#/components/schemas/AccessItem',
+                },
+              },
+            },
+            additionalProperties: {
+              $ref: '#/components/schemas/AccessItem',
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type WorkspaceAccess = { products?: { [key: string]: AccessItem }; } & { [key: string]: AccessItem };'
+      );
+    });
+
     test('should indent property JSDoc comments inside object declarations', () => {
       const res = generateTypes(
         prepareSchemas({

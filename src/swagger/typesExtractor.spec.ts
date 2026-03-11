@@ -344,6 +344,47 @@ describe('getTypeFromSchema', () => {
     });
   });
 
+  describe('additionalProperties', () => {
+    test('should resolve object map from additionalProperties', () => {
+      const res = getTypeFromSchema(
+        {
+          type: 'object',
+          additionalProperties: {
+            type: 'string',
+          },
+        },
+        opts
+      );
+
+      expect(res).toBe('{ [key: string]: string }');
+    });
+
+    test('should keep both named properties and index signature', () => {
+      const res = getTypeFromSchema(
+        {
+          type: 'object',
+          properties: {
+            products: {
+              type: 'object',
+              additionalProperties: {
+                $ref: '#/components/schemas/AccessResponseItem',
+              },
+            },
+          },
+          additionalProperties: {
+            $ref: '#/components/schemas/AccessResponseItem',
+          },
+        },
+        opts
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        '{ products?: { [key: string]: AccessResponseItem }; } & { [key: string]: AccessResponseItem }'
+      );
+    });
+  });
+
   describe('OpenAPI 3.0 nullable', () => {
     type TestCase = {
       schema: OA3.SchemaObject;

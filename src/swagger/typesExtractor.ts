@@ -196,13 +196,8 @@ function getTypeFromObject(
   requiredOverride?: string[]
 ): string {
   const unknownType = options.preferAny ? 'any' : 'unknown';
-
-  if (schema.additionalProperties) {
-    const extraProps = schema.additionalProperties;
-    return `{ [key: string]: ${
-      extraProps === true ? 'any' : getTypeFromSchemaResolved(extraProps, options)
-    } }`;
-  }
+  let objectWithNamedPropsType = '';
+  let objectWithIndexSignatureType = '';
 
   if (schema.properties) {
     const props = Object.keys(schema.properties);
@@ -218,7 +213,26 @@ function getTypeFromObject(
       );
     }
 
-    return `{ ${result.join('\n')} }`;
+    objectWithNamedPropsType = `{ ${result.join('\n')} }`;
+  }
+
+  if (schema.additionalProperties) {
+    const extraProps = schema.additionalProperties;
+    objectWithIndexSignatureType = `{ [key: string]: ${
+      extraProps === true ? 'any' : getTypeFromSchemaResolved(extraProps, options)
+    } }`;
+  }
+
+  if (objectWithNamedPropsType && objectWithIndexSignatureType) {
+    return `${objectWithNamedPropsType} & ${objectWithIndexSignatureType}`;
+  }
+
+  if (objectWithNamedPropsType) {
+    return objectWithNamedPropsType;
+  }
+
+  if (objectWithIndexSignatureType) {
+    return objectWithIndexSignatureType;
   }
 
   return unknownType;
