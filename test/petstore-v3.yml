@@ -649,6 +649,8 @@ components:
       xml:
         name: category
       type: object
+      additionalProperties:
+        type: boolean
     User:
       x-swagger-router-model: io.swagger.petstore.model.User
       properties:
@@ -683,6 +685,13 @@ components:
       xml:
         name: user
       type: object
+      oneOf:
+        - required:
+            - id
+            - email
+        - required:
+            - id
+            - username
     Tag:
       x-swagger-router-model: io.swagger.petstore.model.Tag
       properties:
@@ -736,6 +745,9 @@ components:
       xml:
         name: pet
       type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Item'
+
     ApiResponse:
       properties:
         code:
@@ -748,6 +760,12 @@ components:
       xml:
         name: '##default'
       type: object
+
+    Item:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/Tag'
+
   requestBodies:
     Pet:
       required: true

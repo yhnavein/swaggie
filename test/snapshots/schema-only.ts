@@ -21,40 +21,41 @@ export type Address = {
   zip?: string;
 };
 
-export type Category = {
-  id?: number;
-  name?: string;
-};
+export type Category = { id?: number;
+name?: string; } & { [key: string]: boolean };
 
-export type User = {
-  id?: number;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  password?: string;
-  phone?: string | null;
-  /** User Status */
-  userStatus?: number;
-};
+export type User = { id: number;
+username?: string;
+firstName?: string;
+lastName?: string;
+email: string;
+password?: string;
+phone?: string | null;
+userStatus?: number; } | { id: number;
+username: string;
+firstName?: string;
+lastName?: string;
+email?: string;
+password?: string;
+phone?: string | null;
+userStatus?: number; };
 
 export type Tag = {
   id?: number;
   name?: string;
 };
 
-export type Pet = {
-  id?: number;
-  name: string;
-  category?: Category;
-  photoUrls: string[] | null;
-  tags?: Tag[];
-  /** pet status in the store */
-  status?: "available" | "pending" | "sold";
-};
+export type Pet = { id?: number;
+name: string;
+category?: Category;
+photoUrls: string[] | null;
+tags?: Tag[];
+status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
 
 export type ApiResponse = {
   code?: number;
   type?: string;
   message?: string;
 };
+
+export type Item = { [key: string]: Tag };

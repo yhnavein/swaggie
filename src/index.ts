@@ -83,6 +83,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     arrayFormat,
     mode,
     schemaStyle,
+    enumStyle,
     template,
     queryParamsSerialization = {},
     ...rest
@@ -104,6 +105,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     generationMode: mode ?? rest.generationMode ?? APP_DEFAULTS.generationMode,
     schemaDeclarationStyle:
       schemaStyle ?? rest.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
+    enumDeclarationStyle:
+      enumStyle ?? rest.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
     queryParamsSerialization: mergedQueryParamsSerialization,
   };
 }

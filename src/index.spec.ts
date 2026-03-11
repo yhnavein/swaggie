@@ -282,6 +282,11 @@ describe('prepareAppOptions', () => {
       expect(result.schemaDeclarationStyle).toBe(APP_DEFAULTS.schemaDeclarationStyle);
     });
 
+    test('applies default enumDeclarationStyle when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.enumDeclarationStyle).toBe(APP_DEFAULTS.enumDeclarationStyle);
+    });
+
     test('result always has all AppOptions fields fully resolved', () => {
       const result = prepareAppOptions(minimalOpts);
       expect(result.template).toBeDefined();
@@ -289,6 +294,7 @@ describe('prepareAppOptions', () => {
       expect(result.nullableStrategy).toBeDefined();
       expect(result.generationMode).toBeDefined();
       expect(result.schemaDeclarationStyle).toBeDefined();
+      expect(result.enumDeclarationStyle).toBeDefined();
       expect(result.queryParamsSerialization.allowDots).toBeDefined();
       expect(result.queryParamsSerialization.arrayFormat).toBeDefined();
     });
@@ -337,6 +343,11 @@ describe('prepareAppOptions', () => {
       const result = prepareAppOptions({ ...minimalOpts, schemaDeclarationStyle: 'type' });
       expect(result.schemaDeclarationStyle).toBe('type');
     });
+
+    test('respects explicit enumDeclarationStyle', () => {
+      const result = prepareAppOptions({ ...minimalOpts, enumDeclarationStyle: 'enum' });
+      expect(result.enumDeclarationStyle).toBe('enum');
+    });
   });
 
   describe('flat CLI options are lifted into queryParamsSerialization', () => {
@@ -377,6 +388,15 @@ describe('prepareAppOptions', () => {
         schemaStyle: 'type',
       });
       expect(result.schemaDeclarationStyle).toBe('type');
+    });
+
+    test('flat enumStyle overrides enumDeclarationStyle', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        enumDeclarationStyle: 'union',
+        enumStyle: 'enum',
+      });
+      expect(result.enumDeclarationStyle).toBe('enum');
     });
 
     test('undefined flat options do not override nested queryParamsSerialization', () => {

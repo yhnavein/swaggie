@@ -121,6 +121,47 @@ export type StringEnum = "Active" | "Disabled";`
       );
     });
 
+    test('should emit TypeScript enums for plain string enums when enabled', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          AccessType: {
+            type: 'string',
+            enum: ['organization', 'workspace', 'user', 'system'],
+            description: 'Different access types',
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'enum' }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+/** Different access types */
+export enum AccessType {
+  organization = "organization",
+  workspace = "workspace",
+  user = "user",
+  system = "system",
+}`
+      );
+    });
+
+    test('should keep non-string enums as union types even when enum style is enabled', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          NumericPriority: {
+            type: 'integer',
+            enum: [2, 1, 0],
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'enum' }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(res, 'export type NumericPriority = 2 | 1 | 0;');
+    });
+
     test('should handle extended enums correctly', () => {
       const res = generateTypes(
         prepareSchemas({
@@ -325,6 +366,54 @@ export enum BadNames {
   });
 
   describe('objects', () => {
+    test('should render dictionary object as type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Workspaces: {
+            type: 'object',
+            additionalProperties: {
+              $ref: '#/components/schemas/WorkspaceAccess',
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Workspaces = { [key: string]: WorkspaceAccess };'
+      );
+    });
+
+    test('should render object with properties and additionalProperties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          WorkspaceAccess: {
+            type: 'object',
+            properties: {
+              products: {
+                type: 'object',
+                additionalProperties: {
+                  $ref: '#/components/schemas/AccessItem',
+                },
+              },
+            },
+            additionalProperties: {
+              $ref: '#/components/schemas/AccessItem',
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type WorkspaceAccess = { products?: { [key: string]: AccessItem }; } & { [key: string]: AccessItem };'
+      );
+    });
+
     test('should indent property JSDoc comments inside object declarations', () => {
       const res = generateTypes(
         prepareSchemas({
@@ -1050,6 +1139,50 @@ export interface AuthenticationData extends LoginPart {
         res,
         `export type Madness = string | number | boolean | string[] | number[] | boolean[] | null;`
       );
+    });
+
+    test('should handle oneOf required-only branches with parent properties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          MemberAccess: {
+            type: 'object',
+            properties: {
+              accessType: {
+                type: 'string',
+              },
+              appId: {
+                type: 'string',
+              },
+              products: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+              isAdmin: {
+                type: 'boolean',
+              },
+            },
+            oneOf: [
+              {
+                required: ['accessType', 'isAdmin'],
+              },
+              {
+                required: ['accessType', 'appId', 'isAdmin'],
+              },
+              {
+                required: ['accessType', 'appId', 'products'],
+              },
+            ],
+          },
+        }),
+        opts,
+        false
+      );
+
+      expect(res).toContain('export type MemberAccess =');
+      expect(res).toContain('accessType: string;');
+      expect(res).not.toContain('unknown | unknown');
     });
   });
 });

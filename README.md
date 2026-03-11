@@ -80,7 +80,8 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 -t, --template <string>   Template to use for code generation (default: "axios")
  -m, --mode <mode>         Generation mode: "full" or "schemas" (default: "full")
  -d, --schemaStyle <style> Schema object style: "interface" or "type" (default: "interface")
-    --preferAny           Use "any" instead of "unknown" for untyped values (default: false)
+    --enumStyle <style>    Enum style for plain string enums: "union" or "enum" (default: "union")
+     --preferAny           Use "any" instead of "unknown" for untyped values (default: false)
     --skipDeprecated      Exclude deprecated operations from the output (default: false)
     --servicePrefix       Prefix for service names — useful when generating multiple APIs
     --allowDots           Use dot notation to serialize nested object query params
@@ -123,6 +124,7 @@ swaggie -c swaggie.config.json
   "nullableStrategy": "ignore",
   "generationMode": "full",
   "schemaDeclarationStyle": "interface",
+  "enumDeclarationStyle": "union",
   "queryParamsSerialization": {
     "arrayFormat": "repeat",
     "allowDots": true
@@ -279,6 +281,14 @@ Use `schemaDeclarationStyle` (or CLI `--schemaStyle`) to control object schema o
 | `"interface"`| `export interface Tag { ... }` (default)                                |
 | `"type"`     | `export type Tag = { ... };`                                             |
 
+### Enum Declaration Style
+
+Use `enumDeclarationStyle` (or CLI `--enumStyle`) for plain string enums:
+- `"union"` (default): `export type Status = "active" | "disabled";`
+- `"enum"`: `export enum Status { active = "active", disabled = "disabled" }`
+
+Note: this applies only to plain string enums. Non-string enums are still emitted as union types.
+
 ### Parameter Modifiers
 
 Sometimes an API spec marks a parameter as required, but your client handles it in an interceptor and you don't want it cluttering every method signature. Parameter modifiers let you override this globally without touching the spec.
@@ -360,12 +370,12 @@ Swaggie only needs a JSON or YAML OpenAPI spec file — it does not require a ru
 | Supported                                                                      | Not Supported                                        |
 | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
 | OpenAPI 3.0, 3.1, 3.2                                                          | Swagger / OpenAPI 2.0                                |
-| `allOf`, `oneOf`, `anyOf`, `$ref`                                              | `not` keyword                                        |
+| `allOf`, `oneOf`, `anyOf`, `$ref`, external $refs                              | `not` keyword                                        |
 | Spec formats: JSON, YAML                                                       | Very complex query parameter structures              |
 | Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (only the first is used)     |
 | Content types: JSON, plain text, multipart/form-data                           | Multiple request body types (only the first is used) |
-| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | References to external spec files                    |
-| Various enum definition styles                                                 | OpenAPI callbacks and webhooks                       |
+| Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | OpenAPI callbacks and webhooks                       |
+| Various enum definition styles, support for additionalProperties               |                                                      |
 | Nullable types, path inheritance, JSDoc descriptions                           |                                                      |
 | Remote URLs and local file paths as spec source                                |                                                      |
 | Grouping by tags, graceful handling of duplicate operation IDs                 |                                                      |

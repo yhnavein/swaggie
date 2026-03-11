@@ -301,6 +301,88 @@ describe('getTypeFromSchema', () => {
         expect(res).toBe(expected);
       });
     }
+
+    test('should apply required-only oneOf branches to parent object properties', () => {
+      const schema: OA3.SchemaObject = {
+        type: 'object',
+        properties: {
+          accessType: { type: 'string' },
+          workspaceId: { type: 'string' },
+          products: { type: 'array', items: { type: 'string' } },
+          checks: { type: 'boolean' },
+        },
+        oneOf: [
+          { required: ['accessType', 'checks'] },
+          { required: ['accessType', 'workspaceId', 'checks'] },
+          { required: ['accessType', 'workspaceId', 'products'] },
+        ],
+      };
+
+      const res = getTypeFromSchema(schema, opts);
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `{ accessType: string; workspaceId?: string; products?: string[]; checks: boolean; } | { accessType: string; workspaceId: string; products?: string[]; checks: boolean; } | { accessType: string; workspaceId: string; products: string[]; checks?: boolean; }`
+      );
+      expect(res).not.toContain('unknown | unknown');
+    });
+
+    test('should ignore unknown required keys in required-only branches', () => {
+      const schema: OA3.SchemaObject = {
+        type: 'object',
+        properties: {
+          accessType: { type: 'string' },
+          checks: { type: 'boolean' },
+        },
+        oneOf: [{ required: ['accessType', 'access'] }],
+      };
+
+      const res = getTypeFromSchema(schema, opts);
+
+      assertEqualIgnoringWhitespace(res, '{ accessType: string; checks?: boolean; }');
+      expect(res).not.toContain('unknown');
+    });
+  });
+
+  describe('additionalProperties', () => {
+    test('should resolve object map from additionalProperties', () => {
+      const res = getTypeFromSchema(
+        {
+          type: 'object',
+          additionalProperties: {
+            type: 'string',
+          },
+        },
+        opts
+      );
+
+      expect(res).toBe('{ [key: string]: string }');
+    });
+
+    test('should keep both named properties and index signature', () => {
+      const res = getTypeFromSchema(
+        {
+          type: 'object',
+          properties: {
+            products: {
+              type: 'object',
+              additionalProperties: {
+                $ref: '#/components/schemas/AccessResponseItem',
+              },
+            },
+          },
+          additionalProperties: {
+            $ref: '#/components/schemas/AccessResponseItem',
+          },
+        },
+        opts
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        '{ products?: { [key: string]: AccessResponseItem }; } & { [key: string]: AccessResponseItem }'
+      );
+    });
   });
 
   describe('OpenAPI 3.0 nullable', () => {

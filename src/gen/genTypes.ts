@@ -70,7 +70,7 @@ function renderSchema(
     return result.join('\n');
   }
   if ('enum' in schema) {
-    result.push(renderEnumType(safeName, schema));
+    result.push(renderEnumType(safeName, schema, options));
     return result.join('\n');
   }
 
@@ -83,7 +83,15 @@ function renderSchema(
   if ('allOf' in schema) {
     const types = getRefCompositeTypes(schema);
     const mergedSchema = getMergedCompositeObjects(schema);
+    const objectType = getTypeFromSchema(mergedSchema, options);
     const objectContents = generateObjectTypeContents(mergedSchema, options);
+    const hasAdditionalProperties = !!mergedSchema.additionalProperties;
+
+    if (hasAdditionalProperties) {
+      const compositeTypes = [...types, objectType].join(' & ');
+      result.push(`export type ${safeName} = ${compositeTypes};`);
+      return `${result.join('\n')}\n`;
+    }
 
     if (useTypeAliases) {
       const compositeTypes = [...types, `{${objectContents ? `\n${objectContents}\n` : ''}}`].join(' & ');
@@ -95,7 +103,7 @@ function renderSchema(
     result.push(`export interface ${safeName} ${extensions}{`);
     result.push(objectContents);
   } else if ('oneOf' in schema || 'anyOf' in schema) {
-    const typeDefinition = getTypesFromAnyOrOneOf(schema, options);
+    const typeDefinition = getTypeFromSchema(schema, options);
     result.push(`export type ${safeName} = ${typeDefinition};`);
 
     return `${result.join('\n')}\n`;
@@ -105,7 +113,15 @@ function renderSchema(
     result.push(`export type ${safeName} = ${generateItemsType(schema.items, options)}[];`);
     return result.join('\n');
   } else {
+    const objectType = getTypeFromSchema(schema, options);
+    const hasAdditionalProperties = !!schema.additionalProperties;
+
     const objectContents = generateObjectTypeContents(schema, options);
+    if (hasAdditionalProperties) {
+      result.push(`export type ${safeName} = ${objectType};`);
+      return `${result.join('\n')}\n`;
+    }
+
     if (useTypeAliases) {
       result.push(`export type ${safeName} = {`);
       result.push(objectContents);
@@ -117,21 +133,6 @@ function renderSchema(
   }
 
   return `${result.join('\n')}\n}\n`;
-}
-
-/**
- * Generates the type definition for an `anyOf` or `oneOf` schema.
- * @param schema - The schema object to generate the type definition for.
- * @param options - The options for the generation.
- * @returns The type definition for the `anyOf` or `oneOf` schema.
- */
-function getTypesFromAnyOrOneOf(schema: OA3.SchemaObject, options: AppOptions) {
-  const composite = schema.allOf || schema.oneOf || schema.anyOf;
-  if (!composite) {
-    return '';
-  }
-
-  return composite.map((s) => getTypeFromSchema(s, options)).join(' | ');
 }
 
 /**
@@ -182,9 +183,34 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
 /**
  * Render simple enum types (just a union of values)
  */
-function renderEnumType(name: string, def: OA3.SchemaObject) {
+function renderEnumType(name: string, def: OA3.SchemaObject, options: AppOptions) {
+  if (options.enumDeclarationStyle === 'enum' && shouldRenderStringEnumDeclaration(def)) {
+    return renderStringEnumDeclaration(name, def);
+  }
+
   const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
   return `export type ${name} = ${values};\n`;
+}
+
+function shouldRenderStringEnumDeclaration(def: OA3.SchemaObject): def is OA3.SchemaObject & {
+  enum: string[];
+} {
+  return (
+    def.type === 'string' &&
+    Array.isArray(def.enum) &&
+    def.enum.every((value) => typeof value === 'string')
+  );
+}
+
+function renderStringEnumDeclaration(name: string, def: OA3.SchemaObject & { enum: string[] }) {
+  let res = `export enum ${name} {\n`;
+  for (let index = 0; index < def.enum.length; index++) {
+    const value = def.enum[index];
+    const memberName = escapePropName(value) ?? `VALUE_${index}`;
+    res += `  ${memberName} = ${JSON.stringify(value)},\n`;
+  }
+
+  return `${res}}\n`;
 }
 
 /**
@@ -256,7 +282,7 @@ function isNullableAsOptional(
   );
 }
 
-function getMergedCompositeObjects(schema: OA3.SchemaObject) {
+function getMergedCompositeObjects(schema: OA3.SchemaObject): OA3.SchemaObject {
   const { allOf, oneOf, anyOf, ...safeSchema } = schema;
   const composite = allOf || oneOf || anyOf || [];
   const subSchemas = composite.filter((v) => !('$ref' in v));
@@ -267,7 +293,7 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject) {
     subSchemas.push(safeSchema);
   }
 
-  return deepMerge({}, ...subSchemas);
+  return deepMerge({}, ...subSchemas) as OA3.SchemaObject;
 }
 
 function isObject(item?: object): item is Record<string, object> {

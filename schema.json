@@ -126,6 +126,15 @@
             "type"
           ]
         },
+        "enumDeclarationStyle": {
+          "type": "string",
+          "default": "union",
+          "description": "Controls whether plain string enums are generated as union types or TypeScript enums",
+          "enum": [
+            "union",
+            "enum"
+          ]
+        },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },
