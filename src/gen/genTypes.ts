@@ -61,6 +61,7 @@ function renderSchema(
   }
 
   const result: string[] = [];
+  const schemaContext = `components.schemas.${safeName}`;
   if (schema.description ?? schema.title) {
     result.push(renderComment(schema.description ?? schema.title));
   }
@@ -83,8 +84,8 @@ function renderSchema(
   if ('allOf' in schema) {
     const types = getRefCompositeTypes(schema);
     const mergedSchema = getMergedCompositeObjects(schema);
-    const objectType = getTypeFromSchema(mergedSchema, options);
-    const objectContents = generateObjectTypeContents(mergedSchema, options);
+    const objectType = getTypeFromSchema(mergedSchema, options, `${schemaContext}.allOf`);
+    const objectContents = generateObjectTypeContents(mergedSchema, options, schemaContext);
     const hasAdditionalProperties = !!mergedSchema.additionalProperties;
 
     if (hasAdditionalProperties) {
@@ -103,7 +104,7 @@ function renderSchema(
     result.push(`export interface ${safeName} ${extensions}{`);
     result.push(objectContents);
   } else if ('oneOf' in schema || 'anyOf' in schema) {
-    const typeDefinition = getTypeFromSchema(schema, options);
+    const typeDefinition = getTypeFromSchema(schema, options, schemaContext);
     result.push(`export type ${safeName} = ${typeDefinition};`);
 
     return `${result.join('\n')}\n`;
@@ -113,10 +114,10 @@ function renderSchema(
     result.push(`export type ${safeName} = ${generateItemsType(schema.items, options)}[];`);
     return result.join('\n');
   } else {
-    const objectType = getTypeFromSchema(schema, options);
+    const objectType = getTypeFromSchema(schema, options, schemaContext);
     const hasAdditionalProperties = !!schema.additionalProperties;
 
-    const objectContents = generateObjectTypeContents(schema, options);
+    const objectContents = generateObjectTypeContents(schema, options, schemaContext);
     if (hasAdditionalProperties) {
       result.push(`export type ${safeName} = ${objectType};`);
       return `${result.join('\n')}\n`;
@@ -138,7 +139,11 @@ function renderSchema(
 /**
  * Generates the inline contents of an object type.
  */
-function generateObjectTypeContents(schema: OA3.SchemaObject, options: AppOptions) {
+function generateObjectTypeContents(
+  schema: OA3.SchemaObject,
+  options: AppOptions,
+  schemaContext = 'components.schemas.unknown'
+) {
   const result: string[] = [];
   const required = schema.required || [];
   const props = Object.keys(schema.properties || {});
@@ -146,7 +151,7 @@ function generateObjectTypeContents(schema: OA3.SchemaObject, options: AppOption
   for (const prop of props) {
     const propDefinition = schema.properties[prop];
     const isRequired = !!~required.indexOf(prop);
-    result.push(renderTypeProp(prop, propDefinition, isRequired, options));
+    result.push(renderTypeProp(prop, propDefinition, isRequired, options, schemaContext));
   }
 
   return result.join('\n');
@@ -233,10 +238,11 @@ function renderTypeProp(
   propName: string,
   definition: OA3.ReferenceObject | OA3.SchemaObject,
   required: boolean,
-  options: AppOptions
+  options: AppOptions,
+  schemaContext: string
 ): string {
   const lines: string[] = [];
-  const type = getTypeFromSchema(definition, options);
+  const type = getTypeFromSchema(definition, options, `${schemaContext}.properties.${propName}`);
 
   if ('description' in definition || 'title' in definition) {
     const renderedComment = renderComment(definition.description ?? definition.title);

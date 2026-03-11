@@ -16,6 +16,44 @@ describe('prepareOperations', () => {
   const opts = getClientOptions();
 
   describe('parameters', () => {
+    test('should throw a helpful error for invalid properties.$ref schema shape', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'GetGenericResource',
+          method: 'get',
+          path: '/resources/{resourceId}',
+          parameters: [
+            {
+              name: 'resourceId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      $ref: '#/components/schemas/GenericResource',
+                    } as unknown as OA3.SchemaObject['properties'],
+                  },
+                },
+              },
+            },
+          },
+          group: null,
+        },
+      ];
+
+      expect(() => prepareOperations(ops, opts)).toThrow(
+        'Failed to prepare operation GET /resources/{resourceId} (GetGenericResource). Check if schema is valid for this operation.'
+      );
+    });
+
     test('should prepare parameter types for use in templates', () => {
       const ops: ApiOperation[] = [
         {
