@@ -70,7 +70,7 @@ function renderSchema(
     return result.join('\n');
   }
   if ('enum' in schema) {
-    result.push(renderEnumType(safeName, schema));
+    result.push(renderEnumType(safeName, schema, options));
     return result.join('\n');
   }
 
@@ -183,9 +183,34 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
 /**
  * Render simple enum types (just a union of values)
  */
-function renderEnumType(name: string, def: OA3.SchemaObject) {
+function renderEnumType(name: string, def: OA3.SchemaObject, options: AppOptions) {
+  if (options.enumDeclarationStyle === 'enum' && shouldRenderStringEnumDeclaration(def)) {
+    return renderStringEnumDeclaration(name, def);
+  }
+
   const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
   return `export type ${name} = ${values};\n`;
+}
+
+function shouldRenderStringEnumDeclaration(def: OA3.SchemaObject): def is OA3.SchemaObject & {
+  enum: string[];
+} {
+  return (
+    def.type === 'string' &&
+    Array.isArray(def.enum) &&
+    def.enum.every((value) => typeof value === 'string')
+  );
+}
+
+function renderStringEnumDeclaration(name: string, def: OA3.SchemaObject & { enum: string[] }) {
+  let res = `export enum ${name} {\n`;
+  for (let index = 0; index < def.enum.length; index++) {
+    const value = def.enum[index];
+    const memberName = escapePropName(value) ?? `VALUE_${index}`;
+    res += `  ${memberName} = ${JSON.stringify(value)},\n`;
+  }
+
+  return `${res}}\n`;
 }
 
 /**

@@ -332,6 +332,7 @@ export const APP_DEFAULTS: Partial<AppOptions> = {
   nullableStrategy: 'ignore',
   generationMode: 'full',
   schemaDeclarationStyle: 'interface',
+  enumDeclarationStyle: 'union',
   queryParamsSerialization: {
     allowDots: true,
     arrayFormat: 'repeat',
@@ -351,6 +352,7 @@ export function resolveOptions(opts: Partial<ClientOptions>): AppOptions {
     nullableStrategy: opts.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
     generationMode: opts.generationMode ?? APP_DEFAULTS.generationMode,
     schemaDeclarationStyle: opts.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
+    enumDeclarationStyle: opts.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
     queryParamsSerialization: {
       ...APP_DEFAULTS.queryParamsSerialization,
       ...opts.queryParamsSerialization,

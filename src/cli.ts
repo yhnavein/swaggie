@@ -23,6 +23,10 @@ const schemaStyleOption = new Option(
   '-d, --schemaStyle <style>',
   'Schema object declaration style'
 ).choices(['interface', 'type']);
+const enumStyleOption = new Option(
+  '--enumStyle <style>',
+  'Enum declaration style for plain string enums'
+).choices(['union', 'enum']);
 
 const program = new Command();
 program
@@ -64,7 +68,8 @@ program
   )
   .addOption(arrayFormatOption)
   .addOption(modeOption)
-  .addOption(schemaStyleOption);
+  .addOption(schemaStyleOption)
+  .addOption(enumStyleOption);
 
 program.parse(process.argv);
 

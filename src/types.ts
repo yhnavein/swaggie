@@ -36,6 +36,8 @@ export interface ClientOptions {
   generationMode?: GenerationMode;
   /** Controls whether object schemas are emitted as interfaces or type aliases */
   schemaDeclarationStyle?: SchemaDeclarationStyle;
+  /** Controls whether plain string enums are emitted as unions or TypeScript enums */
+  enumDeclarationStyle?: EnumDeclarationStyle;
 
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
@@ -51,6 +53,7 @@ export interface CliOptions extends FullAppOptions {
   arrayFormat?: ArrayFormat;
   mode?: GenerationMode;
   schemaStyle?: SchemaDeclarationStyle;
+  enumStyle?: EnumDeclarationStyle;
 }
 
 export interface FullAppOptions extends ClientOptions {
@@ -65,6 +68,7 @@ export type ArrayFormat = 'indices' | 'repeat' | 'brackets';
 export type NullableStrategy = 'include' | 'nullableAsOptional' | 'ignore';
 export type GenerationMode = 'full' | 'schemas';
 export type SchemaDeclarationStyle = 'interface' | 'type';
+export type EnumDeclarationStyle = 'union' | 'enum';
 
 /**
  * Internal options type used throughout the app after `prepareAppOptions` has run.
@@ -77,6 +81,7 @@ export interface AppOptions extends ClientOptions {
   nullableStrategy: NullableStrategy;
   generationMode: GenerationMode;
   schemaDeclarationStyle: SchemaDeclarationStyle;
+  enumDeclarationStyle: EnumDeclarationStyle;
   queryParamsSerialization: {
     allowDots: boolean;
     arrayFormat: ArrayFormat;
