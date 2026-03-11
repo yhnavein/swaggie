@@ -46,6 +46,7 @@ function renderSchema(
   schema: OA3.ReferenceObject | OA3.SchemaObject,
   options: AppOptions
 ): string {
+  const useTypeAliases = options.schemaDeclarationStyle === 'type';
   const safeName = getSafeIdentifier(name);
   if (!safeName) {
     console.warn(`Skipping schema ${name} because it is not a valid identifier`);
@@ -81,11 +82,18 @@ function renderSchema(
 
   if ('allOf' in schema) {
     const types = getRefCompositeTypes(schema);
+    const mergedSchema = getMergedCompositeObjects(schema);
+    const objectContents = generateObjectTypeContents(mergedSchema, options);
+
+    if (useTypeAliases) {
+      const compositeTypes = [...types, `{${objectContents ? `\n${objectContents}\n` : ''}}`].join(' & ');
+      result.push(`export type ${safeName} = ${compositeTypes};`);
+      return `${result.join('\n')}\n`;
+    }
+
     const extensions = types ? `extends ${types.join(', ')} ` : '';
     result.push(`export interface ${safeName} ${extensions}{`);
-
-    const mergedSchema = getMergedCompositeObjects(schema);
-    result.push(generateObjectTypeContents(mergedSchema, options));
+    result.push(objectContents);
   } else if ('oneOf' in schema || 'anyOf' in schema) {
     const typeDefinition = getTypesFromAnyOrOneOf(schema, options);
     result.push(`export type ${safeName} = ${typeDefinition};`);
@@ -97,11 +105,18 @@ function renderSchema(
     result.push(`export type ${safeName} = ${generateItemsType(schema.items, options)}[];`);
     return result.join('\n');
   } else {
+    const objectContents = generateObjectTypeContents(schema, options);
+    if (useTypeAliases) {
+      result.push(`export type ${safeName} = {`);
+      result.push(objectContents);
+      return `${result.join('\n')}\n};\n`;
+    }
+
     result.push(`export interface ${safeName} {`);
-    result.push(generateObjectTypeContents(schema, options));
+    result.push(objectContents);
   }
 
-  return `${result.join('\n')}}\n`;
+  return `${result.join('\n')}\n}\n`;
 }
 
 /**
@@ -198,7 +213,10 @@ function renderTypeProp(
   const type = getTypeFromSchema(definition, options);
 
   if ('description' in definition || 'title' in definition) {
-    lines.push(renderComment(definition.description ?? definition.title));
+    const renderedComment = renderComment(definition.description ?? definition.title);
+    if (renderedComment) {
+      lines.push(indentComment(renderedComment, '  '));
+    }
   }
 
   const isOptional = !required || isNullableAsOptional(definition, options);
@@ -209,6 +227,13 @@ function renderTypeProp(
   lines.push(`  ${safePropName}${optionalMark}: ${type};`);
 
   return lines.join('\n');
+}
+
+function indentComment(comment: string, indent: string): string {
+  return comment
+    .split('\n')
+    .map((line) => `${indent}${line}`)
+    .join('\n');
 }
 
 /**

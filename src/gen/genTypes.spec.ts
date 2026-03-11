@@ -45,6 +45,51 @@ export interface B {}`
     );
   });
 
+  test('should skip unused schemas by default and include all when disabled', () => {
+    const spec = getDocument({
+      paths: {
+        '/items': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/UsedSchema' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          UsedSchema: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+            },
+          },
+          UnusedSchema: {
+            type: 'object',
+            properties: {
+              label: { type: 'string' },
+            },
+          },
+        },
+      },
+    });
+
+    const withHeuristic = generateTypes(spec, opts);
+    const allSchemas = generateTypes(spec, opts, false);
+
+    expect(withHeuristic).toContain('export interface UsedSchema');
+    expect(withHeuristic).not.toContain('export interface UnusedSchema');
+    expect(allSchemas).toContain('export interface UsedSchema');
+    expect(allSchemas).toContain('export interface UnusedSchema');
+  });
+
   describe('enums', () => {
     test('should handle simple enums correctly', () => {
       const res = generateTypes(
@@ -280,6 +325,26 @@ export enum BadNames {
   });
 
   describe('objects', () => {
+    test('should indent property JSDoc comments inside object declarations', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Pet: {
+            type: 'object',
+            properties: {
+              status: {
+                type: 'string',
+                description: 'pet status in the store',
+              },
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      expect(res).toContain('  /** pet status in the store */\n  status?: string;');
+    });
+
     test('should handle obj with no required fields', () => {
       const res = generateTypes(
         prepareSchemas({
@@ -513,6 +578,65 @@ export interface AuthenticationData {
   region?: number;
   rememberMe?: boolean;
 }`
+        );
+      });
+    });
+
+    describe('schemaDeclarationStyle', () => {
+      test('should generate type aliases for object schemas when enabled', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              type: 'object',
+              required: ['login'],
+              properties: {
+                login: {
+                  type: 'string',
+                },
+                rememberMe: {
+                  type: 'boolean',
+                },
+              },
+            },
+          }),
+          getClientOptions({ schemaDeclarationStyle: 'type' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `
+export type AuthenticationData = {
+  login: string;
+  rememberMe?: boolean;
+};`
+        );
+      });
+
+      test('should generate intersection types for allOf when enabled', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              allOf: [
+                { $ref: '#/components/schemas/LoginPart' },
+                {
+                  type: 'object',
+                  properties: {
+                    rememberMe: {
+                      type: 'boolean',
+                    },
+                  },
+                },
+              ],
+            },
+          }),
+          getClientOptions({ schemaDeclarationStyle: 'type' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `export type AuthenticationData = LoginPart & { rememberMe?: boolean; };`
         );
       });
     });

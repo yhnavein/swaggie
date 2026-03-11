@@ -78,6 +78,8 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 -o, --out <filePath>      Output file path (omit to print to stdout)
 -b, --baseUrl <string>    Default base URL for the generated client (default: "")
 -t, --template <string>   Template to use for code generation (default: "axios")
+ -m, --mode <mode>         Generation mode: "full" or "schemas" (default: "full")
+ -d, --schemaStyle <style> Schema object style: "interface" or "type" (default: "interface")
     --preferAny           Use "any" instead of "unknown" for untyped values (default: false)
     --skipDeprecated      Exclude deprecated operations from the output (default: false)
     --servicePrefix       Prefix for service names — useful when generating multiple APIs
@@ -119,6 +121,8 @@ swaggie -c swaggie.config.json
   "servicePrefix": "",
   "dateFormat": "Date",
   "nullableStrategy": "ignore",
+  "generationMode": "full",
+  "schemaDeclarationStyle": "interface",
   "queryParamsSerialization": {
     "arrayFormat": "repeat",
     "allowDots": true
@@ -254,6 +258,26 @@ OpenAPI 3.0 allows fields to be marked as `nullable: true`. Swaggie gives you th
 // nullableStrategy: "include"           →  tenant: string | null;
 // nullableStrategy: "nullableAsOptional"  →  tenant?: string;
 ```
+
+### Generation Mode
+
+Use `generationMode` (or CLI `--mode`) to control what gets generated:
+
+| Value       | Behavior                                                                       |
+| ----------- | ------------------------------------------------------------------------------ |
+| `"full"`   | Generates full client code + used schemas (default, existing behavior)         |
+| `"schemas"`| Generates only schemas and includes all component schemas by default            |
+
+`"schemas"` mode intentionally does not run the used-schema heuristic.
+
+### Schema Declaration Style
+
+Use `schemaDeclarationStyle` (or CLI `--schemaStyle`) to control object schema output:
+
+| Value         | Behavior                                                                 |
+| ------------- | ------------------------------------------------------------------------ |
+| `"interface"`| `export interface Tag { ... }` (default)                                |
+| `"type"`     | `export type Tag = { ... };`                                             |
 
 ### Parameter Modifiers
 

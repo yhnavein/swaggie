@@ -34,7 +34,9 @@ function verifyOptions(options: Partial<FullAppOptions>) {
 }
 
 function gen(spec: OA3.Document, options: AppOptions): Promise<string> {
-  loadAllTemplateFiles(options.template);
+  if (options.generationMode === 'full') {
+    loadAllTemplateFiles(options.template);
+  }
 
   return generateCode(spec, options);
 }
@@ -76,7 +78,15 @@ export type CodeGenResult = [string, AppOptions];
  * object where every defaultable field is guaranteed to be present.
  */
 export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
-  const { allowDots, arrayFormat, template, queryParamsSerialization = {}, ...rest } = cliOpts;
+  const {
+    allowDots,
+    arrayFormat,
+    mode,
+    schemaStyle,
+    template,
+    queryParamsSerialization = {},
+    ...rest
+  } = cliOpts;
   const mergedQueryParamsSerialization = {
     ...APP_DEFAULTS.queryParamsSerialization,
     ...Object.fromEntries(
@@ -91,6 +101,9 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     template: template ?? APP_DEFAULTS.template,
     servicePrefix: rest.servicePrefix ?? APP_DEFAULTS.servicePrefix,
     nullableStrategy: rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
+    generationMode: mode ?? rest.generationMode ?? APP_DEFAULTS.generationMode,
+    schemaDeclarationStyle:
+      schemaStyle ?? rest.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
     queryParamsSerialization: mergedQueryParamsSerialization,
   };
 }

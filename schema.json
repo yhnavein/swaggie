@@ -108,6 +108,24 @@
             "ignore"
           ]
         },
+        "generationMode": {
+          "type": "string",
+          "default": "full",
+          "description": "Controls whether to generate full API client code or only schemas",
+          "enum": [
+            "full",
+            "schemas"
+          ]
+        },
+        "schemaDeclarationStyle": {
+          "type": "string",
+          "default": "interface",
+          "description": "Controls whether object schemas are generated as interfaces or type aliases",
+          "enum": [
+            "interface",
+            "type"
+          ]
+        },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },

@@ -32,6 +32,11 @@ export interface ClientOptions {
   /** Options for query parameters serialization */
   queryParamsSerialization: QueryParamsSerializationOptions;
 
+  /** Controls whether to generate full client code or only component schemas */
+  generationMode?: GenerationMode;
+  /** Controls whether object schemas are emitted as interfaces or type aliases */
+  schemaDeclarationStyle?: SchemaDeclarationStyle;
+
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
     /** Global-level modifiers for parameter with a given name */
@@ -44,6 +49,8 @@ export interface ClientOptions {
 export interface CliOptions extends FullAppOptions {
   allowDots?: boolean;
   arrayFormat?: ArrayFormat;
+  mode?: GenerationMode;
+  schemaStyle?: SchemaDeclarationStyle;
 }
 
 export interface FullAppOptions extends ClientOptions {
@@ -56,6 +63,8 @@ export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' 
 export type DateSupport = 'string' | 'Date';
 export type ArrayFormat = 'indices' | 'repeat' | 'brackets';
 export type NullableStrategy = 'include' | 'nullableAsOptional' | 'ignore';
+export type GenerationMode = 'full' | 'schemas';
+export type SchemaDeclarationStyle = 'interface' | 'type';
 
 /**
  * Internal options type used throughout the app after `prepareAppOptions` has run.
@@ -66,6 +75,8 @@ export interface AppOptions extends ClientOptions {
   template: Template;
   servicePrefix: string;
   nullableStrategy: NullableStrategy;
+  generationMode: GenerationMode;
+  schemaDeclarationStyle: SchemaDeclarationStyle;
   queryParamsSerialization: {
     allowDots: boolean;
     arrayFormat: ArrayFormat;
