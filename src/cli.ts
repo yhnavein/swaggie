@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { bold, cyan, red } from 'nanocolors';
+import { bold, cyan, red } from 'picocolors';
 import { Command, Option } from 'commander';
 import fs from 'node:fs';
 import path from 'node:path';
