@@ -1,0 +1,7 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        external:
+          type: boolean

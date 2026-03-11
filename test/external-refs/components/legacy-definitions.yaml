@@ -1,0 +1,6 @@
+definitions:
+  LegacyUser:
+    type: object
+    properties:
+      id:
+        type: string

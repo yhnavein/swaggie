@@ -1,0 +1,6 @@
+components:
+  headers:
+    CorrelationId:
+      description: Correlation id
+      schema:
+        type: string

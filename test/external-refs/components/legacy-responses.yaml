@@ -1,0 +1,7 @@
+responses:
+  OkResponse:
+    description: ok
+    content:
+      application/json:
+        schema:
+          type: string

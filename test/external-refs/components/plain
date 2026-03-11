@@ -1,0 +1,7 @@
+components:
+  schemas:
+    PlainModel:
+      type: object
+      properties:
+        value:
+          type: string

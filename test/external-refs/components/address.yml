@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Address:
+      type: object
+      properties:
+        city:
+          type: string

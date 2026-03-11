@@ -1,0 +1,8 @@
+components:
+  parameters:
+    OrgId:
+      name: orgId
+      in: header
+      required: true
+      schema:
+        type: string

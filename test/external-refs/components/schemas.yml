@@ -1,0 +1,18 @@
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - owner
+      properties:
+        name:
+          type: string
+        owner:
+          $ref: ./common.yml#/components/schemas/User
+        category:
+          $ref: '#/components/schemas/Category'
+    Category:
+      type: object
+      properties:
+        name:
+          type: string

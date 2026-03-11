@@ -1,0 +1,5 @@
+paths:
+  nope:
+    type: array
+    items:
+      $ref: ./schemas.yml#/components/schemas/Pet

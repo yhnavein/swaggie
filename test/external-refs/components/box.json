@@ -1,0 +1,14 @@
+{
+  "components": {
+    "schemas": {
+      "JsonBox": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

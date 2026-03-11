@@ -1,0 +1,9 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        address:
+          $ref: ./address.yml#/components/schemas/Address

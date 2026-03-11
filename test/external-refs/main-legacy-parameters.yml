@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info:
+  title: Legacy Parameters Ref
+  version: 1.0.0
+paths:
+  /system/users/{userId}/roles:
+    parameters:
+      - $ref: ./parameters/common-parameters-path.yaml#/parameters/userIdRequired
+    get:
+      operationId: getUserRoles
+      responses:
+        '200':
+          description: ok

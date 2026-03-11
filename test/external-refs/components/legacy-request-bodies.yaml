@@ -1,0 +1,10 @@
+requestBodies:
+  CreateBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
