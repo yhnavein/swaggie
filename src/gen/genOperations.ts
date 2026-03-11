@@ -115,12 +115,11 @@ export function prepareOperations(
     markParametersAsSkippable(params);
 
     const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
-    // Some libraries need to know the content type of the request body in case of urlencoded body
+    // Some libraries need explicit Content-Type for request bodies.
     if (body?.contentType === 'urlencoded') {
-      headers.push({
-        originalName: 'Content-Type',
-        value: 'application/x-www-form-urlencoded',
-      });
+      upsertFixedHeader(headers, 'Content-Type', 'application/x-www-form-urlencoded');
+    } else if (body?.contentType === 'json' && options.template === 'fetch') {
+      upsertFixedHeader(headers, 'Content-Type', 'application/json');
     }
 
     return {
@@ -316,4 +315,20 @@ function getRequestBody(
   }
 
   return null;
+}
+
+function upsertFixedHeader(headers: IOperationParam[], headerName: string, value: string): void {
+  const headerIndex = headers.findIndex(
+    (header) => header.originalName.toLowerCase() === headerName.toLowerCase()
+  );
+
+  if (headerIndex >= 0) {
+    headers[headerIndex].value = value;
+    return;
+  }
+
+  headers.push({
+    originalName: headerName,
+    value,
+  });
 }

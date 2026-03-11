@@ -28,10 +28,19 @@ export const petClient = {
   ): Promise<Pet> {
     const url = `${defaults.baseUrl}/pet?`;
 
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
-      ...$config,
+      headers,
+      ...$configRest,
     })
     .then((response) => response.json() as Promise<Pet>);
   },
@@ -47,12 +56,18 @@ export const petClient = {
   ): Promise<unknown> {
     const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
 
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+      'api_key': apiKey ?? '',
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: 'DELETE',
-      headers: {
-        'api_key': apiKey ?? '',
-      },
-      ...$config,
+      headers,
+      ...$configRest,
     })
     .then((response) => response.json() as Promise<unknown>);
   },
@@ -120,13 +135,19 @@ export const petClient = {
   ): Promise<Pet> {
     const url = `${defaults.baseUrl}/pet?`;
 
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+      'Content-Type': 'application/x-www-form-urlencoded',
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: 'PUT',
       body: new URLSearchParams(body as any),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      ...$config,
+      headers,
+      ...$configRest,
     })
     .then((response) => response.json() as Promise<Pet>);
   },
@@ -236,10 +257,19 @@ export const storeClient = {
   ): Promise<Order> {
     const url = `${defaults.baseUrl}/store/order?`;
 
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
-      ...$config,
+      headers,
+      ...$configRest,
     })
     .then((response) => response.json() as Promise<Order>);
   },
@@ -256,10 +286,19 @@ export const userClient = {
   ): Promise<User> {
     const url = `${defaults.baseUrl}/user?`;
 
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
-      ...$config,
+      headers,
+      ...$configRest,
     })
     .then((response) => response.json() as Promise<User>);
   },
@@ -273,10 +312,19 @@ export const userClient = {
   ): Promise<User> {
     const url = `${defaults.baseUrl}/user/createWithList?`;
 
+    const { headers: $configHeaders, ...$configRest } = $config ?? {};
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    });
+    if ($configHeaders) {
+      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
+    }
+
     return fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
-      ...$config,
+      headers,
+      ...$configRest,
     })
     .then((response) => response.json() as Promise<User>);
   },

@@ -244,6 +244,8 @@ describe('prepareOperations', () => {
     });
 
     describe('requestBody (JSON)', () => {
+      const fetchOpts = getClientOptions({ template: 'fetch' });
+
       test('should handle requestBody with ref type', () => {
         const ops: ApiOperation[] = [
           {
@@ -265,7 +267,7 @@ describe('prepareOperations', () => {
           },
         ];
 
-        const [op1] = prepareOperations(ops, opts);
+        const [op1] = prepareOperations(ops, fetchOpts);
         const expectedBodyParam: IBodyParam = {
           contentType: 'json',
           name: 'body',
@@ -277,6 +279,57 @@ describe('prepareOperations', () => {
 
         expect(op1.body).toEqual(expectedBodyParam);
         expect(op1.parameters).toEqual([expectedBodyParam]);
+        expect(op1.headers).toEqual([
+          {
+            originalName: 'Content-Type',
+            value: 'application/json',
+          },
+        ]);
+      });
+
+      test('should upsert existing Content-Type header when body is json', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            parameters: [
+              {
+                name: 'Content-Type',
+                in: 'header',
+                required: false,
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, fetchOpts);
+
+        expect(op1.headers).toHaveLength(1);
+        expect(op1.headers[0]).toEqual(
+          expect.objectContaining({
+            originalName: 'Content-Type',
+            name: 'contentType',
+            type: 'string',
+            optional: true,
+            value: 'application/json',
+          })
+        );
       });
 
       type TestCase = {
@@ -346,6 +399,31 @@ describe('prepareOperations', () => {
           expect(op1.parameters).toEqual([expectedBodyParam]);
         });
       }
+
+      test('should not inject Content-Type for json when template is not fetch', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createPet',
+            method: 'post',
+            path: '/pet',
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+            },
+            responses: {},
+            group: null,
+          },
+        ];
+
+        const [op1] = prepareOperations(ops, opts);
+        expect(op1.headers).toEqual([]);
+      });
 
       test('should handle nullable requestBody schema with nullableStrategy: include', () => {
         const includeOpts = getClientOptions({ nullableStrategy: 'include' });
@@ -610,6 +688,12 @@ describe('prepareOperations', () => {
 
         expect(op1.body).toEqual(expectedBodyParam);
         expect(op1.parameters).toEqual([expectedBodyParam]);
+        expect(op1.headers).toEqual([
+          {
+            originalName: 'Content-Type',
+            value: 'application/x-www-form-urlencoded',
+          },
+        ]);
       });
     });
 
@@ -648,6 +732,7 @@ describe('prepareOperations', () => {
 
         expect(op1.body).toEqual(expectedBodyParam);
         expect(op1.parameters).toEqual([expectedBodyParam]);
+        expect(op1.headers).toEqual([]);
       });
     });
 
@@ -694,6 +779,7 @@ describe('prepareOperations', () => {
 
         expect(op1.body).toEqual(expectedBodyParam);
         expect(op1.parameters).toEqual([expectedBodyParam]);
+        expect(op1.headers).toEqual([]);
       });
     });
   });

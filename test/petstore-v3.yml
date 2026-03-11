@@ -317,7 +317,7 @@ paths:
           description: Invalid input
       requestBody:
         content:
-          application/json:
+          text/json:
             schema:
               $ref: '#/components/schemas/Order'
           application/xml:
