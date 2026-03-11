@@ -32,4 +32,28 @@ describe('petstore snapshots', () => {
       }
     });
   }
+
+  test(`should match existing schema-only snapshot`, async () => {
+    const snapshotFile = `./test/snapshots/schema-only.ts`;
+    const parameters: FullAppOptions = {
+      src: './test/petstore-v3.yml',
+      out: './.tmp/test/',
+      template: 'xior',
+      queryParamsSerialization: {},
+      nullableStrategy: 'include',
+      generationMode: 'schemas',
+      schemaDeclarationStyle: 'type',
+    };
+
+    const [generatedCode] = await runCodeGenerator(parameters);
+
+    if (process.env.UPDATE_SNAPSHOTS) {
+      await Bun.file(snapshotFile).write(generatedCode);
+      // No need to assert anything when updating snapshots
+    } else {
+      const existingSnapshot = await Bun.file(snapshotFile).text();
+
+      expect(existingSnapshot).toBe(generatedCode);
+    }
+  });
 });

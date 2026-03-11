@@ -98,6 +98,53 @@ describe('runCodeGenerator', () => {
     expect(code).toContain('userId: string');
   });
 
+  test('works in schemas mode and emits all schemas', async () => {
+    const parameters = {
+      src: {
+        openapi: '3.0.0',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/items': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'ok',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/UsedSchema' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            UsedSchema: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+              },
+            },
+            UnusedSchema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      generationMode: 'schemas' as const,
+    };
+
+    const [code] = await runCodeGenerator(parameters);
+    expect(code).toContain('export interface UsedSchema');
+    expect(code).toContain('export interface UnusedSchema');
+    expect(code).not.toContain('getItems');
+  });
+
   test('fails when wrong --config provided', async () => {
     const parameters = {
       config: './test/nonexistent-config.json',
@@ -225,11 +272,23 @@ describe('prepareAppOptions', () => {
       expect(result.queryParamsSerialization).toEqual(APP_DEFAULTS.queryParamsSerialization);
     });
 
+    test('applies default generationMode when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.generationMode).toBe(APP_DEFAULTS.generationMode);
+    });
+
+    test('applies default schemaDeclarationStyle when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.schemaDeclarationStyle).toBe(APP_DEFAULTS.schemaDeclarationStyle);
+    });
+
     test('result always has all AppOptions fields fully resolved', () => {
       const result = prepareAppOptions(minimalOpts);
       expect(result.template).toBeDefined();
       expect(result.servicePrefix).toBeDefined();
       expect(result.nullableStrategy).toBeDefined();
+      expect(result.generationMode).toBeDefined();
+      expect(result.schemaDeclarationStyle).toBeDefined();
       expect(result.queryParamsSerialization.allowDots).toBeDefined();
       expect(result.queryParamsSerialization.arrayFormat).toBeDefined();
     });
@@ -268,6 +327,16 @@ describe('prepareAppOptions', () => {
       });
       expect(result.queryParamsSerialization).toEqual({ arrayFormat: 'indices', allowDots: false });
     });
+
+    test('respects explicit generationMode', () => {
+      const result = prepareAppOptions({ ...minimalOpts, generationMode: 'schemas' });
+      expect(result.generationMode).toBe('schemas');
+    });
+
+    test('respects explicit schemaDeclarationStyle', () => {
+      const result = prepareAppOptions({ ...minimalOpts, schemaDeclarationStyle: 'type' });
+      expect(result.schemaDeclarationStyle).toBe('type');
+    });
   });
 
   describe('flat CLI options are lifted into queryParamsSerialization', () => {
@@ -290,6 +359,24 @@ describe('prepareAppOptions', () => {
       });
       expect(result.queryParamsSerialization.allowDots).toBe(false);
       expect(result.queryParamsSerialization.arrayFormat).toBe('repeat');
+    });
+
+    test('flat mode overrides generationMode', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        generationMode: 'full',
+        mode: 'schemas',
+      });
+      expect(result.generationMode).toBe('schemas');
+    });
+
+    test('flat schemaStyle overrides schemaDeclarationStyle', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        schemaDeclarationStyle: 'interface',
+        schemaStyle: 'type',
+      });
+      expect(result.schemaDeclarationStyle).toBe('type');
     });
 
     test('undefined flat options do not override nested queryParamsSerialization', () => {

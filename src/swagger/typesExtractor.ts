@@ -262,6 +262,8 @@ export const APP_DEFAULTS: Partial<AppOptions> = {
   template: 'axios',
   servicePrefix: '',
   nullableStrategy: 'ignore',
+  generationMode: 'full',
+  schemaDeclarationStyle: 'interface',
   queryParamsSerialization: {
     allowDots: true,
     arrayFormat: 'repeat',
@@ -279,6 +281,8 @@ export function resolveOptions(opts: Partial<ClientOptions>): AppOptions {
     template: opts.template ?? APP_DEFAULTS.template,
     servicePrefix: opts.servicePrefix ?? APP_DEFAULTS.servicePrefix,
     nullableStrategy: opts.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
+    generationMode: opts.generationMode ?? APP_DEFAULTS.generationMode,
+    schemaDeclarationStyle: opts.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
     queryParamsSerialization: {
       ...APP_DEFAULTS.queryParamsSerialization,
       ...opts.queryParamsSerialization,

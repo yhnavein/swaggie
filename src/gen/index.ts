@@ -9,8 +9,14 @@ export default async function generateCode(
   spec: OA3.Document,
   options: AppOptions
 ): Promise<string> {
-  let fileContents = await generateOperations(spec, options);
-  fileContents += generateTypes(spec, options);
+  let fileContents = '';
+
+  if (options.generationMode === 'schemas') {
+    fileContents = generateTypes(spec, options, false);
+  } else {
+    fileContents = await generateOperations(spec, options);
+    fileContents += generateTypes(spec, options);
+  }
 
   if (options.out) {
     const destFile = prepareOutputFilename(options.out);

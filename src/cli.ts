@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { type CodeGenResult, runCodeGenerator } from './index';
-import type { FullAppOptions } from './types';
+import type { CliOptions } from './types';
 
 const arrayFormatOption = new Option(
   '--arrayFormat <format>',
@@ -14,6 +14,15 @@ const arrayFormatOption = new Option(
 ).choices(['indices', 'repeat', 'brackets']);
 
 const packageJson = readPackageJson();
+
+const modeOption = new Option('-m, --mode <mode>', 'Generation mode').choices([
+  'full',
+  'schemas',
+]);
+const schemaStyleOption = new Option(
+  '-d, --schemaStyle <style>',
+  'Schema object declaration style'
+).choices(['interface', 'type']);
 
 const program = new Command();
 program
@@ -53,11 +62,13 @@ program
     '--allowDots <bool>',
     'Determines if dots should be used for serialization object properties'
   )
-  .addOption(arrayFormatOption);
+  .addOption(arrayFormatOption)
+  .addOption(modeOption)
+  .addOption(schemaStyleOption);
 
 program.parse(process.argv);
 
-const options = program.opts<FullAppOptions>();
+const options = program.opts<CliOptions>();
 
 runCodeGenerator(options).then(complete, error);
 
