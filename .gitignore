@@ -63,6 +63,7 @@ coverage/
 test/api*.json
 .tmp/
 .nyc_output/
+*.tgz
 
 # Vitepress
 docs/.vitepress/dist
