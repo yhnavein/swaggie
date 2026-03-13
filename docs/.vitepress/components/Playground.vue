@@ -348,26 +348,36 @@ async function copyToClipboard() {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 0 24px 24px;
   font-family: var(--vp-font-family-base);
+  /* Fill the remaining viewport height below the header */
+  min-height: calc(100vh - var(--vp-nav-height) - 120px);
 }
 
 .pg-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  min-height: 540px;
+  flex: 1;
+  /* Panels grow to fill the remaining space */
+  min-height: 0;
 }
 
 @media (max-width: 768px) {
+  .playground {
+    padding: 0 12px 16px;
+  }
   .pg-columns {
     grid-template-columns: 1fr;
-    min-height: unset;
   }
 }
 
 /* ── Settings bar ────────────────────────────────────────────────── */
 
 .pg-settings {
+  position: sticky;
+  top: 5em;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -479,6 +489,9 @@ async function copyToClipboard() {
   border-radius: 8px;
   overflow: hidden;
   background: var(--vp-c-bg);
+  /* Grow to fill the grid row */
+  min-height: 0;
+  max-height: calc(100vh - 264px);
 }
 
 .pg-panel-header {
@@ -518,7 +531,8 @@ async function copyToClipboard() {
   font-size: 12.5px;
   line-height: 1.6;
   tab-size: 2;
-  min-height: 480px;
+  /* Grow to fill panel; min-height just for very small screens */
+  min-height: 300px;
 }
 
 /* ── Output (right panel) ────────────────────────────────────────── */
@@ -526,12 +540,14 @@ async function copyToClipboard() {
 .pg-output {
   flex: 1;
   overflow: auto;
-  min-height: 480px;
+  min-height: 300px;
   position: relative;
 }
 
 .pg-highlighted {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Override Shiki's pre to fill the panel */
@@ -539,8 +555,7 @@ async function copyToClipboard() {
   margin: 0;
   padding: 14px;
   border-radius: 0;
-  height: 100%;
-  min-height: 480px;
+  flex: 1;
   box-sizing: border-box;
   font-size: 12.5px;
   line-height: 1.6;
@@ -558,8 +573,7 @@ async function copyToClipboard() {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  min-height: 200px;
+  flex: 1;
   padding: 24px;
   color: var(--vp-c-text-3);
   font-size: 13px;
