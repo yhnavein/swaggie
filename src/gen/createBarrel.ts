@@ -1,7 +1,7 @@
 import { camel } from 'case';
 
 import type { ApiOperation, AppOptions } from '../types';
-import { renderFile } from '../utils';
+import { renderFile } from '../utils/templateEngine';
 
 type ClientGroups = {
   [key: string]: ApiOperation[];

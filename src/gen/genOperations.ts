@@ -3,13 +3,13 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import { getParameterType, getOperations } from '../swagger';
 import {
-  groupOperationsByGroupName,
-  getBestResponse,
-  orderBy,
-  renderFile,
-  getBestContentType,
   escapeIdentifier,
-} from '../utils';
+  getBestContentType,
+  getBestResponse,
+  groupOperationsByGroupName,
+  orderBy,
+} from '../utils/utils';
+import { renderFile } from '../utils/templateEngine';
 import { generateBarrelFile } from './createBarrel';
 import type { ApiOperation, AppOptions } from '../types';
 import type { ClientData, IBodyParam, IOperation, IOperationParam } from './types';

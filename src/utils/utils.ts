@@ -1,5 +1,3 @@
-import { mkdir, writeFileSync as fsWriteFileSync } from 'node:fs';
-import { dirname } from 'node:path';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import type { ApiOperation } from '../types';
@@ -128,19 +126,6 @@ export function verifyDocumentSpec(spec: VerifableDocument): OA3.Document {
 export interface VerifableDocument extends OA3.Document {
   swagger?: string;
   openapi: string;
-}
-
-export function saveFile(filePath: string, contents: string) {
-  return new Promise((resolve, reject) => {
-    mkdir(dirname(filePath), { recursive: true }, (err) => {
-      if (err) {
-        reject(err);
-      }
-
-      fsWriteFileSync(filePath, contents);
-      resolve(true);
-    });
-  });
 }
 
 /**

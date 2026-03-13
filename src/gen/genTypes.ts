@@ -2,7 +2,7 @@ import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 
 import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../swagger';
 import type { AppOptions } from '../types';
-import { escapePropName } from '../utils';
+import { escapePropName } from '../utils/utils';
 import { findAllUsedRefs } from './refsHelper';
 import { renderComment } from './jsDocs';
 
