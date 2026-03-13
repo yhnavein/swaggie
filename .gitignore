@@ -63,3 +63,7 @@ coverage/
 test/api*.json
 .tmp/
 .nyc_output/
+
+# Vitepress
+docs/.vitepress/dist
+docs/.vitepress/cache
