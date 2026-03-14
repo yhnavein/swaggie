@@ -73,7 +73,11 @@ async function parseSpec(input: string): Promise<object> {
 
 async function renderHighlighted(code: string): Promise<string> {
   try {
-    return await codeToHtml(code, { lang: 'typescript', theme: 'github-dark' });
+    return await codeToHtml(code, {
+      lang: 'typescript',
+      themes: { light: 'github-light', dark: 'github-dark' },
+      defaultColor: false,
+    });
   } catch {
     const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return `<pre class="shiki-fallback"><code>${escaped}</code></pre>`;
@@ -935,12 +939,21 @@ function getNavHeight(): number {
   font-size: 12.5px;
   line-height: 1.6;
   overflow: auto;
-  background: #0d1117 !important;
+  /* Use the light theme colors by default */
+  background-color: var(--shiki-light-bg) !important;
+  color: var(--shiki-light) !important;
 }
 
 .pg-highlighted :deep(pre.shiki code) {
   font-family: var(--vp-font-family-mono);
 }
+
+/* Token colors for light mode */
+.pg-highlighted :deep(pre.shiki span) {
+  color: var(--shiki-light) !important;
+}
+
+
 
 /* ── Empty / loading states ──────────────────────────────────────── */
 
@@ -1017,5 +1030,17 @@ function getNavHeight(): number {
   background: var(--vp-c-green-soft);
   border-color: var(--vp-c-green-1);
   color: var(--vp-c-green-1);
+}
+</style>
+
+<!-- Unscoped: .dark lives on <html>, so it cannot be targeted from a scoped block -->
+<style>
+.dark .pg-highlighted pre.shiki {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+
+.dark .pg-highlighted pre.shiki span {
+  color: var(--shiki-dark) !important;
 }
 </style>
