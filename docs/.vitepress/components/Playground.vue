@@ -4,6 +4,8 @@ import { runCodeGenerator } from 'swaggie/browser';
 import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
 import HintIcon from './HintIcon.vue';
+import ChevronDownIcon from './ChevronDownIcon.vue';
+import { EXAMPLE_SPEC } from '../sampleSpec';
 
 // ─── Session storage helpers ──────────────────────────────────────────────────
 
@@ -34,133 +36,31 @@ function s<T>(key: string, fallback: T): T {
 
 // ─── Settings — primary row ───────────────────────────────────────────────────
 
-const template         = ref<string>(s('template', 'axios'));
-const generationMode   = ref<string>(s('generationMode', 'full'));
-const schemaStyle      = ref<string>(s('schemaStyle', 'interface'));
-const enumStyle        = ref<string>(s('enumStyle', 'union'));
+const template = ref<string>(s('template', 'axios'));
+const generationMode = ref<string>(s('generationMode', 'full'));
+const schemaStyle = ref<string>(s('schemaStyle', 'interface'));
+const enumStyle = ref<string>(s('enumStyle', 'union'));
 const nullableStrategy = ref<string>(s('nullableStrategy', 'ignore'));
-const baseUrl          = ref<string>(s('baseUrl', ''));
-const skipDeprecated   = ref<boolean>(s('skipDeprecated', false));
+const baseUrl = ref<string>(s('baseUrl', ''));
+const skipDeprecated = ref<boolean>(s('skipDeprecated', false));
 
 // ─── Settings — advanced row ──────────────────────────────────────────────────
 
-const showAdvanced  = ref<boolean>(s('showAdvanced', false));
-const dateFormat    = ref<string>(s('dateFormat', 'Date'));
-const preferAny     = ref<boolean>(s('preferAny', false));
+const showAdvanced = ref<boolean>(s('showAdvanced', false));
+const dateFormat = ref<string>(s('dateFormat', 'Date'));
+const preferAny = ref<boolean>(s('preferAny', false));
 const servicePrefix = ref<string>(s('servicePrefix', ''));
-const allowDots     = ref<boolean>(s('allowDots', true));
-const arrayFormat   = ref<string>(s('arrayFormat', 'repeat'));
+const allowDots = ref<boolean>(s('allowDots', true));
+const arrayFormat = ref<string>(s('arrayFormat', 'repeat'));
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
-const specInput    = ref<string>('');
-const outputHtml   = ref<string>('');
-const outputRaw    = ref<string>('');
-const isLoading    = ref<boolean>(false);
+const specInput = ref<string>('');
+const outputHtml = ref<string>('');
+const outputRaw = ref<string>('');
+const isLoading = ref<boolean>(false);
 const errorMessage = ref<string>('');
-const copied       = ref<boolean>(false);
-
-// ─── Example spec (PetStore mini) ────────────────────────────────────────────
-
-const EXAMPLE_SPEC = `openapi: "3.0.3"
-info:
-  title: Pet Store
-  version: "1.0.0"
-paths:
-  /pets:
-    get:
-      operationId: listPets
-      summary: List all pets
-      tags: [pets]
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: A list of pets
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Pet"
-    post:
-      operationId: createPet
-      summary: Create a pet
-      tags: [pets]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewPet"
-      responses:
-        "201":
-          description: Created pet
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
-  /pets/{petId}:
-    get:
-      operationId: getPetById
-      summary: Get a pet by ID
-      tags: [pets]
-      parameters:
-        - name: petId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: A single pet
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
-        "404":
-          description: Pet not found
-    delete:
-      operationId: deletePet
-      summary: Delete a pet
-      tags: [pets]
-      parameters:
-        - name: petId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "204":
-          description: Pet deleted
-components:
-  schemas:
-    Pet:
-      type: object
-      required: [id, name]
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        tag:
-          type: string
-        status:
-          type: string
-          enum: [available, pending, sold]
-    NewPet:
-      type: object
-      required: [name]
-      properties:
-        name:
-          type: string
-        tag:
-          type: string
-`;
+const copied = ref<boolean>(false);
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -181,10 +81,7 @@ async function renderHighlighted(code: string): Promise<string> {
   try {
     return await codeToHtml(code, { lang: 'typescript', theme: 'github-dark' });
   } catch {
-    const escaped = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return `<pre class="shiki-fallback"><code>${escaped}</code></pre>`;
   }
 }
@@ -253,7 +150,9 @@ async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(outputRaw.value);
     copied.value = true;
-    setTimeout(() => { copied.value = false; }, 2000);
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
   } catch {
     // Clipboard not available (e.g., non-secure context)
   }
@@ -262,30 +161,35 @@ async function copyToClipboard() {
 // ─── Option descriptions (from schema.json) ───────────────────────────────────
 
 const HINTS: Record<string, string> = {
-  template:         'Template used for generating the API client. Choose a bundled template by name or provide a path to a custom one.',
-  generationMode:   'Controls whether to generate a full API client (methods + schemas) or only TypeScript schemas.',
-  schemaStyle:      'Controls whether object schemas are generated as interfaces or type aliases.',
-  enumStyle:        'Controls whether plain string enums are generated as union types or TypeScript enums.',
+  template:
+    'Template used for generating the API client. Choose a bundled template by name or provide a path to a custom one.',
+  generationMode:
+    'Controls whether to generate a full API client (methods + schemas) or only TypeScript schemas.',
+  schemaStyle: 'Controls whether object schemas are generated as interfaces or type aliases.',
+  enumStyle:
+    'Controls whether plain string enums are generated as union types or TypeScript enums.',
   nullableStrategy: 'Controls how OpenAPI "nullable: true" is translated into TypeScript types.',
-  baseUrl:          'Base URL baked into the generated client as the default value.',
-  skipDeprecated:   'When enabled, operations marked deprecated in the spec are excluded from the generated output.',
-  dateFormat:       'Determines how date fields are typed in generated models — as the JavaScript Date object or as a plain string.',
-  arrayFormat:      'Determines how arrays are serialized in query strings: repeat (?a=1&a=2), brackets (?a[]=1), or indices (?a[0]=1).',
-  servicePrefix:    'Prefix added to every generated service name. Useful when generating multiple APIs to avoid name collisions.',
-  allowDots:        'Use dot notation for nested object query params (a.b=1) instead of bracket notation (a[b]=1).',
-  preferAny:        'Use the "any" type instead of "unknown" for untyped or free-form values.',
+  baseUrl: 'Base URL baked into the generated client as the default value.',
+  skipDeprecated:
+    'When enabled, operations marked deprecated in the spec are excluded from the generated output.',
+  dateFormat:
+    'Determines how date fields are typed in generated models — as the JavaScript Date object or as a plain string.',
+  arrayFormat:
+    'Determines how arrays are serialized in query strings: repeat (?a=1&a=2), brackets (?a[]=1), or indices (?a[0]=1).',
+  servicePrefix:
+    'Prefix added to every generated service name. Useful when generating multiple APIs to avoid name collisions.',
+  allowDots:
+    'Use dot notation for nested object query params (a.b=1) instead of bracket notation (a[b]=1).',
+  preferAny: 'Use the "any" type instead of "unknown" for untyped or free-form values.',
 };
 </script>
 
 <template>
   <div class="playground">
-
     <!-- ── Settings box ─────────────────────────────────────────── -->
     <div class="pg-settings">
-
       <!-- Primary row -->
       <div class="pg-settings-row">
-
         <label class="pg-field">
           <span class="pg-label">
             Template
@@ -301,9 +205,7 @@ const HINTS: Record<string, string> = {
               <option value="ng1">ng1</option>
               <option value="ng2">ng2</option>
             </select>
-            <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </div>
         </label>
 
@@ -317,9 +219,7 @@ const HINTS: Record<string, string> = {
               <option value="full">full</option>
               <option value="schemas">schemas</option>
             </select>
-            <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </div>
         </label>
 
@@ -333,9 +233,7 @@ const HINTS: Record<string, string> = {
               <option value="interface">interface</option>
               <option value="type">type</option>
             </select>
-            <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </div>
         </label>
 
@@ -349,9 +247,7 @@ const HINTS: Record<string, string> = {
               <option value="union">union</option>
               <option value="enum">enum</option>
             </select>
-            <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </div>
         </label>
 
@@ -366,9 +262,7 @@ const HINTS: Record<string, string> = {
               <option value="include">include</option>
               <option value="nullableAsOptional">nullableAsOptional</option>
             </select>
-            <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </div>
         </label>
 
@@ -391,7 +285,12 @@ const HINTS: Record<string, string> = {
             <HintIcon :hint="HINTS.skipDeprecated" />
           </span>
           <div class="pg-checkbox-wrap">
-            <input v-model="skipDeprecated" type="checkbox" class="pg-checkbox" id="skipDeprecated" />
+            <input
+              v-model="skipDeprecated"
+              type="checkbox"
+              class="pg-checkbox"
+              id="skipDeprecated"
+            />
             <label for="skipDeprecated" class="pg-toggle" />
           </div>
         </label>
@@ -408,28 +307,36 @@ const HINTS: Record<string, string> = {
           <svg
             class="pg-chevron-btn"
             :class="{ 'pg-chevron-btn--open': showAdvanced }"
-            viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+            viewBox="0 0 12 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
           >
-            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path
+              d="M2 4l4 4 4-4"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           {{ showAdvanced ? 'Less' : 'More' }}
         </button>
 
         <button
-          class="pg-btn"
+          class="pg-btn pg-generate-btn"
           :disabled="isLoading"
           @click="generate"
           type="button"
         >
           <span v-if="isLoading" class="pg-spinner" aria-hidden="true" />
-          <span>{{ isLoading ? 'Generating…' : 'Generate' }}</span>
+          <span v-if="!isLoading">Generate</span>
         </button>
       </div>
 
       <!-- Advanced row (collapsible) -->
       <Transition name="pg-expand">
         <div v-if="showAdvanced" class="pg-settings-row pg-settings-row--advanced">
-
           <label class="pg-field">
             <span class="pg-label">
               Date format
@@ -440,9 +347,7 @@ const HINTS: Record<string, string> = {
                 <option value="Date">Date</option>
                 <option value="string">string</option>
               </select>
-              <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+              <ChevronDownIcon />
             </div>
           </label>
 
@@ -457,9 +362,7 @@ const HINTS: Record<string, string> = {
                 <option value="brackets">brackets</option>
                 <option value="indices">indices</option>
               </select>
-              <svg class="pg-chevron" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+              <ChevronDownIcon />
             </div>
           </label>
 
@@ -497,7 +400,6 @@ const HINTS: Record<string, string> = {
               <label for="preferAny" class="pg-toggle" />
             </div>
           </label>
-
         </div>
       </Transition>
     </div>
@@ -581,8 +483,12 @@ const HINTS: Record<string, string> = {
 }
 
 @media (max-width: 768px) {
-  .playground { padding: 0 12px 16px; }
-  .pg-columns  { grid-template-columns: 1fr; }
+  .playground {
+    padding: 0 12px 16px;
+  }
+  .pg-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Settings box ────────────────────────────────────────────────── */
@@ -623,9 +529,13 @@ const HINTS: Record<string, string> = {
   flex: 1;
 }
 
-.pg-field--checkbox { min-width: unset; }
+.pg-field--checkbox {
+  min-width: unset;
+}
 
-.pg-spacer { flex: 1; }
+.pg-spacer {
+  flex: 1;
+}
 
 /* ── Label ───────────────────────────────────────────────────────── */
 
@@ -666,7 +576,9 @@ const HINTS: Record<string, string> = {
   width: 100%;
 }
 
-.pg-select:focus { border-color: var(--vp-c-brand-1); }
+.pg-select:focus {
+  border-color: var(--vp-c-brand-1);
+}
 
 .pg-chevron {
   position: absolute;
@@ -694,7 +606,9 @@ const HINTS: Record<string, string> = {
   box-sizing: border-box;
 }
 
-.pg-input:focus { border-color: var(--vp-c-brand-1); }
+.pg-input:focus {
+  border-color: var(--vp-c-brand-1);
+}
 
 /* ── Toggle checkbox ─────────────────────────────────────────────── */
 
@@ -735,9 +649,16 @@ const HINTS: Record<string, string> = {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.pg-checkbox:checked + .pg-toggle            { background: var(--vp-c-brand-1); }
-.pg-checkbox:checked + .pg-toggle::after     { transform: translateX(16px); }
-.pg-checkbox:focus-visible + .pg-toggle      { outline: 2px solid var(--vp-c-brand-1); outline-offset: 2px; }
+.pg-checkbox:checked + .pg-toggle {
+  background: var(--vp-c-brand-1);
+}
+.pg-checkbox:checked + .pg-toggle::after {
+  transform: translateX(16px);
+}
+.pg-checkbox:focus-visible + .pg-toggle {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
 
 /* ── Buttons ─────────────────────────────────────────────────────── */
 
@@ -748,20 +669,27 @@ const HINTS: Record<string, string> = {
   height: 34px;
   padding: 0 18px;
   margin-top: auto;
-  background: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-2);
   color: var(--vp-c-white);
   border: none;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.pg-btn:hover:not(:disabled) { background: var(--vp-c-brand-2); }
-.pg-btn:disabled              { opacity: 0.6; cursor: not-allowed; }
+.pg-btn:hover:not(:disabled) {
+  background: var(--vp-c-brand-3);
+}
+.pg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .pg-btn--ghost {
   background: transparent;
@@ -775,6 +703,11 @@ const HINTS: Record<string, string> = {
   border-color: var(--vp-c-text-3);
 }
 
+.pg-generate-btn {
+  min-width: 94px;
+  justify-content: center;
+}
+
 .pg-chevron-btn {
   width: 12px;
   height: 12px;
@@ -782,13 +715,18 @@ const HINTS: Record<string, string> = {
   flex-shrink: 0;
 }
 
-.pg-chevron-btn--open { transform: rotate(180deg); }
+.pg-chevron-btn--open {
+  transform: rotate(180deg);
+}
 
 /* ── Expand / collapse transition ────────────────────────────────── */
 
 .pg-expand-enter-active,
 .pg-expand-leave-active {
-  transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s ease,
+    padding 0.25s ease;
   overflow: hidden;
   max-height: 200px;
 }
@@ -813,7 +751,11 @@ const HINTS: Record<string, string> = {
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ── Error banner ────────────────────────────────────────────────── */
 
@@ -937,13 +879,24 @@ const HINTS: Record<string, string> = {
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
-.pg-skeleton--short  { width: 40%; }
-.pg-skeleton--medium { width: 65%; }
-.pg-skeleton--long   { width: 90%; }
+.pg-skeleton--short {
+  width: 40%;
+}
+.pg-skeleton--medium {
+  width: 65%;
+}
+.pg-skeleton--long {
+  width: 90%;
+}
 
 @keyframes shimmer {
-  0%, 100% { opacity: 0.5; }
-  50%       { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ── Copy button ─────────────────────────────────────────────────── */
@@ -958,7 +911,10 @@ const HINTS: Record<string, string> = {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .pg-copy-btn:hover {
