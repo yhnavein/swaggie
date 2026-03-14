@@ -35,7 +35,7 @@ export default defineConfig({
   description:
     'Generate fully typed TypeScript API clients from your OpenAPI 3 spec — zero runtime overhead.',
 
-  head: [['link', { rel: 'icon', href: '/swaggie/swaggie.svg', type: 'image/svg+xml' }]],
+  head: [['link', { rel: 'icon', href: '/swaggie/swaggie-square.png', type: 'image/png' }]],
 
   markdown: {
     config(md) {

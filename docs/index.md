@@ -6,7 +6,7 @@ hero:
   text: Typed TypeScript clients from your OpenAPI spec
   tagline: Stop writing API-fetching code by hand. Point Swaggie at your OpenAPI 3 spec and get a fully typed, ready-to-use client in seconds.
   image:
-    src: /swaggie.svg
+    src: /swaggie-full.png
     alt: Swaggie
   actions:
     - theme: brand
