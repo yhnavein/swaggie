@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { runCodeGenerator } from 'swaggie/browser';
 import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
@@ -61,13 +61,6 @@ const outputRaw = ref<string>('');
 const isLoading = ref<boolean>(false);
 const errorMessage = ref<string>('');
 const copied = ref<boolean>(false);
-
-// ─── Lifecycle ────────────────────────────────────────────────────────────────
-
-onMounted(async () => {
-  specInput.value = EXAMPLE_SPEC;
-  await generate();
-});
 
 // ─── Code generation ──────────────────────────────────────────────────────────
 
@@ -158,6 +151,86 @@ async function copyToClipboard() {
   }
 }
 
+// ─── Example specs dropdown ───────────────────────────────────────────────────
+
+const EXAMPLE_SPECS = [
+  { label: 'Pet Store (Swagger)', url: 'https://petstore3.swagger.io/api/v3/openapi.yaml' },
+  {
+    label: 'Youtube Data API',
+    url: 'https://api.apis.guru/v2/specs/googleapis.com/youtube/v3/openapi.json',
+  },
+  { label: 'TCGdex', url: 'https://api.apis.guru/v2/specs/tcgdex.net/2.0.0/openapi.json' },
+  {
+    label: 'Revolut Open Banking',
+    url: 'https://raw.githubusercontent.com/revolut-engineering/revolut-openapi/refs/heads/master/yaml/open-banking.yaml',
+  },
+  {
+    label: 'Google Cloud Search',
+    url: 'https://api.apis.guru/v2/specs/googleapis.com/cloudsearch/v1/openapi.json',
+  },
+];
+
+const showExamplesMenu = ref(false);
+const isLoadingSpec = ref(false);
+
+async function loadExampleSpec(url: string) {
+  showExamplesMenu.value = false;
+  isLoadingSpec.value = true;
+  errorMessage.value = '';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    specInput.value = await res.text();
+  } catch (err: unknown) {
+    errorMessage.value = `Failed to load spec: ${err instanceof Error ? err.message : String(err)}`;
+  } finally {
+    isLoadingSpec.value = false;
+  }
+}
+
+function closeExamplesMenu(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  if (!target.closest('.pg-examples-wrap')) {
+    showExamplesMenu.value = false;
+  }
+}
+
+// ─── Sticky settings detection ────────────────────────────────────────────────
+
+const settingsSentinel = ref<HTMLElement | null>(null);
+const isSticky = ref(false);
+let stickyObserver: IntersectionObserver | null = null;
+
+onMounted(async () => {
+  // Sticky detection: observe a zero-height sentinel placed just above .pg-settings.
+  // When it scrolls out of view the settings bar has become sticky.
+  if (typeof IntersectionObserver !== 'undefined' && settingsSentinel.value) {
+    stickyObserver = new IntersectionObserver(
+      ([entry]) => {
+        isSticky.value = !entry.isIntersecting;
+      },
+      { threshold: 0, rootMargin: `-${getNavHeight()}px 0px 0px 0px` }
+    );
+    stickyObserver.observe(settingsSentinel.value);
+  }
+
+  document.addEventListener('click', closeExamplesMenu);
+
+  specInput.value = EXAMPLE_SPEC;
+  await generate();
+});
+
+onUnmounted(() => {
+  stickyObserver?.disconnect();
+  document.removeEventListener('click', closeExamplesMenu);
+});
+
+function getNavHeight(): number {
+  if (typeof document === 'undefined') return 64;
+  const nav = document.querySelector('.VPNav') as HTMLElement | null;
+  return nav ? nav.offsetHeight : 64;
+}
+
 // ─── Option descriptions (from schema.json) ───────────────────────────────────
 
 const HINTS: Record<string, string> = {
@@ -186,8 +259,11 @@ const HINTS: Record<string, string> = {
 
 <template>
   <div class="playground">
+    <!-- Zero-height sentinel — when it leaves viewport the settings bar is sticky -->
+    <div ref="settingsSentinel" class="pg-sentinel" aria-hidden="true" />
+
     <!-- ── Settings box ─────────────────────────────────────────── -->
-    <div class="pg-settings">
+    <div class="pg-settings" :class="{ 'pg-settings--stuck': isSticky }">
       <!-- Primary row -->
       <div class="pg-settings-row">
         <label class="pg-field">
@@ -415,7 +491,46 @@ const HINTS: Record<string, string> = {
       <div class="pg-panel">
         <div class="pg-panel-header">
           <span class="pg-panel-title">OpenAPI Spec</span>
-          <span class="pg-panel-hint">YAML or JSON</span>
+          <div class="pg-examples-wrap">
+            <button
+              class="pg-examples-btn"
+              :class="{ 'pg-examples-btn--loading': isLoadingSpec }"
+              type="button"
+              @click.stop="showExamplesMenu = !showExamplesMenu"
+            >
+              <span v-if="isLoadingSpec" class="pg-spinner pg-spinner--sm" aria-hidden="true" />
+              <span v-else>Examples</span>
+              <svg
+                v-if="!isLoadingSpec"
+                class="pg-chevron-sm"
+                :class="{ 'pg-chevron-sm--open': showExamplesMenu }"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 4l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <div v-if="showExamplesMenu" class="pg-examples-menu" role="menu">
+              <button
+                v-for="spec in EXAMPLE_SPECS"
+                :key="spec.url"
+                class="pg-examples-item"
+                type="button"
+                role="menuitem"
+                @click="loadExampleSpec(spec.url)"
+              >
+                {{ spec.label }}
+              </button>
+            </div>
+          </div>
         </div>
         <textarea
           v-model="specInput"
@@ -491,15 +606,49 @@ const HINTS: Record<string, string> = {
   }
 }
 
+/* ── Sticky sentinel ─────────────────────────────────────────────── */
+
+.pg-sentinel {
+  height: 0;
+  /* Must sit at the very top of the scroll area so we detect stickiness correctly */
+  margin-top: -1px;
+}
+
 /* ── Settings box ────────────────────────────────────────────────── */
 
 .pg-settings {
   display: flex;
   flex-direction: column;
   gap: 0;
+  position: sticky;
+  top: var(--vp-nav-height);
+  z-index: 10;
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
+  overflow: hidden;
+  transition:
+    border-radius 0.15s,
+    margin 0.15s;
+}
+
+/* When stuck: flush with viewport edges & square top corners */
+.pg-settings--stuck {
+  border-radius: 0;
+  border-top: none;
+  /* Break out of the playground's horizontal padding */
+  margin-left: -24px;
+  margin-right: -24px;
+  /* Restore inner padding so content doesn't touch the edges */
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (max-width: 768px) {
+  .pg-settings--stuck {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
 }
 
 .pg-settings-row {
@@ -778,7 +927,8 @@ const HINTS: Record<string, string> = {
   overflow: hidden;
   background: var(--vp-c-bg);
   min-height: 0;
-  max-height: calc(100vh - 264px);
+  /*max-height: calc(100vh - 264px);*/
+  max-height: calc(100vh - 185px);
 }
 
 .pg-panel-header {
@@ -802,6 +952,94 @@ const HINTS: Record<string, string> = {
 .pg-panel-hint {
   font-size: 11px;
   color: var(--vp-c-text-3);
+}
+
+/* ── Examples dropdown ───────────────────────────────────────────── */
+
+.pg-examples-wrap {
+  position: relative;
+}
+
+.pg-examples-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 4px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+}
+
+.pg-examples-btn:hover,
+.pg-examples-btn--loading {
+  background: var(--vp-c-bg-soft);
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.pg-chevron-sm {
+  width: 10px;
+  height: 10px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.pg-chevron-sm--open {
+  transform: rotate(180deg);
+}
+
+.pg-examples-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 230px;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 7px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 50;
+}
+
+.pg-examples-item {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  background: transparent;
+  border: none;
+  color: var(--vp-c-text-1);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.pg-examples-item:hover {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-brand-1);
+}
+
+.pg-examples-item + .pg-examples-item {
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+/* Small spinner variant for spec loading */
+.pg-spinner--sm {
+  width: 11px;
+  height: 11px;
+  border-width: 1.5px;
+  border-color: rgba(0, 0, 0, 0.15);
+  border-top-color: var(--vp-c-brand-1);
 }
 
 /* ── Textarea (left panel) ───────────────────────────────────────── */
