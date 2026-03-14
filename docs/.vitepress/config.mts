@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress';
+import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import path from 'node:path';
 
 // https://vitepress.dev/reference/site-config
@@ -34,10 +35,16 @@ export default defineConfig({
   description:
     'Generate fully typed TypeScript API clients from your OpenAPI 3 spec — zero runtime overhead.',
 
-  head: [['link', { rel: 'icon', href: '/swaggie/swaggie.svg', type: 'image/svg+xml' }]],
+  head: [['link', { rel: 'icon', href: '/swaggie/swaggie-square.png', type: 'image/png' }]],
+
+  markdown: {
+    config(md) {
+      md.use(tabsMarkdownPlugin);
+    },
+  },
 
   themeConfig: {
-    logo: '/swaggie.svg',
+    logo: '/swaggie-square.png',
 
     nav: [
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
@@ -71,7 +78,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © Swaggie contributors',
+      copyright: 'Copyright © Piotr Dabrowski',
     },
 
     search: {

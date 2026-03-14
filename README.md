@@ -1,5 +1,5 @@
 <div style="text-align: center; margin: 0px auto 30px; max-width: 600px">
-  <img src="./swaggie.svg" alt="Swaggie logo">
+  <img src="./docs/public/swaggie-full.png" alt="Swaggie logo">
 </div>
 
 # Swaggie
@@ -387,7 +387,7 @@ Swaggie only needs a JSON or YAML OpenAPI spec file — it does not require a ru
 ## Used By
 
 <div style="display: flex; gap: 1rem;">
-<a href="https://www.britishcouncil.org"><img alt="British Council" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/BritishCouncil.png/320px-BritishCouncil.png" style="height: 50px;" /></a>
-<a href="https://kpmg.com/"><img alt="KPMG" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/KPMG.svg/320px-KPMG.svg.png" style="height: 50px;" /></a>
-<a href="https://klarna.com/"><img alt="Klarna" src="https://upload.wikimedia.org/wikipedia/commons/4/40/Klarna_Payment_Badge.svg" style="height: 50px;" /></a>
+<a href="https://www.britishcouncil.org"><img alt="British Council" src="./docs/public/used-in/bc-logo.png" /></a>
+<a href="https://kpmg.com/"><img alt="KPMG" src="./docs/public/used-in/kpmg-logo.png" /></a>
+<a href="https://klarna.com/"><img alt="Klarna" src="./docs/public/used-in/klarna-logo.png" /></a>
 </div>

@@ -17,19 +17,61 @@ If your backend still exposes a 2.0 spec, you can convert it using [swagger2open
 
 Install Swaggie as a dev dependency (recommended):
 
+:::tabs variant:code
+== npm
+
 ```bash
 npm install swaggie --save-dev
-# or
+```
+
+== yarn
+
+```bash
 yarn add swaggie --dev
-# or
+```
+
+== pnpm
+
+```bash
+pnpm add swaggie --dev
+```
+
+== bun
+
+```bash
 bun add swaggie --dev
 ```
 
-Or install it globally if you prefer running it as a standalone CLI:
+:::
+
+Or use it without installing:
+
+:::tabs variant:code
+== npm
 
 ```bash
-npm install swaggie -g
+npx swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./src/api/petstore.ts
 ```
+
+== yarn
+
+```bash
+yarn dlx swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./src/api/petstore.ts
+```
+
+== pnpm
+
+```bash
+pnpmx swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./src/api/petstore.ts
+```
+
+== bun
+
+```bash
+bunx swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./src/api/petstore.ts
+```
+
+:::
 
 ## Your first client in 60 seconds
 

@@ -5,7 +5,8 @@ import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
 import HintIcon from './HintIcon.vue';
 import ChevronDownIcon from './ChevronDownIcon.vue';
-import { EXAMPLE_SPEC } from '../sampleSpec';
+import Button from './Button.vue';
+import { EXAMPLE_SPEC, EXAMPLE_SPECS, HINTS } from '../data';
 
 // ─── Session storage helpers ──────────────────────────────────────────────────
 
@@ -72,7 +73,11 @@ async function parseSpec(input: string): Promise<object> {
 
 async function renderHighlighted(code: string): Promise<string> {
   try {
-    return await codeToHtml(code, { lang: 'typescript', theme: 'github-dark' });
+    return await codeToHtml(code, {
+      lang: 'typescript',
+      themes: { light: 'github-light', dark: 'github-dark' },
+      defaultColor: false,
+    });
   } catch {
     const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return `<pre class="shiki-fallback"><code>${escaped}</code></pre>`;
@@ -153,23 +158,6 @@ async function copyToClipboard() {
 
 // ─── Example specs dropdown ───────────────────────────────────────────────────
 
-const EXAMPLE_SPECS = [
-  { label: 'Pet Store (Swagger)', url: 'https://petstore3.swagger.io/api/v3/openapi.yaml' },
-  {
-    label: 'Youtube Data API',
-    url: 'https://api.apis.guru/v2/specs/googleapis.com/youtube/v3/openapi.json',
-  },
-  { label: 'TCGdex', url: 'https://api.apis.guru/v2/specs/tcgdex.net/2.0.0/openapi.json' },
-  {
-    label: 'Revolut Open Banking',
-    url: 'https://raw.githubusercontent.com/revolut-engineering/revolut-openapi/refs/heads/master/yaml/open-banking.yaml',
-  },
-  {
-    label: 'Google Cloud Search',
-    url: 'https://api.apis.guru/v2/specs/googleapis.com/cloudsearch/v1/openapi.json',
-  },
-];
-
 const showExamplesMenu = ref(false);
 const isLoadingSpec = ref(false);
 
@@ -230,31 +218,6 @@ function getNavHeight(): number {
   const nav = document.querySelector('.VPNav') as HTMLElement | null;
   return nav ? nav.offsetHeight : 64;
 }
-
-// ─── Option descriptions (from schema.json) ───────────────────────────────────
-
-const HINTS: Record<string, string> = {
-  template:
-    'Template used for generating the API client. Choose a bundled template by name or provide a path to a custom one.',
-  generationMode:
-    'Controls whether to generate a full API client (methods + schemas) or only TypeScript schemas.',
-  schemaStyle: 'Controls whether object schemas are generated as interfaces or type aliases.',
-  enumStyle:
-    'Controls whether plain string enums are generated as union types or TypeScript enums.',
-  nullableStrategy: 'Controls how OpenAPI "nullable: true" is translated into TypeScript types.',
-  baseUrl: 'Base URL baked into the generated client as the default value.',
-  skipDeprecated:
-    'When enabled, operations marked deprecated in the spec are excluded from the generated output.',
-  dateFormat:
-    'Determines how date fields are typed in generated models — as the JavaScript Date object or as a plain string.',
-  arrayFormat:
-    'Determines how arrays are serialized in query strings: repeat (?a=1&a=2), brackets (?a[]=1), or indices (?a[0]=1).',
-  servicePrefix:
-    'Prefix added to every generated service name. Useful when generating multiple APIs to avoid name collisions.',
-  allowDots:
-    'Use dot notation for nested object query params (a.b=1) instead of bracket notation (a[b]=1).',
-  preferAny: 'Use the "any" type instead of "unknown" for untyped or free-form values.',
-};
 </script>
 
 <template>
@@ -374,40 +337,17 @@ const HINTS: Record<string, string> = {
         <!-- Push buttons to the right -->
         <div class="pg-spacer" />
 
-        <button
-          class="pg-btn pg-btn--ghost"
-          @click="showAdvanced = !showAdvanced"
+        <Button
+          variant="ghost"
+          :chevron="true"
+          :open="showAdvanced"
           :aria-expanded="showAdvanced"
-          type="button"
+          @click="showAdvanced = !showAdvanced"
         >
-          <svg
-            class="pg-chevron-btn"
-            :class="{ 'pg-chevron-btn--open': showAdvanced }"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M2 4l4 4 4-4"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
           {{ showAdvanced ? 'Less' : 'More' }}
-        </button>
+        </Button>
 
-        <button
-          class="pg-btn pg-generate-btn"
-          :disabled="isLoading"
-          @click="generate"
-          type="button"
-        >
-          <span v-if="isLoading" class="pg-spinner" aria-hidden="true" />
-          <span v-if="!isLoading">Generate</span>
-        </button>
+        <Button style="min-width: 94px" :loading="isLoading" @click="generate"> Generate </Button>
       </div>
 
       <!-- Advanced row (collapsible) -->
@@ -476,6 +416,8 @@ const HINTS: Record<string, string> = {
               <label for="preferAny" class="pg-toggle" />
             </div>
           </label>
+
+          <div class="pg-spacer" />
         </div>
       </Transition>
     </div>
@@ -500,23 +442,12 @@ const HINTS: Record<string, string> = {
             >
               <span v-if="isLoadingSpec" class="pg-spinner pg-spinner--sm" aria-hidden="true" />
               <span v-else>Examples</span>
-              <svg
+
+              <ChevronDownIcon
                 v-if="!isLoadingSpec"
-                class="pg-chevron-sm"
-                :class="{ 'pg-chevron-sm--open': showExamplesMenu }"
-                viewBox="0 0 12 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  d="M2 4l4 4 4-4"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+                :open="showExamplesMenu"
+                style="width: 10px; height: 10px; position: static"
+              />
             </button>
             <div v-if="showExamplesMenu" class="pg-examples-menu" role="menu">
               <button
@@ -809,65 +740,6 @@ const HINTS: Record<string, string> = {
   outline-offset: 2px;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────────── */
-
-.pg-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 18px;
-  margin-top: auto;
-  background: var(--vp-c-brand-2);
-  color: var(--vp-c-white);
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    opacity 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.pg-btn:hover:not(:disabled) {
-  background: var(--vp-c-brand-3);
-}
-.pg-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.pg-btn--ghost {
-  background: transparent;
-  color: var(--vp-c-text-2);
-  border: 1px solid var(--vp-c-divider);
-}
-
-.pg-btn--ghost:hover:not(:disabled) {
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
-  border-color: var(--vp-c-text-3);
-}
-
-.pg-generate-btn {
-  min-width: 94px;
-  justify-content: center;
-}
-
-.pg-chevron-btn {
-  width: 12px;
-  height: 12px;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.pg-chevron-btn--open {
-  transform: rotate(180deg);
-}
-
 /* ── Expand / collapse transition ────────────────────────────────── */
 
 .pg-expand-enter-active,
@@ -886,24 +758,6 @@ const HINTS: Record<string, string> = {
   opacity: 0;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-}
-
-/* ── Spinner ─────────────────────────────────────────────────────── */
-
-.pg-spinner {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* ── Error banner ────────────────────────────────────────────────── */
@@ -987,17 +841,6 @@ const HINTS: Record<string, string> = {
   color: var(--vp-c-brand-1);
 }
 
-.pg-chevron-sm {
-  width: 10px;
-  height: 10px;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.pg-chevron-sm--open {
-  transform: rotate(180deg);
-}
-
 .pg-examples-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -1033,11 +876,24 @@ const HINTS: Record<string, string> = {
   border-top: 1px solid var(--vp-c-divider);
 }
 
-/* Small spinner variant for spec loading */
+/* Small spinner for spec loading (base + size/colour override) */
+.pg-spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  animation: pg-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .pg-spinner--sm {
   width: 11px;
   height: 11px;
-  border-width: 1.5px;
   border-color: rgba(0, 0, 0, 0.15);
   border-top-color: var(--vp-c-brand-1);
 }
@@ -1083,12 +939,21 @@ const HINTS: Record<string, string> = {
   font-size: 12.5px;
   line-height: 1.6;
   overflow: auto;
-  background: #0d1117 !important;
+  /* Use the light theme colors by default */
+  background-color: var(--shiki-light-bg) !important;
+  color: var(--shiki-light) !important;
 }
 
 .pg-highlighted :deep(pre.shiki code) {
   font-family: var(--vp-font-family-mono);
 }
+
+/* Token colors for light mode */
+.pg-highlighted :deep(pre.shiki span) {
+  color: var(--shiki-light) !important;
+}
+
+
 
 /* ── Empty / loading states ──────────────────────────────────────── */
 
@@ -1165,5 +1030,17 @@ const HINTS: Record<string, string> = {
   background: var(--vp-c-green-soft);
   border-color: var(--vp-c-green-1);
   color: var(--vp-c-green-1);
+}
+</style>
+
+<!-- Unscoped: .dark lives on <html>, so it cannot be targeted from a scoped block -->
+<style>
+.dark .pg-highlighted pre.shiki {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+
+.dark .pg-highlighted pre.shiki span {
+  color: var(--shiki-dark) !important;
 }
 </style>
