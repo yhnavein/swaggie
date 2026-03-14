@@ -47,5 +47,5 @@ jobs:
         with:
           name: dist
           path: dist/
-      - run: npm install --production
+      - run: npm install --omit=dev --legacy-peer-deps
       - run: node dist/cli.js -c test/ci-test.config.json

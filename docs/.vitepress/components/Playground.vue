@@ -353,6 +353,38 @@ function getNavHeight(): number {
       <!-- Advanced row (collapsible) -->
       <Transition name="pg-expand">
         <div v-if="showAdvanced" class="pg-settings-row pg-settings-row--advanced">
+          <!-- Query params group -->
+          <div class="pg-group">
+            <div class="pg-group-label">Query params</div>
+            <div class="pg-group-fields">
+              <label class="pg-field">
+                <span class="pg-label">
+                  Array format
+                  <HintIcon :hint="HINTS.arrayFormat" />
+                </span>
+                <div class="pg-select-wrap">
+                  <select v-model="arrayFormat" class="pg-select">
+                    <option value="repeat">repeat</option>
+                    <option value="brackets">brackets</option>
+                    <option value="indices">indices</option>
+                  </select>
+                  <ChevronDownIcon />
+                </div>
+              </label>
+
+              <label class="pg-field pg-field--checkbox">
+                <span class="pg-label">
+                  Allow dots
+                  <HintIcon :hint="HINTS.allowDots" />
+                </span>
+                <div class="pg-checkbox-wrap">
+                  <input v-model="allowDots" type="checkbox" class="pg-checkbox" id="allowDots" />
+                  <label for="allowDots" class="pg-toggle" />
+                </div>
+              </label>
+            </div>
+          </div>
+
           <label class="pg-field">
             <span class="pg-label">
               Date format
@@ -362,21 +394,6 @@ function getNavHeight(): number {
               <select v-model="dateFormat" class="pg-select">
                 <option value="Date">Date</option>
                 <option value="string">string</option>
-              </select>
-              <ChevronDownIcon />
-            </div>
-          </label>
-
-          <label class="pg-field">
-            <span class="pg-label">
-              Array format
-              <HintIcon :hint="HINTS.arrayFormat" />
-            </span>
-            <div class="pg-select-wrap">
-              <select v-model="arrayFormat" class="pg-select">
-                <option value="repeat">repeat</option>
-                <option value="brackets">brackets</option>
-                <option value="indices">indices</option>
               </select>
               <ChevronDownIcon />
             </div>
@@ -393,17 +410,6 @@ function getNavHeight(): number {
               placeholder="e.g. Petstore"
               class="pg-input"
             />
-          </label>
-
-          <label class="pg-field pg-field--checkbox">
-            <span class="pg-label">
-              Allow dots
-              <HintIcon :hint="HINTS.allowDots" />
-            </span>
-            <div class="pg-checkbox-wrap">
-              <input v-model="allowDots" type="checkbox" class="pg-checkbox" id="allowDots" />
-              <label for="allowDots" class="pg-toggle" />
-            </div>
           </label>
 
           <label class="pg-field pg-field--checkbox">
@@ -557,7 +563,6 @@ function getNavHeight(): number {
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
-  overflow: hidden;
   transition:
     border-radius 0.15s,
     margin 0.15s;
@@ -595,6 +600,34 @@ function getNavHeight(): number {
   background: var(--vp-c-bg-elv, var(--vp-c-bg));
 }
 
+/* ── Query params group ──────────────────────────────────────────── */
+
+.pg-group {
+  position: relative;
+  border-right: 1px solid var(--vp-c-divider);
+  padding: 12px 8px 12px 14px;
+  margin: -12px 0 -12px -14px;
+}
+
+.pg-group-label {
+  position: absolute;
+  top: 4px;
+  width: 100%;
+  font-size: 10px;
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  user-select: none;
+  text-align: center;
+  line-height: 1;
+}
+
+.pg-group-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
 /* ── Fields ──────────────────────────────────────────────────────── */
 
 .pg-field {
@@ -606,7 +639,6 @@ function getNavHeight(): number {
 
 .pg-field--wide {
   min-width: 180px;
-  flex: 1;
 }
 
 .pg-field--checkbox {
@@ -952,8 +984,6 @@ function getNavHeight(): number {
 .pg-highlighted :deep(pre.shiki span) {
   color: var(--shiki-light) !important;
 }
-
-
 
 /* ── Empty / loading states ──────────────────────────────────────── */
 

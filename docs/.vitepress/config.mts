@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import path from 'node:path';
+import { version } from '../../package.json';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -50,6 +51,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
       { text: 'Reference', link: '/reference/cli', activeMatch: '/reference/' },
       { text: 'Playground', link: '/playground' },
+      { text: `v${version}`, link: 'https://github.com/yhnavein/swaggie/releases' },
     ],
 
     sidebar: [
@@ -61,6 +63,7 @@ export default defineConfig({
           { text: 'Templates', link: '/guide/templates' },
           { text: 'Advanced Options', link: '/guide/advanced' },
           { text: 'Programmatic API', link: '/guide/programmatic' },
+          { text: 'Backend Support', link: '/guide/backend-support' },
         ],
       },
       {

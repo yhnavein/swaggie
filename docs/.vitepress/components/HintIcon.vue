@@ -45,7 +45,7 @@ defineProps<{ hint: string }>();
 .pg-hint-wrap::after {
   content: attr(data-hint);
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   width: 220px;
@@ -71,11 +71,11 @@ defineProps<{ hint: string }>();
 .pg-hint-wrap::before {
   content: '';
   position: absolute;
-  bottom: calc(100% + 2px);
+  top: calc(100% + 2px);
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: var(--vp-c-divider);
+  border-bottom-color: var(--vp-c-divider);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s;
