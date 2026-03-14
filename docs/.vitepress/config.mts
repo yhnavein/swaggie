@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress';
+import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import path from 'node:path';
 
 // https://vitepress.dev/reference/site-config
@@ -36,6 +37,12 @@ export default defineConfig({
 
   head: [['link', { rel: 'icon', href: '/swaggie/swaggie.svg', type: 'image/svg+xml' }]],
 
+  markdown: {
+    config(md) {
+      md.use(tabsMarkdownPlugin);
+    },
+  },
+
   themeConfig: {
     logo: '/swaggie.svg',
 
@@ -71,7 +78,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © Swaggie contributors',
+      copyright: 'Copyright © Piotr Dabrowski',
     },
 
     search: {
