@@ -3,34 +3,62 @@ import { ref, onMounted } from 'vue';
 import { runCodeGenerator } from 'swaggie/browser';
 import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
+import HintIcon from './HintIcon.vue';
+
+// ─── Session storage helpers ──────────────────────────────────────────────────
+
+const SESSION_KEY = 'swaggie-playground';
+
+function loadSession(): Record<string, unknown> {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveSession(patch: Record<string, unknown>) {
+  try {
+    const current = loadSession();
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, ...patch }));
+  } catch {
+    // sessionStorage unavailable (SSR, private mode, quota)
+  }
+}
+
+function s<T>(key: string, fallback: T): T {
+  const saved = loadSession()[key];
+  return saved !== undefined ? (saved as T) : fallback;
+}
 
 // ─── Settings — primary row ───────────────────────────────────────────────────
 
-const template = ref<string>('axios');
-const generationMode = ref<string>('full');
-const schemaStyle = ref<string>('interface');
-const enumStyle = ref<string>('union');
-const nullableStrategy = ref<string>('ignore');
-const baseUrl = ref<string>('');
-const skipDeprecated = ref<boolean>(false);
+const template         = ref<string>(s('template', 'axios'));
+const generationMode   = ref<string>(s('generationMode', 'full'));
+const schemaStyle      = ref<string>(s('schemaStyle', 'interface'));
+const enumStyle        = ref<string>(s('enumStyle', 'union'));
+const nullableStrategy = ref<string>(s('nullableStrategy', 'ignore'));
+const baseUrl          = ref<string>(s('baseUrl', ''));
+const skipDeprecated   = ref<boolean>(s('skipDeprecated', false));
 
-// ─── Settings — advanced (expanded) row ──────────────────────────────────────
+// ─── Settings — advanced row ──────────────────────────────────────────────────
 
-const showAdvanced = ref<boolean>(false);
-const dateFormat = ref<string>('Date');
-const preferAny = ref<boolean>(false);
-const servicePrefix = ref<string>('');
-const allowDots = ref<boolean>(true);
-const arrayFormat = ref<string>('repeat');
+const showAdvanced  = ref<boolean>(s('showAdvanced', false));
+const dateFormat    = ref<string>(s('dateFormat', 'Date'));
+const preferAny     = ref<boolean>(s('preferAny', false));
+const servicePrefix = ref<string>(s('servicePrefix', ''));
+const allowDots     = ref<boolean>(s('allowDots', true));
+const arrayFormat   = ref<string>(s('arrayFormat', 'repeat'));
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
-const specInput = ref<string>('');
-const outputHtml = ref<string>('');
-const outputRaw = ref<string>('');
-const isLoading = ref<boolean>(false);
+const specInput    = ref<string>('');
+const outputHtml   = ref<string>('');
+const outputRaw    = ref<string>('');
+const isLoading    = ref<boolean>(false);
 const errorMessage = ref<string>('');
-const copied = ref<boolean>(false);
+const copied       = ref<boolean>(false);
 
 // ─── Example spec (PetStore mini) ────────────────────────────────────────────
 
@@ -145,18 +173,13 @@ onMounted(async () => {
 
 async function parseSpec(input: string): Promise<object> {
   const trimmed = input.trim();
-  if (trimmed.startsWith('{')) {
-    return JSON.parse(trimmed);
-  }
+  if (trimmed.startsWith('{')) return JSON.parse(trimmed);
   return parseYaml(trimmed);
 }
 
 async function renderHighlighted(code: string): Promise<string> {
   try {
-    return await codeToHtml(code, {
-      lang: 'typescript',
-      theme: 'github-dark',
-    });
+    return await codeToHtml(code, { lang: 'typescript', theme: 'github-dark' });
   } catch {
     const escaped = code
       .replace(/&/g, '&amp;')
@@ -200,9 +223,24 @@ async function generate() {
 
     outputRaw.value = code;
     outputHtml.value = await renderHighlighted(code);
+
+    saveSession({
+      template: template.value,
+      generationMode: generationMode.value,
+      schemaStyle: schemaStyle.value,
+      enumStyle: enumStyle.value,
+      nullableStrategy: nullableStrategy.value,
+      baseUrl: baseUrl.value,
+      skipDeprecated: skipDeprecated.value,
+      showAdvanced: showAdvanced.value,
+      dateFormat: dateFormat.value,
+      preferAny: preferAny.value,
+      servicePrefix: servicePrefix.value,
+      allowDots: allowDots.value,
+      arrayFormat: arrayFormat.value,
+    });
   } catch (err: unknown) {
-    errorMessage.value =
-      err instanceof Error ? err.message : String(err);
+    errorMessage.value = err instanceof Error ? err.message : String(err);
   } finally {
     isLoading.value = false;
   }
@@ -220,18 +258,39 @@ async function copyToClipboard() {
     // Clipboard not available (e.g., non-secure context)
   }
 }
+
+// ─── Option descriptions (from schema.json) ───────────────────────────────────
+
+const HINTS: Record<string, string> = {
+  template:         'Template used for generating the API client. Choose a bundled template by name or provide a path to a custom one.',
+  generationMode:   'Controls whether to generate a full API client (methods + schemas) or only TypeScript schemas.',
+  schemaStyle:      'Controls whether object schemas are generated as interfaces or type aliases.',
+  enumStyle:        'Controls whether plain string enums are generated as union types or TypeScript enums.',
+  nullableStrategy: 'Controls how OpenAPI "nullable: true" is translated into TypeScript types.',
+  baseUrl:          'Base URL baked into the generated client as the default value.',
+  skipDeprecated:   'When enabled, operations marked deprecated in the spec are excluded from the generated output.',
+  dateFormat:       'Determines how date fields are typed in generated models — as the JavaScript Date object or as a plain string.',
+  arrayFormat:      'Determines how arrays are serialized in query strings: repeat (?a=1&a=2), brackets (?a[]=1), or indices (?a[0]=1).',
+  servicePrefix:    'Prefix added to every generated service name. Useful when generating multiple APIs to avoid name collisions.',
+  allowDots:        'Use dot notation for nested object query params (a.b=1) instead of bracket notation (a[b]=1).',
+  preferAny:        'Use the "any" type instead of "unknown" for untyped or free-form values.',
+};
 </script>
 
 <template>
   <div class="playground">
-    <!-- ── Settings bar ─────────────────────────────────────────── -->
+
+    <!-- ── Settings box ─────────────────────────────────────────── -->
     <div class="pg-settings">
 
       <!-- Primary row -->
       <div class="pg-settings-row">
 
         <label class="pg-field">
-          <span class="pg-label">Template</span>
+          <span class="pg-label">
+            Template
+            <HintIcon :hint="HINTS.template" />
+          </span>
           <div class="pg-select-wrap">
             <select v-model="template" class="pg-select">
               <option value="axios">axios</option>
@@ -249,7 +308,10 @@ async function copyToClipboard() {
         </label>
 
         <label class="pg-field">
-          <span class="pg-label">Mode</span>
+          <span class="pg-label">
+            Mode
+            <HintIcon :hint="HINTS.generationMode" />
+          </span>
           <div class="pg-select-wrap">
             <select v-model="generationMode" class="pg-select">
               <option value="full">full</option>
@@ -262,7 +324,10 @@ async function copyToClipboard() {
         </label>
 
         <label class="pg-field">
-          <span class="pg-label">Schema style</span>
+          <span class="pg-label">
+            Schema style
+            <HintIcon :hint="HINTS.schemaStyle" />
+          </span>
           <div class="pg-select-wrap">
             <select v-model="schemaStyle" class="pg-select">
               <option value="interface">interface</option>
@@ -275,7 +340,10 @@ async function copyToClipboard() {
         </label>
 
         <label class="pg-field">
-          <span class="pg-label">Enum style</span>
+          <span class="pg-label">
+            Enum style
+            <HintIcon :hint="HINTS.enumStyle" />
+          </span>
           <div class="pg-select-wrap">
             <select v-model="enumStyle" class="pg-select">
               <option value="union">union</option>
@@ -288,7 +356,10 @@ async function copyToClipboard() {
         </label>
 
         <label class="pg-field">
-          <span class="pg-label">Nullable</span>
+          <span class="pg-label">
+            Nullable
+            <HintIcon :hint="HINTS.nullableStrategy" />
+          </span>
           <div class="pg-select-wrap">
             <select v-model="nullableStrategy" class="pg-select">
               <option value="ignore">ignore</option>
@@ -302,7 +373,10 @@ async function copyToClipboard() {
         </label>
 
         <label class="pg-field pg-field--wide">
-          <span class="pg-label">Base URL</span>
+          <span class="pg-label">
+            Base URL
+            <HintIcon :hint="HINTS.baseUrl" />
+          </span>
           <input
             v-model="baseUrl"
             type="text"
@@ -312,22 +386,19 @@ async function copyToClipboard() {
         </label>
 
         <label class="pg-field pg-field--checkbox">
-          <span class="pg-label">Skip deprecated</span>
+          <span class="pg-label">
+            Skip deprecated
+            <HintIcon :hint="HINTS.skipDeprecated" />
+          </span>
           <div class="pg-checkbox-wrap">
-            <input
-              v-model="skipDeprecated"
-              type="checkbox"
-              class="pg-checkbox"
-              id="skipDeprecated"
-            />
+            <input v-model="skipDeprecated" type="checkbox" class="pg-checkbox" id="skipDeprecated" />
             <label for="skipDeprecated" class="pg-toggle" />
           </div>
         </label>
 
-        <!-- Spacer to push buttons to the right -->
+        <!-- Push buttons to the right -->
         <div class="pg-spacer" />
 
-        <!-- Expand / collapse advanced -->
         <button
           class="pg-btn pg-btn--ghost"
           @click="showAdvanced = !showAdvanced"
@@ -337,10 +408,7 @@ async function copyToClipboard() {
           <svg
             class="pg-chevron-btn"
             :class="{ 'pg-chevron-btn--open': showAdvanced }"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
+            viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
           >
             <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -363,7 +431,10 @@ async function copyToClipboard() {
         <div v-if="showAdvanced" class="pg-settings-row pg-settings-row--advanced">
 
           <label class="pg-field">
-            <span class="pg-label">Date format</span>
+            <span class="pg-label">
+              Date format
+              <HintIcon :hint="HINTS.dateFormat" />
+            </span>
             <div class="pg-select-wrap">
               <select v-model="dateFormat" class="pg-select">
                 <option value="Date">Date</option>
@@ -376,7 +447,10 @@ async function copyToClipboard() {
           </label>
 
           <label class="pg-field">
-            <span class="pg-label">Array format</span>
+            <span class="pg-label">
+              Array format
+              <HintIcon :hint="HINTS.arrayFormat" />
+            </span>
             <div class="pg-select-wrap">
               <select v-model="arrayFormat" class="pg-select">
                 <option value="repeat">repeat</option>
@@ -390,7 +464,10 @@ async function copyToClipboard() {
           </label>
 
           <label class="pg-field pg-field--wide">
-            <span class="pg-label">Service prefix</span>
+            <span class="pg-label">
+              Service prefix
+              <HintIcon :hint="HINTS.servicePrefix" />
+            </span>
             <input
               v-model="servicePrefix"
               type="text"
@@ -400,27 +477,23 @@ async function copyToClipboard() {
           </label>
 
           <label class="pg-field pg-field--checkbox">
-            <span class="pg-label">Allow dots</span>
+            <span class="pg-label">
+              Allow dots
+              <HintIcon :hint="HINTS.allowDots" />
+            </span>
             <div class="pg-checkbox-wrap">
-              <input
-                v-model="allowDots"
-                type="checkbox"
-                class="pg-checkbox"
-                id="allowDots"
-              />
+              <input v-model="allowDots" type="checkbox" class="pg-checkbox" id="allowDots" />
               <label for="allowDots" class="pg-toggle" />
             </div>
           </label>
 
           <label class="pg-field pg-field--checkbox">
-            <span class="pg-label">Prefer any</span>
+            <span class="pg-label">
+              Prefer any
+              <HintIcon :hint="HINTS.preferAny" />
+            </span>
             <div class="pg-checkbox-wrap">
-              <input
-                v-model="preferAny"
-                type="checkbox"
-                class="pg-checkbox"
-                id="preferAny"
-              />
+              <input v-model="preferAny" type="checkbox" class="pg-checkbox" id="preferAny" />
               <label for="preferAny" class="pg-toggle" />
             </div>
           </label>
@@ -508,12 +581,8 @@ async function copyToClipboard() {
 }
 
 @media (max-width: 768px) {
-  .playground {
-    padding: 0 12px 16px;
-  }
-  .pg-columns {
-    grid-template-columns: 1fr;
-  }
+  .playground { padding: 0 12px 16px; }
+  .pg-columns  { grid-template-columns: 1fr; }
 }
 
 /* ── Settings box ────────────────────────────────────────────────── */
@@ -525,7 +594,6 @@ async function copyToClipboard() {
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
-  overflow: hidden;
 }
 
 .pg-settings-row {
@@ -555,21 +623,23 @@ async function copyToClipboard() {
   flex: 1;
 }
 
-.pg-field--checkbox {
-  min-width: unset;
-}
+.pg-field--checkbox { min-width: unset; }
 
-.pg-spacer {
-  flex: 1;
-}
+.pg-spacer { flex: 1; }
+
+/* ── Label ───────────────────────────────────────────────────────── */
 
 .pg-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
   font-weight: 600;
   color: var(--vp-c-text-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
+  user-select: none;
 }
 
 /* ── Custom select (with chevron) ────────────────────────────────── */
@@ -581,11 +651,9 @@ async function copyToClipboard() {
 }
 
 .pg-select {
-  /* Reset browser default appearance completely */
   appearance: none;
   -webkit-appearance: none;
   height: 34px;
-  /* Extra right padding reserves space for the chevron icon */
   padding: 0 32px 0 10px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 6px;
@@ -598,9 +666,7 @@ async function copyToClipboard() {
   width: 100%;
 }
 
-.pg-select:focus {
-  border-color: var(--vp-c-brand-1);
-}
+.pg-select:focus { border-color: var(--vp-c-brand-1); }
 
 .pg-chevron {
   position: absolute;
@@ -628,9 +694,7 @@ async function copyToClipboard() {
   box-sizing: border-box;
 }
 
-.pg-input:focus {
-  border-color: var(--vp-c-brand-1);
-}
+.pg-input:focus { border-color: var(--vp-c-brand-1); }
 
 /* ── Toggle checkbox ─────────────────────────────────────────────── */
 
@@ -641,7 +705,6 @@ async function copyToClipboard() {
   align-items: center;
 }
 
-/* Hide the real checkbox but keep it accessible */
 .pg-checkbox {
   position: absolute;
   opacity: 0;
@@ -649,7 +712,6 @@ async function copyToClipboard() {
   height: 0;
 }
 
-/* The visual toggle track */
 .pg-toggle {
   display: inline-block;
   width: 36px;
@@ -661,7 +723,6 @@ async function copyToClipboard() {
   flex-shrink: 0;
 }
 
-/* The toggle thumb */
 .pg-toggle::after {
   content: '';
   display: block;
@@ -671,21 +732,12 @@ async function copyToClipboard() {
   border-radius: 50%;
   background: white;
   transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.pg-checkbox:checked + .pg-toggle {
-  background: var(--vp-c-brand-1);
-}
-
-.pg-checkbox:checked + .pg-toggle::after {
-  transform: translateX(16px);
-}
-
-.pg-checkbox:focus-visible + .pg-toggle {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 2px;
-}
+.pg-checkbox:checked + .pg-toggle            { background: var(--vp-c-brand-1); }
+.pg-checkbox:checked + .pg-toggle::after     { transform: translateX(16px); }
+.pg-checkbox:focus-visible + .pg-toggle      { outline: 2px solid var(--vp-c-brand-1); outline-offset: 2px; }
 
 /* ── Buttons ─────────────────────────────────────────────────────── */
 
@@ -708,14 +760,8 @@ async function copyToClipboard() {
   flex-shrink: 0;
 }
 
-.pg-btn:hover:not(:disabled) {
-  background: var(--vp-c-brand-2);
-}
-
-.pg-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+.pg-btn:hover:not(:disabled) { background: var(--vp-c-brand-2); }
+.pg-btn:disabled              { opacity: 0.6; cursor: not-allowed; }
 
 .pg-btn--ghost {
   background: transparent;
@@ -729,7 +775,6 @@ async function copyToClipboard() {
   border-color: var(--vp-c-text-3);
 }
 
-/* Chevron inside the More/Less button */
 .pg-chevron-btn {
   width: 12px;
   height: 12px;
@@ -737,11 +782,9 @@ async function copyToClipboard() {
   flex-shrink: 0;
 }
 
-.pg-chevron-btn--open {
-  transform: rotate(180deg);
-}
+.pg-chevron-btn--open { transform: rotate(180deg); }
 
-/* ── Expand/collapse transition ──────────────────────────────────── */
+/* ── Expand / collapse transition ────────────────────────────────── */
 
 .pg-expand-enter-active,
 .pg-expand-leave-active {
@@ -770,9 +813,7 @@ async function copyToClipboard() {
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Error banner ────────────────────────────────────────────────── */
 
@@ -902,7 +943,7 @@ async function copyToClipboard() {
 
 @keyframes shimmer {
   0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  50%       { opacity: 1; }
 }
 
 /* ── Copy button ─────────────────────────────────────────────────── */
