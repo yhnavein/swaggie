@@ -3,7 +3,6 @@ layout: home
 
 hero:
   name: Swaggie
-  text: Typed TypeScript clients from your OpenAPI spec
   tagline: Stop writing API-fetching code by hand. Point Swaggie at your OpenAPI 3 spec and get a fully typed, ready-to-use client in seconds.
   image:
     src: /swaggie-full.png
@@ -58,3 +57,12 @@ import Button from './.vitepress/components/Button.vue';
     <Button style="font-size: 1rem;">Open Playground</Button>
   </a>
 </div>
+
+<style>
+@media (min-width: 960px) {
+  .image-container .image-src {
+    max-width: 462px;
+    max-height: 320px;
+  }
+}
+</style>

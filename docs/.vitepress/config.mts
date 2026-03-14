@@ -44,7 +44,7 @@ export default defineConfig({
   },
 
   themeConfig: {
-    logo: '/swaggie.svg',
+    logo: '/swaggie-square.png',
 
     nav: [
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
