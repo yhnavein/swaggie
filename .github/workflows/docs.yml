@@ -30,7 +30,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     # Only deploy on pushes to master, not on PRs
-    # if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     permissions:
       pages: write
       id-token: write

@@ -1,13 +1,13 @@
 {
   "name": "swaggie",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "Generate a fully typed TypeScript API client from your OpenAPI 3 spec",
   "author": {
     "name": "Piotr Dabrowski",
     "url": "https://github.com/yhnavein"
   },
   "license": "MIT",
-  "homepage": "https://github.com/yhnavein/swaggie",
+  "homepage": "https://yhnavein.github.io/swaggie/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yhnavein/swaggie.git"
