@@ -1,12 +1,21 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Eta } from 'eta';
+import { initTemplateEngineFromBundled, initTemplateEngineFromDirectory } from './templateEngine';
+let bundledTemplates: TemplateBundleStore | null = null;
 
-let engine: Eta;
+export type TemplateBundleStore = Record<string, Record<string, string>>;
+
+export function setBundledTemplates(templates: TemplateBundleStore | null) {
+  bundledTemplates = templates;
+}
 
 export function loadAllTemplateFiles(templateName: string | null) {
   if (!templateName) {
     throw new Error('No template name was provided');
+  }
+
+  if (loadFromBundledTemplates(templateName)) {
+    return;
   }
 
   const templatesDir = fs.existsSync(templateName)
@@ -18,12 +27,16 @@ export function loadAllTemplateFiles(templateName: string | null) {
       `Could not find directory with the template (we tried ${templatesDir}). Is the template name correct?`
     );
   }
-  engine = new Eta({ views: templatesDir });
+  initTemplateEngineFromDirectory(templatesDir);
 }
 
-/**
- * Get's a template file and renders it with the provided data.
- */
-export function renderFile(templateFile: string, data: object = {}) {
-  return engine.render(templateFile, data);
+function loadFromBundledTemplates(templateName: string): boolean {
+  const templateFiles = bundledTemplates?.[templateName];
+  if (!templateFiles) {
+    return false;
+  }
+
+  initTemplateEngineFromBundled(templateFiles);
+
+  return true;
 }

@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OA3, OpenAPIV3_1 as OA31 } from 'openapi-types';
 import type { AppOptions, ClientOptions } from '../types';
-import { escapePropName } from '../utils';
+import { escapePropName } from '../utils/utils';
 
 /**
  * Converts a parameter object to a TypeScript type.

@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test, describe, beforeEach, afterEach, expect } from 'bun:test';
 
-import { loadAllTemplateFiles, renderFile } from './templateManager';
+import { loadAllTemplateFiles, setBundledTemplates } from './templateManager';
+import { renderFile } from './templateEngine';
 
 const GOOD_FILE = 'client.ejs';
 
@@ -97,5 +98,24 @@ describe('custom templates', () => {
   afterEach(() => {
     fs.unlinkSync(path.join(tempDir, 'client.ejs'));
     fs.rmdirSync(tempDir);
+  });
+});
+
+describe('bundled templates', () => {
+  afterEach(() => {
+    setBundledTemplates(null);
+  });
+
+  test('should render template from bundled storage', () => {
+    setBundledTemplates({
+      bundled: {
+        'client.ejs': 'Hello <%= it.name %>!',
+      },
+    });
+
+    loadAllTemplateFiles('bundled');
+    const templateResult = renderFile('client.ejs', { name: 'Swaggie' });
+
+    expect(templateResult).toBe('Hello Swaggie!');
   });
 });

@@ -1,5 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
-import type { ClientOptions, FullAppOptions } from './types';
+import type { AppOptions, FullAppOptions } from './types';
 
 export type CodeGenResult = [string, AppOptions];
 
