@@ -135,6 +135,15 @@
             "enum"
           ]
         },
+        "enumNamesStyle": {
+          "type": "string",
+          "default": "original",
+          "description": "Controls how enum member names are formatted when generating TypeScript enum declarations. Only applies when enumDeclarationStyle is set to 'enum'.",
+          "enum": [
+            "original",
+            "PascalCase"
+          ]
+        },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },

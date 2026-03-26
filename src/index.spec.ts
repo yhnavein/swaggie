@@ -287,6 +287,11 @@ describe('prepareAppOptions', () => {
       expect(result.enumDeclarationStyle).toBe(APP_DEFAULTS.enumDeclarationStyle);
     });
 
+    test('applies default enumNamesStyle when none provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.enumNamesStyle).toBe(APP_DEFAULTS.enumNamesStyle);
+    });
+
     test('result always has all AppOptions fields fully resolved', () => {
       const result = prepareAppOptions(minimalOpts);
       expect(result.template).toBeDefined();
@@ -295,6 +300,7 @@ describe('prepareAppOptions', () => {
       expect(result.generationMode).toBeDefined();
       expect(result.schemaDeclarationStyle).toBeDefined();
       expect(result.enumDeclarationStyle).toBeDefined();
+      expect(result.enumNamesStyle).toBeDefined();
       expect(result.queryParamsSerialization.allowDots).toBeDefined();
       expect(result.queryParamsSerialization.arrayFormat).toBeDefined();
     });
@@ -347,6 +353,26 @@ describe('prepareAppOptions', () => {
     test('respects explicit enumDeclarationStyle', () => {
       const result = prepareAppOptions({ ...minimalOpts, enumDeclarationStyle: 'enum' });
       expect(result.enumDeclarationStyle).toBe('enum');
+    });
+
+    test('respects explicit enumNamesStyle PascalCase', () => {
+      const result = prepareAppOptions({ ...minimalOpts, enumNamesStyle: 'PascalCase' });
+      expect(result.enumNamesStyle).toBe('PascalCase');
+    });
+
+    test('normalizes "pascal" to "PascalCase"', () => {
+      const result = prepareAppOptions({ ...minimalOpts, enumNamesStyle: 'pascal' });
+      expect(result.enumNamesStyle).toBe('PascalCase');
+    });
+
+    test('normalizes "pascalcase" (lowercase) to "PascalCase"', () => {
+      const result = prepareAppOptions({ ...minimalOpts, enumNamesStyle: 'pascalcase' });
+      expect(result.enumNamesStyle).toBe('PascalCase');
+    });
+
+    test('respects explicit enumNamesStyle original', () => {
+      const result = prepareAppOptions({ ...minimalOpts, enumNamesStyle: 'original' });
+      expect(result.enumNamesStyle).toBe('original');
     });
   });
 

@@ -363,6 +363,116 @@ export enum BadNames {
     // }`
     //       );
     //     });
+
+    test('should convert enum member names to PascalCase when enumNamesStyle is PascalCase', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          AccessType: {
+            type: 'string',
+            enum: ['organization', 'workspace', 'user', 'system'],
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'enum', enumNamesStyle: 'PascalCase' }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export enum AccessType {
+  Organization = "organization",
+  Workspace = "workspace",
+  User = "user",
+  System = "system",
+}`
+      );
+    });
+
+    test('should handle PascalCase for values with spaces, hyphens, and dots', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Status: {
+            type: 'string',
+            enum: ['org name', 'my-value', 'some.thing', 'under_score', 'ALLCAPS'],
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'enum', enumNamesStyle: 'PascalCase' }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export enum Status {
+  OrgName = "org name",
+  MyValue = "my-value",
+  SomeThing = "some.thing",
+  UnderScore = "under_score",
+  ALLCAPS = "ALLCAPS",
+}`
+      );
+    });
+
+    test('should preserve original enum values when enumNamesStyle is PascalCase', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Direction: {
+            type: 'string',
+            enum: ['north-east', 'south west'],
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'enum', enumNamesStyle: 'PascalCase' }),
+        false
+      );
+
+      // Member names are PascalCase, but string values remain untouched
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export enum Direction {
+  NorthEast = "north-east",
+  SouthWest = "south west",
+}`
+      );
+    });
+
+    test('should not apply PascalCase when enumNamesStyle is original (default)', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          AccessType: {
+            type: 'string',
+            enum: ['organization', 'workspace'],
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'enum' }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+export enum AccessType {
+  organization = "organization",
+  workspace = "workspace",
+}`
+      );
+    });
+
+    test('should ignore enumNamesStyle when enumDeclarationStyle is union', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          AccessType: {
+            type: 'string',
+            enum: ['organization', 'workspace'],
+          },
+        }),
+        getClientOptions({ enumDeclarationStyle: 'union', enumNamesStyle: 'PascalCase' }),
+        false
+      );
+
+      // Union types don't have member names, so enumNamesStyle has no effect
+      assertEqualIgnoringWhitespace(res, `export type AccessType = "organization" | "workspace";`);
+    });
   });
 
   describe('objects', () => {

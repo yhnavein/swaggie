@@ -375,6 +375,7 @@ export const APP_DEFAULTS: Partial<AppOptions> = {
   generationMode: 'full',
   schemaDeclarationStyle: 'interface',
   enumDeclarationStyle: 'union',
+  enumNamesStyle: 'original',
   queryParamsSerialization: {
     allowDots: true,
     arrayFormat: 'repeat',
@@ -395,6 +396,7 @@ export function resolveOptions(opts: Partial<ClientOptions>): AppOptions {
     generationMode: opts.generationMode ?? APP_DEFAULTS.generationMode,
     schemaDeclarationStyle: opts.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
     enumDeclarationStyle: opts.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
+    enumNamesStyle: opts.enumNamesStyle ?? APP_DEFAULTS.enumNamesStyle,
     queryParamsSerialization: {
       ...APP_DEFAULTS.queryParamsSerialization,
       ...opts.queryParamsSerialization,

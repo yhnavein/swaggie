@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateCode from './gen';
-import type { AppOptions, CliOptions, FullAppOptions } from './types';
+import type { AppOptions, CliOptions, EnumNamesStyle, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
 import { APP_DEFAULTS } from './swagger';
 
@@ -41,7 +41,9 @@ function gen(spec: OA3.Document, options: AppOptions): Promise<string> {
   return generateCode(spec, options);
 }
 
-export async function applyConfigFile(options: Partial<FullAppOptions>): Promise<AppOptions> {
+export async function applyConfigFile(
+  options: Partial<FullAppOptions> | Partial<CliOptions>
+): Promise<AppOptions> {
   try {
     if (!options.config) {
       return prepareAppOptions(options as CliOptions);
@@ -84,6 +86,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     mode,
     schemaStyle,
     enumStyle,
+    enumNamesStyle,
     nullables,
     template,
     queryParamsSerialization = {},
@@ -108,6 +111,15 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
       schemaStyle ?? rest.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
     enumDeclarationStyle:
       enumStyle ?? rest.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
+    enumNamesStyle: normalizeEnumNamesStyle(enumNamesStyle),
     queryParamsSerialization: mergedQueryParamsSerialization,
   };
+}
+
+function normalizeEnumNamesStyle(value?: string): EnumNamesStyle {
+  if (!value) return APP_DEFAULTS.enumNamesStyle;
+  const lower = value.toLowerCase();
+  if (lower === 'pascal' || lower === 'pascalcase') return 'PascalCase';
+  if (lower === 'original') return 'original';
+  return APP_DEFAULTS.enumNamesStyle;
 }

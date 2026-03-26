@@ -135,6 +135,32 @@ This setting applies only to **plain string enums**. Numeric enums and mixed-typ
 
 ---
 
+## Enum Names Style
+
+Use `enumNamesStyle` (or `--enumNamesStyle` CLI flag) to control how enum **member names** are formatted when generating TypeScript `enum` declarations.
+
+This option only takes effect when `enumDeclarationStyle` is set to `"enum"`. It does not affect union types (which have no member names) or enums that use explicit custom names via `x-enumNames`/`x-enum-varnames`.
+
+| Value | Output |
+|---|---|
+| `"original"` *(default)* | `export enum Status { active = 'active', 'not active' = 'not active' }` |
+| `"PascalCase"` | `export enum Status { Active = 'active', NotActive = 'not active' }` |
+
+Enum **values** are never modified — only the member names are transformed. Values with spaces, hyphens, dots, and underscores are split and recombined into PascalCase: `"org-name"` becomes `OrgName`, `"some.thing"` becomes `SomeThing`.
+
+```json
+{
+  "enumDeclarationStyle": "enum",
+  "enumNamesStyle": "PascalCase"
+}
+```
+
+::: tip
+The CLI accepts both `PascalCase` and `pascal` as equivalent values: `--enumNamesStyle pascal`.
+:::
+
+---
+
 ## Parameter Modifiers
 
 Sometimes an API spec marks a parameter as required, but in your client it's handled by an interceptor and you don't want it in every method signature. Parameter modifiers let you override this without touching the spec.

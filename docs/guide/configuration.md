@@ -21,6 +21,7 @@ Create a JSON file (conventionally named `swaggie.config.json`) at the root of y
   "generationMode": "full",
   "schemaDeclarationStyle": "interface",
   "enumDeclarationStyle": "union",
+  "enumNamesStyle": "original",
   "queryParamsSerialization": {
     "arrayFormat": "repeat",
     "allowDots": true
@@ -136,6 +137,28 @@ export enum Status { available = 'available', pending = 'pending', sold = 'sold'
 
 ::: info
 Non-string enums (numeric, mixed) are always emitted as union types regardless of this setting.
+:::
+
+---
+
+### `enumNamesStyle`
+
+**Type:** `"original" | "PascalCase"` &nbsp; **Default:** `"original"`
+
+Controls how enum member names are formatted when generating TypeScript `enum` declarations. Only takes effect when `enumDeclarationStyle` is set to `"enum"`.
+
+```typescript
+// "original" (default) — member names match the raw enum values
+export enum Status { active = 'active', 'not active' = 'not active' }
+
+// "PascalCase" — member names are converted to PascalCase
+export enum Status { Active = 'active', NotActive = 'not active' }
+```
+
+The enum **values** are never modified — only the member names are transformed. This is useful when you want clean, idiomatic TypeScript identifiers for your enum members without changing the wire format.
+
+::: tip
+The CLI accepts both `--enumNamesStyle PascalCase` and `--enumNamesStyle pascal` as equivalent values.
 :::
 
 ---

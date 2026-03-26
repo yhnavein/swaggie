@@ -30,6 +30,7 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--mode` | `-m` | `string` | `full` | Generation mode: `full` (client + schemas) or `schemas` (types only). |
 | `--schemaStyle` | `-d` | `string` | `interface` | Schema object style: `interface` or `type`. |
 | `--enumStyle` | — | `string` | `union` | Enum declaration style: `union` or `enum`. |
+| `--enumNamesStyle` | — | `string` | `original` | Enum member name formatting: `original`, `PascalCase`, or `pascal`. Only with `--enumStyle enum`. |
 | `--dateFormat` | — | `string` | `Date` | TypeScript type for date fields: `Date` or `string`. |
 | `--nullables` | — | `string` | `ignore` | Nullable handling: `ignore`, `include`, or `nullableAsOptional`. |
 | `--preferAny` | — | `boolean` | `false` | Use `any` instead of `unknown` for untyped values. |

@@ -27,6 +27,10 @@ const enumStyleOption = new Option(
   '--enumStyle <style>',
   'Enum declaration style for plain string enums'
 ).choices(['union', 'enum']);
+const enumNamesStyleOption = new Option(
+  '--enumNamesStyle <style>',
+  'Controls how enum member names are formatted (only with --enumStyle enum)'
+).choices(['original', 'PascalCase', 'pascal']);
 const dateFormatOption = new Option(
   '--dateFormat <format>',
   'How date fields are emitted in generated types'
@@ -78,6 +82,7 @@ program
   .addOption(modeOption)
   .addOption(schemaStyleOption)
   .addOption(enumStyleOption)
+  .addOption(enumNamesStyleOption)
   .addOption(dateFormatOption)
   .addOption(nullableStrategyOption);
 

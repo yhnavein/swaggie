@@ -2,7 +2,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateOperations from './gen/genOperations';
 import generateTypes from './gen/genTypes';
-import type { AppOptions, CliOptions, FullAppOptions } from './types';
+import type { AppOptions, CliOptions, EnumNamesStyle, FullAppOptions } from './types';
 import { APP_DEFAULTS } from './swagger';
 import { BUNDLED_TEMPLATES } from './generated/bundledTemplates';
 import { verifyDocumentSpec } from './utils/utils';
@@ -72,6 +72,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     mode,
     schemaStyle,
     enumStyle,
+    enumNamesStyle,
     nullables,
     template,
     queryParamsSerialization = {},
@@ -96,6 +97,15 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
       schemaStyle ?? rest.schemaDeclarationStyle ?? APP_DEFAULTS.schemaDeclarationStyle,
     enumDeclarationStyle:
       enumStyle ?? rest.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
+    enumNamesStyle: normalizeEnumNamesStyle(enumNamesStyle),
     queryParamsSerialization: mergedQueryParamsSerialization,
   };
+}
+
+function normalizeEnumNamesStyle(value?: string): EnumNamesStyle {
+  if (!value) return APP_DEFAULTS.enumNamesStyle;
+  const lower = value.toLowerCase();
+  if (lower === 'pascal' || lower === 'pascalcase') return 'PascalCase';
+  if (lower === 'original') return 'original';
+  return APP_DEFAULTS.enumNamesStyle;
 }

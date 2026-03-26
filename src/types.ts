@@ -38,6 +38,13 @@ export interface ClientOptions {
   schemaDeclarationStyle?: SchemaDeclarationStyle;
   /** Controls whether plain string enums are emitted as unions or TypeScript enums */
   enumDeclarationStyle?: EnumDeclarationStyle;
+  /**
+   * Controls how enum member names are formatted when generating TypeScript `enum` declarations.
+   * Only applies when `enumDeclarationStyle` is set to `'enum'`.
+   * - `'original'` — use the raw enum value as the member name (e.g. `org name = "org name"`)
+   * - `'PascalCase'` — convert values to PascalCase (e.g. `OrgName = "org name"`)
+   */
+  enumNamesStyle?: EnumNamesStyle;
 
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
@@ -48,12 +55,14 @@ export interface ClientOptions {
   };
 }
 
-export interface CliOptions extends FullAppOptions {
+export interface CliOptions extends Omit<FullAppOptions, 'enumNamesStyle'> {
   allowDots?: boolean;
   arrayFormat?: ArrayFormat;
   mode?: GenerationMode;
   schemaStyle?: SchemaDeclarationStyle;
   enumStyle?: EnumDeclarationStyle;
+  /** Accepts 'original', 'PascalCase', or 'pascal' (normalized to 'PascalCase') */
+  enumNamesStyle?: string;
   nullables?: NullableStrategy;
 }
 
@@ -70,6 +79,7 @@ export type NullableStrategy = 'include' | 'nullableAsOptional' | 'ignore';
 export type GenerationMode = 'full' | 'schemas';
 export type SchemaDeclarationStyle = 'interface' | 'type';
 export type EnumDeclarationStyle = 'union' | 'enum';
+export type EnumNamesStyle = 'original' | 'PascalCase';
 
 /**
  * Internal options type used throughout the app after `prepareAppOptions` has run.
@@ -83,6 +93,7 @@ export interface AppOptions extends ClientOptions {
   generationMode: GenerationMode;
   schemaDeclarationStyle: SchemaDeclarationStyle;
   enumDeclarationStyle: EnumDeclarationStyle;
+  enumNamesStyle: EnumNamesStyle;
   queryParamsSerialization: {
     allowDots: boolean;
     arrayFormat: ArrayFormat;

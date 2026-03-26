@@ -201,7 +201,7 @@ function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
  */
 function renderEnumType(name: string, def: OA3.SchemaObject, options: AppOptions) {
   if (options.enumDeclarationStyle === 'enum' && shouldRenderStringEnumDeclaration(def)) {
-    return renderStringEnumDeclaration(name, def);
+    return renderStringEnumDeclaration(name, def, options);
   }
 
   const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
@@ -218,15 +218,36 @@ function shouldRenderStringEnumDeclaration(def: OA3.SchemaObject): def is OA3.Sc
   );
 }
 
-function renderStringEnumDeclaration(name: string, def: OA3.SchemaObject & { enum: string[] }) {
+function renderStringEnumDeclaration(
+  name: string,
+  def: OA3.SchemaObject & { enum: string[] },
+  options: AppOptions
+) {
+  const usePascalCase = options.enumNamesStyle === 'PascalCase';
   let res = `export enum ${name} {\n`;
   for (let index = 0; index < def.enum.length; index++) {
     const value = def.enum[index];
-    const memberName = escapePropName(value) ?? `VALUE_${index}`;
+    const rawName = usePascalCase ? toPascalCase(value) : value;
+    const memberName = escapePropName(rawName) ?? `VALUE_${index}`;
     res += `  ${memberName} = ${JSON.stringify(value)},\n`;
   }
 
   return `${res}}\n`;
+}
+
+/**
+ * Converts a string to PascalCase.
+ * Splits on non-alphanumeric characters (spaces, hyphens, dots, underscores, etc.)
+ * and capitalizes the first letter of each segment.
+ *
+ * Examples: "org name" → "OrgName", "my-value" → "MyValue", "some.thing" → "SomeThing"
+ */
+function toPascalCase(value: string): string {
+  return value
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join('');
 }
 
 /**
