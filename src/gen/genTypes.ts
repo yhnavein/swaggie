@@ -88,19 +88,30 @@ function renderSchema(
     const objectContents = generateObjectTypeContents(mergedSchema, options, schemaContext);
     const hasAdditionalProperties = !!mergedSchema.additionalProperties;
 
+    // Detect "orphan" required fields: top-level `required` entries that reference
+    // properties from $ref types rather than inline properties. For these we generate
+    // Required<Pick<...>> to enforce non-optionality in TypeScript.
+    const requiredPickType = getRequiredPickType(schema, mergedSchema, types);
+
     if (hasAdditionalProperties) {
-      const compositeTypes = [...types, objectType].join(' & ');
+      const compositeTypes = [...types, requiredPickType, objectType].filter(Boolean).join(' & ');
       result.push(`export type ${safeName} = ${compositeTypes};`);
       return `${result.join('\n')}\n`;
     }
 
-    if (useTypeAliases) {
-      const compositeTypes = [...types, `{${objectContents ? `\n${objectContents}\n` : ''}}`].join(' & ');
+    if (useTypeAliases || requiredPickType) {
+      // When requiredPickType is present we must use type alias (intersection) style,
+      // because `interface extends` does not allow extending two types that declare the
+      // same property with different optionality (e.g. `Team` with `id?` and
+      // `Required<Pick<Team, 'id'>>` with `id` — TS2320).
+      const objectLiteral = objectContents ? `{\n${objectContents}\n}` : '';
+      const allTypes = [...types, requiredPickType, objectLiteral].filter(Boolean);
+      const compositeTypes = allTypes.join(' & ');
       result.push(`export type ${safeName} = ${compositeTypes};`);
       return `${result.join('\n')}\n`;
     }
 
-    const extensions = types ? `extends ${types.join(', ')} ` : '';
+    const extensions = types.length ? `extends ${types.join(', ')} ` : '';
     result.push(`export interface ${safeName} ${extensions}{`);
     result.push(objectContents);
   } else if ('oneOf' in schema || 'anyOf' in schema) {
@@ -288,14 +299,40 @@ function isNullableAsOptional(
   );
 }
 
+/**
+ * Detects "orphan" required fields: top-level `required` entries that are not covered
+ * by inline `properties` in the merged schema. For these fields, we generate a
+ * `Required<Pick<RefType, 'prop1' | 'prop2'>>` expression to enforce non-optionality.
+ *
+ * @returns A `Required<Pick<...>>` type string, or an empty string if not applicable.
+ */
+function getRequiredPickType(
+  originalSchema: OA3.SchemaObject,
+  mergedSchema: OA3.SchemaObject,
+  refTypes: string[]
+): string {
+  const topLevelRequired = originalSchema.required || [];
+  if (!topLevelRequired.length || !refTypes.length) return '';
+
+  const inlineProps = Object.keys(mergedSchema.properties || {});
+  const orphanRequired = topLevelRequired.filter((r) => !inlineProps.includes(r));
+  if (!orphanRequired.length) return '';
+
+  const propsUnion = orphanRequired.map((p) => `'${p}'`).join(' | ');
+  const baseType = refTypes.length === 1 ? refTypes[0] : refTypes.join(' & ');
+
+  return `Required<Pick<${baseType}, ${propsUnion}>>`;
+}
+
 function getMergedCompositeObjects(schema: OA3.SchemaObject): OA3.SchemaObject {
   const { allOf, oneOf, anyOf, ...safeSchema } = schema;
   const composite = allOf || oneOf || anyOf || [];
   const subSchemas = composite.filter((v) => !('$ref' in v));
 
-  // This is the case where schema itself is of type object, with properties
-  // and at the same time has sub-schemas like `allOf` or similar
-  if (safeSchema.type === 'object' && 'properties' in safeSchema) {
+  // This is the case where schema itself has properties, required fields,
+  // or is of type object — and at the same time has sub-schemas like `allOf` or similar.
+  // We include the parent schema data so that `required` and `properties` are not lost.
+  if ('properties' in safeSchema || 'required' in safeSchema) {
     subSchemas.push(safeSchema);
   }
 

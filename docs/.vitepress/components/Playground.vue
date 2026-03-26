@@ -61,7 +61,10 @@ const outputHtml = ref<string>('');
 const outputRaw = ref<string>('');
 const isLoading = ref<boolean>(false);
 const errorMessage = ref<string>('');
+const warningMessage = ref<string>('');
 const copied = ref<boolean>(false);
+
+const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'patch', 'options', 'head', 'trace'];
 
 // ─── Code generation ──────────────────────────────────────────────────────────
 
@@ -84,6 +87,30 @@ async function renderHighlighted(code: string): Promise<string> {
   }
 }
 
+function hasOperations(spec: object): boolean {
+  const paths = (spec as { paths?: unknown }).paths;
+  if (!paths || typeof paths !== 'object') {
+    return false;
+  }
+
+  const pathItems = Object.values(paths as Record<string, unknown>);
+  for (const pathItem of pathItems) {
+    if (!pathItem || typeof pathItem !== 'object') {
+      continue;
+    }
+
+    const operationByMethod = pathItem as Record<string, unknown>;
+    for (const method of HTTP_METHODS) {
+      const operation = operationByMethod[method];
+      if (operation && typeof operation === 'object') {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 async function generate() {
   if (!specInput.value.trim()) {
     errorMessage.value = 'Paste an OpenAPI spec to get started.';
@@ -92,11 +119,18 @@ async function generate() {
 
   isLoading.value = true;
   errorMessage.value = '';
+  warningMessage.value = '';
   outputHtml.value = '';
   outputRaw.value = '';
 
   try {
     const parsed = await parseSpec(specInput.value);
+
+    if (generationMode.value === 'full' && !hasOperations(parsed)) {
+      warningMessage.value =
+        'This spec does not include any API operations. Switch Mode to "schemas" to generate component schemas only.';
+      return;
+    }
 
     const [code] = await runCodeGenerator({
       src: parsed as any,
@@ -165,6 +199,7 @@ async function loadExampleSpec(url: string) {
   showExamplesMenu.value = false;
   isLoadingSpec.value = true;
   errorMessage.value = '';
+  warningMessage.value = '';
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -428,9 +463,15 @@ function getNavHeight(): number {
       </Transition>
     </div>
 
-    <!-- ── Error banner ──────────────────────────────────────────── -->
-    <div v-if="errorMessage" class="pg-error" role="alert">
-      <strong>Error:</strong> {{ errorMessage }}
+    <!-- ── Alerts ────────────────────────────────────────────────── -->
+    <div
+      v-if="errorMessage || warningMessage"
+      class="pg-alert"
+      :class="warningMessage ? 'pg-alert--warning' : 'pg-alert--error'"
+      role="alert"
+    >
+      <strong>{{ warningMessage ? 'Warning:' : 'Error:' }}</strong>
+      {{ warningMessage || errorMessage }}
     </div>
 
     <!-- ── Two-column editor ─────────────────────────────────────── -->
@@ -792,15 +833,24 @@ function getNavHeight(): number {
   padding-bottom: 0 !important;
 }
 
-/* ── Error banner ────────────────────────────────────────────────── */
+/* ── Alerts ──────────────────────────────────────────────────────── */
 
-.pg-error {
+.pg-alert {
   padding: 10px 16px;
-  background: var(--vp-c-danger-soft);
-  border: 1px solid var(--vp-c-danger-1);
   border-radius: 6px;
   font-size: 13px;
+}
+
+.pg-alert--error {
+  background: var(--vp-c-danger-soft);
+  border: 1px solid var(--vp-c-danger-1);
   color: var(--vp-c-danger-1);
+}
+
+.pg-alert--warning {
+  background: var(--vp-c-warning-soft);
+  border: 1px solid var(--vp-c-warning-1);
+  color: var(--vp-c-warning-1);
 }
 
 /* ── Panels ──────────────────────────────────────────────────────── */

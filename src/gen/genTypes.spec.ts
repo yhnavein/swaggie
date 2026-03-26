@@ -1013,6 +1013,118 @@ export interface AuthenticationData extends LoginPart {
 }`
         );
       });
+
+      test('should handle allOf with single $ref and top-level required (interface style falls back to type alias)', () => {
+        // When Required<Pick<...>> is needed, we must use type alias (intersection) style
+        // because `interface extends` does not allow extending two types that declare
+        // the same property with different optionality (TS2320).
+        const res = generateTypes(
+          prepareSchemas({
+            AdminUser: {
+              allOf: [{ $ref: '#/components/schemas/BaseUser' }],
+              required: ['id', 'email', 'role'],
+            },
+          }),
+          opts,
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `export type AdminUser = BaseUser & Required<Pick<BaseUser, 'id' | 'email' | 'role'>>;`
+        );
+      });
+
+      test('should handle allOf with single $ref and top-level required (type alias)', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AdminUser: {
+              allOf: [{ $ref: '#/components/schemas/BaseUser' }],
+              required: ['id', 'email', 'role'],
+            },
+          }),
+          getClientOptions({ schemaDeclarationStyle: 'type' }),
+          false
+        );
+
+        assertEqualIgnoringWhitespace(
+          res,
+          `export type AdminUser = BaseUser & Required<Pick<BaseUser, 'id' | 'email' | 'role'>>;`
+        );
+      });
+
+      test('should handle allOf with multiple $refs and top-level required', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AdminUser: {
+              allOf: [
+                { $ref: '#/components/schemas/BaseUser' },
+                { $ref: '#/components/schemas/BaseEntity' },
+              ],
+              required: ['id', 'email'],
+            },
+          }),
+          opts,
+          false
+        );
+
+        // Multiple refs + Required<Pick<...>> forces type alias style
+        assertEqualIgnoringWhitespace(
+          res,
+          `export type AdminUser = BaseUser & BaseEntity & Required<Pick<BaseUser & BaseEntity, 'id' | 'email'>>;`
+        );
+      });
+
+      test('should handle allOf with $ref and top-level required + inline properties (no type:object)', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AdminUser: {
+              allOf: [{ $ref: '#/components/schemas/BaseUser' }],
+              required: ['id', 'nickname'],
+              properties: {
+                nickname: { type: 'string' },
+              },
+            },
+          }),
+          opts,
+          false
+        );
+
+        // 'id' is orphan (from ref) → Required<Pick<...>> forces type alias style,
+        // 'nickname' is inline → marked required in the object literal
+        assertEqualIgnoringWhitespace(
+          res,
+          `export type AdminUser = BaseUser & Required<Pick<BaseUser, 'id'>> & {
+  nickname: string;
+};`
+        );
+      });
+
+      test('should handle allOf with $ref and top-level required where all required are inline', () => {
+        const res = generateTypes(
+          prepareSchemas({
+            AuthenticationData: {
+              allOf: [{ $ref: '#/components/schemas/LoginPart' }],
+              required: ['rememberMe'],
+              properties: {
+                rememberMe: { type: 'boolean' },
+                signForSpam: { type: 'boolean' },
+              },
+            },
+          }),
+          opts,
+          false
+        );
+
+        // All required props are covered by inline properties, no Required<Pick<...>> needed
+        assertEqualIgnoringWhitespace(
+          res,
+          `export interface AuthenticationData extends LoginPart {
+  rememberMe: boolean;
+  signForSpam?: boolean;
+}`
+        );
+      });
     });
 
     // Use of `anyOf` and `oneOf` is implemented in the same and very simple way
@@ -1197,9 +1309,22 @@ export interface AuthenticationData extends LoginPart {
         false
       );
 
-      expect(res).toContain('export type MemberAccess =');
-      expect(res).toContain('accessType: string;');
-      expect(res).not.toContain('unknown | unknown');
+      assertEqualIgnoringWhitespace(res, `
+export type MemberAccess = { accessType: string;
+  appId?: string;
+  products?: string[];
+  isAdmin: boolean;
+} | {
+  accessType: string;
+  appId: string;
+  products?: string[];
+  isAdmin: boolean;
+} | {
+  accessType: string;
+  appId: string;
+  products: string[];
+  isAdmin?: boolean;
+};`);
     });
   });
 });
