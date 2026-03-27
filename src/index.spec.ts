@@ -140,6 +140,8 @@ describe('runCodeGenerator', () => {
     };
 
     const [code] = await runCodeGenerator(parameters);
+    expect(code).toContain('/* tslint:disable */');
+    expect(code).toContain('// deno-lint-ignore-file');
     expect(code).toContain('export interface UsedSchema');
     expect(code).toContain('export interface UnusedSchema');
     expect(code).not.toContain('getItems');

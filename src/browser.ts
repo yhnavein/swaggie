@@ -2,6 +2,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import generateOperations from './gen/genOperations';
 import generateTypes from './gen/genTypes';
+import { FILE_HEADER } from './gen/header';
 import type { AppOptions, CliOptions, EnumNamesStyle, FullAppOptions } from './types';
 import { APP_DEFAULTS } from './swagger';
 import { BUNDLED_TEMPLATES } from './generated/bundledTemplates';
@@ -48,7 +49,7 @@ function verifyOptions(options: Partial<FullAppOptions>) {
 
 async function generateCode(spec: OA3.Document, options: AppOptions): Promise<string> {
   if (options.generationMode === 'schemas') {
-    return generateTypes(spec, options, false);
+    return FILE_HEADER + generateTypes(spec, options, false);
   }
 
   const templateFiles = BUNDLED_TEMPLATES[options.template];
