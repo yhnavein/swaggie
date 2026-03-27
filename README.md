@@ -299,6 +299,24 @@ Use `enumNamesStyle` (or CLI `--enumNamesStyle`) to control the casing of enum m
 - `"original"` (default): member names are used exactly as they appear in the spec
 - `"PascalCase"`: member names are converted to PascalCase
 
+### `x-ts-type` Extension
+
+Add `x-ts-type` to any schema in your spec to emit a verbatim TypeScript type string instead of deriving it from the schema definition. This is useful for intersection types, complex mapped types, or any TypeScript construct that cannot be expressed in OpenAPI's type system:
+
+```yaml
+ResourceAccess:
+  x-ts-type: >-
+    { items?: { [key: string]: Entry } } & { [key: string]: boolean | Entry | undefined }
+  type: object   # kept for doc/validation purposes
+```
+
+Swaggie emits exactly:
+```typescript
+export type ResourceAccess = { items?: { [key: string]: Entry } } & { [key: string]: boolean | Entry | undefined };
+```
+
+`x-ts-type` takes precedence over all other schema fields, including `$ref`. See the [full documentation](https://yhnavein.github.io/swaggie/guide/advanced#x-ts-type-extension) for more detail.
+
 ### Parameter Modifiers
 
 Sometimes an API spec marks a parameter as required, but your client handles it in an interceptor and you don't want it cluttering every method signature. Parameter modifiers let you override this globally without touching the spec.
@@ -373,7 +391,7 @@ function error(e) {
 | OpenAPI 3.0, 3.1, 3.2                                                          | Swagger / OpenAPI 2.0                                |
 | `allOf`, `oneOf`, `anyOf`, `$ref`, external $refs                              | `not` keyword                                        |
 | Spec formats: JSON, YAML                                                       | Very complex query parameter structures              |
-| Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (only the first is used)     |
+| Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`, `x-ts-type` | Multiple response types (only the first is used)  |
 | Content types: JSON, plain text, multipart/form-data                           | Multiple request body types (only the first is used) |
 | Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | OpenAPI callbacks and webhooks                       |
 | Various enum definition styles, support for additionalProperties               |                                                      |

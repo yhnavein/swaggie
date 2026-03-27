@@ -22,14 +22,14 @@ Controls how arrays are serialized in the query string.
 
 Given the object `{ "a": { "b": 1 }, "c": [2, 3] }`:
 
-| Result | `allowDots` | `arrayFormat` |
-|---|---|---|
-| `?a.b=1&c=2&c=3` | `true` | `repeat` (default) |
-| `?a.b=1&c[]=2&c[]=3` | `true` | `brackets` |
-| `?a.b=1&c[0]=2&c[1]=3` | `true` | `indices` |
-| `?a[b]=1&c=2&c=3` | `false` | `repeat` |
-| `?a[b]=1&c[]=2&c[]=3` | `false` | `brackets` |
-| `?a[b]=1&c[0]=2&c[1]=3` | `false` | `indices` |
+| Result                  | `allowDots` | `arrayFormat`      |
+| ----------------------- | ----------- | ------------------ |
+| `?a.b=1&c=2&c=3`        | `true`      | `repeat` (default) |
+| `?a.b=1&c[]=2&c[]=3`    | `true`      | `brackets`         |
+| `?a.b=1&c[0]=2&c[1]=3`  | `true`      | `indices`          |
+| `?a[b]=1&c=2&c=3`       | `false`     | `repeat`           |
+| `?a[b]=1&c[]=2&c[]=3`   | `false`     | `brackets`         |
+| `?a[b]=1&c[0]=2&c[1]=3` | `false`     | `indices`          |
 
 Once you know what your backend expects, set it in your config:
 
@@ -54,10 +54,10 @@ swaggie -s ./spec.json -o ./client.ts --allowDots --arrayFormat repeat
 
 OpenAPI 3.0 allows marking a field as `nullable: true`. Swaggie gives you three ways to represent this in the generated TypeScript via the `nullableStrategy` option.
 
-| Value | Behavior |
-|---|---|
-| `"ignore"` *(default)* | `nullable` is ignored — field is typed as non-nullable |
-| `"include"` | Appends `\| null` to the type |
+| Value                  | Behavior                                                   |
+| ---------------------- | ---------------------------------------------------------- |
+| `"ignore"` _(default)_ | `nullable` is ignored — field is typed as non-nullable     |
+| `"include"`            | Appends `\| null` to the type                              |
 | `"nullableAsOptional"` | Makes the field optional (`?`) instead of adding `\| null` |
 
 **Example** — given this schema:
@@ -84,12 +84,13 @@ The output varies by strategy:
 
 Use the `generationMode` option (or `--mode` CLI flag) to control the scope of what gets generated.
 
-| Value | Output |
-|---|---|
-| `"full"` *(default)* | Client methods + TypeScript schemas for all referenced types |
-| `"schemas"` | TypeScript schemas only — all `components/schemas`, no client methods |
+| Value                | Output                                                                |
+| -------------------- | --------------------------------------------------------------------- |
+| `"full"` _(default)_ | Client methods + TypeScript schemas for all referenced types          |
+| `"schemas"`          | TypeScript schemas only — all `components/schemas`, no client methods |
 
 `"schemas"` mode is useful when:
+
 - You only need types for form validation
 - You're generating a shared types package
 - You want to use Swaggie alongside a different code generation tool for the client code
@@ -105,10 +106,10 @@ swaggie -s ./spec.json -o ./src/types.ts --mode schemas
 
 Use `schemaDeclarationStyle` (or `--schemaStyle` CLI flag) to control how object schemas are declared.
 
-| Value | Output |
-|---|---|
-| `"interface"` *(default)* | `export interface Pet { ... }` |
-| `"type"` | `export type Pet = { ... };` |
+| Value                     | Output                         |
+| ------------------------- | ------------------------------ |
+| `"interface"` _(default)_ | `export interface Pet { ... }` |
+| `"type"`                  | `export type Pet = { ... };`   |
 
 **When to prefer `"type"`:** Some teams enforce `type` over `interface` via linting rules. Functionally they are nearly identical for plain objects.
 
@@ -122,10 +123,10 @@ Use `schemaDeclarationStyle` (or `--schemaStyle` CLI flag) to control how object
 
 Use `enumDeclarationStyle` (or `--enumStyle` CLI flag) to control how plain string enums are declared.
 
-| Value | Output |
-|---|---|
-| `"union"` *(default)* | `export type Status = 'active' \| 'disabled';` |
-| `"enum"` | `export enum Status { active = 'active', disabled = 'disabled' }` |
+| Value                 | Output                                                            |
+| --------------------- | ----------------------------------------------------------------- |
+| `"union"` _(default)_ | `export type Status = 'active' \| 'disabled';`                    |
+| `"enum"`              | `export enum Status { active = 'active', disabled = 'disabled' }` |
 
 ::: info
 This setting applies only to **plain string enums**. Numeric enums and mixed-type enums are always emitted as union types.
@@ -141,10 +142,10 @@ Use `enumNamesStyle` (or `--enumNamesStyle` CLI flag) to control how enum **memb
 
 This option only takes effect when `enumDeclarationStyle` is set to `"enum"`. It does not affect union types (which have no member names) or enums that use explicit custom names via `x-enumNames`/`x-enum-varnames`.
 
-| Value | Output |
-|---|---|
-| `"original"` *(default)* | `export enum Status { active = 'active', 'not active' = 'not active' }` |
-| `"PascalCase"` | `export enum Status { Active = 'active', NotActive = 'not active' }` |
+| Value                    | Output                                                                  |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `"original"` _(default)_ | `export enum Status { active = 'active', 'not active' = 'not active' }` |
+| `"PascalCase"`           | `export enum Status { Active = 'active', NotActive = 'not active' }`    |
 
 Enum **values** are never modified — only the member names are transformed. Values with spaces, hyphens, dots, and underscores are split and recombined into PascalCase: `"org-name"` becomes `OrgName`, `"some.thing"` becomes `SomeThing`.
 
@@ -179,10 +180,10 @@ Sometimes an API spec marks a parameter as required, but in your client it's han
 
 The key is the parameter name as it appears in the spec. The value is one of:
 
-| Value | Effect |
-|---|---|
-| `"ignore"` | Parameter is removed from all generated method signatures |
-| `"optional"` | Parameter becomes optional (`?`) everywhere it appears |
+| Value        | Effect                                                         |
+| ------------ | -------------------------------------------------------------- |
+| `"ignore"`   | Parameter is removed from all generated method signatures      |
+| `"optional"` | Parameter becomes optional (`?`) everywhere it appears         |
 | `"required"` | Parameter is always required, regardless of what the spec says |
 
 **Common use case:** Your backend requires a `tenantId` header on every request, handled globally by your Axios interceptor. Mark it as `"ignore"` so it doesn't show up in every generated method signature.
@@ -193,10 +194,10 @@ The key is the parameter name as it appears in the spec. The value is one of:
 
 Use `dateFormat` to control the TypeScript type for `format: date` and `format: date-time` fields.
 
-| Value | Output |
-|---|---|
-| `"Date"` *(default)* | `createdAt: Date` |
-| `"string"` | `createdAt: string` |
+| Value                | Output              |
+| -------------------- | ------------------- |
+| `"Date"` _(default)_ | `createdAt: Date`   |
+| `"string"`           | `createdAt: string` |
 
 Use `"string"` when you serialize/deserialize dates manually or when your runtime doesn't parse ISO strings into `Date` objects automatically.
 
@@ -229,6 +230,68 @@ Prepends a string to every generated service (client object) name. Useful when g
 ```
 
 With `servicePrefix: "Petstore"`, the generated `petClient` becomes `PetstorePetClient`, the `storeClient` becomes `PetstoreStoreClient`, etc.
+
+---
+
+## `x-ts-type` Extension
+
+OpenAPI's type system covers the vast majority of real-world schemas, but occasionally you need a TypeScript type that simply cannot be expressed in OpenAPI — intersection types, complex mapped types, conditional types, and so on. The `x-ts-type` extension is an escape hatch for exactly these cases.
+
+### How it works
+
+Add an `x-ts-type` field to any schema in your spec. When Swaggie encounters it, the value is emitted **verbatim** as the TypeScript type, bypassing all normal schema derivation. The result is a plain type alias:
+
+```typescript
+export type YourSchemaName = <whatever you wrote in x-ts-type>;
+```
+
+`x-ts-type` takes precedence over **everything else** in the schema — including `$ref`, `type`, `properties`, `allOf`, and so on. Any other fields you leave on the schema are ignored by the generator (but remain useful for documentation and validation tooling).
+
+### When to use it
+
+The most common case is an **intersection type with `additionalProperties`**. For example, an API that returns a fixed set of typed fields _plus_ an open-ended set of extra keys cannot be cleanly described in OpenAPI 3.0. With `x-ts-type` you can write the exact TypeScript you need and keep the OpenAPI schema for docs and server-side validation:
+
+```yaml
+components:
+  schemas:
+    ProductAccess:
+      x-ts-type: >-
+        { products?: { [key: string]: AccessItem } } & { [key: string]: boolean | AccessItem | undefined }
+      # The fields below are ignored by Swaggie but used by validators and docs tools
+      type: object
+      properties:
+        products:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AccessItem'
+      additionalProperties:
+        type: boolean
+```
+
+Swaggie generates:
+
+```typescript
+export type ProductAccess = { products?: { [key: string]: AccessItem } } & {
+  [key: string]: boolean | AccessItem | undefined;
+};
+```
+
+### More examples
+
+**Simple union not expressible in OpenAPI:**
+
+```yaml
+StringOrNumber:
+  x-ts-type: string | number
+```
+
+```typescript
+export type StringOrNumber = string | number;
+```
+
+::: warning Keep the rest of the schema for tooling
+Even though Swaggie ignores the other schema fields when `x-ts-type` is present, it is a good practice to keep them accurate. Documentation generators, server-side validators, and mock servers all read the same spec and benefit from a well-formed schema.
+:::
 
 ---
 
