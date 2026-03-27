@@ -53,6 +53,18 @@ function renderSchema(
     return '';
   }
 
+  // x-ts-type takes precedence over everything, including $ref.
+  // When present, emit the literal TypeScript type string verbatim.
+  if ('x-ts-type' in schema) {
+    const result: string[] = [];
+    const s = schema as OA3.SchemaObject;
+    if (s.description ?? s.title) {
+      result.push(renderComment(s.description ?? s.title));
+    }
+    result.push(`export type ${safeName} = ${schema['x-ts-type']};`);
+    return result.join('\n');
+  }
+
   // This is an interesting case, because it is allowed but not likely to be used
   // as it is just a reference to another schema object
   if ('$ref' in schema) {
