@@ -12,7 +12,7 @@
 
 Swaggie generates TypeScript client code from an OpenAPI 3 specification. Instead of writing API-fetching code by hand, you point Swaggie at your API spec and it outputs a fully typed, ready-to-use client — helping you catch errors at compile time rather than at runtime.
 
-See the [Example section](#example) for a quick demo.
+See the [Example section](#example) for a quick demo, or visit the full documentation at **[yhnavein.github.io/swaggie](https://yhnavein.github.io/swaggie/)** for guides, configuration reference, and an interactive playground.
 
 > Inspired by [OpenApi Client](https://github.com/mikestead/openapi-client).
 
@@ -81,6 +81,7 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 -m, --mode <mode>          Generation mode: "full" or "schemas" (default: "full")
 -d, --schemaStyle <style>  Schema object style: "interface" or "type" (default: "interface")
     --enumStyle <style>    Enum style for plain string enums: "union" or "enum" (default: "union")
+    --enumNamesStyle <s>   Enum member name casing: "original" or "PascalCase" (default: "original")
     --dateFormat <format>  Date handling in schemas: "Date" or "string"
     --nullables <strategy> Nullable handling: "include", "nullableAsOptional", or "ignore"
     --preferAny            Use "any" instead of "unknown" for untyped values (default: false)
@@ -127,6 +128,7 @@ swaggie -c swaggie.config.json
   "generationMode": "full",
   "schemaDeclarationStyle": "interface",
   "enumDeclarationStyle": "union",
+  "enumNamesStyle": "original",
   "queryParamsSerialization": {
     "arrayFormat": "repeat",
     "allowDots": true
@@ -291,6 +293,12 @@ Use `enumDeclarationStyle` (or CLI `--enumStyle`) for plain string enums:
 
 Note: this applies only to plain string enums. Non-string enums are still emitted as union types.
 
+### Enum Names Style
+
+Use `enumNamesStyle` (or CLI `--enumNamesStyle`) to control the casing of enum member names when `enumDeclarationStyle` is `"enum"`:
+- `"original"` (default): member names are used exactly as they appear in the spec
+- `"PascalCase"`: member names are converted to PascalCase
+
 ### Parameter Modifiers
 
 Sometimes an API spec marks a parameter as required, but your client handles it in an interceptor and you don't want it cluttering every method signature. Parameter modifiers let you override this globally without touching the spec.
@@ -355,15 +363,6 @@ function error(e) {
   console.error(e.toString());
 }
 ```
-
----
-
-## Server Setup Samples
-
-Swaggie only needs a JSON or YAML OpenAPI spec file — it does not require a running server. However, if you want to see how to configure your backend to expose an OpenAPI spec automatically, check out the sample configurations in the `samples/` folder:
-
-- [ASP.NET Core + NSwag](./samples/dotnetcore/nswag/README.md)
-- [ASP.NET Core + Swashbuckle](./samples/dotnetcore/swashbuckle/README.md)
 
 ---
 

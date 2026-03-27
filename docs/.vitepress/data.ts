@@ -23,6 +23,8 @@ export const HINTS: Record<string, string> = {
   schemaStyle: 'Controls whether object schemas are generated as interfaces or type aliases.',
   enumStyle:
     'Controls whether plain string enums are generated as union types or TypeScript enums.',
+  enumNamesStyle:
+    'Controls how plain string enum member names are cased: "original" keeps them as-is, "PascalCase" converts them.',
   nullableStrategy: 'Controls how OpenAPI "nullable: true" is translated into TypeScript types.',
   baseUrl: 'Base URL baked into the generated client as the default value.',
   skipDeprecated:
