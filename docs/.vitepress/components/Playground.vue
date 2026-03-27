@@ -41,6 +41,7 @@ const template = ref<string>(s('template', 'axios'));
 const generationMode = ref<string>(s('generationMode', 'full'));
 const schemaStyle = ref<string>(s('schemaStyle', 'interface'));
 const enumStyle = ref<string>(s('enumStyle', 'union'));
+const enumNamesStyle = ref<string>(s('enumNamesStyle', 'original'));
 const nullableStrategy = ref<string>(s('nullableStrategy', 'ignore'));
 const baseUrl = ref<string>(s('baseUrl', ''));
 const skipDeprecated = ref<boolean>(s('skipDeprecated', false));
@@ -139,6 +140,7 @@ async function generate() {
       generationMode: generationMode.value as any,
       schemaDeclarationStyle: schemaStyle.value as any,
       enumDeclarationStyle: enumStyle.value as any,
+      enumNamesStyle: enumNamesStyle.value as any,
       nullableStrategy: nullableStrategy.value as any,
       skipDeprecated: skipDeprecated.value,
       dateFormat: dateFormat.value as any,
@@ -158,6 +160,7 @@ async function generate() {
       generationMode: generationMode.value,
       schemaStyle: schemaStyle.value,
       enumStyle: enumStyle.value,
+      enumNamesStyle: enumNamesStyle.value,
       nullableStrategy: nullableStrategy.value,
       baseUrl: baseUrl.value,
       skipDeprecated: skipDeprecated.value,
@@ -320,6 +323,20 @@ function getNavHeight(): number {
             <select v-model="enumStyle" class="pg-select">
               <option value="union">union</option>
               <option value="enum">enum</option>
+            </select>
+            <ChevronDownIcon />
+          </div>
+        </label>
+
+        <label class="pg-field">
+          <span class="pg-label">
+            Enum names
+            <HintIcon :hint="HINTS.enumNamesStyle" />
+          </span>
+          <div class="pg-select-wrap">
+            <select v-model="enumNamesStyle" class="pg-select">
+              <option value="original">original</option>
+              <option value="PascalCase">PascalCase</option>
             </select>
             <ChevronDownIcon />
           </div>

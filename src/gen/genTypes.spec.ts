@@ -1437,10 +1437,87 @@ export type MemberAccess = { accessType: string;
 };`);
     });
   });
+
+  describe('x-ts-type extension', () => {
+    test('should emit verbatim type for x-ts-type', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          ResourceType: {
+            'x-ts-type': 'string | number',
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(res, 'export type ResourceType = string | number;');
+    });
+
+    test('should emit complex intersection type verbatim', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          DictionaryAccess: {
+            'x-ts-type':
+              '{items?: {[key: string]: Entry}} & {[key: string]: boolean | Entry | undefined}',
+            type: 'object',
+            properties: {
+              items: {
+                type: 'object',
+                additionalProperties: { $ref: '#/components/schemas/Entry' },
+              },
+            },
+            additionalProperties: { type: 'boolean' },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type DictionaryAccess = {items?: {[key: string]: Entry}} & {[key: string]: boolean | Entry | undefined};'
+      );
+    });
+
+    test('should preserve JSDoc comment when x-ts-type is present', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          AnnotatedResource: {
+            'x-ts-type': 'string | null',
+            description: 'A nullable resource identifier',
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+/** A nullable resource identifier */
+export type AnnotatedResource = string | null;`
+      );
+    });
+
+    test('should take precedence over $ref and other schema fields', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          OverriddenSchema: {
+            'x-ts-type': 'string',
+            $ref: '#/components/schemas/SomeOtherType',
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(res, 'export type OverriddenSchema = string;');
+    });
+  });
 });
 
 type ExtendedSchema = {
-  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: object });
+  [key: string]: OA3.ReferenceObject | (OA31.SchemaObject & { [key: `x-${string}`]: unknown });
 };
 function prepareSchemas(schemas: ExtendedSchema) {
   return getDocument({

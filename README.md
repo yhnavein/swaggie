@@ -12,7 +12,7 @@
 
 Swaggie generates TypeScript client code from an OpenAPI 3 specification. Instead of writing API-fetching code by hand, you point Swaggie at your API spec and it outputs a fully typed, ready-to-use client — helping you catch errors at compile time rather than at runtime.
 
-See the [Example section](#example) for a quick demo.
+See the [Example section](#example) for a quick demo, or visit the full documentation at **[yhnavein.github.io/swaggie](https://yhnavein.github.io/swaggie/)** for guides, configuration reference, and an interactive playground.
 
 > Inspired by [OpenApi Client](https://github.com/mikestead/openapi-client).
 
@@ -81,6 +81,7 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 -m, --mode <mode>          Generation mode: "full" or "schemas" (default: "full")
 -d, --schemaStyle <style>  Schema object style: "interface" or "type" (default: "interface")
     --enumStyle <style>    Enum style for plain string enums: "union" or "enum" (default: "union")
+    --enumNamesStyle <s>   Enum member name casing: "original" or "PascalCase" (default: "original")
     --dateFormat <format>  Date handling in schemas: "Date" or "string"
     --nullables <strategy> Nullable handling: "include", "nullableAsOptional", or "ignore"
     --preferAny            Use "any" instead of "unknown" for untyped values (default: false)
@@ -127,6 +128,7 @@ swaggie -c swaggie.config.json
   "generationMode": "full",
   "schemaDeclarationStyle": "interface",
   "enumDeclarationStyle": "union",
+  "enumNamesStyle": "original",
   "queryParamsSerialization": {
     "arrayFormat": "repeat",
     "allowDots": true
@@ -291,6 +293,30 @@ Use `enumDeclarationStyle` (or CLI `--enumStyle`) for plain string enums:
 
 Note: this applies only to plain string enums. Non-string enums are still emitted as union types.
 
+### Enum Names Style
+
+Use `enumNamesStyle` (or CLI `--enumNamesStyle`) to control the casing of enum member names when `enumDeclarationStyle` is `"enum"`:
+- `"original"` (default): member names are used exactly as they appear in the spec
+- `"PascalCase"`: member names are converted to PascalCase
+
+### `x-ts-type` Extension
+
+Add `x-ts-type` to any schema in your spec to emit a verbatim TypeScript type string instead of deriving it from the schema definition. This is useful for intersection types, complex mapped types, or any TypeScript construct that cannot be expressed in OpenAPI's type system:
+
+```yaml
+ResourceAccess:
+  x-ts-type: >-
+    { items?: { [key: string]: Entry } } & { [key: string]: boolean | Entry | undefined }
+  type: object   # kept for doc/validation purposes
+```
+
+Swaggie emits exactly:
+```typescript
+export type ResourceAccess = { items?: { [key: string]: Entry } } & { [key: string]: boolean | Entry | undefined };
+```
+
+`x-ts-type` takes precedence over all other schema fields, including `$ref`. See the [full documentation](https://yhnavein.github.io/swaggie/guide/advanced#x-ts-type-extension) for more detail.
+
 ### Parameter Modifiers
 
 Sometimes an API spec marks a parameter as required, but your client handles it in an interceptor and you don't want it cluttering every method signature. Parameter modifiers let you override this globally without touching the spec.
@@ -358,15 +384,6 @@ function error(e) {
 
 ---
 
-## Server Setup Samples
-
-Swaggie only needs a JSON or YAML OpenAPI spec file — it does not require a running server. However, if you want to see how to configure your backend to expose an OpenAPI spec automatically, check out the sample configurations in the `samples/` folder:
-
-- [ASP.NET Core + NSwag](./samples/dotnetcore/nswag/README.md)
-- [ASP.NET Core + Swashbuckle](./samples/dotnetcore/swashbuckle/README.md)
-
----
-
 ## What's Supported
 
 | Supported                                                                      | Not Supported                                        |
@@ -374,7 +391,7 @@ Swaggie only needs a JSON or YAML OpenAPI spec file — it does not require a ru
 | OpenAPI 3.0, 3.1, 3.2                                                          | Swagger / OpenAPI 2.0                                |
 | `allOf`, `oneOf`, `anyOf`, `$ref`, external $refs                              | `not` keyword                                        |
 | Spec formats: JSON, YAML                                                       | Very complex query parameter structures              |
-| Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`           | Multiple response types (only the first is used)     |
+| Extensions: `x-position`, `x-name`, `x-enumNames`, `x-enum-varnames`, `x-ts-type` | Multiple response types (only the first is used)  |
 | Content types: JSON, plain text, multipart/form-data                           | Multiple request body types (only the first is used) |
 | Content types: `application/x-www-form-urlencoded`, `application/octet-stream` | OpenAPI callbacks and webhooks                       |
 | Various enum definition styles, support for additionalProperties               |                                                      |
