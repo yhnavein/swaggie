@@ -1,7 +1,10 @@
 @Injectable({
   providedIn: 'root'
 })
-export class <%= it.clientName.charAt(0).toUpperCase() + it.clientName.slice(1) -%>Service extends BaseService {
+export class <%= it.clientName.charAt(0).toUpperCase() + it.clientName.slice(1) -%>Service {
+  private http = inject(HttpClient);
+  private baseUrl = inject(<%= (it.servicePrefix || 'API').toUpperCase() -%>_BASE_URL, { optional: true }) ?? '';
+
   <% it.operations.forEach((operation) => { %>
 <%~ include('operation.ejs', operation); %>
 
