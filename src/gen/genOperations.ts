@@ -11,6 +11,7 @@ import {
 } from '../utils/utils';
 import { renderFile } from '../utils/templateEngine';
 import { generateBarrelFile } from './createBarrel';
+import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
 import type { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
 import { prepareJsDocsForOperation } from './jsDocs';
@@ -25,7 +26,7 @@ export default async function generateOperations(
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix;
-  let result = renderFile('baseClient.ejs', {
+  let result = FILE_HEADER + renderFile('baseClient.ejs', {
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,

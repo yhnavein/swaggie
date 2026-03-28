@@ -28,6 +28,7 @@ interface SwrConfig extends SWRConfiguration {
   /* Configuration for axios fetcher */
   axios?: AxiosRequestConfig;
 }
+
 export const petClient = {
    /**
   * Add a new pet to the store

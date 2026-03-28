@@ -13,7 +13,7 @@ import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "x
 
 export const http = xior.create({
   baseURL: '',
-  paramsSerializer: (params) =>
+  paramsSerializer: (params: any) =>
     encodeParams(params, true, null, {
       allowDots: true,
       arrayFormat: 'repeat',

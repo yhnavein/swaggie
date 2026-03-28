@@ -16,7 +16,7 @@ export const queryClient = new QueryClient();
 
 export const http = xior.create({
   baseURL: '',
-  paramsSerializer: (params) =>
+  paramsSerializer: (params: any) =>
     encodeParams(params, true, null, {
       allowDots: true,
       arrayFormat: 'repeat',
