@@ -13,8 +13,9 @@ if(getOperations.length > 0) { %>
   if(opName.toLowerCase().startsWith("get")) {
     opName = opName.substring(3);
   }
-  opName[0] = opName[0].toUpperCase();
-  var customName = "use" + it.clientName + opName;
+  opName = opName.charAt(0).toUpperCase() + opName.slice(1);
+  var clientName = it.clientName.charAt(0).toUpperCase() + it.clientName.slice(1);
+  var customName = "use" + clientName + opName;
   var queryOperation = Object.assign({ rqOpName: customName, opKey: it.clientName + opName, clientName: it.camelCaseName }, operation); %>
 <%~ include('queryOperation.ejs', queryOperation); %>
 

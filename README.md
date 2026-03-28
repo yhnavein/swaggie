@@ -179,7 +179,7 @@ import Axios, { AxiosPromise } from 'axios';
 
 const axios = Axios.create({
   baseURL: '/api',
-  paramsSerializer: (params) =>
+  paramsSerializer: (params: any) =>
     encodeParams(params, null, {
       allowDots: true,
       arrayFormat: 'repeat',

@@ -10,6 +10,7 @@
 // ReSharper disable InconsistentNaming
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
+// biome-ignore-all lint: auto-generated code
 
 import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 
