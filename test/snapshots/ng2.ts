@@ -12,57 +12,37 @@
 // deno-lint-ignore-file
 
 import type { Observable } from "rxjs";
-import { Injectable, Inject, Optional, InjectionToken } from "@angular/core";
+import { Injectable, InjectionToken, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 export const API_BASE_URL = new InjectionToken<string>("API_BASE_URL");
 
 abstract class BaseService {
-  private httpClient: HttpClient;
-  private baseUrl: string;
-
-  constructor(
-    @Inject(HttpClient) httpClient: HttpClient,
-    @Optional() @Inject(API_BASE_URL) baseUrl?: string
-  ) {
-    this.httpClient = httpClient;
-    this.baseUrl = baseUrl ? baseUrl : '';
-  }
+  private http = inject(HttpClient);
+  private baseUrl = inject(API_BASE_URL, { optional: true }) ?? '';
 
   protected $get<T>(url: string, options?: any): Observable<T> {
-    return this.httpClient
-      .get<T>(this.baseUrl + url, options)
-      .pipe((response: any) => response);
+    return this.http.get<T>(this.baseUrl + url, options);
   }
 
   protected $getAll<T>(url: string, options?: any): Observable<T[]> {
-    return this.httpClient
-      .get<T[]>(this.baseUrl + url, options)
-      .pipe((response: any) => response);
+    return this.http.get<T[]>(this.baseUrl + url, options);
   }
 
   protected $delete<T>(url: string, options?: any): Observable<T> {
-    return this.httpClient
-      .delete(this.baseUrl + url, options)
-      .pipe((response: any) => response);
+    return this.http.delete<T>(this.baseUrl + url, options);
   }
 
-  protected $post(url: string, data: any, options?: any): Observable<any> {
-    return this.httpClient
-      .post(this.baseUrl + url, data, options)
-      .pipe((response: any) => response);
+  protected $post<T>(url: string, data: any, options?: any): Observable<T> {
+    return this.http.post<T>(this.baseUrl + url, data, options);
   }
 
   protected $patch<T>(url: string, data: any, options?: any): Observable<T> {
-    return this.httpClient
-      .patch(this.baseUrl + url, data, options)
-      .pipe((response: any) => response);
+    return this.http.patch<T>(this.baseUrl + url, data, options);
   }
 
-  protected $put(url: string, data: any, options?: any): Observable<any> {
-    return this.httpClient
-      .put(this.baseUrl + url, data, options)
-      .pipe((response: any) => response);
+  protected $put<T>(url: string, data: any, options?: any): Observable<T> {
+    return this.http.put<T>(this.baseUrl + url, data, options);
   }
 }
 
@@ -76,14 +56,7 @@ function paramsSerializer(params: any) {
 @Injectable({
   providedIn: 'root'
 })
-export class petService extends BaseService {
-  constructor(
-    @Inject(HttpClient) httpClient: HttpClient,
-    @Optional() @Inject(API_BASE_URL) baseUrl?: string
-  ) {
-    super(httpClient, baseUrl);
-  }
-
+export class PetService extends BaseService {
    /**
   * Add a new pet to the store
   * @param body
@@ -92,7 +65,7 @@ export class petService extends BaseService {
     body: Pet ,
     config?: any
   ): Observable<Pet> {
-    const url = `/pet?`;
+    const url = `/pet`;
 
     return this.$post(
       url,
@@ -111,7 +84,7 @@ export class petService extends BaseService {
     petId: number ,
     config?: any
   ): Observable<unknown> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return this.$delete(
       url,
@@ -128,8 +101,9 @@ export class petService extends BaseService {
     status?: "available" | "pending" | "sold" | null,
     config?: any
   ): Observable<Pet[]> {
-    const url = `/pet/findByStatus?${paramsSerializer({'status': status,
-      })}`;
+    const params = paramsSerializer({      'status': status,
+      });
+    const url = `/pet/findByStatus${params ? '?' + params : ''}`;
 
     return this.$get(
       url,
@@ -147,8 +121,9 @@ export class petService extends BaseService {
     tags?: string[] | null,
     config?: any
   ): Observable<Pet[]> {
-    const url = `/pet/findByTags?${paramsSerializer({'tags': tags,
-      })}`;
+    const params = paramsSerializer({      'tags': tags,
+      });
+    const url = `/pet/findByTags${params ? '?' + params : ''}`;
 
     return this.$get(
       url,
@@ -165,7 +140,7 @@ export class petService extends BaseService {
     petId: number ,
     config?: any
   ): Observable<Pet> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}?`;
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return this.$get(
       url,
@@ -181,7 +156,7 @@ export class petService extends BaseService {
     body: Pet ,
     config?: any
   ): Observable<Pet> {
-    const url = `/pet?`;
+    const url = `/pet`;
 
     return this.$put(
       url,
@@ -202,9 +177,10 @@ export class petService extends BaseService {
     status?: string | null,
     config?: any
   ): Observable<unknown> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}?${paramsSerializer({'name': name,
-      'status': status,
-      })}`;
+    const params = paramsSerializer({      'name': name,
+            'status': status,
+      });
+    const url = `/pet/${encodeURIComponent(`${petId}`)}${params ? '?' + params : ''}`;
 
     return this.$post(
       url,
@@ -225,8 +201,9 @@ export class petService extends BaseService {
     additionalMetadata?: string | null,
     config?: any
   ): Observable<File> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${paramsSerializer({'additionalMetadata': additionalMetadata,
-      })}`;
+    const params = paramsSerializer({      'additionalMetadata': additionalMetadata,
+      });
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage${params ? '?' + params : ''}`;
 
     return this.$post(
       url,
@@ -240,14 +217,7 @@ export class petService extends BaseService {
 @Injectable({
   providedIn: 'root'
 })
-export class storeService extends BaseService {
-  constructor(
-    @Inject(HttpClient) httpClient: HttpClient,
-    @Optional() @Inject(API_BASE_URL) baseUrl?: string
-  ) {
-    super(httpClient, baseUrl);
-  }
-
+export class StoreService extends BaseService {
    /**
   * Delete purchase order by ID
   * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
@@ -257,7 +227,7 @@ export class storeService extends BaseService {
     orderId: number ,
     config?: any
   ): Observable<unknown> {
-    const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return this.$delete(
       url,
@@ -289,7 +259,7 @@ export class storeService extends BaseService {
     orderId: number ,
     config?: any
   ): Observable<Order> {
-    const url = `/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return this.$get(
       url,
@@ -306,7 +276,7 @@ export class storeService extends BaseService {
     body?: Order | null,
     config?: any
   ): Observable<Order> {
-    const url = `/store/order?`;
+    const url = `/store/order`;
 
     return this.$post(
       url,
@@ -320,14 +290,7 @@ export class storeService extends BaseService {
 @Injectable({
   providedIn: 'root'
 })
-export class userService extends BaseService {
-  constructor(
-    @Inject(HttpClient) httpClient: HttpClient,
-    @Optional() @Inject(API_BASE_URL) baseUrl?: string
-  ) {
-    super(httpClient, baseUrl);
-  }
-
+export class UserService extends BaseService {
    /**
   * Create user
   * This can only be done by the logged in user.
@@ -337,7 +300,7 @@ export class userService extends BaseService {
     body?: User | null,
     config?: any
   ): Observable<User> {
-    const url = `/user?`;
+    const url = `/user`;
 
     return this.$post(
       url,
@@ -354,7 +317,7 @@ export class userService extends BaseService {
     body?: User[] | null,
     config?: any
   ): Observable<User> {
-    const url = `/user/createWithList?`;
+    const url = `/user/createWithList`;
 
     return this.$post(
       url,
@@ -372,7 +335,7 @@ export class userService extends BaseService {
     username: string ,
     config?: any
   ): Observable<unknown> {
-    const url = `/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return this.$delete(
       url,
@@ -388,7 +351,7 @@ export class userService extends BaseService {
     username: string ,
     config?: any
   ): Observable<User> {
-    const url = `/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return this.$get(
       url,
@@ -406,9 +369,10 @@ export class userService extends BaseService {
     password?: string | null,
     config?: any
   ): Observable<string> {
-    const url = `/user/login?${paramsSerializer({'username': username,
-      'password': password,
-      })}`;
+    const params = paramsSerializer({      'username': username,
+            'password': password,
+      });
+    const url = `/user/login${params ? '?' + params : ''}`;
 
     return this.$get(
       url,
@@ -420,7 +384,7 @@ export class userService extends BaseService {
   logoutUser(
     config?: any
   ): Observable<unknown> {
-    const url = `/user/logout?`;
+    const url = `/user/logout`;
 
     return this.$get(
       url,
@@ -439,7 +403,7 @@ export class userService extends BaseService {
     username: string ,
     config?: any
   ): Observable<unknown> {
-    const url = `/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return this.$put(
       url,
