@@ -1,5 +1,5 @@
 import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
-import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
+import { type UseQueryOptions, type UseMutationOptions, useQuery, useMutation } from '@tanstack/react-query';
 
 export const http = xior.create({
   baseURL: '<%= it.baseUrl || '' %>',

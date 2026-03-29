@@ -5,18 +5,35 @@ export const <%= it.camelCaseName -%>Client = {
   <% }); %>
 };
 
-<% var getOperations = it.operations.filter((o) => o.method === 'GET');
-if(getOperations.length > 0) { %>
-  <% getOperations.forEach((operation) => {
-  var opName = operation.name;
-  if(opName.toLowerCase().startsWith("get")) {
-    opName = opName.substring(3);
-  }
-  opName = opName.charAt(0).toUpperCase() + opName.slice(1);
-  var clientName = it.clientName.charAt(0).toUpperCase() + it.clientName.slice(1);
-  var customName = "use" + clientName + opName;
-  var swrOperation = Object.assign({ swrOpName: customName }, operation); %>
+<%
+var getOperations = it.operations.filter((o) => o.method === 'GET');
+
+function toOpName(name) {
+  var n = name.toLowerCase().startsWith('get') ? name.substring(3) : name;
+  return n.charAt(0).toUpperCase() + n.slice(1);
+}
+%>
+
+export const <%= it.camelCaseName %> = {
+  queries: {
+<% getOperations.forEach((operation) => {
+  var opName = toOpName(operation.name);
+  var swrOperation = Object.assign({
+    swrOpName: 'use' + opName,
+    clientName: it.camelCaseName,
+  }, operation);
+%>
 <%~ include('swrOperation.ejs', swrOperation); %>
 
-  <% }); %>
-<% } %>
+<% }); %>
+  },
+
+  queryKeys: {
+<% getOperations.forEach((operation) => {
+  var opName = toOpName(operation.name);
+  var keyName = opName.charAt(0).toLowerCase() + opName.slice(1);
+%>
+    <%= keyName %>: (<% operation.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? ' | null' : '' %>, <% }); %>) => `<%= operation.url %><% if(operation.query && operation.query.length > 0) { %>?${encodeParams({<% operation.query.forEach((parameter) => { %>'<%= parameter.originalName %>': <%= parameter.name %>, <% }); %>})}<% } %>`,
+<% }); %>
+  },
+};
