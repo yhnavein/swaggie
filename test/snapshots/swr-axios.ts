@@ -13,6 +13,7 @@
 
 import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 import useSWR, { type SWRConfiguration, type Key } from 'swr';
+import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
 
 export const axios = Axios.create({
   baseURL: '',
@@ -26,9 +27,6 @@ export const axios = Axios.create({
 interface SwrConfig extends SWRConfiguration {
   /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
   key?: Key;
-
-  /* Configuration for axios fetcher */
-  axios?: AxiosRequestConfig;
 }
 
 export const petClient = {
@@ -198,106 +196,173 @@ export const petClient = {
 
   };
 
+
+export const pet = {
+  queries: {
    /**
-  * Finds Pets by status
-  * Multiple status values can be provided with comma separated strings
-  * @param status (optional) - Status values that need to be considered for filter
-  */
-export function usepetfindPetsByStatus(  status?: "available" | "pending" | "sold" | null,
-      $config?: SwrConfig
-  ) {
-  const url = `/pet/findByStatus`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    * Finds Pets by status
+    * Multiple status values can be provided with comma separated strings
+    * @param status (optional) - Status values that need to be considered for filter
+    */
+    useFindPetsByStatus(
+      status?: "available" | "pending" | "sold" | null,
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? pet.queryKeys.findPetsByStatus(status, );
 
-  const cacheUrl = `${url}?${encodeParams({'status': status,
-    })}`;
+      const { data, error, isLoading, mutate } = useSWR<Pet[]>(
+        cacheUrl,
+        () => petClient.findPetsByStatus(status, $httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<Pet[]>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    params: {
-      'status': status,
+      return { data, isLoading, error, mutate };
     },
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
-
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
 
    /**
-  * Finds Pets by tags
-  * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
-  * @deprecated
-  * @param tags (optional) - Tags to filter by
-  */
-export function usepetfindPetsByTags(  tags?: string[] | null,
-      $config?: SwrConfig
-  ) {
-  const url = `/pet/findByTags`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    * Finds Pets by tags
+    * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+    * @deprecated
+    * @param tags (optional) - Tags to filter by
+    */
+    useFindPetsByTags(
+      tags?: string[] | null,
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
 
-  const cacheUrl = `${url}?${encodeParams({'tags': tags,
-    })}`;
+      const { data, error, isLoading, mutate } = useSWR<Pet[]>(
+        cacheUrl,
+        () => petClient.findPetsByTags(tags, $httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<Pet[]>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    params: {
-      'tags': tags,
+      return { data, isLoading, error, mutate };
     },
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
-
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
 
    /**
-  * Find pet by ID
-  * Returns a single pet
-  * @param petId - ID of the pet
-  */
-export function usepetPetById(  petId: number ,
-      $config?: SwrConfig
-  ) {
-  const url = `/pet/${encodeURIComponent(`${petId}`)}`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    * Find pet by ID
+    * Returns a single pet
+    * @param petId - ID of the pet
+    */
+    usePetById(
+      petId: number,
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? pet.queryKeys.petById(petId, );
 
-  const cacheUrl = `${url}?`;
+      const { data, error, isLoading, mutate } = useSWR<Pet>(
+        cacheUrl,
+        () => petClient.getPetById(petId, $httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<Pet>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
+      return { data, isLoading, error, mutate };
+    },
 
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
+  },
 
-  export const storeClient = {
+  mutations: {
+   /**
+    * Add a new pet to the store
+    * @param body
+    */
+    useAddPet(
+      $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<Pet, Error, string, { body: Pet }>(
+        '/pet',
+        (_key: string, { arg }: { arg: { body: Pet } }) =>
+          petClient.addPet(arg.body, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Deletes a pet
+    * @param apiKey (optional) (API name: api_key)
+    * @param petId - ID of the pet
+    */
+    useDeletePet(
+      $config?: SWRMutationConfiguration<unknown, Error, string, { apiKey: string | null; petId: number }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<unknown, Error, string, { apiKey: string | null; petId: number }>(
+        '/pet/*',
+        (_key: string, { arg }: { arg: { apiKey: string | null; petId: number } }) =>
+          petClient.deletePet(arg.apiKey, arg.petId, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Update an existing pet by Id
+    * @param body
+    */
+    useUpdatePet(
+      $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<Pet, Error, string, { body: Pet }>(
+        '/pet',
+        (_key: string, { arg }: { arg: { body: Pet } }) =>
+          petClient.updatePet(arg.body, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Updates a pet in the store with form data
+    * @param petId - ID of the pet
+    * @param name (optional) - Name of pet that needs to be updated
+    * @param status (optional) - Status of pet that needs to be updated
+    */
+    useUpdatePetWithForm(
+      $config?: SWRMutationConfiguration<unknown, Error, string, { petId: number; name?: string | null; status?: string | null }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<unknown, Error, string, { petId: number; name?: string | null; status?: string | null }>(
+        '/pet/*',
+        (_key: string, { arg }: { arg: { petId: number; name?: string | null; status?: string | null } }) =>
+          petClient.updatePetWithForm(arg.petId, arg.name, arg.status, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * uploads an image
+    * @param body (optional)
+    * @param petId - ID of the pet
+    * @param additionalMetadata (optional) - Additional Metadata
+    */
+    useUploadFile(
+      $config?: SWRMutationConfiguration<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
+        '/pet/*/uploadImage',
+        (_key: string, { arg }: { arg: { body: File | null; petId: number; additionalMetadata?: string | null } }) =>
+          petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+  },
+
+  queryKeys: {
+    findPetsByStatus: (status?: "available" | "pending" | "sold" | null, ) => `/pet/findByStatus?${encodeParams({'status': status, })}`,
+    findPetsByTags: (tags?: string[] | null, ) => `/pet/findByTags?${encodeParams({'tags': tags, })}`,
+    petById: (petId: number, ) => `/pet/${encodeURIComponent(`${petId}`)}`,
+  },
+};
+export const storeClient = {
    /**
   * Delete purchase order by ID
   * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
@@ -367,65 +432,96 @@ const { data, error, mutate } = useSWR<Pet>(
 
   };
 
+
+export const store = {
+  queries: {
    /**
-  * Returns pet inventories by status
-  * Returns a map of status codes to quantities
-  */
-export function usestoreInventory(  $config?: SwrConfig
-  ) {
-  const url = `/store/inventory`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    * Returns pet inventories by status
+    * Returns a map of status codes to quantities
+    */
+    useInventory(
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? store.queryKeys.inventory();
 
-  const cacheUrl = `${url}?`;
+      const { data, error, isLoading, mutate } = useSWR<Record<string, number>>(
+        cacheUrl,
+        () => storeClient.getInventory($httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<Record<string, number>>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
-
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
+      return { data, isLoading, error, mutate };
+    },
 
    /**
-  * Find purchase order by ID
-  * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
-  * @param orderId - ID of order that needs to be fetched
-  */
-export function usestoreOrderById(  orderId: number ,
-      $config?: SwrConfig
-  ) {
-  const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    * Find purchase order by ID
+    * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
+    * @param orderId - ID of order that needs to be fetched
+    */
+    useOrderById(
+      orderId: number,
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
 
-  const cacheUrl = `${url}?`;
+      const { data, error, isLoading, mutate } = useSWR<Order>(
+        cacheUrl,
+        () => storeClient.getOrderById(orderId, $httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<Order>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
+      return { data, isLoading, error, mutate };
+    },
 
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
+  },
 
-  export const userClient = {
+  mutations: {
+   /**
+    * Delete purchase order by ID
+    * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
+    * @param orderId - ID of the order that needs to be deleted
+    */
+    useDeleteOrder(
+      $config?: SWRMutationConfiguration<unknown, Error, string, { orderId: number }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<unknown, Error, string, { orderId: number }>(
+        '/store/order/*',
+        (_key: string, { arg }: { arg: { orderId: number } }) =>
+          storeClient.deleteOrder(arg.orderId, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Place an order for a pet
+    * Place a new order in the store
+    * @param body (optional)
+    */
+    usePlaceOrder(
+      $config?: SWRMutationConfiguration<Order, Error, string, { body?: Order | null }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<Order, Error, string, { body?: Order | null }>(
+        '/store/order',
+        (_key: string, { arg }: { arg: { body?: Order | null } }) =>
+          storeClient.placeOrder(arg.body, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+  },
+
+  queryKeys: {
+    inventory: () => `/store/inventory`,
+    orderById: (orderId: number, ) => `/store/order/${encodeURIComponent(`${orderId}`)}`,
+  },
+};
+export const userClient = {
    /**
   * Create user
   * This can only be done by the logged in user.
@@ -550,98 +646,150 @@ const { data, error, mutate } = useSWR<Order>(
 
   };
 
+
+export const user = {
+  queries: {
    /**
-  * Get user by user name
-  * @param username - The name that needs to be fetched. Use user1 for testing.
-  */
-export function useuserUserByName(  username: string ,
-      $config?: SwrConfig
-  ) {
-  const url = `/user/${encodeURIComponent(`${username}`)}`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    * Get user by user name
+    * @param username - The name that needs to be fetched. Use user1 for testing.
+    */
+    useUserByName(
+      username: string,
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? user.queryKeys.userByName(username, );
 
-  const cacheUrl = `${url}?`;
+      const { data, error, isLoading, mutate } = useSWR<User>(
+        cacheUrl,
+        () => userClient.getUserByName(username, $httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<User>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
-
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
-
-   /**
-  * Logs user into the system
-  * @param username (optional) - The user name for login
-  * @param password (optional) - The password for login in clear text
-  */
-export function useuserloginUser(  username?: string | null,
-      password?: string | null,
-      $config?: SwrConfig
-  ) {
-  const url = `/user/login`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
-
-  const cacheUrl = `${url}?${encodeParams({'username': username,
-    'password': password,
-    })}`;
-
-const { data, error, mutate } = useSWR<string>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    params: {
-      'username': username,
-      'password': password,
+      return { data, isLoading, error, mutate };
     },
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
 
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
+   /**
+    * Logs user into the system
+    * @param username (optional) - The user name for login
+    * @param password (optional) - The password for login in clear text
+    */
+    useLoginUser(
+      username?: string | null,
+      password?: string | null,
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? user.queryKeys.loginUser(username, password, );
+
+      const { data, error, isLoading, mutate } = useSWR<string>(
+        cacheUrl,
+        () => userClient.loginUser(username, password, $httpConfig).then((resp) => resp.data),
+        config
+      );
+
+      return { data, isLoading, error, mutate };
+    },
 
   /** Logs out current logged in user session */
-export function useuserlogoutUser(  $config?: SwrConfig
-  ) {
-  const url = `/user/logout`;
-  const { axios: $axiosConf, key, ...config } = $config || {};
+    useLogoutUser(
+      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? user.queryKeys.logoutUser();
 
-  const cacheUrl = `${url}?`;
+      const { data, error, isLoading, mutate } = useSWR<unknown>(
+        cacheUrl,
+        () => userClient.logoutUser($httpConfig).then((resp) => resp.data),
+        config
+      );
 
-const { data, error, mutate } = useSWR<unknown>(
-  key ?? cacheUrl,
-  () => axios.request({
-    url: url,
-    method: 'GET',
-    ...$axiosConf})
-    .then((resp) => resp.data),
-  config);
+      return { data, isLoading, error, mutate };
+    },
 
-  return {
-    data,
-    isLoading: !error && !data,
-    error: error,
-    mutate,
-  };
-}
+  },
 
-  
+  mutations: {
+   /**
+    * Create user
+    * This can only be done by the logged in user.
+    * @param body (optional)
+    */
+    useCreateUser(
+      $config?: SWRMutationConfiguration<User, Error, string, { body?: User | null }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<User, Error, string, { body?: User | null }>(
+        '/user',
+        (_key: string, { arg }: { arg: { body?: User | null } }) =>
+          userClient.createUser(arg.body, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Creates list of users with given input array
+    * @param body (optional)
+    */
+    useCreateUsersWithListInput(
+      $config?: SWRMutationConfiguration<User, Error, string, { body?: User[] | null }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<User, Error, string, { body?: User[] | null }>(
+        '/user/createWithList',
+        (_key: string, { arg }: { arg: { body?: User[] | null } }) =>
+          userClient.createUsersWithListInput(arg.body, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Delete user
+    * This can only be done by the logged in user.
+    * @param username - The name that needs to be deleted
+    */
+    useDeleteUser(
+      $config?: SWRMutationConfiguration<unknown, Error, string, { username: string }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<unknown, Error, string, { username: string }>(
+        '/user/*',
+        (_key: string, { arg }: { arg: { username: string } }) =>
+          userClient.deleteUser(arg.username, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+   /**
+    * Update user
+    * This can only be done by the logged in user.
+    * @param body (optional)
+    * @param username - name that needs to be updated
+    */
+    useUpdateUser(
+      $config?: SWRMutationConfiguration<unknown, Error, string, { body: FormData | null; username: string }>,
+      $httpConfig?: AxiosRequestConfig
+    ) {
+      return useSWRMutation<unknown, Error, string, { body: FormData | null; username: string }>(
+        '/user/*',
+        (_key: string, { arg }: { arg: { body: FormData | null; username: string } }) =>
+          userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },
+
+  },
+
+  queryKeys: {
+    userByName: (username: string, ) => `/user/${encodeURIComponent(`${username}`)}`,
+    loginUser: (username?: string | null, password?: string | null, ) => `/user/login?${encodeParams({'username': username, 'password': password, })}`,
+    logoutUser: () => `/user/logout`,
+  },
+};
+
 /**
  * Serializes a params object into a query string that is compatible with different REST APIs.
  * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
