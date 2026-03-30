@@ -249,11 +249,11 @@ function getTypeFromObject(
 
   if (schema.additionalProperties) {
     const extraProps = schema.additionalProperties;
-    objectWithIndexSignatureType = `{ [key: string]: ${
+    objectWithIndexSignatureType = `Record<string, ${
       extraProps === true
         ? unknownType
         : getTypeFromSchemaResolved(extraProps, options, `${context}.additionalProperties`)
-    } }`;
+    }>`;
   }
 
   if (objectWithNamedPropsType && objectWithIndexSignatureType) {
@@ -271,7 +271,7 @@ function getTypeFromObject(
   // A bare `type: object` with no properties and no additionalProperties is a
   // free-form object per the OpenAPI spec (equivalent to additionalProperties: true).
   if (schema.type === 'object') {
-    return `{ [key: string]: ${unknownType} }`;
+    return `Record<string, ${unknownType}>`;
   }
 
   return unknownType;

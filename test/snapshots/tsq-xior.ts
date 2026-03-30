@@ -283,10 +283,10 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
   * Returns a map of status codes to quantities
   */
   getInventory($config?: XiorRequestConfig
-  ): Promise<XiorResponse<{ [key: string]: number }>> {
+  ): Promise<XiorResponse<Record<string, number>>> {
     const url = `/store/inventory`;
 
-    return http.request<{ [key: string]: number }>({
+    return http.request<Record<string, number>>({
       url: url,
       method: 'GET',
       ...$config,
@@ -337,13 +337,13 @@ usepetPetById.queryKeys = ['pet', 'petPetById'];
   * @param $config (optional) Additional configuration for TanStack Query
   * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
  */
-export function usestoreInventory<TData = { [key: string]: number }, TError = Error>($config?: Omit<
-  UseQueryOptions<{ [key: string]: number }, TError, TData>,
+export function usestoreInventory<TData = Record<string, number>, TError = Error>($config?: Omit<
+  UseQueryOptions<Record<string, number>, TError, TData>,
   'queryKey' | 'queryFn'
 >,
     $httpConfig?: XiorRequestConfig
   ) {
-  return useQuery<{ [key: string]: number }, TError, TData>({
+  return useQuery<Record<string, number>, TError, TData>({
     queryKey: ['store', 'storeInventory', ],
     queryFn: () => storeClient.getInventory($httpConfig).then(res => res.data),
     ...$config
@@ -576,7 +576,7 @@ useuserlogoutUser.queryKeys = ['user', 'userlogoutUser'];
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -605,6 +605,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

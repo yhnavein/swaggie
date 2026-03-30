@@ -271,7 +271,7 @@ export class storeService extends BaseService {
   */
   getInventory(
     config?: any
-  ): Observable<{ [key: string]: number }> {
+  ): Observable<Record<string, number>> {
     const url = `/store/inventory?`;
 
     return this.$get(
@@ -523,7 +523,7 @@ export interface Order {
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -552,6 +552,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

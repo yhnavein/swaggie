@@ -531,7 +531,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type Workspaces = { [key: string]: WorkspaceAccess };'
+        'export type Workspaces = Record<string, WorkspaceAccess>;'
       );
     });
 
@@ -559,7 +559,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type WorkspaceAccess = { products?: { [key: string]: AccessItem }; } & { [key: string]: AccessItem };'
+        'export type WorkspaceAccess = { products?: Record<string, AccessItem>; } & Record<string, AccessItem>;'
       );
     });
 
@@ -576,7 +576,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type Metadata = { [key: string]: unknown };'
+        'export type Metadata = Record<string, unknown>;'
       );
     });
 
@@ -593,7 +593,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type Metadata = { [key: string]: any };'
+        'export type Metadata = Record<string, any>;'
       );
     });
 
@@ -611,7 +611,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type Attributes = { [key: string]: unknown };'
+        'export type Attributes = Record<string, unknown>;'
       );
     });
 
@@ -629,7 +629,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type Attributes = { [key: string]: unknown };'
+        'export type Attributes = Record<string, unknown>;'
       );
     });
 

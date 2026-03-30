@@ -212,10 +212,10 @@ export const storeClient = {
   * Returns a map of status codes to quantities
   */
   getInventory($config?: AxiosRequestConfig
-  ): AxiosPromise<{ [key: string]: number }> {
+  ): AxiosPromise<Record<string, number>> {
     const url = `/store/inventory`;
 
-    return axios.request<{ [key: string]: number }>({
+    return axios.request<Record<string, number>>({
       url: url,
       method: 'GET',
       ...$config,
@@ -457,7 +457,7 @@ export interface Order {
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -486,6 +486,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

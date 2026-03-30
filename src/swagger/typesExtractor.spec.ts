@@ -79,7 +79,7 @@ describe('getTypeFromSchema', () => {
       { schema: { type: 'array', items: { type: 'boolean' } }, expected: 'boolean[]' },
       {
         schema: { type: 'array', items: { type: 'object' } },
-        expected: '{ [key: string]: unknown }[]',
+        expected: 'Record<string, unknown>[]',
       },
       {
         schema: {
@@ -359,7 +359,7 @@ describe('getTypeFromSchema', () => {
         opts
       );
 
-      expect(res).toBe('{ [key: string]: string }');
+      expect(res).toBe('Record<string, string>');
     });
 
     test('should keep both named properties and index signature', () => {
@@ -383,7 +383,7 @@ describe('getTypeFromSchema', () => {
 
       assertEqualIgnoringWhitespace(
         res,
-        '{ products?: { [key: string]: AccessResponseItem }; } & { [key: string]: AccessResponseItem }'
+        '{ products?: Record<string, AccessResponseItem>; } & Record<string, AccessResponseItem>'
       );
     });
 
@@ -393,7 +393,7 @@ describe('getTypeFromSchema', () => {
         opts
       );
 
-      expect(res).toBe('{ [key: string]: unknown }');
+      expect(res).toBe('Record<string, unknown>');
     });
 
     test('should treat additionalProperties: true with preferAny as any-valued map', () => {
@@ -402,7 +402,7 @@ describe('getTypeFromSchema', () => {
         getClientOptions({ preferAny: true })
       );
 
-      expect(res).toBe('{ [key: string]: any }');
+      expect(res).toBe('Record<string, any>');
     });
 
     test('should treat additionalProperties: {} as free-form object (unknown value)', () => {
@@ -411,13 +411,13 @@ describe('getTypeFromSchema', () => {
         opts
       );
 
-      expect(res).toBe('{ [key: string]: unknown }');
+      expect(res).toBe('Record<string, unknown>');
     });
 
     test('should treat bare type:object as free-form object (unknown value)', () => {
       const res = getTypeFromSchema({ type: 'object' }, opts);
 
-      expect(res).toBe('{ [key: string]: unknown }');
+      expect(res).toBe('Record<string, unknown>');
     });
 
     test('should treat bare type:object with preferAny as any-valued map', () => {
@@ -426,7 +426,7 @@ describe('getTypeFromSchema', () => {
         getClientOptions({ preferAny: true })
       );
 
-      expect(res).toBe('{ [key: string]: any }');
+      expect(res).toBe('Record<string, any>');
     });
   });
 
@@ -482,7 +482,7 @@ describe('getTypeFromSchema', () => {
         },
         {
           schema: { type: 'object', nullable: true },
-          expected: '{ [key: string]: unknown } | null',
+          expected: 'Record<string, unknown> | null',
         },
         {
           schema: { type: 'object', properties: { name: { type: 'string' } }, nullable: true },
