@@ -7,6 +7,7 @@ export const <%= it.camelCaseName -%>Client = {
 
 <%
 var getOperations = it.operations.filter((o) => o.method === 'GET');
+var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
 
 function toOpName(name) {
   var n = name.toLowerCase().startsWith('get') ? name.substring(3) : name;
@@ -31,6 +32,19 @@ export const <%= it.camelCaseName %> = {
   }, safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('swrOperation.ejs', swrOperation); %>
+
+<% }); %>
+  },
+
+  mutations: {
+<% mutationOperations.forEach((operation) => {
+  var opName = operation.name.charAt(0).toUpperCase() + operation.name.slice(1);
+  var swrMutationOperation = Object.assign({
+    mutOpName: 'use' + opName,
+    clientName: it.camelCaseName,
+  }, safeOperation(operation, it.camelCaseName));
+%>
+<%~ include('swrMutationOperation.ejs', swrMutationOperation); %>
 
 <% }); %>
   },

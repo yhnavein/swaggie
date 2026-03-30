@@ -1,5 +1,6 @@
 import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 import useSWR, { type SWRConfiguration, type Key } from 'swr';
+import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
 
 export const axios = Axios.create({
   baseURL: '<%= it.baseUrl || '' -%>',
