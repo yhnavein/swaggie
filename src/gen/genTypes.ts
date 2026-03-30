@@ -4,7 +4,7 @@ import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../s
 import type { AppOptions } from '../types';
 import { escapePropName } from '../utils/utils';
 import { findAllUsedRefs } from './refsHelper';
-import { renderComment } from './jsDocs';
+import { buildSchemaComment, renderComment } from './jsDocs';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.
@@ -58,8 +58,9 @@ function renderSchema(
   if ('x-ts-type' in schema) {
     const result: string[] = [];
     const s = schema as OA3.SchemaObject;
-    if (s.description ?? s.title) {
-      result.push(renderComment(s.description ?? s.title));
+    const xTsComment = buildSchemaComment(s);
+    if (xTsComment) {
+      result.push(xTsComment);
     }
     result.push(`export type ${safeName} = ${schema['x-ts-type']};`);
     return result.join('\n');
@@ -74,8 +75,9 @@ function renderSchema(
 
   const result: string[] = [];
   const schemaContext = `components.schemas.${safeName}`;
-  if (schema.description ?? schema.title) {
-    result.push(renderComment(schema.description ?? schema.title));
+  const schemaComment = buildSchemaComment(schema);
+  if (schemaComment) {
+    result.push(schemaComment);
   }
 
   if ('x-enumNames' in schema || 'x-enum-varnames' in schema) {
@@ -288,8 +290,13 @@ function renderTypeProp(
   const lines: string[] = [];
   const type = getTypeFromSchema(definition, options, `${schemaContext}.properties.${propName}`);
 
-  if ('description' in definition || 'title' in definition) {
-    const renderedComment = renderComment(definition.description ?? definition.title);
+  if (
+    'description' in definition ||
+    'title' in definition ||
+    'format' in definition ||
+    'default' in definition
+  ) {
+    const renderedComment = buildSchemaComment(definition as OA3.SchemaObject);
     if (renderedComment) {
       lines.push(indentComment(renderedComment, '  '));
     }

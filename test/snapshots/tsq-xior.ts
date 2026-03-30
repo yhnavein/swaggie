@@ -560,9 +560,13 @@ export function useuserlogoutUser<TData = unknown, TError = Error>($config?: Omi
 useuserlogoutUser.queryKeys = ['user', 'userlogoutUser'];
 
   export interface Order {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -589,6 +593,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export interface Tag {
+  /** @format int64 */
   id?: number;
   name?: string;
 }

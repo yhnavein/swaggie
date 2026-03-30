@@ -10,9 +10,13 @@
 // deno-lint-ignore-file
 
 export type Order = {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -20,6 +24,7 @@ export type Order = {
 };
 
 export type Customer = {
+  /** @format int64 */
   id?: number;
   username?: string;
   address?: Address[] | null;
@@ -52,6 +57,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export type Tag = {
+  /** @format int64 */
   id?: number;
   name?: string;
 };
@@ -64,6 +70,7 @@ tags?: Tag[];
 status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
 
 export type ApiResponse = {
+  /** @format int32 */
   code?: number;
   type?: string;
   message?: string;

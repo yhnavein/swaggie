@@ -80,6 +80,40 @@ export function prepareJsDocsForOperation(
   return renderComment(result.join('\n'));
 }
 
+/**
+ * Builds a JSDoc comment string from schema metadata, including optional
+ * `@default` and `@format` tags when those fields are present on the schema.
+ */
+export function buildSchemaComment(schema: {
+  description?: string;
+  title?: string;
+  format?: string;
+  default?: unknown;
+}): string {
+  const lines: string[] = [];
+
+  const text = schema.description ?? schema.title;
+  if (text) {
+    lines.push(text);
+  }
+
+  if (schema.default !== undefined) {
+    const val =
+      typeof schema.default === 'string'
+        ? `"${schema.default}"`
+        : typeof schema.default === 'object'
+          ? JSON.stringify(schema.default)
+          : String(schema.default);
+    lines.push(`@default ${val}`);
+  }
+
+  if (schema.format !== undefined) {
+    lines.push(`@format ${schema.format}`);
+  }
+
+  return renderComment(lines.join('\n'));
+}
+
 export function renderComment(comment: string | null) {
   if (!comment) {
     return '';
