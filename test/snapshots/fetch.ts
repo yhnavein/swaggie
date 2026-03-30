@@ -1,3 +1,4 @@
+/* istanbul ignore file -- auto-generated code */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------
@@ -7,6 +8,7 @@
 // </auto-generated>
 //----------------------
 // ReSharper disable InconsistentNaming
+// biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
 export const defaults = {
@@ -220,14 +222,14 @@ export const storeClient = {
   * Returns a map of status codes to quantities
   */
   getInventory($config?: RequestInit
-  ): Promise<{ [key: string]: number }> {
+  ): Promise<Record<string, number>> {
     const url = `${defaults.baseUrl}/store/inventory?`;
 
     return fetch(url, {
       method: 'GET',
       ...$config,
     })
-    .then((response) => response.json() as Promise<{ [key: string]: number }>);
+    .then((response) => response.json() as Promise<Record<string, number>>);
   },
 
  /**
@@ -474,9 +476,13 @@ function encodeParams<T = any>(
 }
 
 export interface Order {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -484,7 +490,7 @@ export interface Order {
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -503,6 +509,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export interface Tag {
+  /** @format int64 */
   id?: number;
   name?: string;
 }
@@ -512,6 +519,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

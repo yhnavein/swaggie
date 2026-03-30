@@ -1,3 +1,4 @@
+/* istanbul ignore file -- auto-generated code */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------
@@ -7,6 +8,7 @@
 // </auto-generated>
 //----------------------
 // ReSharper disable InconsistentNaming
+// biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
 import type { IHttpService, IRequestShortcutConfig, IPromise } from 'angular';
@@ -310,7 +312,7 @@ export class storeService extends BaseService {
   * Returns a map of status codes to quantities
   */
   getInventory(    config?: IRequestShortcutConfig
-  ): IPromise<{ [key: string]: number }> {
+  ): IPromise<Record<string, number>> {
     let url = `/store/inventory?`;
 
     return this.$get(
@@ -516,9 +518,13 @@ function serializeQueryParam(obj: any, property: string): string {
   }
 }
 export interface Order {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -526,7 +532,7 @@ export interface Order {
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -545,6 +551,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export interface Tag {
+  /** @format int64 */
   id?: number;
   name?: string;
 }
@@ -554,6 +561,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

@@ -1,3 +1,4 @@
+/* istanbul ignore file -- auto-generated code */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------
@@ -7,6 +8,7 @@
 // </auto-generated>
 //----------------------
 // ReSharper disable InconsistentNaming
+// biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
 import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
@@ -28,6 +30,7 @@ interface SwrConfig extends SWRConfiguration {
   /* Configuration for axios fetcher */
   axios?: AxiosRequestConfig;
 }
+
 export const petClient = {
    /**
   * Add a new pet to the store
@@ -317,10 +320,10 @@ const { data, error, mutate } = useSWR<Pet>(
   * Returns a map of status codes to quantities
   */
   getInventory(  $config?: AxiosRequestConfig
-  ): AxiosPromise<{ [key: string]: number }> {
+  ): AxiosPromise<Record<string, number>> {
     const url = `/store/inventory`;
 
-    return axios.request<{ [key: string]: number }>({
+    return axios.request<Record<string, number>>({
       url: url,
       method: 'GET',
       ...$config,
@@ -375,7 +378,7 @@ export function usestoreInventory(  $config?: SwrConfig
 
   const cacheUrl = `${url}?`;
 
-const { data, error, mutate } = useSWR<{ [key: string]: number }>(
+const { data, error, mutate } = useSWR<Record<string, number>>(
   key ?? cacheUrl,
   () => axios.request({
     url: url,
@@ -697,9 +700,13 @@ function encodeParams<T = any>(
 }
 
 export interface Order {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -707,7 +714,7 @@ export interface Order {
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -726,6 +733,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export interface Tag {
+  /** @format int64 */
   id?: number;
   name?: string;
 }
@@ -735,6 +743,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

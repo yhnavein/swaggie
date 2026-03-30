@@ -1,3 +1,4 @@
+/* istanbul ignore file -- auto-generated code */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------
@@ -7,13 +8,14 @@
 // </auto-generated>
 //----------------------
 // ReSharper disable InconsistentNaming
+// biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
 import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
 export const http = xior.create({
   baseURL: '',
-  paramsSerializer: (params) =>
+  paramsSerializer: (params: any) =>
     encodeParams(params, true, null, {
       allowDots: true,
       arrayFormat: 'repeat',
@@ -210,10 +212,10 @@ export const storeClient = {
   * Returns a map of status codes to quantities
   */
   getInventory($config?: XiorRequestConfig
-  ): Promise<XiorResponse<{ [key: string]: number }>> {
+  ): Promise<XiorResponse<Record<string, number>>> {
     const url = `/store/inventory`;
 
-    return http.request<{ [key: string]: number }>({
+    return http.request<Record<string, number>>({
       url: url,
       method: 'GET',
       ...$config,
@@ -383,9 +385,13 @@ export const userClient = {
 };
 
 export interface Order {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -393,7 +399,7 @@ export interface Order {
 }
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -412,6 +418,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export interface Tag {
+  /** @format int64 */
   id?: number;
   name?: string;
 }
@@ -421,6 +428,6 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

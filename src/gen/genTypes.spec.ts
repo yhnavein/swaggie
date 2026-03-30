@@ -113,7 +113,10 @@ export interface B {}`
       assertEqualIgnoringWhitespace(
         res,
         `
-/** Just a simple enum */
+/**
+ * Just a simple enum
+ * @format int32
+ */
 export type SimpleEnum = 0 | 1;
 
 /** Feature is activated or not */
@@ -170,6 +173,7 @@ export enum AccessType {
             format: 'int32',
             enum: [2, 1, 0],
             'x-enumNames': ['High', 'Medium', 'Low'],
+            default: 1,
           },
           XEnumVarnames: {
             type: 'integer',
@@ -182,6 +186,7 @@ export enum AccessType {
             enum: ['L', 'M', 'S'],
             description: 'How big the feature is',
             'x-enumNames': ['Large', 'Medium', 'Small'],
+            default: 'M',
           },
         }),
         opts,
@@ -191,19 +196,27 @@ export enum AccessType {
       assertEqualIgnoringWhitespace(
         res,
         `
+/**
+ * @default 1
+ * @format int32
+ */
 export enum XEnums {
   High = 2,
   Medium = 1,
   Low = 0,
 }
 
+/** @format int32 */
 export enum XEnumVarnames {
   High = 2,
   Medium = 1,
   Low = 0,
 }
 
-/** How big the feature is */
+/**
+ * How big the feature is
+ * @default "M"
+ */
 export enum XEnumsString {
   Large = "L",
   Medium = "M",
@@ -249,6 +262,7 @@ export enum XEnumsString {
       assertEqualIgnoringWhitespace(
         res,
         `
+/** @format int32 */
 export enum XEnums {
   "1High" = 5,
   "High-Low" = 4,
@@ -258,6 +272,7 @@ export enum XEnums {
   "Seriously, Low?" = 0,
 }
 
+/** @format int32 */
 export enum XEnumVarnames {
   "1High" = 5,
   "High-Low" = 4,
@@ -294,6 +309,7 @@ export enum XEnumVarnames {
           BadNames: {
             type: 'string',
             description: 'How big the feature is',
+            default: 'M',
             oneOf: [
               { title: '1High', const: '1H', description: '1High' },
               { title: 'High-Low', const: 'H', description: 'High-Low size' },
@@ -311,7 +327,10 @@ export enum XEnumVarnames {
       assertEqualIgnoringWhitespace(
         res,
         `
-/** Priority */
+/**
+ * Priority
+ * @format int32
+ */
 export enum Priority {
   High = 2,
   Medium = 1,
@@ -325,7 +344,10 @@ export enum Size {
   Small = "S",
 }
 
-/** How big the feature is */
+/**
+ * How big the feature is
+ * @default "M"
+ */
 export enum BadNames {
   "1High" = "1H",
   "High-Low" = "H",
@@ -509,7 +531,7 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type Workspaces = { [key: string]: WorkspaceAccess };'
+        'export type Workspaces = Record<string, WorkspaceAccess>;'
       );
     });
 
@@ -537,7 +559,77 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type WorkspaceAccess = { products?: { [key: string]: AccessItem }; } & { [key: string]: AccessItem };'
+        'export type WorkspaceAccess = { products?: Record<string, AccessItem>; } & Record<string, AccessItem>;'
+      );
+    });
+
+    test('should render bare type:object as free-form type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Metadata: {
+            type: 'object',
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Metadata = Record<string, unknown>;'
+      );
+    });
+
+    test('should render bare type:object with preferAny as any-valued map', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Metadata: {
+            type: 'object',
+          },
+        }),
+        getClientOptions({ preferAny: true }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Metadata = Record<string, any>;'
+      );
+    });
+
+    test('should render additionalProperties:true as free-form type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Attributes: {
+            type: 'object',
+            additionalProperties: true,
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Attributes = Record<string, unknown>;'
+      );
+    });
+
+    test('should render additionalProperties:{} as free-form type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Attributes: {
+            type: 'object',
+            additionalProperties: {},
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Attributes = Record<string, unknown>;'
       );
     });
 
@@ -577,9 +669,7 @@ export enum AccessType {
               },
             },
           },
-          Empty: {
-            type: 'object',
-          },
+          Empty: {},
         }),
         opts,
         false
@@ -1328,7 +1418,12 @@ export interface AuthenticationData extends LoginPart {
         false
       );
 
-      assertEqualIgnoringWhitespace(res, `export type Auth = TestType[] | null;`);
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+/** @default [] */
+export type Auth = TestType[] | null;`
+      );
     });
 
     test('should handle union of all primitive types', () => {
@@ -1376,7 +1471,9 @@ export interface AuthenticationData extends LoginPart {
 
       assertEqualIgnoringWhitespace(
         res,
-        `export type Madness = string | number | boolean | string[] | number[] | boolean[] | null;`
+        `
+/** @default [] */
+export type Madness = string | number | boolean | string[] | number[] | boolean[] | null;`
       );
     });
 
@@ -1419,7 +1516,9 @@ export interface AuthenticationData extends LoginPart {
         false
       );
 
-      assertEqualIgnoringWhitespace(res, `
+      assertEqualIgnoringWhitespace(
+        res,
+        `
 export type MemberAccess = { accessType: string;
   appId?: string;
   products?: string[];
@@ -1434,7 +1533,8 @@ export type MemberAccess = { accessType: string;
   appId: string;
   products: string[];
   isAdmin?: boolean;
-};`);
+};`
+      );
     });
   });
 

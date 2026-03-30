@@ -1,3 +1,4 @@
+/* istanbul ignore file -- auto-generated code */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------
@@ -7,12 +8,17 @@
 // </auto-generated>
 //----------------------
 // ReSharper disable InconsistentNaming
+// biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
 export type Order = {
+  /** @format int64 */
   id?: number;
+  /** @format int64 */
   petId?: number;
+  /** @format int32 */
   quantity?: number;
+  /** @format date-time */
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
@@ -20,6 +26,7 @@ export type Order = {
 };
 
 export type Customer = {
+  /** @format int64 */
   id?: number;
   username?: string;
   address?: Address[] | null;
@@ -33,7 +40,7 @@ export type Address = {
 };
 
 export type Category = { id?: number;
-name?: string; } & { [key: string]: boolean };
+name?: string; } & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -52,6 +59,7 @@ phone?: string | null;
 userStatus?: number; };
 
 export type Tag = {
+  /** @format int64 */
   id?: number;
   name?: string;
 };
@@ -61,12 +69,13 @@ name: string;
 category?: Category;
 photoUrls: string[] | null;
 tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & { [key: string]: Item };
+status?: "available" | "pending" | "sold"; } & Record<string, Item>;
 
 export type ApiResponse = {
+  /** @format int32 */
   code?: number;
   type?: string;
   message?: string;
 };
 
-export type Item = { [key: string]: Tag };
+export type Item = Record<string, Tag>;

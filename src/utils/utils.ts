@@ -138,7 +138,7 @@ export function groupOperationsByGroupName(operations: ApiOperation[]) {
     return {};
   }
 
-  return operations.reduce<{ [key: string]: ApiOperation[] }>((groups, op) => {
+  return operations.reduce<Record<string, ApiOperation[]>>((groups, op) => {
     if (!groups[op.group]) {
       groups[op.group] = [];
     }
