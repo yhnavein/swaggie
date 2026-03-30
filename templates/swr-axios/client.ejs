@@ -55,7 +55,7 @@ export const <%= it.camelCaseName %> = {
   var keyName = opName.charAt(0).toLowerCase() + opName.slice(1);
   var safeOp = safeOperation(operation, it.camelCaseName);
 %>
-    <%= keyName %>: (<% safeOp.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? ' | null' : '' %>, <% }); %>) => `<%= operation.url %><% if(safeOp.query && safeOp.query.length > 0) { %>?${encodeParams({<% safeOp.query.forEach((parameter) => { %>'<%= parameter.originalName %>': <%= parameter.name %>, <% }); %>})}<% } %>`,
+    <%= keyName %>: (<% safeOp.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => `<%= operation.url %><% if(safeOp.query && safeOp.query.length > 0) { %>?${encodeParams({<% safeOp.query.forEach((parameter) => { %>'<%= parameter.originalName %>': <%= parameter.name %>, <% }); %>})}<% } %>`,
 <% }); %>
   },
 };
