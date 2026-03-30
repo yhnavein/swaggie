@@ -140,7 +140,10 @@ function renderSchema(
     return result.join('\n');
   } else {
     const objectType = getTypeFromSchema(schema, options, schemaContext);
-    const hasAdditionalProperties = !!schema.additionalProperties;
+    // A bare `type: object` with no properties is a free-form object per the OpenAPI spec
+    const isFreeFormObject =
+      schema.type === 'object' && !schema.properties && !schema.additionalProperties;
+    const hasAdditionalProperties = !!schema.additionalProperties || isFreeFormObject;
 
     const objectContents = generateObjectTypeContents(schema, options, schemaContext);
     if (hasAdditionalProperties) {

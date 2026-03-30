@@ -563,6 +563,76 @@ export enum AccessType {
       );
     });
 
+    test('should render bare type:object as free-form type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Metadata: {
+            type: 'object',
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Metadata = { [key: string]: unknown };'
+      );
+    });
+
+    test('should render bare type:object with preferAny as any-valued map', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Metadata: {
+            type: 'object',
+          },
+        }),
+        getClientOptions({ preferAny: true }),
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Metadata = { [key: string]: any };'
+      );
+    });
+
+    test('should render additionalProperties:true as free-form type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Attributes: {
+            type: 'object',
+            additionalProperties: true,
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Attributes = { [key: string]: unknown };'
+      );
+    });
+
+    test('should render additionalProperties:{} as free-form type alias', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Attributes: {
+            type: 'object',
+            additionalProperties: {},
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        'export type Attributes = { [key: string]: unknown };'
+      );
+    });
+
     test('should indent property JSDoc comments inside object declarations', () => {
       const res = generateTypes(
         prepareSchemas({
@@ -599,9 +669,7 @@ export enum AccessType {
               },
             },
           },
-          Empty: {
-            type: 'object',
-          },
+          Empty: {},
         }),
         opts,
         false

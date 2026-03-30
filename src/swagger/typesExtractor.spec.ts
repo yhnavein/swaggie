@@ -77,7 +77,10 @@ describe('getTypeFromSchema', () => {
       { schema: { type: 'array', items: { type: 'string' } }, expected: 'string[]' },
       { schema: { type: 'array', items: { type: 'number' } }, expected: 'number[]' },
       { schema: { type: 'array', items: { type: 'boolean' } }, expected: 'boolean[]' },
-      { schema: { type: 'array', items: { type: 'object' } }, expected: 'unknown[]' },
+      {
+        schema: { type: 'array', items: { type: 'object' } },
+        expected: '{ [key: string]: unknown }[]',
+      },
       {
         schema: {
           type: 'array',
@@ -383,6 +386,48 @@ describe('getTypeFromSchema', () => {
         '{ products?: { [key: string]: AccessResponseItem }; } & { [key: string]: AccessResponseItem }'
       );
     });
+
+    test('should treat additionalProperties: true as free-form object (unknown value)', () => {
+      const res = getTypeFromSchema(
+        { type: 'object', additionalProperties: true },
+        opts
+      );
+
+      expect(res).toBe('{ [key: string]: unknown }');
+    });
+
+    test('should treat additionalProperties: true with preferAny as any-valued map', () => {
+      const res = getTypeFromSchema(
+        { type: 'object', additionalProperties: true },
+        getClientOptions({ preferAny: true })
+      );
+
+      expect(res).toBe('{ [key: string]: any }');
+    });
+
+    test('should treat additionalProperties: {} as free-form object (unknown value)', () => {
+      const res = getTypeFromSchema(
+        { type: 'object', additionalProperties: {} },
+        opts
+      );
+
+      expect(res).toBe('{ [key: string]: unknown }');
+    });
+
+    test('should treat bare type:object as free-form object (unknown value)', () => {
+      const res = getTypeFromSchema({ type: 'object' }, opts);
+
+      expect(res).toBe('{ [key: string]: unknown }');
+    });
+
+    test('should treat bare type:object with preferAny as any-valued map', () => {
+      const res = getTypeFromSchema(
+        { type: 'object' },
+        getClientOptions({ preferAny: true })
+      );
+
+      expect(res).toBe('{ [key: string]: any }');
+    });
   });
 
   describe('OpenAPI 3.0 nullable', () => {
@@ -437,7 +482,7 @@ describe('getTypeFromSchema', () => {
         },
         {
           schema: { type: 'object', nullable: true },
-          expected: 'unknown | null',
+          expected: '{ [key: string]: unknown } | null',
         },
         {
           schema: { type: 'object', properties: { name: { type: 'string' } }, nullable: true },
