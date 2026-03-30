@@ -11,60 +11,22 @@ if (!hasParams) {
   variablesType = '{ ' + parts.join('; ') + ' }';
 }
 
-// For the SWR key we use the raw path pattern (without template expressions) so
-// it stays a stable string. The actual URL with interpolated path params is built
-// inside the fetcher using arg values.
-// Strip all ${...} expressions (including nested backticks) to produce a stable key pattern
-var swrKey = it.url.replace(/\$\{(?:[^{}]|\{[^{}]*\})*\}/g, '*');
+var callArgs = it.parameters.map(function(p) { return 'arg.' + p.name; });
 
-// Build the runtime URL expression inside the fetcher.
-// it.url is already a JS template literal body, but params come from arg.* now.
-var fetcherUrl = it.url.replace(/\$\{encodeURIComponent\(`\$\{(\w+)\}`\)\}/g, function(_, name) {
-  return '${encodeURIComponent(`${arg.' + name + '}`)}';
-});
+// Stable SWR key: replace all ${...} path expressions with *
+var swrKey = it.url.replace(/\$\{(?:[^{}]|\{[^{}]*\})*\}/g, '*');
 
 var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : '';
 %>
 <%~ docs %>
     <%= it.mutOpName %>(
       $config?: SWRMutationConfiguration<<%~ it.returnType %>, Error, string, <%~ variablesType %>>,
-      $axiosConfig?: AxiosRequestConfig
+      $httpConfig?: AxiosRequestConfig
     ) {
       return useSWRMutation<<%~ it.returnType %>, Error, string, <%~ variablesType %>>(
         '<%= swrKey %>',
-        (_key: string, { arg }<%= hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) => {
-          const url = `<%~ fetcherUrl %>`;
-          return axios.request<<%~ it.returnType %>>({
-            url,
-            method: '<%= it.method %>',
-<% if(it.body) { %>
-<% if(it.body.contentType === 'urlencoded') { %>
-            data: new URLSearchParams(arg.<%= it.body.name %> as any),
-<% } else { %>
-            data: arg.<%= it.body.name %>,
-<% } %>
-<% } %>
-<% if(it.query && it.query.length > 0) { %>
-            params: {
-<% it.query.forEach((parameter) => { %>
-              '<%= parameter.originalName %>': arg.<%= parameter.name %>,
-<% }); %>
-            },
-<% } %>
-<% if(it.headers && it.headers.length > 0) { %>
-            headers: {
-<% it.headers.forEach((parameter) => { %>
-<% if (parameter.value) { %>
-              '<%= parameter.originalName %>': '<%= parameter.value %>',
-<% } else { %>
-              '<%= parameter.originalName %>': arg.<%= parameter.name %>,
-<% } %>
-<% }); %>
-            },
-<% } %>
-            ...$axiosConfig,
-          }).then((resp) => resp.data);
-        },
+        (_key: string, { arg }<%= hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) =>
+          <%= it.clientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig).then((resp) => resp.data),
         $config
       );
     },

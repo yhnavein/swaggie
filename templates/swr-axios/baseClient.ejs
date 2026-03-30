@@ -14,8 +14,5 @@ export const axios = Axios.create({
 interface SwrConfig extends SWRConfiguration {
   /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
   key?: Key;
-
-  /* Configuration for axios fetcher */
-  axios?: AxiosRequestConfig;
 }
 

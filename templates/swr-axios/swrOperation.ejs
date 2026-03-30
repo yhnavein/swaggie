@@ -2,45 +2,15 @@
 <%~ docs %>
     <%= it.swrOpName %>(
 <% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
-<% }); %>      $config?: SwrConfig
+<% }); %>      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: AxiosRequestConfig
     ) {
-      const url = `<%= it.url %>`;
-      const { axios: $axiosConf, key, ...config } = $config || {};
-
-<% if(it.query && it.query.length > 0) { %>
-      const cacheKey = encodeParams({<% it.query.forEach((parameter) => { %>
-        '<%= parameter.originalName %>': <%= parameter.name %>,<% }); %>
-      });
-      const cacheUrl = cacheKey ? `${url}?${cacheKey}` : url;
-<% } else { %>
-      const cacheUrl = url;
-<% } %>
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? <%= it.clientName %>.queryKeys.<%= it.swrOpName.charAt(3).toLowerCase() + it.swrOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>);
 
       const { data, error, isLoading, mutate } = useSWR<<%~ it.returnType %>>(
-        key ?? cacheUrl,
-        () => axios.request({
-          url: url,
-          method: '<%= it.method %>',
-<% if(it.query && it.query.length > 0) { %>
-          params: {
-<% it.query.forEach((parameter) => { %>
-            '<%= parameter.originalName %>': <%= parameter.name %>,
-<% }); %>
-          },
-<% } %>
-<% if(it.headers && it.headers.length > 0) { %>
-          headers: {
-<% it.headers.forEach((parameter) => { %>
-<% if (parameter.value) { %>
-            '<%= parameter.originalName %>': '<%= parameter.value %>',
-<% } else { %>
-            '<%= parameter.originalName %>': <%= parameter.name %>,
-<% } %>
-<% }); %>
-          },
-<% } %>
-          ...$axiosConf,
-        }).then((resp) => resp.data),
+        cacheUrl,
+        () => <%= it.clientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig).then((resp) => resp.data),
         config
       );
 
