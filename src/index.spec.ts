@@ -200,6 +200,7 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'repeat',
       allowDots: true,
+      queryParamsAsObject: false,
     });
     expect(conf.template).toBe('axios');
   });
@@ -220,6 +221,7 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'repeat',
       allowDots: true,
+      queryParamsAsObject: false,
     });
     expect(conf.template).toBe('xior');
   });
@@ -243,6 +245,7 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'indices',
       allowDots: false,
+      queryParamsAsObject: false,
     });
   });
 });
@@ -305,6 +308,7 @@ describe('prepareAppOptions', () => {
       expect(result.enumNamesStyle).toBeDefined();
       expect(result.queryParamsSerialization.allowDots).toBeDefined();
       expect(result.queryParamsSerialization.arrayFormat).toBeDefined();
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBeDefined();
     });
   });
 
@@ -337,9 +341,25 @@ describe('prepareAppOptions', () => {
     test('respects explicit queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,
-        queryParamsSerialization: { arrayFormat: 'indices', allowDots: false },
+        queryParamsSerialization: {
+          arrayFormat: 'indices',
+          allowDots: false,
+          queryParamsAsObject: 5,
+        },
       });
-      expect(result.queryParamsSerialization).toEqual({ arrayFormat: 'indices', allowDots: false });
+      expect(result.queryParamsSerialization).toEqual({
+        arrayFormat: 'indices',
+        allowDots: false,
+        queryParamsAsObject: 5,
+      });
+    });
+
+    test('respects explicit queryParamsAsObject boolean', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { queryParamsAsObject: true },
+      });
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(true);
     });
 
     test('respects explicit generationMode', () => {
@@ -392,12 +412,27 @@ describe('prepareAppOptions', () => {
     test('flat options take precedence over nested queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,
-        queryParamsSerialization: { allowDots: true, arrayFormat: 'indices' },
+        queryParamsSerialization: {
+          allowDots: true,
+          arrayFormat: 'indices',
+          queryParamsAsObject: 10,
+        },
         allowDots: false,
         arrayFormat: 'repeat',
+        queryParamsAsObject: 3,
       });
       expect(result.queryParamsSerialization.allowDots).toBe(false);
       expect(result.queryParamsSerialization.arrayFormat).toBe('repeat');
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(3);
+    });
+
+    test('flat queryParamsAsObject overrides nested queryParamsSerialization', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { queryParamsAsObject: true },
+        queryParamsAsObject: 2,
+      });
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(2);
     });
 
     test('flat mode overrides generationMode', () => {
@@ -439,12 +474,18 @@ describe('prepareAppOptions', () => {
     test('undefined flat options do not override nested queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,
-        queryParamsSerialization: { arrayFormat: 'brackets', allowDots: false },
+        queryParamsSerialization: {
+          arrayFormat: 'brackets',
+          allowDots: false,
+          queryParamsAsObject: 4,
+        },
         allowDots: undefined,
         arrayFormat: undefined,
+        queryParamsAsObject: undefined,
       });
       expect(result.queryParamsSerialization.allowDots).toBe(false);
       expect(result.queryParamsSerialization.arrayFormat).toBe('brackets');
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(4);
     });
   });
 

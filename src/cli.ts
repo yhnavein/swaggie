@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { type CodeGenResult, runCodeGenerator } from './index';
-import type { CliOptions } from './types';
+import type { CliOptions, FullAppOptions } from './types';
 
 const arrayFormatOption = new Option(
   '--arrayFormat <format>',
@@ -39,6 +39,10 @@ const nullableStrategyOption = new Option(
   '--nullables <strategy>',
   "Controls how OpenAPI 'nullable' is translated into TypeScript types"
 ).choices(['include', 'nullableAsOptional', 'ignore']);
+const queryParamsAsObjectOption = new Option(
+  '--queryParamsAsObject [threshold]',
+  'Group query params into a single object; pass a number to group only when query params count is greater than threshold'
+).argParser(parseQueryParamsAsObjectArg);
 
 const program = new Command();
 program
@@ -84,13 +88,14 @@ program
   .addOption(enumStyleOption)
   .addOption(enumNamesStyleOption)
   .addOption(dateFormatOption)
-  .addOption(nullableStrategyOption);
+  .addOption(nullableStrategyOption)
+  .addOption(queryParamsAsObjectOption);
 
 program.parse(process.argv);
 
 const options = program.opts<CliOptions>();
 
-runCodeGenerator(options).then(complete, error);
+runCodeGenerator(options as Partial<FullAppOptions>).then(complete, error);
 
 function complete([code, opts]: CodeGenResult) {
   if (opts.out) {
@@ -115,4 +120,17 @@ function readPackageJson() {
   } catch (e) {
     throw new Error('Could not read package.json file');
   }
+}
+
+function parseQueryParamsAsObjectArg(value?: string): boolean | number {
+  if (value === undefined) {
+    return true;
+  }
+
+  const threshold = Number(value);
+  if (!Number.isInteger(threshold) || threshold < 0) {
+    throw new Error('--queryParamsAsObject threshold must be a non-negative integer');
+  }
+
+  return threshold;
 }

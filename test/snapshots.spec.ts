@@ -16,6 +16,7 @@ describe('petstore snapshots', () => {
         queryParamsSerialization: {
           allowDots: true,
           arrayFormat: 'repeat',
+          queryParamsAsObject: 1,
         },
         nullableStrategy: 'include',
       };

@@ -105,15 +105,21 @@ export function prepareOperations(
 
       const body = getRequestBody(op.requestBody, components, options);
       const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
-      const params = getParams(op.parameters as OA3.ParameterObject[], options);
+      let params = getParams(op.parameters as OA3.ParameterObject[], options);
+      let queryParamObject: IOperationParam | undefined;
 
       if (body) {
         params.unshift(body);
       }
 
-    // If all parameters have 'x-position' defined, sort them by it
+      // If all parameters have 'x-position' defined, sort them by it
       if (params.every((p) => p.original['x-position'])) {
         params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
+      }
+
+      if (shouldGroupQueryParams(queryParams, options.queryParamsSerialization.queryParamsAsObject)) {
+        queryParamObject = createQueryParamObject(queryParams);
+        params = replaceQueryParamsWithObject(params, queryParamObject);
       }
 
       markParametersAsSkippable(params);
@@ -139,6 +145,7 @@ export function prepareOperations(
         url: prepareUrl(op.path),
         parameters: params,
         query: queryParams,
+        queryParamObject,
         body,
         headers,
       };
@@ -155,6 +162,58 @@ export function prepareOperations(
       throw new Error(`Failed to prepare operation ${operationContext}: ${message}`);
     }
   });
+}
+
+function shouldGroupQueryParams(
+  queryParams: IOperationParam[],
+  setting: boolean | number
+): boolean {
+  if (queryParams.length < 1 || setting === false) {
+    return false;
+  }
+
+  if (setting === true) {
+    return true;
+  }
+
+  return queryParams.length > setting;
+}
+
+function createQueryParamObject(queryParams: IOperationParam[]): IOperationParam {
+  const properties = queryParams
+    .map((param) => {
+      const isOptional = param.optional ? '?' : '';
+      const nullableType = param.optional ? ' | null' : '';
+      return `${param.name}${isOptional}: ${param.type}${nullableType};`;
+    })
+    .join(' ');
+  const containsRequiredQueryParams = queryParams.some((param) => !param.optional);
+
+  return {
+    originalName: 'queryParams',
+    name: 'queryParams',
+    type: `{ ${properties} }`,
+    optional: !containsRequiredQueryParams,
+    jsDoc: `Grouped query parameters object (${queryParams
+      .map((param) => param.originalName)
+      .join(', ')})`,
+  };
+}
+
+function replaceQueryParamsWithObject(
+  params: IOperationParam[],
+  queryParamObject: IOperationParam
+): IOperationParam[] {
+  const isQueryParam = (param: IOperationParam) => !!param.original && 'in' in param.original && param.original.in === 'query';
+
+  const firstQueryParamIndex = params.findIndex(isQueryParam);
+  if (firstQueryParamIndex < 0) {
+    return params;
+  }
+
+  const paramsWithoutQuery = params.filter((param) => !isQueryParam(param));
+  paramsWithoutQuery.splice(firstQueryParamIndex, 0, queryParamObject);
+  return paramsWithoutQuery;
 }
 
 /**

@@ -9,7 +9,11 @@ config?: any
 <% if(it.query && it.query.length > 0) { -%>
     const params = paramsSerializer({<%
       it.query.forEach((parameter) => { %>
+<% if (it.queryParamObject) { %>
+      '<%= parameter.originalName %>': <%= it.queryParamObject.name %>?.<%= parameter.name %>,
+<% } else { %>
       '<%= parameter.originalName %>': <%= parameter.name %>,
+<% } %>
       <% }); %>});
     const url = `<%= it.url %>${params ? '?' + params : ''}`;
 <% } else { -%>

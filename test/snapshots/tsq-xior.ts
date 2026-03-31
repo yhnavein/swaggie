@@ -63,21 +63,30 @@ export const petClient = {
   },
 
  /**
-  * Finds Pets by status
-  * Multiple status values can be provided with comma separated strings
-  * @param status (optional) - Status values that need to be considered for filter
+  * Finds Pets
+  * Find pets using different filters
+  * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
-  findPetsByStatus(status?: "available" | "pending" | "sold" | null,
+  findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
-    const url = `/pet/findByStatus`;
+    const url = `/pet/find`;
 
     return http.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
-        'status': status,
-      },
+            'status': queryParams?.status,
+                'name': queryParams?.name,
+                'type': queryParams?.type,
+                'owner': queryParams?.owner,
+                'sortBy': queryParams?.sortBy,
+                'order': queryParams?.order,
+                'page': queryParams?.page,
+                'limit': queryParams?.limit,
+                'city': queryParams?.city,
+                'registrationDate': queryParams?.registrationDate,
+          },
       ...$config,
     });
   },
@@ -97,8 +106,8 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-        'tags': tags,
-      },
+            'tags': tags,
+          },
       ...$config,
     });
   },
@@ -143,12 +152,10 @@ export const petClient = {
  /**
   * Updates a pet in the store with form data
   * @param petId - ID of the pet
-  * @param name (optional) - Name of pet that needs to be updated
-  * @param status (optional) - Status of pet that needs to be updated
+  * @param queryParams (optional) - Grouped query parameters object (name, status)
   */
   updatePetWithForm(petId: number ,
-    name?: string | null,
-    status?: string | null,
+    queryParams?: { name?: string | null; status?: string | null; } | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -157,9 +164,9 @@ export const petClient = {
       url: url,
       method: 'POST',
       params: {
-        'name': name,
-        'status': status,
-      },
+            'name': queryParams?.name,
+                'status': queryParams?.status,
+          },
       ...$config,
     });
   },
@@ -182,8 +189,8 @@ export const petClient = {
       method: 'POST',
       data: body,
       params: {
-        'additionalMetadata': additionalMetadata,
-      },
+            'additionalMetadata': additionalMetadata,
+          },
       ...$config,
     });
   },
@@ -194,20 +201,20 @@ export const petClient = {
 export const pet = {
   queries: {
    /**
-    * Finds Pets by status
-    * Multiple status values can be provided with comma separated strings
-    * @param status (optional) - Status values that need to be considered for filter
+    * Finds Pets
+    * Find pets using different filters
+    * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
     * @param $config (optional) Additional configuration for TanStack Query
     * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
-    useFindPetsByStatus<TData = Pet[], TError = Error>(
-      status?: "available" | "pending" | "sold" | null,
+    useFindPets<TData = Pet[], TError = Error>(
+      queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
       $config?: Omit<UseQueryOptions<Pet[], TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig
     ) {
       return useQuery<Pet[], TError, TData>({
-        queryKey: pet.queryKeys.findPetsByStatus(status, ),
-        queryFn: () => petClient.findPetsByStatus(status, $httpConfig).then(res => res.data),
+        queryKey: pet.queryKeys.findPets(queryParams, ),
+        queryFn: () => petClient.findPets(queryParams, $httpConfig).then(res => res.data),
         ...$config
       });
     },
@@ -306,17 +313,16 @@ export const pet = {
    /**
     * Updates a pet in the store with form data
     * @param petId - ID of the pet
-    * @param name (optional) - Name of pet that needs to be updated
-    * @param status (optional) - Status of pet that needs to be updated
+    * @param queryParams (optional) - Grouped query parameters object (name, status)
     * @param $config (optional) Additional configuration for TanStack Query
     * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
     useUpdatePetWithForm<TData = unknown, TError = Error>(
-      $config?: UseMutationOptions<unknown, TError, { petId: number; name?: string | null; status?: string | null }>,
+      $config?: UseMutationOptions<unknown, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
       $httpConfig?: XiorRequestConfig
     ) {
-      return useMutation<unknown, TError, { petId: number; name?: string | null; status?: string | null }>({
-        mutationFn: (vars) => petClient.updatePetWithForm(vars.petId, vars.name, vars.status, $httpConfig).then(res => res.data),
+      return useMutation<unknown, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>({
+        mutationFn: (vars) => petClient.updatePetWithForm(vars.petId, vars.queryParams, $httpConfig).then(res => res.data),
         ...$config
       });
     },
@@ -342,7 +348,7 @@ export const pet = {
   },
 
   queryKeys: {
-    findPetsByStatus: (status?: "available" | "pending" | "sold" | null, ) => ['pet', 'petFindPetsByStatus', status] as const,
+    findPets: (queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null, ) => ['pet', 'petFindPets', queryParams] as const,
     findPetsByTags: (tags?: string[] | null, ) => ['pet', 'petFindPetsByTags', tags] as const,
     petById: (petId: number, ) => ['pet', 'petPetById', petId] as const,
   },
@@ -571,11 +577,9 @@ export const userClient = {
 
  /**
   * Logs user into the system
-  * @param username (optional) - The user name for login
-  * @param password (optional) - The password for login in clear text
+  * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
-  loginUser(username?: string | null,
-    password?: string | null,
+  loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<string>> {
     const url = `/user/login`;
@@ -584,9 +588,9 @@ export const userClient = {
       url: url,
       method: 'GET',
       params: {
-        'username': username,
-        'password': password,
-      },
+            'username': queryParams?.username,
+                'password': queryParams?.password,
+          },
       ...$config,
     });
   },
@@ -648,20 +652,18 @@ export const user = {
 
    /**
     * Logs user into the system
-    * @param username (optional) - The user name for login
-    * @param password (optional) - The password for login in clear text
+    * @param queryParams (optional) - Grouped query parameters object (username, password)
     * @param $config (optional) Additional configuration for TanStack Query
     * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
    */
     useLoginUser<TData = string, TError = Error>(
-      username?: string | null,
-      password?: string | null,
+      queryParams?: { username?: string | null; password?: string | null; } | null,
       $config?: Omit<UseQueryOptions<string, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig
     ) {
       return useQuery<string, TError, TData>({
-        queryKey: user.queryKeys.loginUser(username, password, ),
-        queryFn: () => userClient.loginUser(username, password, $httpConfig).then(res => res.data),
+        queryKey: user.queryKeys.loginUser(queryParams, ),
+        queryFn: () => userClient.loginUser(queryParams, $httpConfig).then(res => res.data),
         ...$config
       });
     },
@@ -756,7 +758,7 @@ export const user = {
 
   queryKeys: {
     userByName: (username: string, ) => ['user', 'userUserByName', username] as const,
-    loginUser: (username?: string | null, password?: string | null, ) => ['user', 'userLoginUser', username, password] as const,
+    loginUser: (queryParams?: { username?: string | null; password?: string | null; } | null, ) => ['user', 'userLoginUser', queryParams] as const,
     logoutUser: () => ['user', 'userLogoutUser'] as const,
   },
 };

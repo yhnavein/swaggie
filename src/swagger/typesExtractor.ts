@@ -385,6 +385,7 @@ export const APP_DEFAULTS: Partial<AppOptions> = {
   queryParamsSerialization: {
     allowDots: true,
     arrayFormat: 'repeat',
+    queryParamsAsObject: false,
   },
 };
 

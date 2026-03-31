@@ -3,6 +3,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 interface QueryParamsSerializationOptions {
   allowDots?: boolean;
   arrayFormat?: ArrayFormat;
+  queryParamsAsObject?: boolean | number;
 }
 
 export interface ClientOptions {
@@ -58,6 +59,7 @@ export interface ClientOptions {
 export interface CliOptions extends Omit<FullAppOptions, 'enumNamesStyle'> {
   allowDots?: boolean;
   arrayFormat?: ArrayFormat;
+  queryParamsAsObject?: boolean | number;
   mode?: GenerationMode;
   schemaStyle?: SchemaDeclarationStyle;
   enumStyle?: EnumDeclarationStyle;
@@ -97,6 +99,7 @@ export interface AppOptions extends ClientOptions {
   queryParamsSerialization: {
     allowDots: boolean;
     arrayFormat: ArrayFormat;
+    queryParamsAsObject: boolean | number;
   };
 }
 

@@ -281,6 +281,161 @@ describe('prepareOperations', () => {
       expect(parameters.map((p) => p.skippable ?? false)).toEqual([false, false, false, true]);
     });
 
+    test('should group query params into object at the first query param position', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPets',
+          method: 'get',
+          path: '/pets/{orgId}',
+          parameters: [
+            {
+              name: 'countryId',
+              in: 'header',
+              required: true,
+              schema: { type: 'string' },
+            },
+            {
+              name: 'search',
+              in: 'query',
+              required: false,
+              schema: { type: 'string' },
+            },
+            {
+              name: 'orgId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+            {
+              name: 'page',
+              in: 'query',
+              required: true,
+              schema: { type: 'number' },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [op] = prepareOperations(ops, {
+        ...opts,
+        queryParamsSerialization: {
+          ...opts.queryParamsSerialization,
+          queryParamsAsObject: true,
+        },
+      });
+
+      expect(op.parameters.map((p) => p.name)).toEqual(['countryId', 'queryParams', 'orgId']);
+      expect(op.query.map((p) => p.name)).toEqual(['search', 'page']);
+      expect(op.queryParamObject?.name).toBe('queryParams');
+      expect(op.queryParamObject?.optional).toBe(false);
+      expect(op.queryParamObject?.type).toContain('search?: string | null;');
+      expect(op.queryParamObject?.type).toContain('page: number;');
+    });
+
+    test('should keep grouped query object at the lowest query x-position', () => {
+      type PositionedParameter = OA3.ParameterObject & { 'x-position': number };
+
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPets',
+          method: 'get',
+          path: '/pets/{orgId}',
+          parameters: [
+            {
+              name: 'headerValue',
+              in: 'header',
+              required: true,
+              schema: { type: 'string' },
+              'x-position': 4,
+            } as PositionedParameter,
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'number' },
+              'x-position': 2,
+            } as PositionedParameter,
+            {
+              name: 'orgId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+              'x-position': 1,
+            } as PositionedParameter,
+            {
+              name: 'search',
+              in: 'query',
+              required: false,
+              schema: { type: 'string' },
+              'x-position': 3,
+            } as PositionedParameter,
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [op] = prepareOperations(ops, {
+        ...opts,
+        queryParamsSerialization: {
+          ...opts.queryParamsSerialization,
+          queryParamsAsObject: true,
+        },
+      });
+
+      expect(op.parameters.map((p) => p.name)).toEqual(['orgId', 'queryParams', 'headerValue']);
+    });
+
+    test('should group query params only when count is greater than threshold', () => {
+      const ops: ApiOperation[] = [
+        {
+          operationId: 'getPets',
+          method: 'get',
+          path: '/pets',
+          parameters: [
+            {
+              name: 'search',
+              in: 'query',
+              required: false,
+              schema: { type: 'string' },
+            },
+            {
+              name: 'page',
+              in: 'query',
+              required: false,
+              schema: { type: 'number' },
+            },
+          ],
+          responses: {},
+          group: null,
+        },
+      ];
+
+      const [withoutGrouping] = prepareOperations(ops, {
+        ...opts,
+        queryParamsSerialization: {
+          ...opts.queryParamsSerialization,
+          queryParamsAsObject: 2,
+        },
+      });
+
+      expect(withoutGrouping.queryParamObject).toBeUndefined();
+      expect(withoutGrouping.parameters.map((p) => p.name)).toEqual(['search', 'page']);
+
+      const [withGrouping] = prepareOperations(ops, {
+        ...opts,
+        queryParamsSerialization: {
+          ...opts.queryParamsSerialization,
+          queryParamsAsObject: 1,
+        },
+      });
+
+      expect(withGrouping.queryParamObject?.name).toBe('queryParams');
+      expect(withGrouping.parameters.map((p) => p.name)).toEqual(['queryParams']);
+    });
+
     describe('requestBody (JSON)', () => {
       const fetchOpts = getClientOptions({ template: 'fetch' });
 

@@ -62,21 +62,30 @@ export const petClient = {
   },
 
  /**
-  * Finds Pets by status
-  * Multiple status values can be provided with comma separated strings
-  * @param status (optional) - Status values that need to be considered for filter
+  * Finds Pets
+  * Find pets using different filters
+  * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
-  findPetsByStatus(status?: "available" | "pending" | "sold" | null,
+  findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<Pet[]>> {
-    const url = `/pet/findByStatus`;
+    const url = `/pet/find`;
 
     return http.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
-        'status': status,
-      },
+            'status': queryParams?.status,
+                'name': queryParams?.name,
+                'type': queryParams?.type,
+                'owner': queryParams?.owner,
+                'sortBy': queryParams?.sortBy,
+                'order': queryParams?.order,
+                'page': queryParams?.page,
+                'limit': queryParams?.limit,
+                'city': queryParams?.city,
+                'registrationDate': queryParams?.registrationDate,
+          },
       ...$config,
     });
   },
@@ -96,8 +105,8 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-        'tags': tags,
-      },
+            'tags': tags,
+          },
       ...$config,
     });
   },
@@ -142,12 +151,10 @@ export const petClient = {
  /**
   * Updates a pet in the store with form data
   * @param petId - ID of the pet
-  * @param name (optional) - Name of pet that needs to be updated
-  * @param status (optional) - Status of pet that needs to be updated
+  * @param queryParams (optional) - Grouped query parameters object (name, status)
   */
   updatePetWithForm(petId: number ,
-    name?: string | null,
-    status?: string | null,
+    queryParams?: { name?: string | null; status?: string | null; } | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
@@ -156,9 +163,9 @@ export const petClient = {
       url: url,
       method: 'POST',
       params: {
-        'name': name,
-        'status': status,
-      },
+            'name': queryParams?.name,
+                'status': queryParams?.status,
+          },
       ...$config,
     });
   },
@@ -181,8 +188,8 @@ export const petClient = {
       method: 'POST',
       data: body,
       params: {
-        'additionalMetadata': additionalMetadata,
-      },
+            'additionalMetadata': additionalMetadata,
+          },
       ...$config,
     });
   },
@@ -330,11 +337,9 @@ export const userClient = {
 
  /**
   * Logs user into the system
-  * @param username (optional) - The user name for login
-  * @param password (optional) - The password for login in clear text
+  * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
-  loginUser(username?: string | null,
-    password?: string | null,
+  loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
     $config?: XiorRequestConfig
   ): Promise<XiorResponse<string>> {
     const url = `/user/login`;
@@ -343,9 +348,9 @@ export const userClient = {
       url: url,
       method: 'GET',
       params: {
-        'username': username,
-        'password': password,
-      },
+            'username': queryParams?.username,
+                'password': queryParams?.password,
+          },
       ...$config,
     });
   },

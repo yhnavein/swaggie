@@ -70,6 +70,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
   const {
     allowDots,
     arrayFormat,
+    queryParamsAsObject,
     mode,
     schemaStyle,
     enumStyle,
@@ -86,6 +87,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     ),
     ...(allowDots !== undefined ? { allowDots } : {}),
     ...(arrayFormat !== undefined ? { arrayFormat } : {}),
+    ...(queryParamsAsObject !== undefined ? { queryParamsAsObject } : {}),
   };
 
   return {

@@ -164,16 +164,43 @@ export class petService extends BaseService {
   }
 
  /**
-  * Finds Pets by status
-  * Multiple status values can be provided with comma separated strings
-  * @param status (optional) - Status values that need to be considered for filter
+  * Finds Pets
+  * Find pets using different filters
+  * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
-  findPetsByStatus(status?: "available" | "pending" | "sold" | null,
+  findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
         config?: IRequestShortcutConfig
   ): IPromise<Pet[]> {
-    let url = `/pet/findByStatus?`;
-    if (status !== undefined) {
-      url += serializeQueryParam(status, 'status') + "&";
+    let url = `/pet/find?`;
+    if (queryParams?.status !== undefined) {
+      url += serializeQueryParam(queryParams.status, 'status') + "&";
+    }
+    if (queryParams?.name !== undefined) {
+      url += serializeQueryParam(queryParams.name, 'name') + "&";
+    }
+    if (queryParams?.type !== undefined) {
+      url += serializeQueryParam(queryParams.type, 'type') + "&";
+    }
+    if (queryParams?.owner !== undefined) {
+      url += serializeQueryParam(queryParams.owner, 'owner') + "&";
+    }
+    if (queryParams?.sortBy !== undefined) {
+      url += serializeQueryParam(queryParams.sortBy, 'sortBy') + "&";
+    }
+    if (queryParams?.order !== undefined) {
+      url += serializeQueryParam(queryParams.order, 'order') + "&";
+    }
+    if (queryParams?.page !== undefined) {
+      url += serializeQueryParam(queryParams.page, 'page') + "&";
+    }
+    if (queryParams?.limit !== undefined) {
+      url += serializeQueryParam(queryParams.limit, 'limit') + "&";
+    }
+    if (queryParams?.city !== undefined) {
+      url += serializeQueryParam(queryParams.city, 'city') + "&";
+    }
+    if (queryParams?.registrationDate !== undefined) {
+      url += serializeQueryParam(queryParams.registrationDate, 'registrationDate') + "&";
     }
   
     return this.$get(
@@ -237,20 +264,18 @@ export class petService extends BaseService {
  /**
   * Updates a pet in the store with form data
   * @param petId - ID of the pet
-  * @param name (optional) - Name of pet that needs to be updated
-  * @param status (optional) - Status of pet that needs to be updated
+  * @param queryParams (optional) - Grouped query parameters object (name, status)
   */
   updatePetWithForm(petId: number ,
-    name?: string | null,
-    status?: string | null,
+    queryParams?: { name?: string | null; status?: string | null; } | null,
         config?: IRequestShortcutConfig
   ): IPromise<unknown> {
     let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
-    if (name !== undefined) {
-      url += serializeQueryParam(name, 'name') + "&";
+    if (queryParams?.name !== undefined) {
+      url += serializeQueryParam(queryParams.name, 'name') + "&";
     }
-    if (status !== undefined) {
-      url += serializeQueryParam(status, 'status') + "&";
+    if (queryParams?.status !== undefined) {
+      url += serializeQueryParam(queryParams.status, 'status') + "&";
     }
   
     return this.$post(
@@ -428,19 +453,17 @@ export class userService extends BaseService {
 
  /**
   * Logs user into the system
-  * @param username (optional) - The user name for login
-  * @param password (optional) - The password for login in clear text
+  * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
-  loginUser(username?: string | null,
-    password?: string | null,
+  loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
         config?: IRequestShortcutConfig
   ): IPromise<string> {
     let url = `/user/login?`;
-    if (username !== undefined) {
-      url += serializeQueryParam(username, 'username') + "&";
+    if (queryParams?.username !== undefined) {
+      url += serializeQueryParam(queryParams.username, 'username') + "&";
     }
-    if (password !== undefined) {
-      url += serializeQueryParam(password, 'password') + "&";
+    if (queryParams?.password !== undefined) {
+      url += serializeQueryParam(queryParams.password, 'password') + "&";
     }
   
     return this.$get(

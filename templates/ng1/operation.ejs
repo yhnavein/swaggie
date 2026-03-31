@@ -8,11 +8,11 @@
     let url = `<%= it.url %>?`;
 <% if(it.query && it.query.length > 0) { %>
   <% it.query.forEach((parameter) => { %>
-  if (<%= parameter.name %> !== undefined) {
+  if (<%= it.queryParamObject ? `${it.queryParamObject.name}?.${parameter.name}` : parameter.name %> !== undefined) {
   <% if(!!parameter.original && parameter.original.type === 'array') { %>
-    <%= parameter.name %>.forEach(item => { url += serializeQueryParam(item, '<%= parameter.originalName %>') + "&"; });
+    <%= it.queryParamObject ? `${it.queryParamObject.name}.${parameter.name}` : parameter.name %>.forEach(item => { url += serializeQueryParam(item, '<%= parameter.originalName %>') + "&"; });
   <% } else {%>
-    url += serializeQueryParam(<%= parameter.name %>, '<%= parameter.originalName %>') + "&";
+    url += serializeQueryParam(<%= it.queryParamObject ? `${it.queryParamObject.name}.${parameter.name}` : parameter.name %>, '<%= parameter.originalName %>') + "&";
   <% } %>
   }
   <% }); %>

@@ -26,6 +26,8 @@ export interface IOperation {
   parameters: IOperationParam[];
   /** Query parameters of the operation. */
   query: IOperationParam[];
+  /** Grouped query parameter object when queryParamsAsObject is enabled. */
+  queryParamObject?: IOperationParam;
   /** Body parameter of the operation. */
   body: IBodyParam;
   /** Headers of the operation. */
