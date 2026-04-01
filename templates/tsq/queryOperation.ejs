@@ -1,5 +1,5 @@
 <%
-var baseAdditionalParams = '  * @param $config (optional) Additional configuration for TanStack Query\n  * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)';
+var baseAdditionalParams = '  * @param $config (optional) Additional configuration for TanStack Query\n  * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying ' + it.httpConfigType + ')';
 var rawDocs = it.jsDocs
   ? it.jsDocs.replace(/(\s*)\*\/\s*$/, '\n' + baseAdditionalParams + '\n */')
   : '';
@@ -9,7 +9,7 @@ var docs = rawDocs ? rawDocs.replace(/^/gm, '  ') + '\n' : '';
     <%= it.rqOpName %><TData = <%~ it.returnType %>, TError = Error>(
 <% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
 <% }); %>      $config?: Omit<UseQueryOptions<<%~ it.returnType %>, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
+      $httpConfig?: <%= it.httpConfigType %>
     ) {
       return useQuery<<%~ it.returnType %>, TError, TData>({
         queryKey: <%= it.clientName %>.queryKeys.<%= it.rqOpName.charAt(3).toLowerCase() + it.rqOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>),

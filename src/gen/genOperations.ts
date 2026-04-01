@@ -10,7 +10,7 @@ import {
   orderBy,
 } from '../utils/utils';
 import { renderFile, hasTemplateFile } from '../utils/templateEngine';
-import { getL1Template } from '../utils/templateValidator';
+import { getL1Template, getHttpConfigType } from '../utils/templateValidator';
 import { generateBarrelFile } from './createBarrel';
 import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
@@ -55,6 +55,7 @@ export default async function generateOperations(
     const renderedFile = renderFile('client.ejs', {
       ...clientData,
       servicePrefix,
+      httpConfigType: getHttpConfigType(options.template),
     });
 
     result += renderedFile;

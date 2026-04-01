@@ -33,6 +33,7 @@ export const <%= it.camelCaseName %> = {
     rqOpName: 'use' + opName,
     opKey: it.camelCaseName + opName,
     clientName: it.camelCaseName,
+    httpConfigType: it.httpConfigType,
   }, safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('queryOperation.ejs', queryOperation); %>
@@ -46,6 +47,7 @@ export const <%= it.camelCaseName %> = {
   var mutationOperation = Object.assign({
     mutOpName: 'use' + opName,
     clientName: it.camelCaseName,
+    httpConfigType: it.httpConfigType,
   }, safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('mutationOperation.ejs', mutationOperation); %>

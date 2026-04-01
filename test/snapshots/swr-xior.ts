@@ -18,12 +18,12 @@ interface SwrConfig extends SWRConfiguration {
   /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
   key?: Key;
 }
-import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
+import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
-export const axios = Axios.create({
+export const http = xior.create({
   baseURL: '',
   paramsSerializer: (params: any) =>
-    encodeParams(params, null, {
+    encodeParams(params, true, null, {
       allowDots: true,
       arrayFormat: 'repeat',
     }),
@@ -35,11 +35,11 @@ export const petClient = {
   * @param body
   */
   addPet(body: Pet ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Pet>> {
     const url = `/pet`;
 
-    return axios.request<Pet>({
+    return http.request<Pet>({
       url: url,
       method: 'POST',
       data: body,
@@ -54,11 +54,11 @@ export const petClient = {
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
-    return axios.request<unknown>({
+    return http.request<unknown>({
       url: url,
       method: 'DELETE',
       headers: {
@@ -74,11 +74,11 @@ export const petClient = {
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet[]> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/find`;
 
-    return axios.request<Pet[]>({
+    return http.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
@@ -104,11 +104,11 @@ export const petClient = {
   * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet[]> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Pet[]>> {
     const url = `/pet/findByTags`;
 
-    return axios.request<Pet[]>({
+    return http.request<Pet[]>({
       url: url,
       method: 'GET',
       params: {
@@ -124,11 +124,11 @@ export const petClient = {
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Pet>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
-    return axios.request<Pet>({
+    return http.request<Pet>({
       url: url,
       method: 'GET',
       ...$config,
@@ -140,11 +140,11 @@ export const petClient = {
   * @param body
   */
   updatePet(body: Pet ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Pet>> {
     const url = `/pet`;
 
-    return axios.request<Pet>({
+    return http.request<Pet>({
       url: url,
       method: 'PUT',
       data: new URLSearchParams(body as any),
@@ -162,11 +162,11 @@ export const petClient = {
   */
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
-    return axios.request<unknown>({
+    return http.request<unknown>({
       url: url,
       method: 'POST',
       params: {
@@ -186,11 +186,11 @@ export const petClient = {
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<File> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<File>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    return axios.request<File>({
+    return http.request<File>({
       url: url,
       method: 'POST',
       data: body,
@@ -214,8 +214,7 @@ export const pet = {
     useFindPets(
       queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
 
@@ -237,8 +236,7 @@ export const pet = {
     useFindPetsByTags(
       tags?: string[] | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
 
@@ -259,8 +257,7 @@ export const pet = {
     usePetById(
       petId: number,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.petById(petId, );
 
@@ -282,8 +279,7 @@ export const pet = {
     */
     useAddPet(
       $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<Pet, Error, string, { body: Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: Pet } }) =>
@@ -299,8 +295,7 @@ export const pet = {
     */
     useDeletePet(
       $config?: SWRMutationConfiguration<unknown, Error, string, { apiKey: string | null; petId: number }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<unknown, Error, string, { apiKey: string | null; petId: number }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { apiKey: string | null; petId: number } }) =>
@@ -315,8 +310,7 @@ export const pet = {
     */
     useUpdatePet(
       $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<Pet, Error, string, { body: Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: Pet } }) =>
@@ -332,8 +326,7 @@ export const pet = {
     */
     useUpdatePetWithForm(
       $config?: SWRMutationConfiguration<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null } }) =>
@@ -350,8 +343,7 @@ export const pet = {
     */
     useUploadFile(
       $config?: SWRMutationConfiguration<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
         '/pet/*/uploadImage',
         (_key: string, { arg }: { arg: { body: File | null; petId: number; additionalMetadata?: string | null } }) =>
@@ -375,11 +367,11 @@ export const storeClient = {
   * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<unknown>> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return axios.request<unknown>({
+    return http.request<unknown>({
       url: url,
       method: 'DELETE',
       ...$config,
@@ -390,11 +382,11 @@ export const storeClient = {
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
-  getInventory($config?: AxiosRequestConfig
-  ): AxiosPromise<Record<string, number>> {
+  getInventory($config?: XiorRequestConfig
+  ): Promise<XiorResponse<Record<string, number>>> {
     const url = `/store/inventory`;
 
-    return axios.request<Record<string, number>>({
+    return http.request<Record<string, number>>({
       url: url,
       method: 'GET',
       ...$config,
@@ -407,11 +399,11 @@ export const storeClient = {
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Order> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Order>> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return axios.request<Order>({
+    return http.request<Order>({
       url: url,
       method: 'GET',
       ...$config,
@@ -424,11 +416,11 @@ export const storeClient = {
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Order> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<Order>> {
     const url = `/store/order`;
 
-    return axios.request<Order>({
+    return http.request<Order>({
       url: url,
       method: 'POST',
       data: body,
@@ -447,8 +439,7 @@ export const store = {
     */
     useInventory(
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.inventory();
 
@@ -469,8 +460,7 @@ export const store = {
     useOrderById(
       orderId: number,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
 
@@ -493,8 +483,7 @@ export const store = {
     */
     useDeleteOrder(
       $config?: SWRMutationConfiguration<unknown, Error, string, { orderId: number }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<unknown, Error, string, { orderId: number }>(
         '/store/order/*',
         (_key: string, { arg }: { arg: { orderId: number } }) =>
@@ -510,8 +499,7 @@ export const store = {
     */
     usePlaceOrder(
       $config?: SWRMutationConfiguration<Order, Error, string, { body?: Order | null }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<Order, Error, string, { body?: Order | null }>(
         '/store/order',
         (_key: string, { arg }: { arg: { body?: Order | null } }) =>
@@ -534,11 +522,11 @@ export const userClient = {
   * @param body (optional)
   */
   createUser(body?: User | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<User> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<User>> {
     const url = `/user`;
 
-    return axios.request<User>({
+    return http.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -551,11 +539,11 @@ export const userClient = {
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<User> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<User>> {
     const url = `/user/createWithList`;
 
-    return axios.request<User>({
+    return http.request<User>({
       url: url,
       method: 'POST',
       data: body,
@@ -569,11 +557,11 @@ export const userClient = {
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<unknown>> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
-    return axios.request<unknown>({
+    return http.request<unknown>({
       url: url,
       method: 'DELETE',
       ...$config,
@@ -585,11 +573,11 @@ export const userClient = {
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<User> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<User>> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
-    return axios.request<User>({
+    return http.request<User>({
       url: url,
       method: 'GET',
       ...$config,
@@ -601,11 +589,11 @@ export const userClient = {
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<string> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<string>> {
     const url = `/user/login`;
 
-    return axios.request<string>({
+    return http.request<string>({
       url: url,
       method: 'GET',
       params: {
@@ -617,11 +605,11 @@ export const userClient = {
   },
 
   /** Logs out current logged in user session */
-  logoutUser($config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+  logoutUser($config?: XiorRequestConfig
+  ): Promise<XiorResponse<unknown>> {
     const url = `/user/logout`;
 
-    return axios.request<unknown>({
+    return http.request<unknown>({
       url: url,
       method: 'GET',
       ...$config,
@@ -636,11 +624,11 @@ export const userClient = {
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
+    $config?: XiorRequestConfig
+  ): Promise<XiorResponse<unknown>> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
-    return axios.request<unknown>({
+    return http.request<unknown>({
       url: url,
       method: 'PUT',
       data: body,
@@ -660,8 +648,7 @@ export const user = {
     useUserByName(
       username: string,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.userByName(username, );
 
@@ -681,8 +668,7 @@ export const user = {
     useLoginUser(
       queryParams?: { username?: string | null; password?: string | null; } | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
 
@@ -698,8 +684,7 @@ export const user = {
   /** Logs out current logged in user session */
     useLogoutUser(
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.logoutUser();
 
@@ -722,8 +707,7 @@ export const user = {
     */
     useCreateUser(
       $config?: SWRMutationConfiguration<User, Error, string, { body?: User | null }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<User, Error, string, { body?: User | null }>(
         '/user',
         (_key: string, { arg }: { arg: { body?: User | null } }) =>
@@ -738,8 +722,7 @@ export const user = {
     */
     useCreateUsersWithListInput(
       $config?: SWRMutationConfiguration<User, Error, string, { body?: User[] | null }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<User, Error, string, { body?: User[] | null }>(
         '/user/createWithList',
         (_key: string, { arg }: { arg: { body?: User[] | null } }) =>
@@ -755,8 +738,7 @@ export const user = {
     */
     useDeleteUser(
       $config?: SWRMutationConfiguration<unknown, Error, string, { username: string }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<unknown, Error, string, { username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { username: string } }) =>
@@ -773,8 +755,7 @@ export const user = {
     */
     useUpdateUser(
       $config?: SWRMutationConfiguration<unknown, Error, string, { body: FormData | null; username: string }>,
-      $httpConfig?: AxiosRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useSWRMutation<unknown, Error, string, { body: FormData | null; username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { body: FormData | null; username: string } }) =>
@@ -791,64 +772,6 @@ export const user = {
     logoutUser: () => `/user/logout`,
   },
 };
-
-/**
- * Serializes a params object into a query string that is compatible with different REST APIs.
- * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
- * Kudos to @suhaotian for the original implementation
- */
-function encodeParams<T = any>(
-  params: T,
-  parentKey: string | null = null,
-  options?: {
-    allowDots?: boolean;
-    serializeDate?: (value: Date) => string;
-    arrayFormat?: 'indices' | 'repeat' | 'brackets';
-  }
-): string {
-  if (params === undefined || params === null) return '';
-  const encodedParams: string[] = [];
-  const paramsIsArray = Array.isArray(params);
-  const { arrayFormat, allowDots, serializeDate } = options || {};
-
-  const getKey = (key: string) => {
-    if (allowDots && !paramsIsArray) return `.${key}`;
-    if (paramsIsArray) {
-      if (arrayFormat === 'brackets') {
-        return '[]';
-      }
-      if (arrayFormat === 'repeat') {
-        return '';
-      }
-    }
-    return `[${key}]`;
-  };
-
-  for (const key in params) {
-    if (Object.prototype.hasOwnProperty.call(params, key)) {
-      let value = (params as any)[key];
-      if (value !== undefined) {
-        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
-
-        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
-        if (!isNaN(value) && value instanceof Date) {
-          value = serializeDate ? serializeDate(value) : value.toISOString();
-        }
-        if (typeof value === 'object') {
-          // If the value is an object or array, recursively encode its contents
-          const result = encodeParams(value, encodedKey, options);
-          if (result !== '') encodedParams.push(result);
-        } else {
-          // Otherwise, encode the key-value pair
-          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
-        }
-      }
-    }
-  }
-
-  return encodedParams.join('&');
-}
-
 export interface Order {
   /** @format int64 */
   id?: number;

@@ -102,3 +102,26 @@ export function normalizeTemplate(template: TemplateInput): ResolvedTemplate {
 export function getL1Template(template: ResolvedTemplate): string {
   return Array.isArray(template) ? template[1] : template;
 }
+
+/**
+ * Returns the TypeScript type name for the `$httpConfig` parameter that the
+ * L1 template exposes on each operation method.
+ *
+ * Used by L2 operation partials so the `$httpConfig` parameter they forward
+ * to the underlying client method has the correct type regardless of which L1
+ * is paired with the L2.
+ */
+export function getHttpConfigType(template: ResolvedTemplate): string {
+  const l1 = getL1Template(template);
+  switch (l1) {
+    case 'axios':
+      return 'AxiosRequestConfig';
+    case 'xior':
+      return 'XiorRequestConfig';
+    case 'fetch':
+      return 'RequestInit';
+    default:
+      // Custom path or unknown — fall back to a permissive type
+      return 'Record<string, unknown>';
+  }
+}

@@ -29,6 +29,7 @@ export const <%= it.camelCaseName %> = {
   var swrOperation = Object.assign({
     swrOpName: 'use' + opName,
     clientName: it.camelCaseName,
+    httpConfigType: it.httpConfigType,
   }, safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('swrOperation.ejs', swrOperation); %>
@@ -42,6 +43,7 @@ export const <%= it.camelCaseName %> = {
   var swrMutationOperation = Object.assign({
     mutOpName: 'use' + opName,
     clientName: it.camelCaseName,
+    httpConfigType: it.httpConfigType,
   }, safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('swrMutationOperation.ejs', swrMutationOperation); %>

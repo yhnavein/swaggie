@@ -205,13 +205,12 @@ export const pet = {
     * Find pets using different filters
     * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useFindPets<TData = Pet[], TError = Error>(
       queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
       $config?: Omit<UseQueryOptions<Pet[], TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Pet[], TError, TData>({
         queryKey: pet.queryKeys.findPets(queryParams, ),
         queryFn: () => petClient.findPets(queryParams, $httpConfig).then(res => res.data),
@@ -225,13 +224,12 @@ export const pet = {
     * @deprecated
     * @param tags (optional) - Tags to filter by
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useFindPetsByTags<TData = Pet[], TError = Error>(
       tags?: string[] | null,
       $config?: Omit<UseQueryOptions<Pet[], TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Pet[], TError, TData>({
         queryKey: pet.queryKeys.findPetsByTags(tags, ),
         queryFn: () => petClient.findPetsByTags(tags, $httpConfig).then(res => res.data),
@@ -244,13 +242,12 @@ export const pet = {
     * Returns a single pet
     * @param petId - ID of the pet
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     usePetById<TData = Pet, TError = Error>(
       petId: number,
       $config?: Omit<UseQueryOptions<Pet, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Pet, TError, TData>({
         queryKey: pet.queryKeys.petById(petId, ),
         queryFn: () => petClient.getPetById(petId, $httpConfig).then(res => res.data),
@@ -265,12 +262,11 @@ export const pet = {
     * Add a new pet to the store
     * @param body
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useAddPet<TData = Pet, TError = Error>(
       $config?: UseMutationOptions<Pet, TError, { body: Pet }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<Pet, TError, { body: Pet }>({
         mutationFn: (vars) => petClient.addPet(vars.body, $httpConfig).then(res => res.data),
         ...$config
@@ -282,12 +278,11 @@ export const pet = {
     * @param apiKey (optional) (API name: api_key)
     * @param petId - ID of the pet
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useDeletePet<TData = unknown, TError = Error>(
       $config?: UseMutationOptions<unknown, TError, { apiKey: string | null; petId: number }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { apiKey: string | null; petId: number }>({
         mutationFn: (vars) => petClient.deletePet(vars.apiKey, vars.petId, $httpConfig).then(res => res.data),
         ...$config
@@ -298,12 +293,11 @@ export const pet = {
     * Update an existing pet by Id
     * @param body
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useUpdatePet<TData = Pet, TError = Error>(
       $config?: UseMutationOptions<Pet, TError, { body: Pet }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<Pet, TError, { body: Pet }>({
         mutationFn: (vars) => petClient.updatePet(vars.body, $httpConfig).then(res => res.data),
         ...$config
@@ -315,12 +309,11 @@ export const pet = {
     * @param petId - ID of the pet
     * @param queryParams (optional) - Grouped query parameters object (name, status)
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useUpdatePetWithForm<TData = unknown, TError = Error>(
       $config?: UseMutationOptions<unknown, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>({
         mutationFn: (vars) => petClient.updatePetWithForm(vars.petId, vars.queryParams, $httpConfig).then(res => res.data),
         ...$config
@@ -333,12 +326,11 @@ export const pet = {
     * @param petId - ID of the pet
     * @param additionalMetadata (optional) - Additional Metadata
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useUploadFile<TData = File, TError = Error>(
       $config?: UseMutationOptions<File, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<File, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>({
         mutationFn: (vars) => petClient.uploadFile(vars.body, vars.petId, vars.additionalMetadata, $httpConfig).then(res => res.data),
         ...$config
@@ -430,12 +422,11 @@ export const store = {
     * Returns pet inventories by status
     * Returns a map of status codes to quantities
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useInventory<TData = Record<string, number>, TError = Error>(
       $config?: Omit<UseQueryOptions<Record<string, number>, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Record<string, number>, TError, TData>({
         queryKey: store.queryKeys.inventory(),
         queryFn: () => storeClient.getInventory($httpConfig).then(res => res.data),
@@ -448,13 +439,12 @@ export const store = {
     * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
     * @param orderId - ID of order that needs to be fetched
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useOrderById<TData = Order, TError = Error>(
       orderId: number,
       $config?: Omit<UseQueryOptions<Order, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Order, TError, TData>({
         queryKey: store.queryKeys.orderById(orderId, ),
         queryFn: () => storeClient.getOrderById(orderId, $httpConfig).then(res => res.data),
@@ -470,12 +460,11 @@ export const store = {
     * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
     * @param orderId - ID of the order that needs to be deleted
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useDeleteOrder<TData = unknown, TError = Error>(
       $config?: UseMutationOptions<unknown, TError, { orderId: number }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { orderId: number }>({
         mutationFn: (vars) => storeClient.deleteOrder(vars.orderId, $httpConfig).then(res => res.data),
         ...$config
@@ -487,12 +476,11 @@ export const store = {
     * Place a new order in the store
     * @param body (optional)
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     usePlaceOrder<TData = Order, TError = Error>(
       $config?: UseMutationOptions<Order, TError, { body?: Order | null }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<Order, TError, { body?: Order | null }>({
         mutationFn: (vars) => storeClient.placeOrder(vars.body, $httpConfig).then(res => res.data),
         ...$config
@@ -636,13 +624,12 @@ export const user = {
     * Get user by user name
     * @param username - The name that needs to be fetched. Use user1 for testing.
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useUserByName<TData = User, TError = Error>(
       username: string,
       $config?: Omit<UseQueryOptions<User, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<User, TError, TData>({
         queryKey: user.queryKeys.userByName(username, ),
         queryFn: () => userClient.getUserByName(username, $httpConfig).then(res => res.data),
@@ -654,13 +641,12 @@ export const user = {
     * Logs user into the system
     * @param queryParams (optional) - Grouped query parameters object (username, password)
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useLoginUser<TData = string, TError = Error>(
       queryParams?: { username?: string | null; password?: string | null; } | null,
       $config?: Omit<UseQueryOptions<string, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<string, TError, TData>({
         queryKey: user.queryKeys.loginUser(queryParams, ),
         queryFn: () => userClient.loginUser(queryParams, $httpConfig).then(res => res.data),
@@ -670,12 +656,11 @@ export const user = {
 
   /** Logs out current logged in user session
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useLogoutUser<TData = unknown, TError = Error>(
       $config?: Omit<UseQueryOptions<unknown, TError, TData>, 'queryKey' | 'queryFn'>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useQuery<unknown, TError, TData>({
         queryKey: user.queryKeys.logoutUser(),
         queryFn: () => userClient.logoutUser($httpConfig).then(res => res.data),
@@ -691,12 +676,11 @@ export const user = {
     * This can only be done by the logged in user.
     * @param body (optional)
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useCreateUser<TData = User, TError = Error>(
       $config?: UseMutationOptions<User, TError, { body?: User | null }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<User, TError, { body?: User | null }>({
         mutationFn: (vars) => userClient.createUser(vars.body, $httpConfig).then(res => res.data),
         ...$config
@@ -707,12 +691,11 @@ export const user = {
     * Creates list of users with given input array
     * @param body (optional)
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useCreateUsersWithListInput<TData = User, TError = Error>(
       $config?: UseMutationOptions<User, TError, { body?: User[] | null }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<User, TError, { body?: User[] | null }>({
         mutationFn: (vars) => userClient.createUsersWithListInput(vars.body, $httpConfig).then(res => res.data),
         ...$config
@@ -724,12 +707,11 @@ export const user = {
     * This can only be done by the logged in user.
     * @param username - The name that needs to be deleted
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useDeleteUser<TData = unknown, TError = Error>(
       $config?: UseMutationOptions<unknown, TError, { username: string }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { username: string }>({
         mutationFn: (vars) => userClient.deleteUser(vars.username, $httpConfig).then(res => res.data),
         ...$config
@@ -742,12 +724,11 @@ export const user = {
     * @param body (optional)
     * @param username - name that needs to be updated
     * @param $config (optional) Additional configuration for TanStack Query
-    * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useUpdateUser<TData = unknown, TError = Error>(
       $config?: UseMutationOptions<unknown, TError, { body: FormData | null; username: string }>,
-      $httpConfig?: XiorRequestConfig
-    ) {
+      $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { body: FormData | null; username: string }>({
         mutationFn: (vars) => userClient.updateUser(vars.body, vars.username, $httpConfig).then(res => res.data),
         ...$config

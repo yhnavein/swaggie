@@ -3,7 +3,7 @@
     <%= it.swrOpName %>(
 <% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
 <% }); %>      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig
+      $httpConfig?: <%= it.httpConfigType %>
     ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? <%= it.clientName %>.queryKeys.<%= it.swrOpName.charAt(3).toLowerCase() + it.swrOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>);

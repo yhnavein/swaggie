@@ -21,7 +21,7 @@ var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : '';
 <%~ docs %>
     <%= it.mutOpName %>(
       $config?: SWRMutationConfiguration<<%~ it.returnType %>, Error, string, <%~ variablesType %>>,
-      $httpConfig?: AxiosRequestConfig
+      $httpConfig?: <%= it.httpConfigType %>
     ) {
       return useSWRMutation<<%~ it.returnType %>, Error, string, <%~ variablesType %>>(
         '<%= swrKey %>',

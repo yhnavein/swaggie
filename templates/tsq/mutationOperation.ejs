@@ -13,7 +13,7 @@ if (!hasParams) {
 
 var callArgs = it.parameters.map(function(p) { return 'vars.' + p.name; });
 
-var baseAdditionalParams = '  * @param $config (optional) Additional configuration for TanStack Query\n  * @param $httpConfig (optional) Additional configuration for xior request (actually executes the request)';
+var baseAdditionalParams = '  * @param $config (optional) Additional configuration for TanStack Query\n  * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying ' + it.httpConfigType + ')';
 var rawDocs = it.jsDocs
   ? it.jsDocs.replace(/(\s*)\*\/\s*$/, '\n' + baseAdditionalParams + '\n */')
   : '';
@@ -22,7 +22,7 @@ var docs = rawDocs ? rawDocs.replace(/^/gm, '  ') + '\n' : '';
 <%~ docs %>
     <%= it.mutOpName %><TData = <%~ it.returnType %>, TError = Error>(
       $config?: UseMutationOptions<<%~ it.returnType %>, TError, <%~ variablesType %>>,
-      $httpConfig?: XiorRequestConfig
+      $httpConfig?: <%= it.httpConfigType %>
     ) {
       return useMutation<<%~ it.returnType %>, TError, <%~ variablesType %>>({
         mutationFn: (<%= hasParams ? 'vars' : '' %>) => <%= it.clientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig).then(res => res.data),
