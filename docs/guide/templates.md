@@ -1,24 +1,24 @@
 # Templates
 
-Swaggie ships with seven built-in templates covering the most common TypeScript HTTP client libraries. You can also provide a custom template directory if none of them fit your codebase.
+Swaggie's template system is split into two independent layers: **HTTP client templates** (L1) and **reactive query layer templates** (L2). You can use an L1 template on its own, or combine an L2 with any compatible L1 to get a fully-typed reactive data-fetching layer on top.
 
-## Built-in templates
+## HTTP client templates (L1)
+
+These are self-contained and produce a plain typed client with one method per API operation. Pick whichever library fits your project:
 
 | Template | HTTP Client | Best for |
 |---|---|---|
 | `axios` | [Axios](https://axios-http.com) | React, Vue, Node.js — the most widely used default |
-| `fetch` | Native `fetch` | Browser apps with no extra dependencies |
+| `fetch` | Native `fetch` | Browser apps or Node 18+ with no extra dependencies |
 | `xior` | [xior](https://github.com/suhaotian/xior) | Lightweight Axios-compatible alternative |
-| `swr-axios` | SWR + Axios | React apps using [SWR](https://swr.vercel.app) for data fetching |
-| `tsq-xior` | TanStack Query + xior | React apps using [TanStack Query](https://tanstack.com/query) |
 | `ng1` | Angular 1 `$http` | Legacy Angular 1.x applications |
 | `ng2` | Angular `HttpClient` | Angular 2+ applications (uses `InjectionToken`) |
 
 ### `axios` (default)
 
-The default template. Generates client objects with methods that return `AxiosPromise<T>`. Includes a shared Axios instance configured with your `baseUrl` and query parameter serialization settings.
+Generates client objects with methods that return `AxiosPromise<T>`. Includes a shared Axios instance configured with your `baseUrl` and query parameter serialization settings.
 
-**Dependencies you need in your project:**
+**Dependencies:**
 
 ```bash
 npm install axios
@@ -69,67 +69,135 @@ npm install xior
 
 ---
 
-### `swr-axios`
+### `ng1` / `ng2`
 
-Generates SWR hooks for `GET` operations and standard Axios methods for mutations (`POST`, `PUT`, `PATCH`, `DELETE`). Best for React apps that use [SWR](https://swr.vercel.app) for server state.
+Angular-specific clients. `ng1` uses `$http` and Angular 1 dependency injection. `ng2` generates injectable services using `HttpClient` and `InjectionToken`. Requires `@angular/common/http`.
 
-**Dependencies:**
+> Angular clients are not compatible with reactive query layers (L2).
+
+---
+
+## Reactive query layer templates (L2)
+
+L2 templates wrap an L1 client with a reactive data-fetching layer. They produce two exports per API group: the plain client object (identical to the L1 template) and a hooks namespace with `queries`, `mutations`, and `queryKeys`.
+
+| Template | Library | Best for |
+|---|---|---|
+| `swr` | [SWR](https://swr.vercel.app) | React apps using SWR for server state |
+| `tsq` | [TanStack Query](https://tanstack.com/query) | React apps using TanStack Query |
+
+L2 templates must be composed with a compatible L1. The compatible L1 templates are: **`axios`**, **`fetch`**, **`xior`**.
+
+---
+
+## Combining L1 and L2
+
+Pass the template as a **2-element array** with `[L2, L1]` in your config, or as a **comma-separated pair** on the CLI.
+
+### In a config file
+
+```json
+{
+  "template": ["swr", "axios"]
+}
+```
+
+### On the CLI
+
+```bash
+# [L2, L1] comma-separated
+swaggie -s ./openapi.json -o ./client.ts -t swr,axios
+swaggie -s ./openapi.json -o ./client.ts -t tsq,xior
+swaggie -s ./openapi.json -o ./client.ts -t swr,fetch
+swaggie -s ./openapi.json -o ./client.ts -t tsq,axios
+```
+
+### L2 alone — defaults to `fetch` as the L1
+
+If you pass only an L2 name without a companion L1, Swaggie defaults to `fetch`:
+
+```json
+{ "template": "swr" }
+```
+
+This is equivalent to `["swr", "fetch"]`.
+
+### Valid combinations
+
+| L2 | Compatible L1 templates |
+|---|---|
+| `swr` | `axios`, `fetch`, `xior` |
+| `tsq` | `axios`, `fetch`, `xior` |
+
+### Generated output (excerpt for `["swr", "axios"]`)
+
+```typescript
+import useSWR, { type SWRConfiguration, type Key } from 'swr';
+import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from 'axios';
+
+const axios = Axios.create({ baseURL: '/api' });
+
+// Plain HTTP client — identical to the plain axios template
+export const petClient = {
+  getPetById(petId: number): AxiosPromise<Pet> {
+    return axios.request<Pet>({ url: `/pet/${petId}`, method: 'GET' });
+  },
+};
+
+// SWR hook namespace
+export const pet = {
+  queries: {
+    useGetPetById(petId: number, $config?: SwrConfig) {
+      return useSWR<Pet>(pet.queryKeys.getPetById(petId), () =>
+        petClient.getPetById(petId).then((r) => r.data)
+      );
+    },
+  },
+  mutations: {
+    useAddPet($config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>) {
+      return useSWRMutation('/pet', (_key, { arg }) =>
+        petClient.addPet(arg.body).then((r) => r.data)
+      );
+    },
+  },
+  queryKeys: {
+    getPetById: (petId: number) => `/pet/${petId}`,
+  },
+};
+```
+
+**Dependencies for `["swr", "axios"]`:**
 
 ```bash
 npm install axios swr
 ```
 
-**Generated output (excerpt):**
-
-```typescript
-import useSWR from 'swr';
-
-export const petClient = {
-  useGetPetById(petId: number) {
-    return useSWR<Pet>(`/pet/${petId}`, fetcher);
-  },
-
-  addPet(body: Pet): AxiosPromise<Pet> {
-    return axios.request<Pet>({ url: '/pet', method: 'POST', data: body });
-  },
-};
-```
-
----
-
-### `tsq-xior`
-
-Generates [TanStack Query](https://tanstack.com/query) hooks for `GET` operations, backed by xior for the actual HTTP calls. Mutations use plain xior calls.
-
-**Dependencies:**
+**Dependencies for `["tsq", "xior"]`:**
 
 ```bash
-npm install @tanstack/react-query xior
+npm install xior @tanstack/react-query
 ```
 
 ---
-
-### `ng1`
-
-Angular 1 template. Generates a service using `$http` and Angular 1 dependency injection.
-
----
-
-### `ng2`
-
-Angular 2+ template. Generates injectable services using `HttpClient` and `InjectionToken` for configuration. Requires `@angular/common/http`.
 
 ## Choosing the right template
 
-- **No framework / Node.js backend** → `fetch` (zero deps) or `axios` (interceptors, retries)
-- **React with SWR** → `swr-axios`
-- **React with TanStack Query** → `tsq-xior`
-- **Prefer minimal bundle size** → `xior` or `fetch`
-- **Angular** → `ng2` (Angular 2+) or `ng1` (legacy)
+| Scenario | Template |
+|---|---|
+| No framework / Node.js backend | `fetch` (zero deps) or `axios` |
+| React — prefer minimal bundle size | `xior` or `fetch` |
+| React with SWR — backed by axios | `["swr", "axios"]` |
+| React with SWR — minimal bundle | `["swr", "xior"]` or `["swr", "fetch"]` |
+| React with TanStack Query | `["tsq", "xior"]` or `["tsq", "axios"]` |
+| Angular 2+ | `ng2` |
+| Angular 1 (legacy) | `ng1` |
+
+---
 
 ## Custom templates
 
-If none of the built-in templates fit your existing HTTP client setup, you can provide your own template directory:
+If none of the built-in templates fit your existing HTTP client setup, provide a path to your own template directory:
 
 ```bash
 swaggie -s ./openapi.json -o ./client.ts --template ./my-template/
@@ -143,41 +211,23 @@ Or in your config file:
 }
 ```
 
+Custom paths also work in composite pairs. For example, to use your own reactive layer on top of the built-in `axios` L1:
+
+```json
+{
+  "template": ["./my-l2-template/", "axios"]
+}
+```
+
 ### Template directory structure
 
-A custom template directory should contain EJS (`.ejs`) files. Swaggie will look for these files:
+A custom template directory should contain `.ejs` files. Swaggie renders these files at generation time:
 
 | File | Purpose |
 |---|---|
-| `baseClient.ejs` | Top of the output file — imports, shared HTTP client setup |
+| `baseClient.ejs` | Top of the output file — imports and shared HTTP client setup |
 | `client.ejs` | One client object per tag group |
 | `operation.ejs` | One method per API operation |
-| `barrel.ejs` | Re-export barrel file (optional) |
+| `barrel.ejs` | Shared helpers appended once at the bottom |
 
-### Available template variables
-
-Inside each template, Swaggie provides the following variables:
-
-**In `operation.ejs`:**
-
-| Variable | Type | Description |
-|---|---|---|
-| `operation` | `IOperation` | Parsed operation data (method, path, params, responses) |
-| `options` | `AppOptions` | Resolved generation options |
-
-**In `client.ejs`:**
-
-| Variable | Type | Description |
-|---|---|---|
-| `group` | `string` | Tag name for this client group |
-| `operations` | `IOperation[]` | All operations belonging to this group |
-| `options` | `AppOptions` | Resolved generation options |
-
-**In `baseClient.ejs`:**
-
-| Variable | Type | Description |
-|---|---|---|
-| `options` | `AppOptions` | Resolved generation options |
-| `groups` | `string[]` | All tag group names |
-
-The best way to get started with a custom template is to copy one of the [built-in templates](https://github.com/yhnavein/swaggie/tree/master/templates) and modify it for your needs.
+The best way to get started is to copy one of the [built-in templates](https://github.com/yhnavein/swaggie/tree/master/templates) and modify it for your needs.

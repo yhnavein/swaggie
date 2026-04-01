@@ -25,7 +25,7 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--config` | `-c` | `string` | — | Path to a JSON configuration file. Mutually exclusive with `--src`. |
 | `--src` | `-s` | `string` | — | URL or file path to the OpenAPI spec (`.json` or `.yaml`). Required when not using `--config`. |
 | `--out` | `-o` | `string` | — | Output file path. Omit to print generated code to stdout. |
-| `--template` | `-t` | `string` | `axios` | Template to use. One of: `axios`, `fetch`, `xior`, `swr-axios`, `tsq-xior`, `ng1`, `ng2`, or a path to a custom template directory. |
+| `--template` | `-t` | `string` | `axios` | Template to use. L1 (HTTP client): `axios`, `fetch`, `xior`, `ng1`, `ng2`. L2 (reactive layer) paired with an L1 using a comma-separated value: `swr,axios` / `tsq,xior` / `swr,fetch`, etc. An L2 name alone (e.g. `swr`) defaults to `fetch` as the L1. A path to a custom template directory is also accepted. |
 | `--baseUrl` | `-b` | `string` | `""` | Default base URL baked into the generated client. |
 | `--mode` | `-m` | `string` | `full` | Generation mode: `full` (client + schemas) or `schemas` (types only). |
 | `--schemaStyle` | `-d` | `string` | `interface` | Schema object style: `interface` or `type`. |
@@ -85,6 +85,21 @@ swaggie -s ./spec.json -o ./src/types.ts --mode schemas
 
 ```bash
 swaggie -s ./spec.json -o ./client.ts -t fetch --allowDots --arrayFormat repeat
+```
+
+### Use a reactive query layer with a specific HTTP client
+
+Combine an L2 template (reactive layer) with an L1 template (HTTP client) using a comma-separated pair:
+
+```bash
+# SWR hooks backed by axios
+swaggie -s ./spec.json -o ./client.ts -t swr,axios
+
+# TanStack Query hooks backed by xior
+swaggie -s ./spec.json -o ./client.ts -t tsq,xior
+
+# SWR hooks backed by the native fetch API
+swaggie -s ./spec.json -o ./client.ts -t swr,fetch
 ```
 
 ### Skip deprecated endpoints

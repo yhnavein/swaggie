@@ -521,4 +521,112 @@ describe('prepareAppOptions', () => {
       expect(result.modifiers).toEqual(modifiers);
     });
   });
+
+  describe('template normalization', () => {
+    test('normalizes "swr" to ["swr", "fetch"]', () => {
+      const result = prepareAppOptions({ ...minimalOpts, template: 'swr' as any });
+      expect(result.template).toEqual(['swr', 'fetch']);
+    });
+
+    test('normalizes "tsq" to ["tsq", "fetch"]', () => {
+      const result = prepareAppOptions({ ...minimalOpts, template: 'tsq' as any });
+      expect(result.template).toEqual(['tsq', 'fetch']);
+    });
+
+    test('passes through L1 templates unchanged', () => {
+      expect(prepareAppOptions({ ...minimalOpts, template: 'axios' }).template).toBe('axios');
+      expect(prepareAppOptions({ ...minimalOpts, template: 'fetch' }).template).toBe('fetch');
+      expect(prepareAppOptions({ ...minimalOpts, template: 'xior' }).template).toBe('xior');
+    });
+
+    test('passes through [L2, L1] array unchanged', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        template: ['swr', 'axios'] as any,
+      });
+      expect(result.template).toEqual(['swr', 'axios']);
+    });
+  });
+});
+
+describe('runCodeGenerator — template validation', () => {
+  test('rejects legacy "swr-axios" template name with migration hint', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'swr-axios',
+    };
+
+    try {
+      await runCodeGenerator(parameters as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('swr-axios');
+      expect(e.message).toContain('["swr", "axios"]');
+    }
+  });
+
+  test('rejects legacy "tsq-xior" template name with migration hint', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'tsq-xior',
+    };
+
+    try {
+      await runCodeGenerator(parameters as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('tsq-xior');
+      expect(e.message).toContain('["tsq", "xior"]');
+    }
+  });
+
+  test('accepts ["swr", "axios"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'axios'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    // Should contain both the axios HTTP client and SWR hooks
+    expect(code).toContain('import Axios');
+    expect(code).toContain('useSWR');
+  });
+
+  test('accepts ["tsq", "xior"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['tsq', 'xior'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain('import xior');
+    expect(code).toContain('useQuery');
+  });
+
+  test('accepts ["swr", "fetch"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'fetch'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain('defaults');
+    expect(code).toContain('useSWR');
+  });
+
+  test('accepts single "swr" and defaults to fetch as L1', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'swr',
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain('useSWR');
+    // fetch base client should be present
+    expect(code).toContain('defaults');
+  });
 });

@@ -16,8 +16,10 @@ export const EXAMPLE_SPECS = [
 ];
 
 export const HINTS: Record<string, string> = {
-  template:
-    'Template used for generating the API client. Choose a bundled template by name or provide a path to a custom one.',
+  l1Template:
+    'The HTTP client library used in the generated code. This is the core template — it controls how requests are made (axios, fetch, xior, etc.).',
+  l2Template:
+    'Optional reactive query layer (SWR or TanStack Query) added on top of the HTTP client. When set, each API group gets both a plain client and a hooks namespace. Not compatible with Angular clients.',
   generationMode:
     'Controls whether to generate a full API client (methods + schemas) or only TypeScript schemas.',
   schemaStyle: 'Controls whether object schemas are generated as interfaces or type aliases.',

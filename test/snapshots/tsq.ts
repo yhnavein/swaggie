@@ -11,8 +11,8 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
-import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 import { type UseQueryOptions, type UseMutationOptions, useQuery, useMutation } from '@tanstack/react-query';
+import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
 export const http = xior.create({
   baseURL: '',

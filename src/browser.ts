@@ -9,6 +9,8 @@ import { BUNDLED_TEMPLATES } from './generated/bundledTemplates';
 import { verifyDocumentSpec } from './utils/utils';
 import { loadSpecDocument } from './utils/documentLoader.browser';
 import { initTemplateEngineFromBundled } from './utils/templateEngine';
+import { validateTemplate, normalizeTemplate } from './utils/templateValidator';
+import { mergeTemplateFiles } from './utils/templateManager';
 
 /**
  * Browser-friendly code generation entrypoint.
@@ -52,12 +54,27 @@ async function generateCode(spec: OA3.Document, options: AppOptions): Promise<st
     return FILE_HEADER + generateTypes(spec, options, false);
   }
 
-  const templateFiles = BUNDLED_TEMPLATES[options.template];
-  if (!templateFiles) {
-    throw new Error(`Bundled templates for '${options.template}' are not available`);
+  validateTemplate(options.template);
+
+  if (Array.isArray(options.template)) {
+    const [l2, l1] = options.template;
+    const l1Files = BUNDLED_TEMPLATES[l1 as keyof typeof BUNDLED_TEMPLATES];
+    const l2Files = BUNDLED_TEMPLATES[l2 as keyof typeof BUNDLED_TEMPLATES];
+    if (!l1Files) {
+      throw new Error(`Bundled templates for L1 '${l1}' are not available`);
+    }
+    if (!l2Files) {
+      throw new Error(`Bundled templates for L2 '${l2}' are not available`);
+    }
+    initTemplateEngineFromBundled(mergeTemplateFiles(l1Files, l2Files));
+  } else {
+    const templateFiles = BUNDLED_TEMPLATES[options.template as keyof typeof BUNDLED_TEMPLATES];
+    if (!templateFiles) {
+      throw new Error(`Bundled templates for '${options.template}' are not available`);
+    }
+    initTemplateEngineFromBundled(templateFiles);
   }
 
-  initTemplateEngineFromBundled(templateFiles);
   const operationsCode = await generateOperations(spec, options);
 
   return operationsCode + generateTypes(spec, options);
@@ -92,7 +109,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
 
   return {
     ...rest,
-    template: template ?? APP_DEFAULTS.template,
+    template: normalizeTemplate(template ?? APP_DEFAULTS.template),
     servicePrefix: rest.servicePrefix ?? APP_DEFAULTS.servicePrefix,
     nullableStrategy: nullables ?? rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
     generationMode: mode ?? rest.generationMode ?? APP_DEFAULTS.generationMode,

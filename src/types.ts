@@ -14,8 +14,14 @@ export interface ClientOptions {
   src: string | object;
   /** Path to the file which will contain generated TypeScript code */
   out?: string;
-  /** Template to be used for code generation */
-  template: Template;
+  /**
+   * Template to be used for code generation.
+   * Can be a single L1 template name (e.g. "axios"), a single L2 template name
+   * (e.g. "swr" — defaults to "fetch" as the L1), or a 2-element tuple of
+   * [L2, L1] (e.g. ["swr", "axios"]).
+   * Custom filesystem paths are also accepted in any position.
+   */
+  template: TemplateInput;
   baseUrl?: string;
   preferAny?: boolean;
   /** Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code */
@@ -73,7 +79,23 @@ export interface FullAppOptions extends ClientOptions {
   config?: string;
 }
 
-export type Template = 'axios' | 'fetch' | 'ng1' | 'ng2' | 'swr-axios' | 'xior' | 'tsq-xior';
+/** HTTP client templates (standalone, no reactive layer) */
+export type L1Template = 'axios' | 'fetch' | 'xior' | 'ng1' | 'ng2';
+/** Reactive query layer templates (must be composed with an L1 template) */
+export type L2Template = 'swr' | 'tsq';
+/** Any named built-in template */
+export type Template = L1Template | L2Template;
+/**
+ * What the user may supply as a `template` value:
+ * - a single template name or custom path string
+ * - a [L2, L1] pair (names or custom paths)
+ */
+export type TemplateInput = Template | string | [string, string];
+/**
+ * After normalization inside prepareAppOptions the template is always
+ * either a single L1 string or a resolved [L2, L1] pair.
+ */
+export type ResolvedTemplate = L1Template | string | [string, string];
 export type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch';
 export type DateSupport = 'string' | 'Date';
 export type ArrayFormat = 'indices' | 'repeat' | 'brackets';
@@ -89,7 +111,7 @@ export type EnumNamesStyle = 'original' | 'PascalCase';
  * needs to perform its own `?? fallback` logic.
  */
 export interface AppOptions extends ClientOptions {
-  template: Template;
+  template: ResolvedTemplate;
   servicePrefix: string;
   nullableStrategy: NullableStrategy;
   generationMode: GenerationMode;

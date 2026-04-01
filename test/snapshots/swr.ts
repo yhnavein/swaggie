@@ -11,9 +11,14 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
-import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 import useSWR, { type SWRConfiguration, type Key } from 'swr';
 import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
+
+interface SwrConfig extends SWRConfiguration {
+  /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
+  key?: Key;
+}
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
 
 export const axios = Axios.create({
   baseURL: '',
@@ -24,18 +29,13 @@ export const axios = Axios.create({
     }),
 });
 
-interface SwrConfig extends SWRConfiguration {
-  /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
-  key?: Key;
-}
-
 export const petClient = {
    /**
   * Add a new pet to the store
   * @param body
   */
   addPet(body: Pet ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     const url = `/pet`;
 
@@ -54,7 +54,7 @@ export const petClient = {
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
@@ -74,7 +74,7 @@ export const petClient = {
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     const url = `/pet/find`;
 
@@ -104,7 +104,7 @@ export const petClient = {
   * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Pet[]> {
     const url = `/pet/findByTags`;
 
@@ -124,7 +124,7 @@ export const petClient = {
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
@@ -140,7 +140,7 @@ export const petClient = {
   * @param body
   */
   updatePet(body: Pet ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Pet> {
     const url = `/pet`;
 
@@ -162,7 +162,7 @@ export const petClient = {
   */
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
@@ -186,7 +186,7 @@ export const petClient = {
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<File> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
@@ -375,7 +375,7 @@ export const storeClient = {
   * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
@@ -390,7 +390,7 @@ export const storeClient = {
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
-  getInventory(  $config?: AxiosRequestConfig
+  getInventory($config?: AxiosRequestConfig
   ): AxiosPromise<Record<string, number>> {
     const url = `/store/inventory`;
 
@@ -407,7 +407,7 @@ export const storeClient = {
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
@@ -424,7 +424,7 @@ export const storeClient = {
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<Order> {
     const url = `/store/order`;
 
@@ -534,7 +534,7 @@ export const userClient = {
   * @param body (optional)
   */
   createUser(body?: User | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     const url = `/user`;
 
@@ -551,7 +551,7 @@ export const userClient = {
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     const url = `/user/createWithList`;
 
@@ -569,7 +569,7 @@ export const userClient = {
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
@@ -585,7 +585,7 @@ export const userClient = {
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<User> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
@@ -601,7 +601,7 @@ export const userClient = {
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<string> {
     const url = `/user/login`;
 
@@ -617,7 +617,7 @@ export const userClient = {
   },
 
   /** Logs out current logged in user session */
-  logoutUser(  $config?: AxiosRequestConfig
+  logoutUser($config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/logout`;
 
@@ -636,7 +636,7 @@ export const userClient = {
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
-      $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig
   ): AxiosPromise<unknown> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 

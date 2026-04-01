@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { runCodeGenerator } from 'swaggie/browser';
 import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
@@ -37,7 +37,18 @@ function s<T>(key: string, fallback: T): T {
 
 // ─── Settings — primary row ───────────────────────────────────────────────────
 
-const template = ref<string>(s('template', 'axios'));
+const l1Template = ref<string>(s('l1Template', 'axios'));
+const l2Template = ref<string>(s('l2Template', ''));
+
+/** ng1/ng2 are not compatible with reactive layers */
+const isL2Disabled = computed(() => l1Template.value === 'ng1' || l1Template.value === 'ng2');
+
+function onL1Change() {
+  if (isL2Disabled.value) {
+    l2Template.value = '';
+  }
+}
+
 const generationMode = ref<string>(s('generationMode', 'full'));
 const schemaStyle = ref<string>(s('schemaStyle', 'interface'));
 const enumStyle = ref<string>(s('enumStyle', 'union'));
@@ -133,9 +144,13 @@ async function generate() {
       return;
     }
 
+    const resolvedTemplate = l2Template.value
+      ? ([l2Template.value, l1Template.value] as [string, string])
+      : l1Template.value;
+
     const [code] = await runCodeGenerator({
       src: parsed as any,
-      template: template.value as any,
+      template: resolvedTemplate as any,
       baseUrl: baseUrl.value || undefined,
       generationMode: generationMode.value as any,
       schemaDeclarationStyle: schemaStyle.value as any,
@@ -156,7 +171,8 @@ async function generate() {
     outputHtml.value = await renderHighlighted(code);
 
     saveSession({
-      template: template.value,
+      l1Template: l1Template.value,
+      l2Template: l2Template.value,
       generationMode: generationMode.value,
       schemaStyle: schemaStyle.value,
       enumStyle: enumStyle.value,
@@ -269,18 +285,31 @@ function getNavHeight(): number {
       <div class="pg-settings-row">
         <label class="pg-field">
           <span class="pg-label">
-            Template
-            <HintIcon :hint="HINTS.template" />
+            HTTP client
+            <HintIcon :hint="HINTS.l1Template" />
           </span>
           <div class="pg-select-wrap">
-            <select v-model="template" class="pg-select">
+            <select v-model="l1Template" class="pg-select" @change="onL1Change">
               <option value="axios">axios</option>
               <option value="fetch">fetch</option>
               <option value="xior">xior</option>
-              <option value="swr-axios">swr-axios</option>
-              <option value="tsq-xior">tsq-xior</option>
               <option value="ng1">ng1</option>
               <option value="ng2">ng2</option>
+            </select>
+            <ChevronDownIcon />
+          </div>
+        </label>
+
+        <label class="pg-field" :class="{ 'pg-field--disabled': isL2Disabled }">
+          <span class="pg-label">
+            Reactive layer
+            <HintIcon :hint="HINTS.l2Template" />
+          </span>
+          <div class="pg-select-wrap">
+            <select v-model="l2Template" class="pg-select" :disabled="isL2Disabled">
+              <option value="">none</option>
+              <option value="swr">swr</option>
+              <option value="tsq">tsq</option>
             </select>
             <ChevronDownIcon />
           </div>
@@ -701,6 +730,11 @@ function getNavHeight(): number {
 
 .pg-field--checkbox {
   min-width: unset;
+}
+
+.pg-field--disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .pg-spacer {

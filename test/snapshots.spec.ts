@@ -1,18 +1,28 @@
 import { test, describe, expect } from 'bun:test';
 
 import { runCodeGenerator } from '../src/index';
-import type { FullAppOptions, Template } from '../src/types';
+import type { FullAppOptions, TemplateInput } from '../src/types';
 
-const templates: Template[] = ['axios', 'xior', 'swr-axios', 'fetch', 'ng1', 'ng2', 'tsq-xior'];
+type SnapshotEntry = { snapshotName: string; template: TemplateInput };
+
+const snapshots: SnapshotEntry[] = [
+  { snapshotName: 'axios', template: 'axios' },
+  { snapshotName: 'xior', template: 'xior' },
+  { snapshotName: 'fetch', template: 'fetch' },
+  { snapshotName: 'ng1', template: 'ng1' },
+  { snapshotName: 'ng2', template: 'ng2' },
+  { snapshotName: 'swr', template: ['swr', 'axios'] },
+  { snapshotName: 'tsq', template: ['tsq', 'xior'] },
+];
 
 describe('petstore snapshots', () => {
-  for (const template of templates) {
-    test(`should match existing ${template} snapshot`, async () => {
-      const snapshotFile = `./test/snapshots/${template}.ts`;
+  for (const { snapshotName, template } of snapshots) {
+    test(`should match existing ${snapshotName} snapshot`, async () => {
+      const snapshotFile = `./test/snapshots/${snapshotName}.ts`;
       const parameters: FullAppOptions = {
         src: './test/petstore-v3.yml',
         out: './.tmp/test/',
-        template,
+        template: template as any,
         queryParamsSerialization: {
           allowDots: true,
           arrayFormat: 'repeat',

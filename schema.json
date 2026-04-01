@@ -57,17 +57,27 @@
         },
         "template": {
           "default": "axios",
-          "description": "Template that will be used for generating the API client. You can reference bundled templates by name or provide path to the custom template as well",
-          "examples": [
-            "axios",
-            "xior",
-            "swr-axios",
-            "fetch",
-            "ng1",
-            "ng2",
-            "tsq-xior"
-          ],
-          "type": "string"
+          "description": "Template that will be used for generating the API client. Use a single L1 template name (e.g. \"axios\"), a single L2 name (defaults to \"fetch\" as L1), or a [L2, L1] array for custom pairings.",
+          "oneOf": [
+            {
+              "type": "string",
+              "examples": ["axios", "fetch", "xior", "ng1", "ng2", "swr", "tsq"]
+            },
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 2,
+              "maxItems": 2,
+              "examples": [
+                ["swr", "axios"],
+                ["swr", "fetch"],
+                ["swr", "xior"],
+                ["tsq", "axios"],
+                ["tsq", "fetch"],
+                ["tsq", "xior"]
+              ]
+            }
+          ]
         },
         "baseUrl": {
           "default": "",

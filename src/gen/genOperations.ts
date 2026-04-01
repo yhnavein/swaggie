@@ -9,7 +9,8 @@ import {
   groupOperationsByGroupName,
   orderBy,
 } from '../utils/utils';
-import { renderFile } from '../utils/templateEngine';
+import { renderFile, hasTemplateFile } from '../utils/templateEngine';
+import { getL1Template } from '../utils/templateValidator';
 import { generateBarrelFile } from './createBarrel';
 import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
@@ -26,11 +27,22 @@ export default async function generateOperations(
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix;
-  let result = FILE_HEADER + renderFile('baseClient.ejs', {
+  const baseClientData = {
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,
-  });
+  };
+
+  // When a composite [L2, L1] template is used, the L2 base client contains
+  // reactive library imports (e.g. useSWR, useQuery). These are placed first
+  // so all imports appear at the top of the file before the HTTP client setup.
+  let baseClients = '';
+  if (hasTemplateFile('baseClientL2.ejs')) {
+    baseClients += renderFile('baseClientL2.ejs', baseClientData);
+  }
+  baseClients += renderFile('baseClient.ejs', baseClientData);
+
+  let result = FILE_HEADER + baseClients;
 
   for (const name in groups) {
     const group = groups[name];
@@ -132,7 +144,7 @@ export function prepareOperations(
       // Some libraries need explicit Content-Type for request bodies.
       if (body?.contentType === 'urlencoded') {
         upsertFixedHeader(headers, 'Content-Type', 'application/x-www-form-urlencoded');
-      } else if (body?.contentType === 'json' && options.template === 'fetch') {
+      } else if (body?.contentType === 'json' && getL1Template(options.template) === 'fetch') {
         upsertFixedHeader(headers, 'Content-Type', 'application/json');
       }
 

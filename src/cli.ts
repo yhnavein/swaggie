@@ -67,7 +67,12 @@ program
   .option('-b, --baseUrl <string>', 'Base URL that will be used as a default value in the clients')
   .option(
     '-t, --template <string>',
-    'Template used for generating API client. Default: "axios". Other: "fetch", "ng1", "ng2", "swr-axios", "xior", "tsq-xior"'
+    'Template used for generating API client. ' +
+      'L1 (HTTP client) templates: "axios" (default), "fetch", "xior", "ng1", "ng2". ' +
+      'L2 (reactive layer) templates must be paired with an L1 using a comma-separated value: ' +
+      '"swr,axios", "swr,fetch", "tsq,xior", "tsq,fetch", etc. ' +
+      'Providing only an L2 name (e.g. "swr") defaults to "fetch" as the L1.',
+    parseTemplateArg
   )
   .option('--preferAny', 'Use "any" type instead of "unknown"')
   .option(
@@ -120,6 +125,19 @@ function readPackageJson() {
   } catch (e) {
     throw new Error('Could not read package.json file');
   }
+}
+
+function parseTemplateArg(value: string): string | [string, string] {
+  const parts = value.split(',').map((s) => s.trim());
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  if (parts.length === 2) {
+    return [parts[0], parts[1]];
+  }
+  throw new Error(
+    `--template accepts at most 2 comma-separated values (e.g. "swr,axios"). Got ${parts.length}.`
+  );
 }
 
 function parseQueryParamsAsObjectArg(value?: string): boolean | number {

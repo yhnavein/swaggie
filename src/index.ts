@@ -4,6 +4,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import generateCode from './gen';
 import type { AppOptions, CliOptions, EnumNamesStyle, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
+import { validateTemplate, normalizeTemplate } from './utils/templateValidator';
 import { APP_DEFAULTS } from './swagger';
 
 /**
@@ -35,6 +36,7 @@ function verifyOptions(options: Partial<FullAppOptions>) {
 
 function gen(spec: OA3.Document, options: AppOptions): Promise<string> {
   if (options.generationMode === 'full') {
+    validateTemplate(options.template);
     loadAllTemplateFiles(options.template);
   }
 
@@ -105,7 +107,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
 
   return {
     ...rest,
-    template: template ?? APP_DEFAULTS.template,
+    template: normalizeTemplate(template ?? APP_DEFAULTS.template),
     servicePrefix: rest.servicePrefix ?? APP_DEFAULTS.servicePrefix,
     nullableStrategy: nullables ?? rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
     generationMode: mode ?? rest.generationMode ?? APP_DEFAULTS.generationMode,
