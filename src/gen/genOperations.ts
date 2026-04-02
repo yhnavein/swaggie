@@ -42,7 +42,8 @@ export default async function generateOperations(
   }
   baseClients += renderFile('baseClient.ejs', baseClientData);
 
-  let result = FILE_HEADER + baseClients;
+  const clientDirective = options.useClient ? "'use client';\n" : '';
+  let result = clientDirective + FILE_HEADER + baseClients;
 
   for (const name in groups) {
     const group = groups[name];

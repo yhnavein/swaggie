@@ -76,6 +76,10 @@ program
   )
   .option('--preferAny', 'Use "any" type instead of "unknown"')
   .option(
+    '-C, --useClient',
+    "Prepend 'use client'; to the generated file. Required for Next.js App Router with SWR or TanStack Query hooks"
+  )
+  .option(
     '--skipDeprecated',
     'Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code'
   )

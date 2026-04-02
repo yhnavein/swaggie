@@ -40,6 +40,8 @@ export const HINTS: Record<string, string> = {
   allowDots:
     'Use dot notation for nested object query params (a.b=1) instead of bracket notation (a[b]=1).',
   preferAny: 'Use the "any" type instead of "unknown" for untyped or free-form values.',
+  useClient:
+    'Prepend \'use client\';\' to the generated file. Required for Next.js App Router when using SWR or TanStack Query — hooks can only run in Client Components. Has no effect outside RSC environments.',
 };
 
 export const EXAMPLE_SPEC = `openapi: "3.0.3"

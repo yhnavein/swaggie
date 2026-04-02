@@ -629,4 +629,38 @@ describe('runCodeGenerator — template validation', () => {
     // fetch base client should be present
     expect(code).toContain('defaults');
   });
+
+  test('prepends "use client"; when useClient is true', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'axios'],
+      useClient: true,
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code.startsWith("'use client';\n")).toBe(true);
+  });
+
+  test('does not prepend "use client"; by default', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'axios'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code.startsWith("'use client'")).toBe(false);
+  });
+
+  test('useClient is preserved in returned options', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['tsq', 'fetch'],
+      useClient: true,
+    };
+
+    const [, opts] = await runCodeGenerator(parameters as any);
+    expect(opts.useClient).toBe(true);
+  });
 });

@@ -89,6 +89,7 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
     --servicePrefix        Prefix for service names — useful when generating multiple APIs
     --allowDots            Use dot notation to serialize nested object query params
     --arrayFormat          How arrays are serialized: "indices", "repeat", or "brackets"
+-C, --useClient            Prepend 'use client'; directive (Next.js App Router + SWR/TSQ)
 -h, --help                 Show help
 ```
 

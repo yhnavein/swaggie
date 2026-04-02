@@ -53,6 +53,14 @@ export interface ClientOptions {
    */
   enumNamesStyle?: EnumNamesStyle;
 
+  /**
+   * Prepends `'use client';` as the very first line of the generated file.
+   * Required for Next.js App Router when using SWR or TanStack Query hooks,
+   * which can only run in Client Components.
+   * Has no effect and should not be used with non-RSC environments.
+   */
+  useClient?: boolean;
+
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
     /** Global-level modifiers for parameter with a given name */

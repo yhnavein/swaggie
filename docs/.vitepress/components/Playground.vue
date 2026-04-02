@@ -56,6 +56,10 @@ const enumNamesStyle = ref<string>(s('enumNamesStyle', 'original'));
 const nullableStrategy = ref<string>(s('nullableStrategy', 'ignore'));
 const baseUrl = ref<string>(s('baseUrl', ''));
 const skipDeprecated = ref<boolean>(s('skipDeprecated', false));
+const useClient = ref<boolean>(s('useClient', false));
+
+/** useClient only makes sense when an L2 reactive layer is selected */
+const isUseClientDisabled = computed(() => !l2Template.value);
 
 // ─── Settings — advanced row ──────────────────────────────────────────────────
 
@@ -158,6 +162,7 @@ async function generate() {
       enumNamesStyle: enumNamesStyle.value as any,
       nullableStrategy: nullableStrategy.value as any,
       skipDeprecated: skipDeprecated.value,
+      useClient: useClient.value || undefined,
       dateFormat: dateFormat.value as any,
       preferAny: preferAny.value,
       servicePrefix: servicePrefix.value || undefined,
@@ -180,6 +185,7 @@ async function generate() {
       nullableStrategy: nullableStrategy.value,
       baseUrl: baseUrl.value,
       skipDeprecated: skipDeprecated.value,
+      useClient: useClient.value,
       showAdvanced: showAdvanced.value,
       dateFormat: dateFormat.value,
       preferAny: preferAny.value,
@@ -412,6 +418,23 @@ function getNavHeight(): number {
               id="skipDeprecated"
             />
             <label for="skipDeprecated" class="pg-toggle" />
+          </div>
+        </label>
+
+        <label class="pg-field pg-field--checkbox" :class="{ 'pg-field--disabled': isUseClientDisabled }">
+          <span class="pg-label">
+            Use client
+            <HintIcon :hint="HINTS.useClient" />
+          </span>
+          <div class="pg-checkbox-wrap">
+            <input
+              v-model="useClient"
+              type="checkbox"
+              class="pg-checkbox"
+              id="useClient"
+              :disabled="isUseClientDisabled"
+            />
+            <label for="useClient" class="pg-toggle" />
           </div>
         </label>
 

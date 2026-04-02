@@ -38,6 +38,7 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--servicePrefix` | — | `string` | `""` | Prefix for generated service (client object) names. |
 | `--allowDots` | — | `boolean` | `true` | Use dot notation for nested object query params (`a.b=1` vs `a[b]=1`). |
 | `--arrayFormat` | — | `string` | `repeat` | Array serialization in query strings: `indices`, `repeat`, or `brackets`. |
+| `--useClient` | `-C` | `boolean` | `false` | Prepend `'use client';` as the first line of the generated file. Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates. Has no effect and should not be used outside of RSC environments. |
 | `--version` | `-V` | — | — | Print the installed version number and exit. |
 | `--help` | `-h` | — | — | Show the help message and exit. |
 
@@ -106,6 +107,26 @@ swaggie -s ./spec.json -o ./client.ts -t swr,fetch
 
 ```bash
 swaggie -s ./spec.json -o ./client.ts --skipDeprecated
+```
+
+### Next.js App Router (SWR or TanStack Query)
+
+SWR and TanStack Query hooks can only run in Client Components. Use `--useClient` (or `-C`) to prepend the required `'use client';` directive:
+
+```bash
+swaggie -s ./spec.json -o ./src/api/client.ts -t swr,axios --useClient
+swaggie -s ./spec.json -o ./src/api/client.ts -t tsq,fetch -C
+```
+
+Or in a config file:
+
+```json
+{
+  "src": "./spec.json",
+  "out": "./src/api/client.ts",
+  "template": ["swr", "axios"],
+  "useClient": true
+}
 ```
 
 ## Piping to a formatter

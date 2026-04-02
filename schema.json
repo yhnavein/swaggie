@@ -99,6 +99,11 @@
           "description": "Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code",
           "type": "boolean"
         },
+        "useClient": {
+          "default": false,
+          "description": "Prepend 'use client'; as the very first line of the generated file. Required for Next.js App Router when using SWR or TanStack Query hooks, which can only run in Client Components. Has no effect and should not be used outside of RSC environments.",
+          "type": "boolean"
+        },
         "dateFormat": {
           "default": "Date",
           "description": "It determines how Date fields will be handled and what type they will have in models",
