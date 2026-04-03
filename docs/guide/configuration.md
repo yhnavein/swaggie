@@ -241,6 +241,32 @@ See [Query Parameter Serialization](/guide/advanced#query-parameter-serializatio
 
 ---
 
+### `mocks`
+
+**Type:** `string`
+
+Output path for the generated mock/stub file. When set, Swaggie writes a companion file exporting typed spy stubs for every client method and hook. Requires `testingFramework` and `out` to also be set.
+
+```json
+{ "mocks": "./src/__mocks__/api.ts" }
+```
+
+See [Mocking](/guide/mocking) for a full guide.
+
+---
+
+### `testingFramework`
+
+**Type:** `"vitest" | "jest"`
+
+The test framework whose spy functions (`vi.fn()` or `jest.fn()`) are used in the generated mock file. Requires `mocks` and `out` to also be set.
+
+```json
+{ "testingFramework": "vitest" }
+```
+
+---
+
 ### `modifiers`
 
 **Type:** `object`

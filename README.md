@@ -22,6 +22,7 @@ See the [Example section](#example) for a quick demo, or visit the full document
 
 - Generates TypeScript code from OpenAPI 3.0, 3.1, and 3.2 specs
 - Supports multiple HTTP client libraries out of the box: `fetch`, `axios`, `xior`, `Angular 1`, `Angular 2+`; with optional reactive layers (`swr`, `tsq`) that compose with any compatible HTTP client
+- **Auto-generated mock/stub files** for Vitest and Jest — typed spies for every client method and hook, with ergonomic helpers like `mockSWR()` and `mockQuery()`
 - Custom templates — bring your own to fit your existing codebase
 - Supports `allOf`, `oneOf`, `anyOf`, `$ref`, nullable types, and various enum definitions
 - Handles multiple content types: JSON, plain text, multipart/form-data, URL-encoded, and binary
@@ -72,25 +73,27 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 **Available options:**
 
 ```
--V, --version              Output the version number
--c, --config <path>        Path to a JSON configuration file
--s, --src <url|path>       URL or file path to the OpenAPI spec
--o, --out <filePath>       Output file path (omit to print to stdout)
--b, --baseUrl <string>     Default base URL for the generated client (default: "")
--t, --template <string>    Template to use. Single name: "axios", "fetch", "xior", "ng1", "ng2", "swr", "tsq". Reactive pair: "swr,axios" / "tsq,xior" / etc. (default: "axios")
--m, --mode <mode>          Generation mode: "full" or "schemas" (default: "full")
--d, --schemaStyle <style>  Schema object style: "interface" or "type" (default: "interface")
-    --enumStyle <style>    Enum style for plain string enums: "union" or "enum" (default: "union")
-    --enumNamesStyle <s>   Enum member name casing: "original" or "PascalCase" (default: "original")
-    --dateFormat <format>  Date handling in schemas: "Date" or "string"
-    --nullables <strategy> Nullable handling: "include", "nullableAsOptional", or "ignore"
-    --preferAny            Use "any" instead of "unknown" for untyped values (default: false)
-    --skipDeprecated       Exclude deprecated operations from the output (default: false)
-    --servicePrefix        Prefix for service names — useful when generating multiple APIs
-    --allowDots            Use dot notation to serialize nested object query params
-    --arrayFormat          How arrays are serialized: "indices", "repeat", or "brackets"
--C, --useClient            Prepend 'use client'; directive (Next.js App Router + SWR/TSQ)
--h, --help                 Show help
+-V, --version                  Output the version number
+-c, --config <path>            Path to a JSON configuration file
+-s, --src <url|path>           URL or file path to the OpenAPI spec
+-o, --out <filePath>           Output file path (omit to print to stdout)
+-b, --baseUrl <string>         Base URL that will be used as a default value in the clients
+-t, --template <string>        Template to use. Single name: "axios", "fetch", "xior", "ng1", "ng2", "swr", "tsq". Reactive pair: "swr,axios" / "tsq,xior" / etc. (default: "axios")
+-m, --mode <mode>              Generation mode: "full" or "schemas" (default: "full")
+-d, --schemaStyle <style>      Schema object style: "interface" or "type" (default: "interface")
+    --enumStyle <style>        Enum style for plain string enums: "union" or "enum" (default: "union")
+    --enumNamesStyle <s>       Enum member name casing: "original" or "PascalCase" (default: "original")
+    --dateFormat <format>      How date fields are emitted in generated types
+    --nullables <strategy>     Nullable handling: "include", "nullableAsOptional", or "ignore"
+    --preferAny                Use "any" instead of "unknown" for untyped values (default: false)
+    --skipDeprecated           Exclude deprecated operations from the output (default: false)
+    --servicePrefix            Prefix for service names — useful when generating multiple APIs
+    --allowDots                Use dot notation to serialize nested object query params
+    --arrayFormat              How arrays are serialized: "indices", "repeat", or "brackets"
+-C, --useClient                Prepend 'use client'; directive (Next.js App Router + SWR/TSQ)
+    --mocks <path>             Output path for a generated mock/stub file (requires --testingFramework and --out)
+-T, --testingFramework <name>  Framework for generated mocks: "vitest" or "jest" (requires --mocks and --out)
+-h, --help                     Show help
 ```
 
 ### Formatting the Output
@@ -405,6 +408,39 @@ biome check ./FILE_PATH.ts --apply-unsafe
 ```
 
 Either tool needs to be installed separately and configured for your project.
+
+---
+
+## Generating Mocks
+
+Swaggie can generate a companion mock file alongside your client — a set of typed spy stubs for every method and hook, ready to drop into your tests.
+
+```bash
+swaggie -s ./spec.json -o ./src/api/client.ts -t swr,axios \
+  --mocks ./src/__mocks__/api.ts --testingFramework vitest
+```
+
+Or in a config file:
+
+```json
+{
+  "src": "./openapi.json",
+  "out": "./src/api/client.ts",
+  "template": ["swr", "axios"],
+  "mocks": "./src/__mocks__/api.ts",
+  "testingFramework": "vitest"
+}
+```
+
+The generated mock file exports the same names as the real client, so `vi.mock('./api', () => import('./__mocks__/api'))` is all you need in tests. For L2 (SWR/TSQ) templates, hook stubs come with shorthand helpers:
+
+```ts
+pet.queries.usePetById.mockSWR({ data: { id: 1, name: 'Rex' } });
+pet.mutations.useAddPet.mockSWRMutation({ isMutating: false });
+// TanStack Query equivalents: mockQuery() / mockMutation()
+```
+
+See the [Mocking guide](https://yhnavein.github.io/swaggie/guide/mocking) for full details.
 
 ---
 

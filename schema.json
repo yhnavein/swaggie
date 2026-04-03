@@ -159,6 +159,16 @@
             "PascalCase"
           ]
         },
+        "mocks": {
+          "description": "Output path for the generated mock/stub file. Requires `testingFramework` and `out` to also be set. When provided, a companion mock file is generated alongside the main client, exporting typed spy stubs for every operation and hook.",
+          "type": "string",
+          "examples": ["./src/__mocks__/api.ts", "./src/api/api.mock.ts"]
+        },
+        "testingFramework": {
+          "description": "The test framework to use for generated mock stubs. `vitest` uses `vi.fn()`, `jest` uses `jest.fn()`. Requires `mocks` and `out` to also be set.",
+          "type": "string",
+          "enum": ["vitest", "jest"]
+        },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },

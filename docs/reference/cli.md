@@ -39,6 +39,8 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--allowDots` | — | `boolean` | `true` | Use dot notation for nested object query params (`a.b=1` vs `a[b]=1`). |
 | `--arrayFormat` | — | `string` | `repeat` | Array serialization in query strings: `indices`, `repeat`, or `brackets`. |
 | `--useClient` | `-C` | `boolean` | `false` | Prepend `'use client';` as the first line of the generated file. Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates. Has no effect and should not be used outside of RSC environments. |
+| `--mocks` | — | `string` | — | Output path for the generated mock/stub file. Requires `--testingFramework` and `--out`. See [Mocking](/guide/mocking). |
+| `--testingFramework` | `-T` | `string` | — | Test framework for generated mock stubs: `vitest` or `jest`. Requires `--mocks` and `--out`. |
 | `--version` | `-V` | — | — | Print the installed version number and exit. |
 | `--help` | `-h` | — | — | Show the help message and exit. |
 
