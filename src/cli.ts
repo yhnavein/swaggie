@@ -13,6 +13,11 @@ const arrayFormatOption = new Option(
   'Determines how arrays should be serialized'
 ).choices(['indices', 'repeat', 'brackets']);
 
+const testingFrameworkOption = new Option(
+  '-T, --testingFramework <framework>',
+  'Test framework for generated mock stubs (requires --mocks and --out)'
+).choices(['vitest', 'jest']);
+
 const packageJson = readPackageJson();
 
 const modeOption = new Option('-m, --mode <mode>', 'Generation mode').choices([
@@ -98,7 +103,12 @@ program
   .addOption(enumNamesStyleOption)
   .addOption(dateFormatOption)
   .addOption(nullableStrategyOption)
-  .addOption(queryParamsAsObjectOption);
+  .addOption(queryParamsAsObjectOption)
+  .option(
+    '--mocks <path>',
+    'Output path for the generated mock/stub file (requires --testingFramework and --out)'
+  )
+  .addOption(testingFrameworkOption);
 
 program.parse(process.argv);
 

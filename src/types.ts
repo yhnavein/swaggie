@@ -61,6 +61,21 @@ export interface ClientOptions {
    */
   useClient?: boolean;
 
+  /**
+   * Output path for the generated mock/stub file. Requires `testingFramework`
+   * and `out` to also be set. When provided, a companion mock file is generated
+   * alongside the main client, exporting typed spy stubs for every operation.
+   */
+  mocks?: string;
+
+  /**
+   * The test framework to use for generated mock stubs.
+   * - `'vitest'` — uses `vi.fn()` from `vitest`
+   * - `'jest'`   — uses `jest.fn()` from `@jest/globals`
+   * Requires `mocks` and `out` to also be set.
+   */
+  testingFramework?: TestingFramework;
+
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
     /** Global-level modifiers for parameter with a given name */
@@ -80,6 +95,8 @@ export interface CliOptions extends Omit<FullAppOptions, 'enumNamesStyle'> {
   /** Accepts 'original', 'PascalCase', or 'pascal' (normalized to 'PascalCase') */
   enumNamesStyle?: string;
   nullables?: NullableStrategy;
+  mocks?: string;
+  testingFramework?: TestingFramework;
 }
 
 export interface FullAppOptions extends ClientOptions {
@@ -112,6 +129,7 @@ export type GenerationMode = 'full' | 'schemas';
 export type SchemaDeclarationStyle = 'interface' | 'type';
 export type EnumDeclarationStyle = 'union' | 'enum';
 export type EnumNamesStyle = 'original' | 'PascalCase';
+export type TestingFramework = 'vitest' | 'jest';
 
 /**
  * Internal options type used throughout the app after `prepareAppOptions` has run.
@@ -131,6 +149,8 @@ export interface AppOptions extends ClientOptions {
     arrayFormat: ArrayFormat;
     queryParamsAsObject: boolean | number;
   };
+  mocks?: string;
+  testingFramework?: TestingFramework;
 }
 
 /**

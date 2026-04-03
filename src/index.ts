@@ -32,6 +32,14 @@ function verifyOptions(options: Partial<FullAppOptions>) {
   if (!!options.config === !!options.src) {
     throw new Error('You need to provide either --config or --src parameters');
   }
+  if (!!options.mocks !== !!options.testingFramework) {
+    throw new Error('--mocks and --testingFramework must be used together');
+  }
+  if (options.mocks && !options.out) {
+    throw new Error(
+      '--mocks requires --out to be set, since the mock file needs to import the generated client'
+    );
+  }
 }
 
 function gen(spec: OA3.Document, options: AppOptions): Promise<string> {
@@ -93,6 +101,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     nullables,
     template,
     queryParamsSerialization = {},
+    mocks,
+    testingFramework,
     ...rest
   } = cliOpts;
   const mergedQueryParamsSerialization = {
@@ -117,6 +127,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
       enumStyle ?? rest.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
     enumNamesStyle: normalizeEnumNamesStyle(enumNamesStyle),
     queryParamsSerialization: mergedQueryParamsSerialization,
+    ...(mocks !== undefined ? { mocks } : {}),
+    ...(testingFramework !== undefined ? { testingFramework } : {}),
   };
 }
 
