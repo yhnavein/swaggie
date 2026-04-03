@@ -9,7 +9,6 @@ import type { AppOptions, TestingFramework } from '../types';
 import type { IOperation } from './types';
 
 const MOCK_FILE_HEADER = `\
-/* istanbul ignore file -- auto-generated test helper */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------

@@ -1,4 +1,3 @@
-/* istanbul ignore file -- auto-generated test helper */
 /* tslint:disable */
 /* eslint-disable */
 //----------------------

@@ -42,6 +42,10 @@ export const HINTS: Record<string, string> = {
   preferAny: 'Use the "any" type instead of "unknown" for untyped or free-form values.',
   useClient:
     'Prepend \'use client\';\' to the generated file. Required for Next.js App Router when using SWR or TanStack Query — hooks can only run in Client Components. Has no effect outside RSC environments.',
+  generateMocks:
+    'When enabled, a companion mock file is generated alongside the client. It exports typed spy stubs for every method and hook, ready to drop into your tests. Only available in "full" generation mode.',
+  testingFramework:
+    'The test framework whose spy functions are used in the generated mock file. "vitest" uses vi.fn(), "jest" uses jest.fn(). Only relevant when "Generate mocks" is enabled.',
 };
 
 export const EXAMPLE_SPEC = `openapi: "3.0.3"
