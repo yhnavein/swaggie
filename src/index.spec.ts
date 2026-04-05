@@ -1,4 +1,5 @@
 import { test, describe, beforeEach, expect, spyOn } from 'bun:test';
+import fs from 'node:fs';
 
 import { runCodeGenerator, applyConfigFile, prepareAppOptions } from './';
 import { mockFetchWithFile } from '../test/test.utils';
@@ -22,6 +23,15 @@ describe('runCodeGenerator', () => {
       throw new Error('Expected error to be thrown');
     } catch (e) {
       expect(e.message).toContain('You need to provide');
+    }
+  });
+
+  test('fails when null is passed as options', async () => {
+    try {
+      await runCodeGenerator(null as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('Options were not provided');
     }
   });
 
@@ -247,6 +257,18 @@ describe('applyConfigFile', () => {
       allowDots: false,
       queryParamsAsObject: false,
     });
+  });
+
+  test('fails with a clear error when config file contains an empty array', async () => {
+    // Write a temp config file containing an empty JSON array
+    const tmpPath = './.tmp/test/empty-array-config.json';
+    await Bun.write(tmpPath, '[]');
+    try {
+      await applyConfigFile({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('Could not correctly load config file');
+    }
   });
 });
 
@@ -547,6 +569,36 @@ describe('prepareAppOptions', () => {
       expect(result.template).toEqual(['swr', 'axios']);
     });
   });
+
+  describe('mocks and testingFramework', () => {
+    test('passes mocks through when provided', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        mocks: './src/__mocks__/api.ts',
+        testingFramework: 'vitest',
+      });
+      expect(result.mocks).toBe('./src/__mocks__/api.ts');
+    });
+
+    test('passes testingFramework through when provided', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        mocks: './src/__mocks__/api.ts',
+        testingFramework: 'jest',
+      });
+      expect(result.testingFramework).toBe('jest');
+    });
+
+    test('mocks is absent from result when not provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.mocks).toBeUndefined();
+    });
+
+    test('testingFramework is absent from result when not provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.testingFramework).toBeUndefined();
+    });
+  });
 });
 
 describe('runCodeGenerator — template validation', () => {
@@ -662,5 +714,79 @@ describe('runCodeGenerator — template validation', () => {
 
     const [, opts] = await runCodeGenerator(parameters as any);
     expect(opts.useClient).toBe(true);
+  });
+
+  // ── mock flag validation ───────────────────────────────────────────────────
+
+  test('fails when --mocks is provided without --testingFramework', async () => {
+    try {
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: './.tmp/test/api.ts',
+        mocks: './.tmp/test/api.mock.ts',
+      } as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('--mocks and --testingFramework must be used together');
+    }
+  });
+
+  test('fails when --testingFramework is provided without --mocks', async () => {
+    try {
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: './.tmp/test/api.ts',
+        testingFramework: 'vitest',
+      } as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('--mocks and --testingFramework must be used together');
+    }
+  });
+
+  test('fails when --mocks is provided without --out', async () => {
+    try {
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        mocks: './.tmp/test/api.mock.ts',
+        testingFramework: 'vitest',
+      } as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e.message).toContain('--mocks requires --out to be set');
+    }
+  });
+
+  test('generates mock file alongside client when --mocks and --testingFramework are set', async () => {
+    const outPath = './.tmp/test/mock-gen-test/api.ts';
+    const mocksPath = './.tmp/test/mock-gen-test/api.mock.ts';
+
+    await runCodeGenerator({
+      src: './test/petstore-v3.yml',
+      out: outPath,
+      mocks: mocksPath,
+      testingFramework: 'vitest',
+    } as any);
+
+    const mockFile = await Bun.file(mocksPath).text();
+    expect(mockFile).toContain('createClientMocks');
+    expect(mockFile).toContain("import { vi } from 'vitest'");
+    expect(mockFile).toContain("import * as realApi from './api'");
+  });
+
+  test('mock file uses jest primitives when testingFramework is jest', async () => {
+    const outPath = './.tmp/test/mock-gen-jest/api.ts';
+    const mocksPath = './.tmp/test/mock-gen-jest/api.mock.ts';
+
+    await runCodeGenerator({
+      src: './test/petstore-v3.yml',
+      out: outPath,
+      mocks: mocksPath,
+      testingFramework: 'jest',
+    } as any);
+
+    const mockFile = await Bun.file(mocksPath).text();
+    expect(mockFile).toContain("import { jest } from '@jest/globals'");
+    expect(mockFile).toContain('jest.spyOn(');
   });
 });
