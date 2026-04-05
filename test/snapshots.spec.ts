@@ -30,6 +30,7 @@ const mockSnapshots: MockSnapshotEntry[] = [
   { snapshotName: 'xior.mock', template: 'xior', testingFramework: 'vitest' },
   { snapshotName: 'swr-axios.mock', template: ['swr', 'axios'], testingFramework: 'jest' },
   { snapshotName: 'tsq.mock', template: ['tsq', 'xior'], testingFramework: 'vitest' },
+  { snapshotName: 'ng2.mock', template: 'ng2', testingFramework: 'vitest' },
 ];
 
 const BASE_PARAMS: Pick<

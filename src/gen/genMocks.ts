@@ -42,6 +42,15 @@ export default function generateMocks(
 ): string {
   const fw = options.testingFramework!;
   const template = options.template;
+
+  if (template === 'ng1') {
+    throw new Error(
+      'Mock generation is not supported for the "ng1" template. ' +
+        'Use "ng2", "axios", "fetch", "xior", "swr", or "tsq" instead.'
+    );
+  }
+
+  const isNg2 = template === 'ng2';
   const l2 = getL2Name(template);
 
   const operations = getOperations(spec);
@@ -64,6 +73,20 @@ export default function generateMocks(
   // Framework import
   result += buildFrameworkImport(fw);
   result += '\n';
+
+  if (isNg2) {
+    // ng2: type-only import (no Angular DI triggered), MockedService<T> utility, vi.fn()-based stubs
+    result += buildNg2TypeImport(preparedGroups, relativeApiImport);
+    result += '\n';
+    result += buildMockedServiceType();
+    result += '\n';
+    result += buildNg2CreateClientMocks(preparedGroups, fw);
+    result += '\n';
+    result += 'export type ClientMocks = ReturnType<typeof createClientMocks>;\n';
+    return result;
+  }
+
+  // ── Standard path (axios / fetch / xior / swr / tsq) ───────────────────────
 
   // Real client import — needed for spyOn targets
   result += `import * as realApi from '${relativeApiImport}';\n`;
@@ -103,19 +126,61 @@ export default function generateMocks(
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// L2 detection
-// ---------------------------------------------------------------------------
-
 function getL2Name(template: AppOptions['template']): 'swr' | 'tsq' | null {
   if (!Array.isArray(template)) return null;
   const [l2] = template;
   return isL2Template(l2) ? (l2 as 'swr' | 'tsq') : null;
 }
 
-// ---------------------------------------------------------------------------
-// Framework primitives
-// ---------------------------------------------------------------------------
+/**
+ * Derives the Angular service class name from a camelCase group name.
+ * e.g. "pet" → "PetService", "petstorePet" → "PetstorePetService"
+ */
+function toServiceClassName(camelName: string): string {
+  return camelName.charAt(0).toUpperCase() + camelName.slice(1) + 'Service';
+}
+
+function buildNg2TypeImport(groups: { camelName: string }[], relativeApiImport: string): string {
+  const names = groups.map((g) => toServiceClassName(g.camelName)).join(', ');
+  return `import type { ${names} } from '${relativeApiImport}';\n`;
+}
+
+function buildMockedServiceType(): string {
+  return `\
+export type MockedService<T> = {
+  [K in keyof T]: T[K] extends (...args: infer A) => infer R ? (...args: A) => R : T[K];
+};
+`;
+}
+
+function buildNg2CreateClientMocks(
+  groups: { camelName: string; ops: IOperation[] }[],
+  fw: TestingFramework
+): string {
+  const lines: string[] = ['export function createClientMocks() {', '  return {'];
+
+  for (const { camelName, ops } of groups) {
+    const serviceClass = toServiceClassName(camelName);
+    lines.push(`    ${camelName}Client: {`);
+    for (const op of ops) {
+      if (fw === 'vitest') {
+        lines.push(`      ${op.name}: vi.fn<typeof ${serviceClass}.prototype.${op.name}>(),`);
+      } else {
+        // Jest: bare jest.fn() — no typed fn<F> overload available
+        lines.push(`      ${op.name}: jest.fn(),`);
+      }
+    }
+    if (fw === 'vitest') {
+      lines.push(`    } satisfies MockedService<${serviceClass}>,`);
+    } else {
+      lines.push('    },');
+    }
+  }
+
+  lines.push('  };');
+  lines.push('}');
+  return lines.join('\n') + '\n';
+}
 
 function buildFrameworkImport(fw: TestingFramework): string {
   return fw === 'vitest'
@@ -138,10 +203,6 @@ function fwRef(fw: TestingFramework): string {
   return fw === 'vitest' ? 'vi' : 'jest';
 }
 
-// ---------------------------------------------------------------------------
-// SWR defaults + helpers
-// ---------------------------------------------------------------------------
-
 function buildSwrDefaults(fw: TestingFramework): string {
   return `\
 const defaultSWRReturn = {
@@ -157,7 +218,6 @@ const defaultSWRMutationReturn = {
 function buildSwrHelpers(fw: TestingFramework): string {
   const ref = fwRef(fw);
   return `\
-// ─── SWR mock helpers ────────────────────────────────────────────────────────
 
 /** Augments a spy with a \`mockSWR\` shorthand for useSWR query hooks. */
 function withMockSWR<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
@@ -178,10 +238,6 @@ function withMockSWRMutation<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) 
 }
 `;
 }
-
-// ---------------------------------------------------------------------------
-// TanStack Query defaults + helpers
-// ---------------------------------------------------------------------------
 
 function buildTsqDefaults(fw: TestingFramework): string {
   return `\
@@ -238,10 +294,6 @@ function withMockMutation<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
 `;
 }
 
-// ---------------------------------------------------------------------------
-// createClientMocks — all templates
-// ---------------------------------------------------------------------------
-
 function buildCreateClientMocks(
   groups: { camelName: string; ops: IOperation[] }[],
   fw: TestingFramework
@@ -263,10 +315,6 @@ function buildCreateClientMocks(
   lines.push('}');
   return lines.join('\n') + '\n';
 }
-
-// ---------------------------------------------------------------------------
-// createApiHookMocks — SWR
-// ---------------------------------------------------------------------------
 
 function buildCreateSwrHookMocks(
   groups: { camelName: string; ops: IOperation[] }[],
@@ -304,10 +352,6 @@ function buildCreateSwrHookMocks(
   return lines.join('\n') + '\n';
 }
 
-// ---------------------------------------------------------------------------
-// createApiHookMocks — TanStack Query
-// ---------------------------------------------------------------------------
-
 function buildCreateTsqHookMocks(
   groups: { camelName: string; ops: IOperation[] }[],
   fw: TestingFramework
@@ -343,10 +387,6 @@ function buildCreateTsqHookMocks(
   lines.push('}');
   return lines.join('\n') + '\n';
 }
-
-// ---------------------------------------------------------------------------
-// Shared name helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Converts an operation name to a React hook name.

@@ -20,7 +20,6 @@ const defaultSWRMutationReturn = {
   trigger: jest.fn(), isMutating: false, error: null, data: undefined, isValidating: false,
 };
 
-// ─── SWR mock helpers ────────────────────────────────────────────────────────
 
 /** Augments a spy with a `mockSWR` shorthand for useSWR query hooks. */
 function withMockSWR<T extends ReturnType<typeof jest.spyOn>>(spy: T) {
