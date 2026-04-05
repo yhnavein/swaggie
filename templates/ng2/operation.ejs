@@ -4,7 +4,7 @@
     <% it.parameters.forEach((parameter) => { %>
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
-config?: any
+config?: HttpConfig
   ): Observable<<%~ it.returnType %>> {
 <% if(it.query && it.query.length > 0) { -%>
     const params = paramsSerializer({<%
@@ -19,6 +19,14 @@ config?: any
 <% } else { -%>
     const url = `<%= it.url %>`;
 <% } -%>
+<% if(it.headers && it.headers.length > 0) { it.headers.forEach((parameter) => { %>
+<% if (parameter.value) { %>
+    config = { ...config, headers: { ...config?.headers, '<%= parameter.originalName %>': '<%= parameter.value %>' } };
+<% } else { %>
+    if (<%= parameter.name %>) {
+      config = { ...config, headers: { ...config?.headers, '<%= parameter.originalName %>': <%= parameter.name %> } };
+    }
+<% } %><% }); } %>
 <% if(it.method === 'GET') { %>
     return this.http.get<<%~ it.returnType %>>(this.baseUrl + url, config);
 <% } else if(it.method === 'DELETE') { %>
