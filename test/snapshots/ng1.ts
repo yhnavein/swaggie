@@ -156,6 +156,9 @@ export class petService extends BaseService {
   ): IPromise<unknown> {
     let url = `/pet/${encodeURIComponent(`${petId}`)}?`;
 
+    if (apiKey) {
+      config = { ...config, headers: { ...config?.headers, 'api_key': apiKey } };
+    }
     return this.$delete(
       url,
     config
@@ -253,6 +256,7 @@ export class petService extends BaseService {
   ): IPromise<Pet> {
     let url = `/pet?`;
 
+    config = { ...config, headers: { ...config?.headers, 'Content-Type': 'application/x-www-form-urlencoded' } };
     return this.$put(
       url,
       new URLSearchParams(body as any),

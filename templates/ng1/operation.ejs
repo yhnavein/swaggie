@@ -18,6 +18,14 @@
   <% }); %>
 <% } %>
 
+<% if(it.headers && it.headers.length > 0) { it.headers.forEach((parameter) => { %>
+<% if (parameter.value) { %>
+    config = { ...config, headers: { ...config?.headers, '<%= parameter.originalName %>': '<%= parameter.value %>' } };
+<% } else { %>
+    if (<%= parameter.name %>) {
+      config = { ...config, headers: { ...config?.headers, '<%= parameter.originalName %>': <%= parameter.name %> } };
+    }
+<% } %><% }); } %>
     return this.$<%= it.method.toLowerCase() %>(
       url,
 <% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
