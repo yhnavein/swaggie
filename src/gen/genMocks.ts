@@ -25,10 +25,11 @@ const MOCK_FILE_HEADER = `\
  * Generates a companion mock/stub file for a generated API client.
  *
  * The mock file exports:
- * - Typed spy stubs for every `*Client` object method
- * - When an L2 template (swr/tsq) is active: hook stubs wrapped with
- *   `withMockSWR` / `withMockQuery` / `withMockMutation` helpers
- * - `queryKeys` passthrough (re-exported from the real client — not mocked)
+ * - `createClientMocks()` — spyOn stubs for every `*Client` method (all templates)
+ * - `ClientMocks` type alias
+ * - `createApiHookMocks()` — spyOn stubs for every hook with ergonomic shorthand
+ *   helpers (`mockSWR`, `mockQuery`, etc.) — L2 templates only (swr/tsq)
+ * - `ApiHookMocks` type alias — L2 templates only
  *
  * @param spec              The OpenAPI document
  * @param options           Generator options (must have `testingFramework` set)
@@ -45,9 +46,18 @@ export default function generateMocks(
 
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
-
   const groupNames = Object.keys(groups);
   const servicePrefix = options.servicePrefix;
+
+  // Collect prepared operations per group up-front so we iterate once
+  const preparedGroups = groupNames
+    .map((name) => {
+      const fullName = servicePrefix + name;
+      const camelName = camel(fullName);
+      const ops = prepareOperations(groups[name], options, spec.components);
+      return { name, camelName, ops };
+    })
+    .filter((g) => g.ops.length > 0);
 
   let result = MOCK_FILE_HEADER;
 
@@ -55,103 +65,114 @@ export default function generateMocks(
   result += buildFrameworkImport(fw);
   result += '\n';
 
-  // Real client import — needed for queryKeys passthrough (value import).
-  // Only emitted when there is an L2 (hooks layer).
-  if (l2) {
-    result += `import * as realApi from '${relativeApiImport}';\n`;
-    result += '\n';
-  }
+  // Real client import — needed for spyOn targets
+  result += `import * as realApi from '${relativeApiImport}';\n`;
+  result += '\n';
 
-  // Helper functions (only when L2 is present)
+  // SWR/TSQ helper functions and default return values (L2 only)
   if (l2 === 'swr') {
+    result += buildSwrDefaults(fw);
+    result += '\n';
     result += buildSwrHelpers(fw);
     result += '\n';
   } else if (l2 === 'tsq') {
+    result += buildTsqDefaults(fw);
+    result += '\n';
     result += buildTsqHelpers(fw);
     result += '\n';
   }
 
-  // Per-group stubs
-  for (const name of groupNames) {
-    const group = groups[name];
-    const fullName = servicePrefix + name;
-    const camelName = camel(fullName);
-    const preparedOps = prepareOperations(group, options, spec.components);
+  // ── createClientMocks ───────────────────────────────────────────────────────
+  result += buildCreateClientMocks(preparedGroups, fw);
+  result += '\n';
+  result += 'export type ClientMocks = ReturnType<typeof createClientMocks>;\n';
 
-    if (preparedOps.length === 0) {
-      continue;
-    }
-
-    // *Client stub object
-    result += buildClientStub(camelName, preparedOps, fw);
+  // ── createApiHookMocks (L2 only) ────────────────────────────────────────────
+  if (l2 === 'swr') {
     result += '\n';
-
-    // Hooks stub object (L2 only)
-    if (l2 === 'swr') {
-      result += buildSwrHooksStub(camelName, preparedOps, fw);
-      result += '\n';
-    } else if (l2 === 'tsq') {
-      result += buildTsqHooksStub(camelName, preparedOps, fw);
-      result += '\n';
-    }
+    result += buildCreateSwrHookMocks(preparedGroups, fw);
+    result += '\n';
+    result += 'export type ApiHookMocks = ReturnType<typeof createApiHookMocks>;\n';
+  } else if (l2 === 'tsq') {
+    result += '\n';
+    result += buildCreateTsqHookMocks(preparedGroups, fw);
+    result += '\n';
+    result += 'export type ApiHookMocks = ReturnType<typeof createApiHookMocks>;\n';
   }
 
   return result;
 }
 
 // ---------------------------------------------------------------------------
-// Helpers: L2 detection
+// L2 detection
 // ---------------------------------------------------------------------------
 
 function getL2Name(template: AppOptions['template']): 'swr' | 'tsq' | null {
-  if (!Array.isArray(template)) {
-    return null;
-  }
+  if (!Array.isArray(template)) return null;
   const [l2] = template;
-  if (isL2Template(l2)) {
-    return l2 as 'swr' | 'tsq';
-  }
-  return null;
+  return isL2Template(l2) ? (l2 as 'swr' | 'tsq') : null;
 }
 
 // ---------------------------------------------------------------------------
-// Framework import line
+// Framework primitives
 // ---------------------------------------------------------------------------
 
 function buildFrameworkImport(fw: TestingFramework): string {
-  if (fw === 'vitest') {
-    return "import { vi } from 'vitest';\n";
-  }
-  return "import { jest } from '@jest/globals';\n";
+  return fw === 'vitest'
+    ? "import { vi } from 'vitest';\n"
+    : "import { jest } from '@jest/globals';\n";
 }
 
+/** Returns the spy function expression for the given framework. */
+function spyFn(fw: TestingFramework): string {
+  return fw === 'vitest' ? 'vi.spyOn' : 'jest.spyOn';
+}
+
+/** Returns a new fn() call for the given framework. */
 function fn(fw: TestingFramework): string {
   return fw === 'vitest' ? 'vi.fn()' : 'jest.fn()';
 }
 
+/** Returns the framework object identifier (vi / jest). */
+function fwRef(fw: TestingFramework): string {
+  return fw === 'vitest' ? 'vi' : 'jest';
+}
+
 // ---------------------------------------------------------------------------
-// SWR helper functions
+// SWR defaults + helpers
 // ---------------------------------------------------------------------------
 
+function buildSwrDefaults(fw: TestingFramework): string {
+  return `\
+const defaultSWRReturn = {
+  data: undefined, isLoading: false, error: null, mutate: ${fn(fw)}, isValidating: false,
+};
+
+const defaultSWRMutationReturn = {
+  trigger: ${fn(fw)}, isMutating: false, error: null, data: undefined, isValidating: false,
+};
+`;
+}
+
 function buildSwrHelpers(fw: TestingFramework): string {
-  const fnRef = fw === 'vitest' ? 'vi' : 'jest';
+  const ref = fwRef(fw);
   return `\
 // ─── SWR mock helpers ────────────────────────────────────────────────────────
 
 /** Augments a spy with a \`mockSWR\` shorthand for useSWR query hooks. */
-function withMockSWR<T extends ReturnType<typeof ${fnRef}.fn>>(spy: T) {
+function withMockSWR<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
   return Object.assign(spy, {
     mockSWR({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
-      spy.mockReturnValue({ data, isLoading: isLoading ?? false, error: error ?? null, mutate: ${fn(fw)} });
+      spy.mockReturnValue({ ...defaultSWRReturn, data, isLoading: isLoading ?? false, error: error ?? null });
     },
   });
 }
 
 /** Augments a spy with a \`mockSWRMutation\` shorthand for useSWRMutation hooks. */
-function withMockSWRMutation<T extends ReturnType<typeof ${fnRef}.fn>>(spy: T) {
+function withMockSWRMutation<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
   return Object.assign(spy, {
     mockSWRMutation({ data, isMutating, error }: { data?: unknown; isMutating?: boolean; error?: Error }) {
-      spy.mockReturnValue({ trigger: ${fn(fw)}, isMutating: isMutating ?? false, error: error ?? null, data });
+      spy.mockReturnValue({ ...defaultSWRMutationReturn, trigger: ${fn(fw)}, isMutating: isMutating ?? false, error: error ?? null, data });
     },
   });
 }
@@ -159,45 +180,57 @@ function withMockSWRMutation<T extends ReturnType<typeof ${fnRef}.fn>>(spy: T) {
 }
 
 // ---------------------------------------------------------------------------
-// TanStack Query helper functions
+// TanStack Query defaults + helpers
 // ---------------------------------------------------------------------------
 
+function buildTsqDefaults(fw: TestingFramework): string {
+  return `\
+const defaultQueryReturn = {
+  data: undefined, isLoading: false, isPending: false, isFetching: false,
+  isSuccess: false, error: null, refetch: ${fn(fw)}, status: 'pending' as const,
+};
+
+const defaultMutationReturn = {
+  mutate: ${fn(fw)}, mutateAsync: ${fn(fw)}, isPending: false,
+  isSuccess: false, error: null, data: undefined, reset: ${fn(fw)},
+};
+`;
+}
+
 function buildTsqHelpers(fw: TestingFramework): string {
-  const fnRef = fw === 'vitest' ? 'vi' : 'jest';
+  const ref = fwRef(fw);
   return `\
 // ─── TanStack Query mock helpers ─────────────────────────────────────────────
 
 /** Augments a spy with a \`mockQuery\` shorthand for useQuery hooks. */
-function withMockQuery<T extends ReturnType<typeof ${fnRef}.fn>>(spy: T) {
+function withMockQuery<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
   return Object.assign(spy, {
     mockQuery({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
       const pending = isLoading ?? false;
       spy.mockReturnValue({
+        ...defaultQueryReturn,
         data,
         isLoading: pending,
         isPending: pending,
-        isFetching: false,
         isSuccess: data !== undefined && !pending,
         error: error ?? null,
-        refetch: ${fn(fw)},
-        status: pending ? 'pending' : 'success',
+        status: pending ? 'pending' : ('success' as const),
       });
     },
   });
 }
 
 /** Augments a spy with a \`mockMutation\` shorthand for useMutation hooks. */
-function withMockMutation<T extends ReturnType<typeof ${fnRef}.fn>>(spy: T) {
+function withMockMutation<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
   return Object.assign(spy, {
     mockMutation({ data, isPending, error }: { data?: unknown; isPending?: boolean; error?: Error }) {
       spy.mockReturnValue({
+        ...defaultMutationReturn,
         mutate: ${fn(fw)},
         mutateAsync: ${fn(fw)},
         isPending: isPending ?? false,
-        isSuccess: false,
         error: error ?? null,
         data,
-        reset: ${fn(fw)},
       });
     },
   });
@@ -206,92 +239,109 @@ function withMockMutation<T extends ReturnType<typeof ${fnRef}.fn>>(spy: T) {
 }
 
 // ---------------------------------------------------------------------------
-// *Client stub object
+// createClientMocks — all templates
 // ---------------------------------------------------------------------------
 
-function buildClientStub(
-  camelName: string,
-  operations: IOperation[],
+function buildCreateClientMocks(
+  groups: { camelName: string; ops: IOperation[] }[],
   fw: TestingFramework
 ): string {
-  const lines = operations.map((op) => `  ${op.name}: ${fn(fw)},`);
-  return `export const ${camelName}Client = {\n${lines.join('\n')}\n};\n`;
+  const spy = spyFn(fw);
+  const lines: string[] = ['export function createClientMocks() {', '  return {'];
+
+  for (const { camelName, ops } of groups) {
+    lines.push(`    ${camelName}Client: {`);
+    for (const op of ops) {
+      lines.push(
+        `      ${op.name}: ${spy}(realApi.${camelName}Client, '${op.name}').mockReturnValue(undefined as any),`
+      );
+    }
+    lines.push('    },');
+  }
+
+  lines.push('  };');
+  lines.push('}');
+  return lines.join('\n') + '\n';
 }
 
 // ---------------------------------------------------------------------------
-// SWR hooks stub object
+// createApiHookMocks — SWR
 // ---------------------------------------------------------------------------
 
-function buildSwrHooksStub(
-  camelName: string,
-  operations: IOperation[],
+function buildCreateSwrHookMocks(
+  groups: { camelName: string; ops: IOperation[] }[],
   fw: TestingFramework
 ): string {
-  const getOps = operations.filter((o) => o.method === 'GET');
-  const mutOps = operations.filter((o) => o.method !== 'GET');
+  const spy = spyFn(fw);
+  const lines: string[] = ['export function createApiHookMocks() {', '  return {'];
 
-  const queryLines = getOps.map((op) => {
-    const hookName = toHookName(op.name, 'use');
-    return `    ${hookName}: withMockSWR(${fn(fw)}),`;
-  });
+  for (const { camelName, ops } of groups) {
+    const getOps = ops.filter((o) => o.method === 'GET');
+    const mutOps = ops.filter((o) => o.method !== 'GET');
 
-  const mutationLines = mutOps.map((op) => {
-    const hookName = 'use' + pascal(op.name);
-    return `    ${hookName}: withMockSWRMutation(${fn(fw)}),`;
-  });
+    lines.push(`    ${camelName}: {`);
+    lines.push('      queries: {');
+    for (const op of getOps) {
+      const hookName = toHookName(op.name, 'use');
+      lines.push(
+        `        ${hookName}: withMockSWR(${spy}(realApi.${camelName}.queries, '${hookName}').mockReturnValue(defaultSWRReturn)),`
+      );
+    }
+    lines.push('      },');
+    lines.push('      mutations: {');
+    for (const op of mutOps) {
+      const hookName = 'use' + pascal(op.name);
+      lines.push(
+        `        ${hookName}: withMockSWRMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn)),`
+      );
+    }
+    lines.push('      },');
+    lines.push('    },');
+  }
 
-  return [
-    `export const ${camelName} = {`,
-    `  queries: {`,
-    ...queryLines,
-    `  },`,
-    ``,
-    `  mutations: {`,
-    ...mutationLines,
-    `  },`,
-    ``,
-    `  // queryKeys are pure functions — no mocking needed`,
-    `  queryKeys: realApi.${camelName}.queryKeys,`,
-    `};\n`,
-  ].join('\n');
+  lines.push('  };');
+  lines.push('}');
+  return lines.join('\n') + '\n';
 }
 
 // ---------------------------------------------------------------------------
-// TanStack Query hooks stub object
+// createApiHookMocks — TanStack Query
 // ---------------------------------------------------------------------------
 
-function buildTsqHooksStub(
-  camelName: string,
-  operations: IOperation[],
+function buildCreateTsqHookMocks(
+  groups: { camelName: string; ops: IOperation[] }[],
   fw: TestingFramework
 ): string {
-  const getOps = operations.filter((o) => o.method === 'GET');
-  const mutOps = operations.filter((o) => o.method !== 'GET');
+  const spy = spyFn(fw);
+  const lines: string[] = ['export function createApiHookMocks() {', '  return {'];
 
-  const queryLines = getOps.map((op) => {
-    const hookName = toHookName(op.name, 'use');
-    return `    ${hookName}: withMockQuery(${fn(fw)}),`;
-  });
+  for (const { camelName, ops } of groups) {
+    const getOps = ops.filter((o) => o.method === 'GET');
+    const mutOps = ops.filter((o) => o.method !== 'GET');
 
-  const mutationLines = mutOps.map((op) => {
-    const hookName = 'use' + pascal(op.name);
-    return `    ${hookName}: withMockMutation(${fn(fw)}),`;
-  });
+    lines.push(`    ${camelName}: {`);
+    lines.push('      queries: {');
+    for (const op of getOps) {
+      const hookName = toHookName(op.name, 'use');
+      lines.push(
+        `        ${hookName}: withMockQuery(${spy}(realApi.${camelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn)),`
+      );
+    }
+    lines.push('      },');
+    lines.push('      mutations: {');
+    for (const op of mutOps) {
+      const hookName = 'use' + pascal(op.name);
+      lines.push(
+        `        ${hookName}: withMockMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn)),`
+      );
+    }
+    lines.push('      },');
+    lines.push('    },');
+  }
 
-  return [
-    `export const ${camelName} = {`,
-    `  queries: {`,
-    ...queryLines,
-    `  },`,
-    ``,
-    `  mutations: {`,
-    ...mutationLines,
-    `  },`,
-    ``,
-    `  // queryKeys are pure functions — no mocking needed`,
-    `  queryKeys: realApi.${camelName}.queryKeys,`,
-    `};\n`,
-  ].join('\n');
+  lines.push('  };');
+  lines.push('}');
+  return lines.join('\n') + '\n';
 }
 
 // ---------------------------------------------------------------------------
@@ -300,11 +350,11 @@ function buildTsqHooksStub(
 
 /**
  * Converts an operation name to a React hook name.
- * Strips a leading "get" prefix (case-insensitive) and capitalises, then
+ * Strips a leading "get" prefix (case-insensitive) then capitalises, then
  * prepends the given prefix (e.g. "use").
  *
- * @example toHookName('findPetsByStatus', 'use') → 'useFindPetsByStatus'
  * @example toHookName('getPetById', 'use')       → 'usePetById'
+ * @example toHookName('findPetsByStatus', 'use') → 'useFindPetsByStatus'
  */
 function toHookName(operationName: string, prefix: string): string {
   const stripped = operationName.toLowerCase().startsWith('get')

@@ -10,31 +10,36 @@
 // deno-lint-ignore-file
 import { vi } from 'vitest';
 
-export const petClient = {
-  addPet: vi.fn(),
-  deletePet: vi.fn(),
-  findPets: vi.fn(),
-  findPetsByTags: vi.fn(),
-  getPetById: vi.fn(),
-  updatePet: vi.fn(),
-  updatePetWithForm: vi.fn(),
-  uploadFile: vi.fn(),
-};
+import * as realApi from './api';
 
-export const storeClient = {
-  deleteOrder: vi.fn(),
-  getInventory: vi.fn(),
-  getOrderById: vi.fn(),
-  placeOrder: vi.fn(),
-};
+export function createClientMocks() {
+  return {
+    petClient: {
+      addPet: vi.spyOn(realApi.petClient, 'addPet').mockReturnValue(undefined as any),
+      deletePet: vi.spyOn(realApi.petClient, 'deletePet').mockReturnValue(undefined as any),
+      findPets: vi.spyOn(realApi.petClient, 'findPets').mockReturnValue(undefined as any),
+      findPetsByTags: vi.spyOn(realApi.petClient, 'findPetsByTags').mockReturnValue(undefined as any),
+      getPetById: vi.spyOn(realApi.petClient, 'getPetById').mockReturnValue(undefined as any),
+      updatePet: vi.spyOn(realApi.petClient, 'updatePet').mockReturnValue(undefined as any),
+      updatePetWithForm: vi.spyOn(realApi.petClient, 'updatePetWithForm').mockReturnValue(undefined as any),
+      uploadFile: vi.spyOn(realApi.petClient, 'uploadFile').mockReturnValue(undefined as any),
+    },
+    storeClient: {
+      deleteOrder: vi.spyOn(realApi.storeClient, 'deleteOrder').mockReturnValue(undefined as any),
+      getInventory: vi.spyOn(realApi.storeClient, 'getInventory').mockReturnValue(undefined as any),
+      getOrderById: vi.spyOn(realApi.storeClient, 'getOrderById').mockReturnValue(undefined as any),
+      placeOrder: vi.spyOn(realApi.storeClient, 'placeOrder').mockReturnValue(undefined as any),
+    },
+    userClient: {
+      createUser: vi.spyOn(realApi.userClient, 'createUser').mockReturnValue(undefined as any),
+      createUsersWithListInput: vi.spyOn(realApi.userClient, 'createUsersWithListInput').mockReturnValue(undefined as any),
+      deleteUser: vi.spyOn(realApi.userClient, 'deleteUser').mockReturnValue(undefined as any),
+      getUserByName: vi.spyOn(realApi.userClient, 'getUserByName').mockReturnValue(undefined as any),
+      loginUser: vi.spyOn(realApi.userClient, 'loginUser').mockReturnValue(undefined as any),
+      logoutUser: vi.spyOn(realApi.userClient, 'logoutUser').mockReturnValue(undefined as any),
+      updateUser: vi.spyOn(realApi.userClient, 'updateUser').mockReturnValue(undefined as any),
+    },
+  };
+}
 
-export const userClient = {
-  createUser: vi.fn(),
-  createUsersWithListInput: vi.fn(),
-  deleteUser: vi.fn(),
-  getUserByName: vi.fn(),
-  loginUser: vi.fn(),
-  logoutUser: vi.fn(),
-  updateUser: vi.fn(),
-};
-
+export type ClientMocks = ReturnType<typeof createClientMocks>;

@@ -12,103 +12,106 @@ import { jest } from '@jest/globals';
 
 import * as realApi from './api';
 
+const defaultSWRReturn = {
+  data: undefined, isLoading: false, error: null, mutate: jest.fn(), isValidating: false,
+};
+
+const defaultSWRMutationReturn = {
+  trigger: jest.fn(), isMutating: false, error: null, data: undefined, isValidating: false,
+};
+
 // ─── SWR mock helpers ────────────────────────────────────────────────────────
 
 /** Augments a spy with a `mockSWR` shorthand for useSWR query hooks. */
-function withMockSWR<T extends ReturnType<typeof jest.fn>>(spy: T) {
+function withMockSWR<T extends ReturnType<typeof jest.spyOn>>(spy: T) {
   return Object.assign(spy, {
     mockSWR({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
-      spy.mockReturnValue({ data, isLoading: isLoading ?? false, error: error ?? null, mutate: jest.fn() });
+      spy.mockReturnValue({ ...defaultSWRReturn, data, isLoading: isLoading ?? false, error: error ?? null });
     },
   });
 }
 
 /** Augments a spy with a `mockSWRMutation` shorthand for useSWRMutation hooks. */
-function withMockSWRMutation<T extends ReturnType<typeof jest.fn>>(spy: T) {
+function withMockSWRMutation<T extends ReturnType<typeof jest.spyOn>>(spy: T) {
   return Object.assign(spy, {
     mockSWRMutation({ data, isMutating, error }: { data?: unknown; isMutating?: boolean; error?: Error }) {
-      spy.mockReturnValue({ trigger: jest.fn(), isMutating: isMutating ?? false, error: error ?? null, data });
+      spy.mockReturnValue({ ...defaultSWRMutationReturn, trigger: jest.fn(), isMutating: isMutating ?? false, error: error ?? null, data });
     },
   });
 }
 
-export const petClient = {
-  addPet: jest.fn(),
-  deletePet: jest.fn(),
-  findPets: jest.fn(),
-  findPetsByTags: jest.fn(),
-  getPetById: jest.fn(),
-  updatePet: jest.fn(),
-  updatePetWithForm: jest.fn(),
-  uploadFile: jest.fn(),
-};
+export function createClientMocks() {
+  return {
+    petClient: {
+      addPet: jest.spyOn(realApi.petClient, 'addPet').mockReturnValue(undefined as any),
+      deletePet: jest.spyOn(realApi.petClient, 'deletePet').mockReturnValue(undefined as any),
+      findPets: jest.spyOn(realApi.petClient, 'findPets').mockReturnValue(undefined as any),
+      findPetsByTags: jest.spyOn(realApi.petClient, 'findPetsByTags').mockReturnValue(undefined as any),
+      getPetById: jest.spyOn(realApi.petClient, 'getPetById').mockReturnValue(undefined as any),
+      updatePet: jest.spyOn(realApi.petClient, 'updatePet').mockReturnValue(undefined as any),
+      updatePetWithForm: jest.spyOn(realApi.petClient, 'updatePetWithForm').mockReturnValue(undefined as any),
+      uploadFile: jest.spyOn(realApi.petClient, 'uploadFile').mockReturnValue(undefined as any),
+    },
+    storeClient: {
+      deleteOrder: jest.spyOn(realApi.storeClient, 'deleteOrder').mockReturnValue(undefined as any),
+      getInventory: jest.spyOn(realApi.storeClient, 'getInventory').mockReturnValue(undefined as any),
+      getOrderById: jest.spyOn(realApi.storeClient, 'getOrderById').mockReturnValue(undefined as any),
+      placeOrder: jest.spyOn(realApi.storeClient, 'placeOrder').mockReturnValue(undefined as any),
+    },
+    userClient: {
+      createUser: jest.spyOn(realApi.userClient, 'createUser').mockReturnValue(undefined as any),
+      createUsersWithListInput: jest.spyOn(realApi.userClient, 'createUsersWithListInput').mockReturnValue(undefined as any),
+      deleteUser: jest.spyOn(realApi.userClient, 'deleteUser').mockReturnValue(undefined as any),
+      getUserByName: jest.spyOn(realApi.userClient, 'getUserByName').mockReturnValue(undefined as any),
+      loginUser: jest.spyOn(realApi.userClient, 'loginUser').mockReturnValue(undefined as any),
+      logoutUser: jest.spyOn(realApi.userClient, 'logoutUser').mockReturnValue(undefined as any),
+      updateUser: jest.spyOn(realApi.userClient, 'updateUser').mockReturnValue(undefined as any),
+    },
+  };
+}
 
-export const pet = {
-  queries: {
-    useFindPets: withMockSWR(jest.fn()),
-    useFindPetsByTags: withMockSWR(jest.fn()),
-    usePetById: withMockSWR(jest.fn()),
-  },
+export type ClientMocks = ReturnType<typeof createClientMocks>;
 
-  mutations: {
-    useAddPet: withMockSWRMutation(jest.fn()),
-    useDeletePet: withMockSWRMutation(jest.fn()),
-    useUpdatePet: withMockSWRMutation(jest.fn()),
-    useUpdatePetWithForm: withMockSWRMutation(jest.fn()),
-    useUploadFile: withMockSWRMutation(jest.fn()),
-  },
+export function createApiHookMocks() {
+  return {
+    pet: {
+      queries: {
+        useFindPets: withMockSWR(jest.spyOn(realApi.pet.queries, 'useFindPets').mockReturnValue(defaultSWRReturn)),
+        useFindPetsByTags: withMockSWR(jest.spyOn(realApi.pet.queries, 'useFindPetsByTags').mockReturnValue(defaultSWRReturn)),
+        usePetById: withMockSWR(jest.spyOn(realApi.pet.queries, 'usePetById').mockReturnValue(defaultSWRReturn)),
+      },
+      mutations: {
+        useAddPet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useAddPet').mockReturnValue(defaultSWRMutationReturn)),
+        useDeletePet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useDeletePet').mockReturnValue(defaultSWRMutationReturn)),
+        useUpdatePet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUpdatePet').mockReturnValue(defaultSWRMutationReturn)),
+        useUpdatePetWithForm: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUpdatePetWithForm').mockReturnValue(defaultSWRMutationReturn)),
+        useUploadFile: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUploadFile').mockReturnValue(defaultSWRMutationReturn)),
+      },
+    },
+    store: {
+      queries: {
+        useInventory: withMockSWR(jest.spyOn(realApi.store.queries, 'useInventory').mockReturnValue(defaultSWRReturn)),
+        useOrderById: withMockSWR(jest.spyOn(realApi.store.queries, 'useOrderById').mockReturnValue(defaultSWRReturn)),
+      },
+      mutations: {
+        useDeleteOrder: withMockSWRMutation(jest.spyOn(realApi.store.mutations, 'useDeleteOrder').mockReturnValue(defaultSWRMutationReturn)),
+        usePlaceOrder: withMockSWRMutation(jest.spyOn(realApi.store.mutations, 'usePlaceOrder').mockReturnValue(defaultSWRMutationReturn)),
+      },
+    },
+    user: {
+      queries: {
+        useUserByName: withMockSWR(jest.spyOn(realApi.user.queries, 'useUserByName').mockReturnValue(defaultSWRReturn)),
+        useLoginUser: withMockSWR(jest.spyOn(realApi.user.queries, 'useLoginUser').mockReturnValue(defaultSWRReturn)),
+        useLogoutUser: withMockSWR(jest.spyOn(realApi.user.queries, 'useLogoutUser').mockReturnValue(defaultSWRReturn)),
+      },
+      mutations: {
+        useCreateUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useCreateUser').mockReturnValue(defaultSWRMutationReturn)),
+        useCreateUsersWithListInput: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useCreateUsersWithListInput').mockReturnValue(defaultSWRMutationReturn)),
+        useDeleteUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useDeleteUser').mockReturnValue(defaultSWRMutationReturn)),
+        useUpdateUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useUpdateUser').mockReturnValue(defaultSWRMutationReturn)),
+      },
+    },
+  };
+}
 
-  // queryKeys are pure functions — no mocking needed
-  queryKeys: realApi.pet.queryKeys,
-};
-
-export const storeClient = {
-  deleteOrder: jest.fn(),
-  getInventory: jest.fn(),
-  getOrderById: jest.fn(),
-  placeOrder: jest.fn(),
-};
-
-export const store = {
-  queries: {
-    useInventory: withMockSWR(jest.fn()),
-    useOrderById: withMockSWR(jest.fn()),
-  },
-
-  mutations: {
-    useDeleteOrder: withMockSWRMutation(jest.fn()),
-    usePlaceOrder: withMockSWRMutation(jest.fn()),
-  },
-
-  // queryKeys are pure functions — no mocking needed
-  queryKeys: realApi.store.queryKeys,
-};
-
-export const userClient = {
-  createUser: jest.fn(),
-  createUsersWithListInput: jest.fn(),
-  deleteUser: jest.fn(),
-  getUserByName: jest.fn(),
-  loginUser: jest.fn(),
-  logoutUser: jest.fn(),
-  updateUser: jest.fn(),
-};
-
-export const user = {
-  queries: {
-    useUserByName: withMockSWR(jest.fn()),
-    useLoginUser: withMockSWR(jest.fn()),
-    useLogoutUser: withMockSWR(jest.fn()),
-  },
-
-  mutations: {
-    useCreateUser: withMockSWRMutation(jest.fn()),
-    useCreateUsersWithListInput: withMockSWRMutation(jest.fn()),
-    useDeleteUser: withMockSWRMutation(jest.fn()),
-    useUpdateUser: withMockSWRMutation(jest.fn()),
-  },
-
-  // queryKeys are pure functions — no mocking needed
-  queryKeys: realApi.user.queryKeys,
-};
-
+export type ApiHookMocks = ReturnType<typeof createApiHookMocks>;
