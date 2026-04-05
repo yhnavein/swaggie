@@ -81,17 +81,17 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-            'status': queryParams?.status,
-                'name': queryParams?.name,
-                'type': queryParams?.type,
-                'owner': queryParams?.owner,
-                'sortBy': queryParams?.sortBy,
-                'order': queryParams?.order,
-                'page': queryParams?.page,
-                'limit': queryParams?.limit,
-                'city': queryParams?.city,
-                'registrationDate': queryParams?.registrationDate,
-          },
+        'status': queryParams?.status,
+        'name': queryParams?.name,
+        'type': queryParams?.type,
+        'owner': queryParams?.owner,
+        'sortBy': queryParams?.sortBy,
+        'order': queryParams?.order,
+        'page': queryParams?.page,
+        'limit': queryParams?.limit,
+        'city': queryParams?.city,
+        'registrationDate': queryParams?.registrationDate,
+      },
       ...$config,
     });
   },
@@ -111,8 +111,8 @@ export const petClient = {
       url: url,
       method: 'GET',
       params: {
-            'tags': tags,
-          },
+        'tags': tags,
+      },
       ...$config,
     });
   },
@@ -169,9 +169,9 @@ export const petClient = {
       url: url,
       method: 'POST',
       params: {
-            'name': queryParams?.name,
-                'status': queryParams?.status,
-          },
+        'name': queryParams?.name,
+        'status': queryParams?.status,
+      },
       ...$config,
     });
   },
@@ -194,8 +194,8 @@ export const petClient = {
       method: 'POST',
       data: body,
       params: {
-            'additionalMetadata': additionalMetadata,
-          },
+        'additionalMetadata': additionalMetadata,
+      },
       ...$config,
     });
   },
@@ -596,9 +596,9 @@ export const userClient = {
       url: url,
       method: 'GET',
       params: {
-            'username': queryParams?.username,
-                'password': queryParams?.password,
-          },
+        'username': queryParams?.username,
+        'password': queryParams?.password,
+      },
       ...$config,
     });
   },
