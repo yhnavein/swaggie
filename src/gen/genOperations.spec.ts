@@ -10,7 +10,7 @@ import {
 } from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions } from '../../test/test.utils';
-import { IBodyParam } from './types';
+import { IBodyParam, PositionedParameter } from './types';
 
 describe('prepareOperations', () => {
   const opts = getClientOptions();
@@ -100,13 +100,13 @@ describe('prepareOperations', () => {
       expect(res.body).toBeNull();
       expect(res.returnType).toBe('unknown');
 
-      const headerParam = res.headers.pop();
+      const headerParam = res.headers.pop()!;
       expect(headerParam.name).toBe('orgID');
       expect(headerParam.originalName).toBe('Org-ID');
       expect(headerParam.type).toBe('string');
       expect(headerParam.optional).toBe(false);
 
-      const queryParam = res.query.pop();
+      const queryParam = res.query.pop()!;
       expect(queryParam.name).toBe('orgType');
       expect(queryParam.originalName).toBe('OrgType');
       expect(queryParam.type).toBe('string');
@@ -335,8 +335,6 @@ describe('prepareOperations', () => {
     });
 
     test('should keep grouped query object at the lowest query x-position', () => {
-      type PositionedParameter = OA3.ParameterObject & { 'x-position': number };
-
       const ops: ApiOperation[] = [
         {
           operationId: 'getPets',
@@ -639,7 +637,7 @@ describe('prepareOperations', () => {
         ];
 
         const [op1] = prepareOperations(ops, includeOpts);
-        expect(op1.body.type).toBe('number[] | null');
+        expect(op1.body!.type).toBe('number[] | null');
       });
 
       test('should handle requestBody along with other parameters', () => {
@@ -749,11 +747,11 @@ describe('prepareOperations', () => {
           type: 'Pet',
         };
 
-        op1.body.original = undefined;
-        expect(op1.body.name).toBe(expectedBodyParam.name);
-        expect(op1.body.optional).toBe(expectedBodyParam.optional);
-        expect(op1.body.originalName).toBe(expectedBodyParam.originalName);
-        expect(op1.body.type).toBe(expectedBodyParam.type);
+        op1.body!.original = undefined;
+        expect(op1.body!.name).toBe(expectedBodyParam.name);
+        expect(op1.body!.optional).toBe(expectedBodyParam.optional);
+        expect(op1.body!.originalName).toBe(expectedBodyParam.originalName);
+        expect(op1.body!.type).toBe(expectedBodyParam.type);
         expect(op1.parameters.length).toBe(4);
         expect(op1.parameters.map((p) => p.name)).toEqual(['orgId', 'wild', 'pet', 'countryId']);
       });
@@ -789,9 +787,9 @@ describe('prepareOperations', () => {
         const [op1] = prepareOperations(ops, opts, components);
 
         expect(op1.body).not.toBeNull();
-        expect(op1.body.type).toBe('Pet');
-        expect(op1.body.optional).toBe(false);
-        expect(op1.body.contentType).toBe('json');
+        expect(op1.body!.type).toBe('Pet');
+        expect(op1.body!.optional).toBe(false);
+        expect(op1.body!.contentType).toBe('json');
       });
 
       test('should return null body when requestBody $ref is not found in components', () => {
@@ -1014,12 +1012,12 @@ describe('prepareOperations', () => {
 describe('fixDuplicateOperations', () => {
   const testCases = [
     { input: [], expected: [] },
-    { input: null, expected: null },
-    { input: undefined, expected: undefined },
+    { input: null, expected: [] },
+    { input: undefined, expected: [] },
   ];
   for (const { input, expected } of testCases) {
     test(`should handle ${input} as input`, () => {
-      const res = fixDuplicateOperations(input);
+      const res = fixDuplicateOperations(input as ApiOperation[]);
 
       expect(res).toEqual(expected);
     });
@@ -1224,14 +1222,19 @@ describe('getParams', () => {
         required: true,
       },
       {
-        name: null,
+        name: null as unknown as string,
         in: 'query',
         required: false,
         schema: {
           type: 'string',
         },
       },
-      { name: undefined, in: 'query', required: false, schema: { type: 'string' } },
+      {
+        name: undefined as unknown as string,
+        in: 'query',
+        required: false,
+        schema: { type: 'string' },
+      },
     ];
     const opts = getClientOptions({
       modifiers: {},

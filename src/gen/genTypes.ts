@@ -34,7 +34,7 @@ export default function generateTypes(
       continue;
     }
 
-    const schema = spec.components.schemas[schemaName];
+    const schema = spec.components!.schemas![schemaName];
     result.push(renderSchema(schemaName, schema, options));
   }
 
@@ -177,7 +177,7 @@ function generateObjectTypeContents(
   const props = Object.keys(schema.properties || {});
 
   for (const prop of props) {
-    const propDefinition = schema.properties[prop];
+    const propDefinition = schema.properties![prop];
     const isRequired = !!~required.indexOf(prop);
     result.push(renderTypeProp(prop, propDefinition, isRequired, options, schemaContext));
   }
@@ -204,8 +204,9 @@ function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, optio
 function renderExtendedEnumType(name: string, def: OA3.SchemaObject) {
   const isString = def.type === 'string';
   let res = `export enum ${name} {\n`;
-  const enumNames: string[] = def['x-enumNames'] ?? def['x-enum-varnames'];
-  const enumValues = def.enum.map((el) => (isString ? `"${el}"` : el));
+  const defAny = def as unknown as Record<string, string[] | undefined>;
+  const enumNames: string[] = defAny['x-enumNames'] ?? defAny['x-enum-varnames'] ?? [];
+  const enumValues = (def.enum ?? []).map((el) => (isString ? `"${el}"` : el));
 
   for (let index = 0; index < enumNames.length; index++) {
     res += `  ${escapePropName(enumNames[index])} = ${enumValues[index]},\n`;
@@ -221,7 +222,7 @@ function renderEnumType(name: string, def: OA3.SchemaObject, options: AppOptions
     return renderStringEnumDeclaration(name, def, options);
   }
 
-  const values = def.enum.map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
+  const values = (def.enum ?? []).map((v) => (typeof v === 'number' ? v : `"${v}"`)).join(' | ');
   return `export type ${name} = ${values};\n`;
 }
 
@@ -272,7 +273,7 @@ function toPascalCase(value: string): string {
  */
 function renderOpenApi31Enum(name: string, def: OA31.SchemaObject) {
   let res = `export enum ${name} {\n`;
-  for (const v of def.oneOf) {
+  for (const v of def.oneOf ?? []) {
     if ('const' in v) {
       res += `  ${escapePropName(v.title)} = ${
         typeof v.const === 'string' ? `"${v.const}"` : v.const
@@ -383,7 +384,7 @@ function getMergedCompositeObjects(schema: OA3.SchemaObject): OA3.SchemaObject {
 }
 
 function isObject(item?: object): item is Record<string, object> {
-  return item && typeof item === 'object' && !Array.isArray(item);
+  return !!item && typeof item === 'object' && !Array.isArray(item);
 }
 function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
   if (!sources.length) return target;

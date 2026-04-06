@@ -6,7 +6,7 @@ export interface ClientData {
   clientName: string;
   camelCaseName: string;
   operations: IOperation[];
-  baseUrl: string;
+  baseUrl?: string;
 }
 
 export interface IOperation {
@@ -15,7 +15,7 @@ export interface IOperation {
   /** Return type of the operation. */
   returnType: string;
   /** Content type of the response. */
-  responseContentType: string;
+  responseContentType: MyContentType | null;
   /** HTTP method of the operation. */
   method: string;
   /** Name of the operation. It has to be safe name. */
@@ -29,7 +29,7 @@ export interface IOperation {
   /** Grouped query parameter object when queryParamsAsObject is enabled. */
   queryParamObject?: IOperationParam;
   /** Body parameter of the operation. */
-  body: IBodyParam;
+  body: IBodyParam | null;
   /** Headers of the operation. */
   headers: IOperationParam[];
 }
@@ -50,3 +50,5 @@ export interface IOperationParam {
 export interface IBodyParam extends IOperationParam {
   contentType?: MyContentType;
 }
+
+export type PositionedParameter = OA3.ParameterObject & { 'x-position': number };

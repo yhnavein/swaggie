@@ -52,14 +52,14 @@ describe('getOperations', () => {
         '/api/pokemon': {
           get: {
             tags: ['Pokemon'],
-            operationId: null,
+            operationId: null as unknown as string,
             responses: {
               '200': { $ref: '#/components/responses/PokemonList' },
             },
           },
           post: {
             tags: [],
-            operationId: null,
+            operationId: null as unknown as string,
             responses: {},
           },
           patch: {

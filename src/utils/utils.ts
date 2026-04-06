@@ -74,7 +74,7 @@ const reservedKeywords = new Set([
  */
 export function escapeIdentifier(name?: string | null): string {
   if (!name) {
-    return name;
+    return name ?? '';
   }
 
   if (reservedKeywords.has(name) || /^[0-9]/.test(name)) {
@@ -139,10 +139,11 @@ export function groupOperationsByGroupName(operations: ApiOperation[]) {
   }
 
   return operations.reduce<Record<string, ApiOperation[]>>((groups, op) => {
-    if (!groups[op.group]) {
-      groups[op.group] = [];
+    const groupKey = op.group ?? 'default';
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
     }
-    groups[op.group].push(op);
+    groups[groupKey].push(op);
     return groups;
   }, {});
 }
@@ -159,7 +160,7 @@ export function groupOperationsByGroupName(operations: ApiOperation[]) {
 export function getBestResponse(
   op: OA3.OperationObject,
   components?: OA3.ComponentsObject
-): [OA3.MediaTypeObject, MyContentType] {
+): [OA3.MediaTypeObject | null, MyContentType | null] {
   const NOT_FOUND = 100000;
   const lowestCode = Object.keys(op.responses).sort().shift() ?? NOT_FOUND;
 
@@ -200,7 +201,7 @@ function resolveResponseRef(
 }
 
 /** This method tries to fix potentially wrong out parameter given from commandline */
-export function prepareOutputFilename(out: string | null): string {
+export function prepareOutputFilename(out: string | null): string | null {
   if (!out) {
     return null;
   }
@@ -219,10 +220,12 @@ export function orderBy<T>(arr: T[] | null | undefined, key: string) {
     return [];
   }
 
-  return arr.concat().sort(sortByKey(key));
+  return arr.concat().sort((a, b) => {
+    const aVal = (a as Record<string, unknown>)[key] as string | number | undefined;
+    const bVal = (b as Record<string, unknown>)[key] as string | number | undefined;
+    return aVal != null && bVal != null ? (aVal > bVal ? 1 : bVal > aVal ? -1 : 0) : 0;
+  });
 }
-
-const sortByKey = (key: string) => (a, b) => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
 
 const orderedContentTypes = [
   'text/plain',
@@ -232,33 +235,36 @@ const orderedContentTypes = [
 const preferredJsonContentTypes = ['application/json', 'text/json'];
 export function getBestContentType(
   reqBody: OA3.RequestBodyObject | OA3.ResponseObject
-): [OA3.MediaTypeObject, MyContentType] {
-  const contentTypes = Object.keys(reqBody.content);
+): [OA3.MediaTypeObject | null, MyContentType | null] {
+  const content = reqBody.content ?? {};
+  const contentTypes = Object.keys(content);
   if (contentTypes.length === 0) {
     return [null, null];
   }
 
-  const preferredJsonContentType = preferredJsonContentTypes.find((ct) => contentTypes.includes(ct));
+  const preferredJsonContentType = preferredJsonContentTypes.find((ct) =>
+    contentTypes.includes(ct)
+  );
   if (preferredJsonContentType) {
-    const typeObject = reqBody.content[preferredJsonContentType];
+    const typeObject = content[preferredJsonContentType];
     const type = getContentType(preferredJsonContentType);
     return [typeObject, type];
   }
 
   const jsonLikeContentType = contentTypes.find(isJsonLikeContentType);
   if (jsonLikeContentType) {
-    const typeObject = reqBody.content[jsonLikeContentType];
+    const typeObject = content[jsonLikeContentType];
     return [typeObject, 'json'];
   }
 
   const firstContentType = orderedContentTypes.find((ct) => contentTypes.includes(ct));
   if (firstContentType) {
-    const typeObject = reqBody.content[firstContentType];
+    const typeObject = content[firstContentType];
     const type = getContentType(firstContentType);
     return [typeObject, type];
   }
 
-  const typeObject = reqBody.content[contentTypes[0]];
+  const typeObject = content[contentTypes[0]];
   const type = getContentType(contentTypes[0]);
   return [typeObject, type];
 }

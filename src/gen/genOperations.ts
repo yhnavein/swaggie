@@ -14,7 +14,13 @@ import { getL1Template, getHttpConfigType } from '../utils/templateValidator';
 import { generateBarrelFile } from './createBarrel';
 import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
-import type { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
+import type {
+  ClientData,
+  IBodyParam,
+  IOperation,
+  IOperationParam,
+  PositionedParameter,
+} from './types';
 import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
@@ -115,9 +121,13 @@ export function prepareOperations(
 
     try {
       const [respObject, responseContentType] = getBestResponse(op, components);
-      const returnType = getParameterType(respObject, options);
+      const returnType = respObject
+        ? getParameterType(respObject, options)
+        : options.preferAny
+          ? 'any'
+          : 'unknown';
 
-      const body = getRequestBody(op.requestBody, components, options);
+      const body = op.requestBody ? getRequestBody(op.requestBody, components, options) : null;
       const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
       let params = getParams(op.parameters as OA3.ParameterObject[], options);
       let queryParamObject: IOperationParam | undefined;
@@ -127,22 +137,24 @@ export function prepareOperations(
       }
 
       // If all parameters have 'x-position' defined, sort them by it
-      if (params.every((p) => p.original['x-position'])) {
-        params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
+      if (params.every((p) => p.original && 'x-position' in p.original)) {
+        params.sort(
+          (a, b) =>
+            (a.original as PositionedParameter)['x-position'] -
+            (b.original as PositionedParameter)['x-position']
+        );
       }
 
-      if (shouldGroupQueryParams(queryParams, options.queryParamsSerialization.queryParamsAsObject)) {
+      if (
+        shouldGroupQueryParams(queryParams, options.queryParamsSerialization.queryParamsAsObject)
+      ) {
         queryParamObject = createQueryParamObject(queryParams);
         params = replaceQueryParamsWithObject(params, queryParamObject);
       }
 
       markParametersAsSkippable(params);
 
-      const headers = getParams(
-        op.parameters as OA3.ParameterObject[],
-        options,
-        ['header']
-      );
+      const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
       // Some libraries need explicit Content-Type for request bodies.
       if (body?.contentType === 'urlencoded') {
         upsertFixedHeader(headers, 'Content-Type', 'application/x-www-form-urlencoded');
@@ -155,7 +167,7 @@ export function prepareOperations(
         returnType,
         responseContentType,
         method: op.method.toUpperCase(),
-        name: getOperationName(op.operationId, op.group),
+        name: getOperationName(op.operationId ?? null, op.group),
         url: prepareUrl(op.path),
         parameters: params,
         query: queryParams,
@@ -218,7 +230,8 @@ function replaceQueryParamsWithObject(
   params: IOperationParam[],
   queryParamObject: IOperationParam
 ): IOperationParam[] {
-  const isQueryParam = (param: IOperationParam) => !!param.original && 'in' in param.original && param.original.in === 'query';
+  const isQueryParam = (param: IOperationParam) =>
+    !!param.original && 'in' in param.original && param.original.in === 'query';
 
   const firstQueryParamIndex = params.findIndex(isQueryParam);
   if (firstQueryParamIndex < 0) {
@@ -275,7 +288,11 @@ function prepareUrl(path: string): string {
  * it can happen very easily and we need to handle it gracefully.
  */
 export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
-  if (!operations || operations.length < 2) {
+  if (!operations) {
+    return [];
+  }
+
+  if (operations.length < 2) {
     return operations;
   }
 
@@ -360,7 +377,7 @@ export function getParams(
  */
 export function getParamName(name?: string | null): string {
   if (!name) {
-    return name;
+    return name ?? '';
   }
 
   return escapeIdentifier(
@@ -397,13 +414,15 @@ function getRequestBody(
   const isFormData = contentType === 'form-data';
 
   if (bodyContent) {
+    const reqBodyAny = reqBody as unknown as Record<string, string | undefined>;
+    const xName = reqBodyAny['x-name'];
     return {
-      originalName: reqBody['x-name'] ?? 'body',
-      name: getParamName(reqBody['x-name'] ?? 'body'),
+      originalName: xName ?? 'body',
+      name: getParamName(xName ?? 'body'),
       type: isFormData ? 'FormData' : getParameterType(bodyContent, options),
       optional: !reqBody.required,
       original: reqBody,
-      contentType,
+      contentType: contentType ?? undefined,
     };
   }
 

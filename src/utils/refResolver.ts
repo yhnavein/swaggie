@@ -3,11 +3,7 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-type ComponentSection =
-  | 'schemas'
-  | 'parameters'
-  | 'requestBodies'
-  | 'responses';
+type ComponentSection = 'schemas' | 'parameters' | 'requestBodies' | 'responses';
 
 const SUPPORTED_COMPONENT_SECTIONS = new Set<ComponentSection>([
   'schemas',
@@ -24,9 +20,7 @@ interface RefContext {
   resolvingRefs: Set<string>;
 }
 
-type ResolvedRef =
-  | { type: 'ref'; value: string }
-  | { type: 'inline'; value: unknown };
+type ResolvedRef = { type: 'ref'; value: string } | { type: 'inline'; value: unknown };
 
 /**
  * Resolves external file refs into local component refs.
@@ -109,9 +103,7 @@ async function resolveRef(
   }
 
   if (!fragment) {
-    throw new Error(
-      `External refs must include a JSON pointer fragment: '${rawRef}'`
-    );
+    throw new Error(`External refs must include a JSON pointer fragment: '${rawRef}'`);
   }
 
   if (!fragment.startsWith('/')) {
@@ -136,9 +128,7 @@ async function importRefFromFile(
 
   if (!targetInfo) {
     if (context.resolvingRefs.has(importKey)) {
-      throw new Error(
-        `Circular non-component external ref is not supported: '${rawRef}'`
-      );
+      throw new Error(`Circular non-component external ref is not supported: '${rawRef}'`);
     }
 
     const targetCopy = structuredClone(target);
@@ -172,10 +162,7 @@ async function importRefFromFile(
 }
 
 function parseImportTarget(pointer: string): { section: ComponentSection; name: string } | null {
-  const parts = pointer
-    .replace(/^#\//, '')
-    .split('/')
-    .map(unescapePointerSegment);
+  const parts = pointer.replace(/^#\//, '').split('/').map(unescapePointerSegment);
 
   if (parts.length === 2) {
     const [legacySection, name] = parts;
@@ -250,12 +237,13 @@ function getOrCreateComponentAlias(
   return candidate;
 }
 
-async function getValueByPointer(filePath: string, pointer: string, context: RefContext): Promise<any> {
+async function getValueByPointer(
+  filePath: string,
+  pointer: string,
+  context: RefContext
+): Promise<any> {
   const doc = await loadDocument(filePath, context);
-  const parts = pointer
-    .replace(/^#\//, '')
-    .split('/')
-    .map(unescapePointerSegment);
+  const parts = pointer.replace(/^#\//, '').split('/').map(unescapePointerSegment);
 
   let current: any = doc;
   for (const part of parts) {

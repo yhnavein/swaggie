@@ -1,18 +1,16 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
-    "target": "ES2022",
-    "module": "commonjs",
+    "rootDir": "./src",
     "declaration": true,
+    "emitDeclarationOnly": true,
     "removeComments": false,
     "esModuleInterop": true,
     "sourceMap": false,
     "newLine": "lf",
-    "noEmit": true,
     "skipLibCheck": true,
     "strict": true,
     "types": ["bun-types"],
   },
-  "exclude": ["node_modules", "dist", "coverage", "test/snapshots"],
+  "include": ["./src/types.ts"],
 }

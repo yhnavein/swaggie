@@ -6,10 +6,7 @@ import { resolveExternalFileRefs } from './refResolver';
 describe('resolveExternalFileRefs', () => {
   test('should generate incremented alias when hash-based collision also exists', async () => {
     const rootSpecPath = path.join(__dirname, '../../test/external-refs/main-collision.yml');
-    const externalFilePath = path.resolve(
-      path.dirname(rootSpecPath),
-      './components/collision.yml'
-    );
+    const externalFilePath = path.resolve(path.dirname(rootSpecPath), './components/collision.yml');
     const hash = shortHash(externalFilePath);
     const firstAlias = `User__${hash}`;
 

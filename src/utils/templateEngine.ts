@@ -34,9 +34,7 @@ export function hasTemplateFile(templateFile: string): boolean {
   }
   return (
     templateFile in loadedFiles ||
-    Object.keys(loadedFiles).some(
-      (k) => k.split('/').pop()?.split('\\').pop() === templateFile
-    )
+    Object.keys(loadedFiles).some((k) => k.split('/').pop()?.split('\\').pop() === templateFile)
   );
 }
 

@@ -22,7 +22,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -31,7 +31,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(null as any);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('Options were not provided');
+      expect((e as Error).message).toContain('Options were not provided');
     }
   });
 
@@ -44,7 +44,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -58,7 +58,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -71,7 +71,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -166,7 +166,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('Could not correctly load config file');
     }
   });
 
@@ -179,7 +179,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('Could not correctly load config file');
     }
   });
 
@@ -267,7 +267,7 @@ describe('applyConfigFile', () => {
       await applyConfigFile({ config: tmpPath });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('Could not correctly load config file');
     }
   });
 });
@@ -612,8 +612,8 @@ describe('runCodeGenerator — template validation', () => {
       await runCodeGenerator(parameters as any);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('swr-axios');
-      expect(e.message).toContain('["swr", "axios"]');
+      expect((e as Error).message).toContain('swr-axios');
+      expect((e as Error).message).toContain('["swr", "axios"]');
     }
   });
 
@@ -627,8 +627,8 @@ describe('runCodeGenerator — template validation', () => {
       await runCodeGenerator(parameters as any);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('tsq-xior');
-      expect(e.message).toContain('["tsq", "xior"]');
+      expect((e as Error).message).toContain('tsq-xior');
+      expect((e as Error).message).toContain('["tsq", "xior"]');
     }
   });
 
@@ -727,7 +727,9 @@ describe('runCodeGenerator — template validation', () => {
       } as any);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('--mocks and --testingFramework must be used together');
+      expect((e as Error).message).toContain(
+        '--mocks and --testingFramework must be used together'
+      );
     }
   });
 
@@ -740,7 +742,9 @@ describe('runCodeGenerator — template validation', () => {
       } as any);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('--mocks and --testingFramework must be used together');
+      expect((e as Error).message).toContain(
+        '--mocks and --testingFramework must be used together'
+      );
     }
   });
 
@@ -753,7 +757,7 @@ describe('runCodeGenerator — template validation', () => {
       } as any);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('--mocks requires --out to be set');
+      expect((e as Error).message).toContain('--mocks requires --out to be set');
     }
   });
 

@@ -53,11 +53,15 @@ function inheritPathParams(op: ApiOperation, inheritableParams: OA3.ParameterObj
     return;
   }
 
+  if (!op.parameters) {
+    op.parameters = [];
+  }
+
   for (const pathParam of inheritableParams) {
     // If the operation doesn't have a parameter with the same name and in, then add it
     if (
       !op.parameters.some(
-        (p: OA3.ParameterObject) => p.name === pathParam.name && p.in === pathParam.in
+        (p) => !('$ref' in p) && (p as OA3.ParameterObject).name === pathParam.name && (p as OA3.ParameterObject).in === pathParam.in
       )
     ) {
       op.parameters.push(Object.assign({}, pathParam));
@@ -70,9 +74,10 @@ function getPathOperation(
   pathInfo: PathInfo,
   spec: OA3.Document
 ): ApiOperation {
+  const pathOp = pathInfo[method]!;
   const op: ApiOperation = Object.assign(
-    { method, path: pathInfo.path, parameters: [], group: getOperationGroupName(pathInfo[method]) },
-    pathInfo[method]
+    { method, path: pathInfo.path, parameters: [], group: getOperationGroupName(pathOp) },
+    pathOp
   );
 
   // if there's no explicit operationId given, create one based on the method and path
@@ -83,7 +88,7 @@ function getPathOperation(
       .replace(/[\/}\-]/g, '');
   }
 
-  const pathLevelParams = spec.paths[pathInfo.path].parameters ?? [];
+  const pathLevelParams = spec.paths?.[pathInfo.path]?.parameters ?? [];
 
   // Replace the path level parameters references with the actual parameters
   replaceReferencedParams(pathLevelParams, spec.components?.parameters ?? {});
@@ -117,6 +122,10 @@ function replaceReferencedParams(
   parameters: ApiOperation['parameters'],
   componentParams: OA3.ComponentsObject['parameters']
 ) {
+  if (!parameters || !componentParams) {
+    return;
+  }
+
   for (let index = 0; index < parameters.length; index++) {
     const param = parameters[index];
 

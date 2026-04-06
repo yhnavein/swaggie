@@ -18,7 +18,9 @@ const SIMPLE_SPEC = getDocument({
         responses: {
           '200': {
             description: 'ok',
-            content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } },
+            content: {
+              'application/json': { schema: { type: 'array', items: { type: 'object' } } },
+            },
           },
         },
       },
@@ -30,7 +32,10 @@ const SIMPLE_SPEC = getDocument({
           content: { 'application/json': { schema: { type: 'object' } } },
         },
         responses: {
-          '201': { description: 'created', content: { 'application/json': { schema: { type: 'object' } } } },
+          '201': {
+            description: 'created',
+            content: { 'application/json': { schema: { type: 'object' } } },
+          },
         },
       },
     },
@@ -176,7 +181,9 @@ describe('swr+axios template — vitest', () => {
   });
 
   test('POST operation appears in mutations with withMockSWRMutation wrapper', () => {
-    expect(output).toContain("withMockSWRMutation(vi.spyOn(realApi.pets.mutations, 'useCreatePet')");
+    expect(output).toContain(
+      "withMockSWRMutation(vi.spyOn(realApi.pets.mutations, 'useCreatePet')"
+    );
   });
 });
 
@@ -274,7 +281,7 @@ describe('ng2 template — vitest', () => {
   });
 
   test('does NOT emit a value import of realApi', () => {
-    expect(output).not.toContain("import * as realApi");
+    expect(output).not.toContain('import * as realApi');
   });
 
   test('emits MockedService<T> utility type', () => {

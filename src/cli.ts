@@ -20,10 +20,7 @@ const testingFrameworkOption = new Option(
 
 const packageJson = readPackageJson();
 
-const modeOption = new Option('-m, --mode <mode>', 'Generation mode').choices([
-  'full',
-  'schemas',
-]);
+const modeOption = new Option('-m, --mode <mode>', 'Generation mode').choices(['full', 'schemas']);
 const schemaStyleOption = new Option(
   '-d, --schemaStyle <style>',
   'Schema object declaration style'

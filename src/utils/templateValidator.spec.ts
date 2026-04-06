@@ -98,12 +98,8 @@ describe('validateTemplate', () => {
 
   describe('array — invalid cases', () => {
     test('should throw when array has wrong number of elements', () => {
-      expect(() => validateTemplate([] as any)).toThrow(
-        'array must have exactly 2 elements'
-      );
-      expect(() => validateTemplate(['swr'] as any)).toThrow(
-        'array must have exactly 2 elements'
-      );
+      expect(() => validateTemplate([] as any)).toThrow('array must have exactly 2 elements');
+      expect(() => validateTemplate(['swr'] as any)).toThrow('array must have exactly 2 elements');
       expect(() => validateTemplate(['swr', 'axios', 'fetch'] as any)).toThrow(
         'array must have exactly 2 elements'
       );

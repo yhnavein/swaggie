@@ -159,5 +159,5 @@ export interface AppOptions extends ClientOptions {
 export interface ApiOperation extends OA3.OperationObject {
   method: HttpMethod;
   path: string;
-  group: string;
+  group: string | null;
 }
