@@ -388,7 +388,7 @@ function buildCreateSwrHookMocks(
     for (const op of mutOps) {
       const hookName = 'use' + pascal(op.name);
       lines.push(
-        `        ${hookName}: withMockSWRMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn)),`
+        `        ${hookName}: withMockSWRMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn as any)),`
       );
     }
     lines.push('      },');

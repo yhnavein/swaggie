@@ -121,11 +121,11 @@ export function createApiHookMocks() {
         usePetById: withMockSWR(jest.spyOn(realApi.pet.queries, 'usePetById').mockReturnValue(defaultSWRReturn)),
       },
       mutations: {
-        useAddPet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useAddPet').mockReturnValue(defaultSWRMutationReturn)),
-        useDeletePet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useDeletePet').mockReturnValue(defaultSWRMutationReturn)),
-        useUpdatePet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUpdatePet').mockReturnValue(defaultSWRMutationReturn)),
-        useUpdatePetWithForm: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUpdatePetWithForm').mockReturnValue(defaultSWRMutationReturn)),
-        useUploadFile: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUploadFile').mockReturnValue(defaultSWRMutationReturn)),
+        useAddPet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useAddPet').mockReturnValue(defaultSWRMutationReturn as any)),
+        useDeletePet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useDeletePet').mockReturnValue(defaultSWRMutationReturn as any)),
+        useUpdatePet: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUpdatePet').mockReturnValue(defaultSWRMutationReturn as any)),
+        useUpdatePetWithForm: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUpdatePetWithForm').mockReturnValue(defaultSWRMutationReturn as any)),
+        useUploadFile: withMockSWRMutation(jest.spyOn(realApi.pet.mutations, 'useUploadFile').mockReturnValue(defaultSWRMutationReturn as any)),
       },
     },
     store: {
@@ -134,8 +134,8 @@ export function createApiHookMocks() {
         useOrderById: withMockSWR(jest.spyOn(realApi.store.queries, 'useOrderById').mockReturnValue(defaultSWRReturn)),
       },
       mutations: {
-        useDeleteOrder: withMockSWRMutation(jest.spyOn(realApi.store.mutations, 'useDeleteOrder').mockReturnValue(defaultSWRMutationReturn)),
-        usePlaceOrder: withMockSWRMutation(jest.spyOn(realApi.store.mutations, 'usePlaceOrder').mockReturnValue(defaultSWRMutationReturn)),
+        useDeleteOrder: withMockSWRMutation(jest.spyOn(realApi.store.mutations, 'useDeleteOrder').mockReturnValue(defaultSWRMutationReturn as any)),
+        usePlaceOrder: withMockSWRMutation(jest.spyOn(realApi.store.mutations, 'usePlaceOrder').mockReturnValue(defaultSWRMutationReturn as any)),
       },
     },
     user: {
@@ -145,10 +145,10 @@ export function createApiHookMocks() {
         useLogoutUser: withMockSWR(jest.spyOn(realApi.user.queries, 'useLogoutUser').mockReturnValue(defaultSWRReturn)),
       },
       mutations: {
-        useCreateUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useCreateUser').mockReturnValue(defaultSWRMutationReturn)),
-        useCreateUsersWithListInput: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useCreateUsersWithListInput').mockReturnValue(defaultSWRMutationReturn)),
-        useDeleteUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useDeleteUser').mockReturnValue(defaultSWRMutationReturn)),
-        useUpdateUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useUpdateUser').mockReturnValue(defaultSWRMutationReturn)),
+        useCreateUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useCreateUser').mockReturnValue(defaultSWRMutationReturn as any)),
+        useCreateUsersWithListInput: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useCreateUsersWithListInput').mockReturnValue(defaultSWRMutationReturn as any)),
+        useDeleteUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useDeleteUser').mockReturnValue(defaultSWRMutationReturn as any)),
+        useUpdateUser: withMockSWRMutation(jest.spyOn(realApi.user.mutations, 'useUpdateUser').mockReturnValue(defaultSWRMutationReturn as any)),
       },
     },
   };
