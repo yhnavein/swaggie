@@ -574,10 +574,7 @@ export enum AccessType {
         false
       );
 
-      assertEqualIgnoringWhitespace(
-        res,
-        'export type Metadata = Record<string, unknown>;'
-      );
+      assertEqualIgnoringWhitespace(res, 'export type Metadata = Record<string, unknown>;');
     });
 
     test('should render bare type:object with preferAny as any-valued map', () => {
@@ -591,10 +588,7 @@ export enum AccessType {
         false
       );
 
-      assertEqualIgnoringWhitespace(
-        res,
-        'export type Metadata = Record<string, any>;'
-      );
+      assertEqualIgnoringWhitespace(res, 'export type Metadata = Record<string, any>;');
     });
 
     test('should render additionalProperties:true as free-form type alias', () => {
@@ -609,10 +603,7 @@ export enum AccessType {
         false
       );
 
-      assertEqualIgnoringWhitespace(
-        res,
-        'export type Attributes = Record<string, unknown>;'
-      );
+      assertEqualIgnoringWhitespace(res, 'export type Attributes = Record<string, unknown>;');
     });
 
     test('should render additionalProperties:{} as free-form type alias', () => {
@@ -627,10 +618,7 @@ export enum AccessType {
         false
       );
 
-      assertEqualIgnoringWhitespace(
-        res,
-        'export type Attributes = Record<string, unknown>;'
-      );
+      assertEqualIgnoringWhitespace(res, 'export type Attributes = Record<string, unknown>;');
     });
 
     test('should indent property JSDoc comments inside object declarations', () => {

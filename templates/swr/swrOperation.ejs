@@ -1,0 +1,18 @@
+<% var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : ''; %>
+<%~ docs %>
+    <%= it.swrOpName %>(
+<% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
+<% }); %>      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $httpConfig?: <%= it.httpConfigType %>
+    ) {
+      const { key, ...config } = $config || {};
+      const cacheUrl = key ?? <%= it.clientName %>.queryKeys.<%= it.swrOpName.charAt(3).toLowerCase() + it.swrOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>);
+
+      const { data, error, isLoading, mutate } = useSWR<<%~ it.returnType %>>(
+        cacheUrl,
+        () => <%= it.clientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig).then((resp) => resp.data),
+        config
+      );
+
+      return { data, isLoading, error, mutate };
+    },

@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.9.0",
+  "version": "2.0.0",
   "description": "Generate a fully typed TypeScript API client from your OpenAPI 3 spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -40,7 +40,7 @@
     "build": "bun run bundle-templates && sucrase ./src -d ./dist --transforms typescript,imports && bun run rm-tests && bun run types",
     "bundle-templates": "bun scripts/bundle-templates.ts",
     "rm-tests": "find dist/ \\( -name '*.spec.js' -o -name 'types.js' \\) -type f -delete",
-    "types": "tsc src/types.ts --outDir dist/ --declaration --emitDeclarationOnly && cp test/index.d.ts ./dist/",
+    "types": "tsc --project tsconfig.types.json && cp test/index.d.ts ./dist/",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:preview": "vitepress preview docs"
@@ -66,7 +66,8 @@
     "service",
     "typescript",
     "codegen",
-    "TanStack Query"
+    "TanStack Query",
+    "mocks"
   ],
   "dependencies": {
     "case": "^1.6.3",
@@ -79,7 +80,7 @@
     "bun-types": "1.3.11",
     "openapi-types": "^12.1.3",
     "sucrase": "3.35.1",
-    "typescript": "5.9.3",
+    "typescript": "6.0.2",
     "vitepress": "^2.0.0-alpha.17",
     "vitepress-plugin-tabs": "0.8.0"
   }

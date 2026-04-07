@@ -50,6 +50,70 @@ swaggie -s ./spec.json -o ./client.ts --allowDots --arrayFormat repeat
 
 ---
 
+## Query Parameter Grouping
+
+**Option:** `queryParamsSerialization.queryParamsAsObject` (CLI: `--queryParamsAsObject`)
+
+When an operation has many query parameters, individual function arguments can get unwieldy. This option groups all query parameters into a single typed object argument instead.
+
+**Without grouping (default):**
+
+```typescript
+getPets(
+  status?: 'available' | 'pending' | 'sold',
+  minAge?: number,
+  maxAge?: number,
+  breed?: string,
+  sortBy?: string,
+  sortDir?: 'asc' | 'desc',
+): AxiosPromise<Pet[]>
+```
+
+**With `queryParamsAsObject: true`:**
+
+```typescript
+getPets(query?: {
+  status?: 'available' | 'pending' | 'sold';
+  minAge?: number;
+  maxAge?: number;
+  breed?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+}): AxiosPromise<Pet[]>
+```
+
+### Values
+
+| Value | Behavior |
+|---|---|
+| `true` | Always group all query parameters into an object |
+| `N` (number) | Group only when the operation has more than `N` query parameters |
+| `false` / omitted | Never group — each query parameter is a separate argument (default) |
+
+The threshold form is useful when you want short operations to keep their flat signatures while longer ones get the cleaner object form:
+
+```json
+{
+  "queryParamsSerialization": {
+    "queryParamsAsObject": 3
+  }
+}
+```
+
+This will leave operations with 3 or fewer query parameters unchanged and group operations with 4 or more.
+
+### CLI
+
+```bash
+# Always group
+swaggie -s ./spec.json -o ./client.ts --queryParamsAsObject
+
+# Group only when there are more than 3 query params
+swaggie -s ./spec.json -o ./client.ts --queryParamsAsObject 3
+```
+
+---
+
 ## Nullable Strategy
 
 OpenAPI 3.0 allows marking a field as `nullable: true`. Swaggie gives you three ways to represent this in the generated TypeScript via the `nullableStrategy` option.

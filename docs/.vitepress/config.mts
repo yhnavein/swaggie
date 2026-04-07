@@ -58,10 +58,12 @@ export default defineConfig({
       {
         text: 'Guide',
         items: [
+          { text: "What's New in v2", link: '/guide/whats-new-v2' },
           { text: 'Getting Started', link: '/guide/getting-started' },
           { text: 'Configuration', link: '/guide/configuration' },
           { text: 'Templates', link: '/guide/templates' },
           { text: 'Advanced Options', link: '/guide/advanced' },
+          { text: 'Mocking', link: '/guide/mocking' },
           { text: 'Programmatic API', link: '/guide/programmatic' },
           { text: 'Backend Support', link: '/guide/backend-support' },
         ],

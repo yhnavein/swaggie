@@ -1,0 +1,32 @@
+<%
+var hasParams = it.parameters.length > 0;
+
+var variablesType;
+if (!hasParams) {
+  variablesType = 'void';
+} else {
+  var parts = it.parameters.map(function(p) {
+    return p.name + (p.skippable ? '?' : '') + ': ' + p.type + (p.optional ? ' | null' : '');
+  });
+  variablesType = '{ ' + parts.join('; ') + ' }';
+}
+
+var callArgs = it.parameters.map(function(p) { return 'arg.' + p.name; });
+
+// Stable SWR key: replace all ${...} path expressions with *
+var swrKey = it.url.replace(/\$\{(?:[^{}]|\{[^{}]*\})*\}/g, '*');
+
+var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : '';
+%>
+<%~ docs %>
+    <%= it.mutOpName %>(
+      $config?: SWRMutationConfiguration<<%~ it.returnType %>, Error, string, <%~ variablesType %>>,
+      $httpConfig?: <%= it.httpConfigType %>
+    ) {
+      return useSWRMutation<<%~ it.returnType %>, Error, string, <%~ variablesType %>>(
+        '<%= swrKey %>',
+        (_key: string, { arg }<%= hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) =>
+          <%= it.clientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig).then((resp) => resp.data),
+        $config
+      );
+    },

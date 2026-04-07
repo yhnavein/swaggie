@@ -1,0 +1,31 @@
+<%
+var hasParams = it.parameters.length > 0;
+
+var variablesType;
+if (!hasParams) {
+  variablesType = 'void';
+} else {
+  var parts = it.parameters.map(function(p) {
+    return p.name + (p.skippable ? '?' : '') + ': ' + p.type + (p.optional ? ' | null' : '');
+  });
+  variablesType = '{ ' + parts.join('; ') + ' }';
+}
+
+var callArgs = it.parameters.map(function(p) { return 'vars.' + p.name; });
+
+var baseAdditionalParams = '  * @param $config (optional) Additional configuration for TanStack Query\n  * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying ' + it.httpConfigType + ')';
+var rawDocs = it.jsDocs
+  ? it.jsDocs.replace(/(\s*)\*\/\s*$/, '\n' + baseAdditionalParams + '\n */')
+  : '';
+var docs = rawDocs ? rawDocs.replace(/^/gm, '  ') + '\n' : '';
+%>
+<%~ docs %>
+    <%= it.mutOpName %><TData = <%~ it.returnType %>, TError = Error>(
+      $config?: UseMutationOptions<<%~ it.returnType %>, TError, <%~ variablesType %>>,
+      $httpConfig?: <%= it.httpConfigType %>
+    ) {
+      return useMutation<<%~ it.returnType %>, TError, <%~ variablesType %>>({
+        mutationFn: (<%= hasParams ? 'vars' : '' %>) => <%= it.clientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig).then(res => res.data),
+        ...$config
+      });
+    },

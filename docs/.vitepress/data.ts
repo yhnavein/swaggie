@@ -16,8 +16,10 @@ export const EXAMPLE_SPECS = [
 ];
 
 export const HINTS: Record<string, string> = {
-  template:
-    'Template used for generating the API client. Choose a bundled template by name or provide a path to a custom one.',
+  l1Template:
+    'The HTTP client library used in the generated code. This is the core template — it controls how requests are made (axios, fetch, xior, etc.).',
+  l2Template:
+    'Optional reactive query layer (SWR or TanStack Query) added on top of the HTTP client. When set, each API group gets both a plain client and a hooks namespace. Not compatible with Angular clients.',
   generationMode:
     'Controls whether to generate a full API client (methods + schemas) or only TypeScript schemas.',
   schemaStyle: 'Controls whether object schemas are generated as interfaces or type aliases.',
@@ -38,6 +40,12 @@ export const HINTS: Record<string, string> = {
   allowDots:
     'Use dot notation for nested object query params (a.b=1) instead of bracket notation (a[b]=1).',
   preferAny: 'Use the "any" type instead of "unknown" for untyped or free-form values.',
+  useClient:
+    'Prepend \'use client\';\' to the generated file. Required for Next.js App Router when using SWR or TanStack Query — hooks can only run in Client Components. Has no effect outside RSC environments.',
+  generateMocks:
+    'When enabled, a companion mock file is generated alongside the client. It exports typed spy stubs for every method and hook, ready to drop into your tests. Only available in "full" generation mode.',
+  testingFramework:
+    'The test framework whose spy functions are used in the generated mock file. "vitest" uses vi.fn(), "jest" uses jest.fn(). Only relevant when "Generate mocks" is enabled.',
 };
 
 export const EXAMPLE_SPEC = `openapi: "3.0.3"

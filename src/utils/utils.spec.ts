@@ -18,8 +18,8 @@ import type { ApiOperation } from '../types';
 describe('escapeIdentifier', () => {
   const testCases = [
     { input: '', expected: '' },
-    { input: null, expected: null },
-    { input: undefined, expected: undefined },
+    { input: null, expected: '' },
+    { input: undefined, expected: '' },
     { input: 'Burrito', expected: 'Burrito' },
     { input: 'return', expected: '_return' },
     { input: '1test', expected: '_1test' },
@@ -133,7 +133,7 @@ describe('groupOperationsByGroupName', () => {
   ];
   for (const { input, expected } of testCases) {
     test(`should handle ${input} as input`, async () => {
-      const res = groupOperationsByGroupName(input);
+      const res = groupOperationsByGroupName(input as ApiOperation[]);
 
       expect(res).toEqual(expected);
     });

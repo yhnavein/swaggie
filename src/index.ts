@@ -4,6 +4,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import generateCode from './gen';
 import type { AppOptions, CliOptions, EnumNamesStyle, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
+import { validateTemplate, normalizeTemplate } from './utils/templateValidator';
 import { APP_DEFAULTS } from './swagger';
 
 /**
@@ -31,10 +32,19 @@ function verifyOptions(options: Partial<FullAppOptions>) {
   if (!!options.config === !!options.src) {
     throw new Error('You need to provide either --config or --src parameters');
   }
+  if (!!options.mocks !== !!options.testingFramework) {
+    throw new Error('--mocks and --testingFramework must be used together');
+  }
+  if (options.mocks && !options.out) {
+    throw new Error(
+      '--mocks requires --out to be set, since the mock file needs to import the generated client'
+    );
+  }
 }
 
 function gen(spec: OA3.Document, options: AppOptions): Promise<string> {
   if (options.generationMode === 'full') {
+    validateTemplate(options.template);
     loadAllTemplateFiles(options.template);
   }
 
@@ -83,6 +93,7 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
   const {
     allowDots,
     arrayFormat,
+    queryParamsAsObject,
     mode,
     schemaStyle,
     enumStyle,
@@ -90,6 +101,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     nullables,
     template,
     queryParamsSerialization = {},
+    mocks,
+    testingFramework,
     ...rest
   } = cliOpts;
   const mergedQueryParamsSerialization = {
@@ -99,11 +112,12 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     ),
     ...(allowDots !== undefined ? { allowDots } : {}),
     ...(arrayFormat !== undefined ? { arrayFormat } : {}),
+    ...(queryParamsAsObject !== undefined ? { queryParamsAsObject } : {}),
   };
 
   return {
     ...rest,
-    template: template ?? APP_DEFAULTS.template,
+    template: normalizeTemplate(template ?? APP_DEFAULTS.template),
     servicePrefix: rest.servicePrefix ?? APP_DEFAULTS.servicePrefix,
     nullableStrategy: nullables ?? rest.nullableStrategy ?? APP_DEFAULTS.nullableStrategy,
     generationMode: mode ?? rest.generationMode ?? APP_DEFAULTS.generationMode,
@@ -113,6 +127,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
       enumStyle ?? rest.enumDeclarationStyle ?? APP_DEFAULTS.enumDeclarationStyle,
     enumNamesStyle: normalizeEnumNamesStyle(enumNamesStyle),
     queryParamsSerialization: mergedQueryParamsSerialization,
+    ...(mocks !== undefined ? { mocks } : {}),
+    ...(testingFramework !== undefined ? { testingFramework } : {}),
   };
 }
 

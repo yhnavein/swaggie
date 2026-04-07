@@ -1,4 +1,5 @@
 import { test, describe, beforeEach, expect, spyOn } from 'bun:test';
+import fs from 'node:fs';
 
 import { runCodeGenerator, applyConfigFile, prepareAppOptions } from './';
 import { mockFetchWithFile } from '../test/test.utils';
@@ -21,7 +22,16 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
+    }
+  });
+
+  test('fails when null is passed as options', async () => {
+    try {
+      await runCodeGenerator(null as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('Options were not provided');
     }
   });
 
@@ -34,7 +44,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -48,7 +58,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -61,7 +71,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('You need to provide');
+      expect((e as Error).message).toContain('You need to provide');
     }
   });
 
@@ -156,7 +166,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('Could not correctly load config file');
     }
   });
 
@@ -169,7 +179,7 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('Could not correctly load config file');
     }
   });
 
@@ -200,6 +210,7 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'repeat',
       allowDots: true,
+      queryParamsAsObject: false,
     });
     expect(conf.template).toBe('axios');
   });
@@ -220,6 +231,7 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'repeat',
       allowDots: true,
+      queryParamsAsObject: false,
     });
     expect(conf.template).toBe('xior');
   });
@@ -243,7 +255,20 @@ describe('applyConfigFile', () => {
     expect(conf.queryParamsSerialization).toEqual({
       arrayFormat: 'indices',
       allowDots: false,
+      queryParamsAsObject: false,
     });
+  });
+
+  test('fails with a clear error when config file contains an empty array', async () => {
+    // Write a temp config file containing an empty JSON array
+    const tmpPath = './.tmp/test/empty-array-config.json';
+    await Bun.write(tmpPath, '[]');
+    try {
+      await applyConfigFile({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('Could not correctly load config file');
+    }
   });
 });
 
@@ -305,6 +330,7 @@ describe('prepareAppOptions', () => {
       expect(result.enumNamesStyle).toBeDefined();
       expect(result.queryParamsSerialization.allowDots).toBeDefined();
       expect(result.queryParamsSerialization.arrayFormat).toBeDefined();
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBeDefined();
     });
   });
 
@@ -337,9 +363,25 @@ describe('prepareAppOptions', () => {
     test('respects explicit queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,
-        queryParamsSerialization: { arrayFormat: 'indices', allowDots: false },
+        queryParamsSerialization: {
+          arrayFormat: 'indices',
+          allowDots: false,
+          queryParamsAsObject: 5,
+        },
       });
-      expect(result.queryParamsSerialization).toEqual({ arrayFormat: 'indices', allowDots: false });
+      expect(result.queryParamsSerialization).toEqual({
+        arrayFormat: 'indices',
+        allowDots: false,
+        queryParamsAsObject: 5,
+      });
+    });
+
+    test('respects explicit queryParamsAsObject boolean', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { queryParamsAsObject: true },
+      });
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(true);
     });
 
     test('respects explicit generationMode', () => {
@@ -392,12 +434,27 @@ describe('prepareAppOptions', () => {
     test('flat options take precedence over nested queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,
-        queryParamsSerialization: { allowDots: true, arrayFormat: 'indices' },
+        queryParamsSerialization: {
+          allowDots: true,
+          arrayFormat: 'indices',
+          queryParamsAsObject: 10,
+        },
         allowDots: false,
         arrayFormat: 'repeat',
+        queryParamsAsObject: 3,
       });
       expect(result.queryParamsSerialization.allowDots).toBe(false);
       expect(result.queryParamsSerialization.arrayFormat).toBe('repeat');
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(3);
+    });
+
+    test('flat queryParamsAsObject overrides nested queryParamsSerialization', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        queryParamsSerialization: { queryParamsAsObject: true },
+        queryParamsAsObject: 2,
+      });
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(2);
     });
 
     test('flat mode overrides generationMode', () => {
@@ -439,12 +496,18 @@ describe('prepareAppOptions', () => {
     test('undefined flat options do not override nested queryParamsSerialization', () => {
       const result = prepareAppOptions({
         ...minimalOpts,
-        queryParamsSerialization: { arrayFormat: 'brackets', allowDots: false },
+        queryParamsSerialization: {
+          arrayFormat: 'brackets',
+          allowDots: false,
+          queryParamsAsObject: 4,
+        },
         allowDots: undefined,
         arrayFormat: undefined,
+        queryParamsAsObject: undefined,
       });
       expect(result.queryParamsSerialization.allowDots).toBe(false);
       expect(result.queryParamsSerialization.arrayFormat).toBe('brackets');
+      expect(result.queryParamsSerialization.queryParamsAsObject).toBe(4);
     });
   });
 
@@ -479,5 +542,255 @@ describe('prepareAppOptions', () => {
       const result = prepareAppOptions({ ...minimalOpts, modifiers });
       expect(result.modifiers).toEqual(modifiers);
     });
+  });
+
+  describe('template normalization', () => {
+    test('normalizes "swr" to ["swr", "fetch"]', () => {
+      const result = prepareAppOptions({ ...minimalOpts, template: 'swr' as any });
+      expect(result.template).toEqual(['swr', 'fetch']);
+    });
+
+    test('normalizes "tsq" to ["tsq", "fetch"]', () => {
+      const result = prepareAppOptions({ ...minimalOpts, template: 'tsq' as any });
+      expect(result.template).toEqual(['tsq', 'fetch']);
+    });
+
+    test('passes through L1 templates unchanged', () => {
+      expect(prepareAppOptions({ ...minimalOpts, template: 'axios' }).template).toBe('axios');
+      expect(prepareAppOptions({ ...minimalOpts, template: 'fetch' }).template).toBe('fetch');
+      expect(prepareAppOptions({ ...minimalOpts, template: 'xior' }).template).toBe('xior');
+    });
+
+    test('passes through [L2, L1] array unchanged', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        template: ['swr', 'axios'] as any,
+      });
+      expect(result.template).toEqual(['swr', 'axios']);
+    });
+  });
+
+  describe('mocks and testingFramework', () => {
+    test('passes mocks through when provided', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        mocks: './src/__mocks__/api.ts',
+        testingFramework: 'vitest',
+      });
+      expect(result.mocks).toBe('./src/__mocks__/api.ts');
+    });
+
+    test('passes testingFramework through when provided', () => {
+      const result = prepareAppOptions({
+        ...minimalOpts,
+        mocks: './src/__mocks__/api.ts',
+        testingFramework: 'jest',
+      });
+      expect(result.testingFramework).toBe('jest');
+    });
+
+    test('mocks is absent from result when not provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.mocks).toBeUndefined();
+    });
+
+    test('testingFramework is absent from result when not provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.testingFramework).toBeUndefined();
+    });
+  });
+});
+
+describe('runCodeGenerator — template validation', () => {
+  test('rejects legacy "swr-axios" template name with migration hint', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'swr-axios',
+    };
+
+    try {
+      await runCodeGenerator(parameters as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('swr-axios');
+      expect((e as Error).message).toContain('["swr", "axios"]');
+    }
+  });
+
+  test('rejects legacy "tsq-xior" template name with migration hint', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'tsq-xior',
+    };
+
+    try {
+      await runCodeGenerator(parameters as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('tsq-xior');
+      expect((e as Error).message).toContain('["tsq", "xior"]');
+    }
+  });
+
+  test('accepts ["swr", "axios"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'axios'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    // Should contain both the axios HTTP client and SWR hooks
+    expect(code).toContain('import Axios');
+    expect(code).toContain('useSWR');
+  });
+
+  test('accepts ["tsq", "xior"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['tsq', 'xior'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain('import xior');
+    expect(code).toContain('useQuery');
+  });
+
+  test('accepts ["swr", "fetch"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'fetch'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain('defaults');
+    expect(code).toContain('useSWR');
+  });
+
+  test('accepts single "swr" and defaults to fetch as L1', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'swr',
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain('useSWR');
+    // fetch base client should be present
+    expect(code).toContain('defaults');
+  });
+
+  test('prepends "use client"; when useClient is true', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'axios'],
+      useClient: true,
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code.startsWith("'use client';\n")).toBe(true);
+  });
+
+  test('does not prepend "use client"; by default', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'axios'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code.startsWith("'use client'")).toBe(false);
+  });
+
+  test('useClient is preserved in returned options', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['tsq', 'fetch'],
+      useClient: true,
+    };
+
+    const [, opts] = await runCodeGenerator(parameters as any);
+    expect(opts.useClient).toBe(true);
+  });
+
+  // ── mock flag validation ───────────────────────────────────────────────────
+
+  test('fails when --mocks is provided without --testingFramework', async () => {
+    try {
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: './.tmp/test/api.ts',
+        mocks: './.tmp/test/api.mock.ts',
+      } as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain(
+        '--mocks and --testingFramework must be used together'
+      );
+    }
+  });
+
+  test('fails when --testingFramework is provided without --mocks', async () => {
+    try {
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: './.tmp/test/api.ts',
+        testingFramework: 'vitest',
+      } as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain(
+        '--mocks and --testingFramework must be used together'
+      );
+    }
+  });
+
+  test('fails when --mocks is provided without --out', async () => {
+    try {
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        mocks: './.tmp/test/api.mock.ts',
+        testingFramework: 'vitest',
+      } as any);
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--mocks requires --out to be set');
+    }
+  });
+
+  test('generates mock file alongside client when --mocks and --testingFramework are set', async () => {
+    const outPath = './.tmp/test/mock-gen-test/api.ts';
+    const mocksPath = './.tmp/test/mock-gen-test/api.mock.ts';
+
+    await runCodeGenerator({
+      src: './test/petstore-v3.yml',
+      out: outPath,
+      mocks: mocksPath,
+      testingFramework: 'vitest',
+    } as any);
+
+    const mockFile = await Bun.file(mocksPath).text();
+    expect(mockFile).toContain('createClientMocks');
+    expect(mockFile).toContain("import { vi } from 'vitest'");
+    expect(mockFile).toContain("import * as realApi from './api'");
+  });
+
+  test('mock file uses jest primitives when testingFramework is jest', async () => {
+    const outPath = './.tmp/test/mock-gen-jest/api.ts';
+    const mocksPath = './.tmp/test/mock-gen-jest/api.mock.ts';
+
+    await runCodeGenerator({
+      src: './test/petstore-v3.yml',
+      out: outPath,
+      mocks: mocksPath,
+      testingFramework: 'jest',
+    } as any);
+
+    const mockFile = await Bun.file(mocksPath).text();
+    expect(mockFile).toContain("import { jest } from '@jest/globals'");
+    expect(mockFile).toContain('jest.spyOn(');
   });
 });

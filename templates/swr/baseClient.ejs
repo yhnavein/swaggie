@@ -1,0 +1,7 @@
+import useSWR, { type SWRConfiguration, type Key } from 'swr';
+import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
+
+interface SwrConfig extends SWRConfiguration {
+  /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
+  key?: Key;
+}

@@ -8,7 +8,11 @@ $config?: RequestInit
     const url = `${defaults.baseUrl}<%= it.url %>?<%
     if(it.query && it.query.length > 0) { %>${defaults.paramsSerializer({<%
       it.query.forEach((parameter) => { %>
+<% if (it.queryParamObject) { %>
+'<%= parameter.originalName %>': <%= it.queryParamObject.name %>?.<%= parameter.name %>,
+<% } else { %>
 '<%= parameter.originalName %>': <%= parameter.name %>,
+<% } %>
       <% }); %>})}<% } %>`;
 
 <% if(it.headers && it.headers.length > 0) { %>

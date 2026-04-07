@@ -573,7 +573,7 @@ describe('refsHelper - findAllUsedRefs', () => {
                     schema: {
                       type: 'object',
                       properties: {
-                        nullProp: null,
+                        nullProp: null as unknown as OA3.SchemaObject,
                         undefinedProp: undefined,
                         validRef: { $ref: '#/components/schemas/ValidSchema' },
                       },
@@ -583,7 +583,7 @@ describe('refsHelper - findAllUsedRefs', () => {
               },
             },
           },
-        },
+        } as unknown as OA3.PathItemObject,
       },
       components: {
         schemas: {
@@ -591,10 +591,10 @@ describe('refsHelper - findAllUsedRefs', () => {
             type: 'object',
             properties: {
               value: { type: 'string' },
-              nullNested: null,
+              nullNested: null as unknown as OA3.SchemaObject,
               undefinedNested: undefined,
             },
-          },
+          } as unknown as OA3.SchemaObject,
         },
       },
     };

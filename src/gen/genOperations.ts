@@ -9,11 +9,18 @@ import {
   groupOperationsByGroupName,
   orderBy,
 } from '../utils/utils';
-import { renderFile } from '../utils/templateEngine';
+import { renderFile, hasTemplateFile } from '../utils/templateEngine';
+import { getL1Template, getHttpConfigType } from '../utils/templateValidator';
 import { generateBarrelFile } from './createBarrel';
 import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
-import type { ClientData, IBodyParam, IOperation, IOperationParam } from './types';
+import type {
+  ClientData,
+  IBodyParam,
+  IOperation,
+  IOperationParam,
+  PositionedParameter,
+} from './types';
 import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
@@ -26,11 +33,23 @@ export default async function generateOperations(
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix;
-  let result = FILE_HEADER + renderFile('baseClient.ejs', {
+  const baseClientData = {
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,
-  });
+  };
+
+  // When a composite [L2, L1] template is used, the L2 base client contains
+  // reactive library imports (e.g. useSWR, useQuery). These are placed first
+  // so all imports appear at the top of the file before the HTTP client setup.
+  let baseClients = '';
+  if (hasTemplateFile('baseClientL2.ejs')) {
+    baseClients += renderFile('baseClientL2.ejs', baseClientData);
+  }
+  baseClients += renderFile('baseClient.ejs', baseClientData);
+
+  const clientDirective = options.useClient ? "'use client';\n" : '';
+  let result = clientDirective + FILE_HEADER + baseClients;
 
   for (const name in groups) {
     const group = groups[name];
@@ -43,6 +62,7 @@ export default async function generateOperations(
     const renderedFile = renderFile('client.ejs', {
       ...clientData,
       servicePrefix,
+      httpConfigType: getHttpConfigType(options.template),
     });
 
     result += renderedFile;
@@ -101,32 +121,44 @@ export function prepareOperations(
 
     try {
       const [respObject, responseContentType] = getBestResponse(op, components);
-      const returnType = getParameterType(respObject, options);
+      const returnType = respObject
+        ? getParameterType(respObject, options)
+        : options.preferAny
+          ? 'any'
+          : 'unknown';
 
-      const body = getRequestBody(op.requestBody, components, options);
+      const body = op.requestBody ? getRequestBody(op.requestBody, components, options) : null;
       const queryParams = getParams(op.parameters as OA3.ParameterObject[], options, ['query']);
-      const params = getParams(op.parameters as OA3.ParameterObject[], options);
+      let params = getParams(op.parameters as OA3.ParameterObject[], options);
+      let queryParamObject: IOperationParam | undefined;
 
       if (body) {
         params.unshift(body);
       }
 
-    // If all parameters have 'x-position' defined, sort them by it
-      if (params.every((p) => p.original['x-position'])) {
-        params.sort((a, b) => a.original['x-position'] - b.original['x-position']);
+      // If all parameters have 'x-position' defined, sort them by it
+      if (params.every((p) => p.original && 'x-position' in p.original)) {
+        params.sort(
+          (a, b) =>
+            (a.original as PositionedParameter)['x-position'] -
+            (b.original as PositionedParameter)['x-position']
+        );
+      }
+
+      if (
+        shouldGroupQueryParams(queryParams, options.queryParamsSerialization.queryParamsAsObject)
+      ) {
+        queryParamObject = createQueryParamObject(queryParams);
+        params = replaceQueryParamsWithObject(params, queryParamObject);
       }
 
       markParametersAsSkippable(params);
 
-      const headers = getParams(
-        op.parameters as OA3.ParameterObject[],
-        options,
-        ['header']
-      );
+      const headers = getParams(op.parameters as OA3.ParameterObject[], options, ['header']);
       // Some libraries need explicit Content-Type for request bodies.
       if (body?.contentType === 'urlencoded') {
         upsertFixedHeader(headers, 'Content-Type', 'application/x-www-form-urlencoded');
-      } else if (body?.contentType === 'json' && options.template === 'fetch') {
+      } else if (body?.contentType === 'json' && getL1Template(options.template) === 'fetch') {
         upsertFixedHeader(headers, 'Content-Type', 'application/json');
       }
 
@@ -135,10 +167,11 @@ export function prepareOperations(
         returnType,
         responseContentType,
         method: op.method.toUpperCase(),
-        name: getOperationName(op.operationId, op.group),
+        name: getOperationName(op.operationId ?? null, op.group),
         url: prepareUrl(op.path),
         parameters: params,
         query: queryParams,
+        queryParamObject,
         body,
         headers,
       };
@@ -155,6 +188,59 @@ export function prepareOperations(
       throw new Error(`Failed to prepare operation ${operationContext}: ${message}`);
     }
   });
+}
+
+function shouldGroupQueryParams(
+  queryParams: IOperationParam[],
+  setting: boolean | number
+): boolean {
+  if (queryParams.length < 1 || setting === false) {
+    return false;
+  }
+
+  if (setting === true) {
+    return true;
+  }
+
+  return queryParams.length > setting;
+}
+
+function createQueryParamObject(queryParams: IOperationParam[]): IOperationParam {
+  const properties = queryParams
+    .map((param) => {
+      const isOptional = param.optional ? '?' : '';
+      const nullableType = param.optional ? ' | null' : '';
+      return `${param.name}${isOptional}: ${param.type}${nullableType};`;
+    })
+    .join(' ');
+  const containsRequiredQueryParams = queryParams.some((param) => !param.optional);
+
+  return {
+    originalName: 'queryParams',
+    name: 'queryParams',
+    type: `{ ${properties} }`,
+    optional: !containsRequiredQueryParams,
+    jsDoc: `Grouped query parameters object (${queryParams
+      .map((param) => param.originalName)
+      .join(', ')})`,
+  };
+}
+
+function replaceQueryParamsWithObject(
+  params: IOperationParam[],
+  queryParamObject: IOperationParam
+): IOperationParam[] {
+  const isQueryParam = (param: IOperationParam) =>
+    !!param.original && 'in' in param.original && param.original.in === 'query';
+
+  const firstQueryParamIndex = params.findIndex(isQueryParam);
+  if (firstQueryParamIndex < 0) {
+    return params;
+  }
+
+  const paramsWithoutQuery = params.filter((param) => !isQueryParam(param));
+  paramsWithoutQuery.splice(firstQueryParamIndex, 0, queryParamObject);
+  return paramsWithoutQuery;
 }
 
 /**
@@ -202,7 +288,11 @@ function prepareUrl(path: string): string {
  * it can happen very easily and we need to handle it gracefully.
  */
 export function fixDuplicateOperations(operations: ApiOperation[]): ApiOperation[] {
-  if (!operations || operations.length < 2) {
+  if (!operations) {
+    return [];
+  }
+
+  if (operations.length < 2) {
     return operations;
   }
 
@@ -287,7 +377,7 @@ export function getParams(
  */
 export function getParamName(name?: string | null): string {
   if (!name) {
-    return name;
+    return name ?? '';
   }
 
   return escapeIdentifier(
@@ -324,13 +414,15 @@ function getRequestBody(
   const isFormData = contentType === 'form-data';
 
   if (bodyContent) {
+    const reqBodyAny = reqBody as unknown as Record<string, string | undefined>;
+    const xName = reqBodyAny['x-name'];
     return {
-      originalName: reqBody['x-name'] ?? 'body',
-      name: getParamName(reqBody['x-name'] ?? 'body'),
+      originalName: xName ?? 'body',
+      name: getParamName(xName ?? 'body'),
       type: isFormData ? 'FormData' : getParameterType(bodyContent, options),
       optional: !reqBody.required,
       original: reqBody,
-      contentType,
+      contentType: contentType ?? undefined,
     };
   }
 

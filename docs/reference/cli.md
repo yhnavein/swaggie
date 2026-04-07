@@ -25,7 +25,7 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--config` | `-c` | `string` | — | Path to a JSON configuration file. Mutually exclusive with `--src`. |
 | `--src` | `-s` | `string` | — | URL or file path to the OpenAPI spec (`.json` or `.yaml`). Required when not using `--config`. |
 | `--out` | `-o` | `string` | — | Output file path. Omit to print generated code to stdout. |
-| `--template` | `-t` | `string` | `axios` | Template to use. One of: `axios`, `fetch`, `xior`, `swr-axios`, `tsq-xior`, `ng1`, `ng2`, or a path to a custom template directory. |
+| `--template` | `-t` | `string` | `axios` | Template to use. HTTP client templates: `axios`, `fetch`, `xior`, `ng1`, `ng2`. Reactive layer templates paired with an HTTP client using a comma-separated value: `swr,axios` / `tsq,xior` / `swr,fetch`, etc. A reactive layer name alone (e.g. `swr`) defaults to `fetch` as the HTTP client. A path to a custom template directory is also accepted. |
 | `--baseUrl` | `-b` | `string` | `""` | Default base URL baked into the generated client. |
 | `--mode` | `-m` | `string` | `full` | Generation mode: `full` (client + schemas) or `schemas` (types only). |
 | `--schemaStyle` | `-d` | `string` | `interface` | Schema object style: `interface` or `type`. |
@@ -38,6 +38,10 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--servicePrefix` | — | `string` | `""` | Prefix for generated service (client object) names. |
 | `--allowDots` | — | `boolean` | `true` | Use dot notation for nested object query params (`a.b=1` vs `a[b]=1`). |
 | `--arrayFormat` | — | `string` | `repeat` | Array serialization in query strings: `indices`, `repeat`, or `brackets`. |
+| `--queryParamsAsObject` | — | `boolean \| number` | — | Group all query parameters into a single typed object argument. Pass without a value to always group, or pass a number `N` to group only when there are more than `N` query parameters. See [Query Parameter Grouping](/guide/advanced#query-parameter-grouping). |
+| `--useClient` | `-C` | `boolean` | `false` | Prepend `'use client';` as the first line of the generated file. Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates. Has no effect and should not be used outside of RSC environments. |
+| `--mocks` | — | `string` | — | Output path for the generated mock/stub file. Requires `--testingFramework` and `--out`. See [Mocking](/guide/mocking). |
+| `--testingFramework` | `-T` | `string` | — | Test framework for generated mock stubs: `vitest` or `jest`. Requires `--mocks` and `--out`. |
 | `--version` | `-V` | — | — | Print the installed version number and exit. |
 | `--help` | `-h` | — | — | Show the help message and exit. |
 
@@ -87,10 +91,45 @@ swaggie -s ./spec.json -o ./src/types.ts --mode schemas
 swaggie -s ./spec.json -o ./client.ts -t fetch --allowDots --arrayFormat repeat
 ```
 
+### Use a reactive query layer with a specific HTTP client
+
+Combine a reactive query layer template with an HTTP client template using a comma-separated pair:
+
+```bash
+# SWR hooks backed by axios
+swaggie -s ./spec.json -o ./client.ts -t swr,axios
+
+# TanStack Query hooks backed by xior
+swaggie -s ./spec.json -o ./client.ts -t tsq,xior
+
+# SWR hooks backed by the native fetch API
+swaggie -s ./spec.json -o ./client.ts -t swr,fetch
+```
+
 ### Skip deprecated endpoints
 
 ```bash
 swaggie -s ./spec.json -o ./client.ts --skipDeprecated
+```
+
+### Next.js App Router (SWR or TanStack Query)
+
+SWR and TanStack Query hooks can only run in Client Components. Use `--useClient` (or `-C`) to prepend the required `'use client';` directive:
+
+```bash
+swaggie -s ./spec.json -o ./src/api/client.ts -t swr,axios --useClient
+swaggie -s ./spec.json -o ./src/api/client.ts -t tsq,fetch -C
+```
+
+Or in a config file:
+
+```json
+{
+  "src": "./spec.json",
+  "out": "./src/api/client.ts",
+  "template": ["swr", "axios"],
+  "useClient": true
+}
 ```
 
 ## Piping to a formatter

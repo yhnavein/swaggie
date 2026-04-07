@@ -114,7 +114,7 @@ export function buildSchemaComment(schema: {
   return renderComment(lines.join('\n'));
 }
 
-export function renderComment(comment: string | null) {
+export function renderComment(comment: string | null | undefined) {
   if (!comment) {
     return '';
   }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { runCodeGenerator } from 'swaggie/browser';
+import generateMocks from '../../../src/gen/genMocks';
 import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
 import HintIcon from './HintIcon.vue';
@@ -37,7 +38,18 @@ function s<T>(key: string, fallback: T): T {
 
 // ─── Settings — primary row ───────────────────────────────────────────────────
 
-const template = ref<string>(s('template', 'axios'));
+const l1Template = ref<string>(s('l1Template', 'axios'));
+const l2Template = ref<string>(s('l2Template', ''));
+
+/** ng1/ng2 are not compatible with reactive layers */
+const isL2Disabled = computed(() => l1Template.value === 'ng1' || l1Template.value === 'ng2');
+
+function onL1Change() {
+  if (isL2Disabled.value) {
+    l2Template.value = '';
+  }
+}
+
 const generationMode = ref<string>(s('generationMode', 'full'));
 const schemaStyle = ref<string>(s('schemaStyle', 'interface'));
 const enumStyle = ref<string>(s('enumStyle', 'union'));
@@ -45,6 +57,18 @@ const enumNamesStyle = ref<string>(s('enumNamesStyle', 'original'));
 const nullableStrategy = ref<string>(s('nullableStrategy', 'ignore'));
 const baseUrl = ref<string>(s('baseUrl', ''));
 const skipDeprecated = ref<boolean>(s('skipDeprecated', false));
+const useClient = ref<boolean>(s('useClient', false));
+
+/** useClient only makes sense when an L2 reactive layer is selected */
+const isUseClientDisabled = computed(() => !l2Template.value);
+
+const generateMocksEnabled = ref<boolean>(s('generateMocksEnabled', false));
+const testingFramework = ref<string>(s('testingFramework', 'vitest'));
+
+/** Mocks only make sense for full generation mode */
+const isMocksDisabled = computed(() => generationMode.value !== 'full');
+/** testingFramework select is only relevant when mocks are enabled */
+const isTestingFrameworkDisabled = computed(() => !generateMocksEnabled.value || isMocksDisabled.value);
 
 // ─── Settings — advanced row ──────────────────────────────────────────────────
 
@@ -60,6 +84,9 @@ const arrayFormat = ref<string>(s('arrayFormat', 'repeat'));
 const specInput = ref<string>('');
 const outputHtml = ref<string>('');
 const outputRaw = ref<string>('');
+const mockOutputHtml = ref<string>('');
+const mockOutputRaw = ref<string>('');
+const activeTab = ref<'client' | 'mocks'>('client');
 const isLoading = ref<boolean>(false);
 const errorMessage = ref<string>('');
 const warningMessage = ref<string>('');
@@ -123,6 +150,9 @@ async function generate() {
   warningMessage.value = '';
   outputHtml.value = '';
   outputRaw.value = '';
+  mockOutputHtml.value = '';
+  mockOutputRaw.value = '';
+  activeTab.value = 'client';
 
   try {
     const parsed = await parseSpec(specInput.value);
@@ -133,9 +163,13 @@ async function generate() {
       return;
     }
 
-    const [code] = await runCodeGenerator({
+    const resolvedTemplate = l2Template.value
+      ? ([l2Template.value, l1Template.value] as [string, string])
+      : l1Template.value;
+
+    const [code, opts] = await runCodeGenerator({
       src: parsed as any,
-      template: template.value as any,
+      template: resolvedTemplate as any,
       baseUrl: baseUrl.value || undefined,
       generationMode: generationMode.value as any,
       schemaDeclarationStyle: schemaStyle.value as any,
@@ -143,6 +177,7 @@ async function generate() {
       enumNamesStyle: enumNamesStyle.value as any,
       nullableStrategy: nullableStrategy.value as any,
       skipDeprecated: skipDeprecated.value,
+      useClient: useClient.value || undefined,
       dateFormat: dateFormat.value as any,
       preferAny: preferAny.value,
       servicePrefix: servicePrefix.value || undefined,
@@ -155,8 +190,20 @@ async function generate() {
     outputRaw.value = code;
     outputHtml.value = await renderHighlighted(code);
 
+    // Generate mocks if enabled — reuses the already-parsed spec and resolved
+    // options from runCodeGenerator, so no extra network round-trip is needed.
+    if (generateMocksEnabled.value && !isMocksDisabled.value) {
+      // Inject testingFramework into opts (not part of the browser runCodeGenerator path).
+      // Use './api' as the canonical relative import path in the playground preview.
+      const optsWithMocks = { ...opts, testingFramework: testingFramework.value as any };
+      const mockCode = generateMocks(parsed as any, optsWithMocks, './api');
+      mockOutputRaw.value = mockCode;
+      mockOutputHtml.value = await renderHighlighted(mockCode);
+    }
+
     saveSession({
-      template: template.value,
+      l1Template: l1Template.value,
+      l2Template: l2Template.value,
       generationMode: generationMode.value,
       schemaStyle: schemaStyle.value,
       enumStyle: enumStyle.value,
@@ -164,12 +211,15 @@ async function generate() {
       nullableStrategy: nullableStrategy.value,
       baseUrl: baseUrl.value,
       skipDeprecated: skipDeprecated.value,
+      useClient: useClient.value,
       showAdvanced: showAdvanced.value,
       dateFormat: dateFormat.value,
       preferAny: preferAny.value,
       servicePrefix: servicePrefix.value,
       allowDots: allowDots.value,
       arrayFormat: arrayFormat.value,
+      generateMocksEnabled: generateMocksEnabled.value,
+      testingFramework: testingFramework.value,
     });
   } catch (err: unknown) {
     errorMessage.value = err instanceof Error ? err.message : String(err);
@@ -181,9 +231,10 @@ async function generate() {
 // ─── Copy to clipboard ────────────────────────────────────────────────────────
 
 async function copyToClipboard() {
-  if (!outputRaw.value) return;
+  const content = activeTab.value === 'mocks' ? mockOutputRaw.value : outputRaw.value;
+  if (!content) return;
   try {
-    await navigator.clipboard.writeText(outputRaw.value);
+    await navigator.clipboard.writeText(content);
     copied.value = true;
     setTimeout(() => {
       copied.value = false;
@@ -269,18 +320,31 @@ function getNavHeight(): number {
       <div class="pg-settings-row">
         <label class="pg-field">
           <span class="pg-label">
-            Template
-            <HintIcon :hint="HINTS.template" />
+            HTTP client
+            <HintIcon :hint="HINTS.l1Template" />
           </span>
           <div class="pg-select-wrap">
-            <select v-model="template" class="pg-select">
+            <select v-model="l1Template" class="pg-select" @change="onL1Change">
               <option value="axios">axios</option>
               <option value="fetch">fetch</option>
               <option value="xior">xior</option>
-              <option value="swr-axios">swr-axios</option>
-              <option value="tsq-xior">tsq-xior</option>
               <option value="ng1">ng1</option>
               <option value="ng2">ng2</option>
+            </select>
+            <ChevronDownIcon />
+          </div>
+        </label>
+
+        <label class="pg-field" :class="{ 'pg-field--disabled': isL2Disabled }">
+          <span class="pg-label">
+            Reactive layer
+            <HintIcon :hint="HINTS.l2Template" />
+          </span>
+          <div class="pg-select-wrap">
+            <select v-model="l2Template" class="pg-select" :disabled="isL2Disabled">
+              <option value="">none</option>
+              <option value="swr">swr</option>
+              <option value="tsq">tsq</option>
             </select>
             <ChevronDownIcon />
           </div>
@@ -342,47 +406,51 @@ function getNavHeight(): number {
           </div>
         </label>
 
-        <label class="pg-field">
+        <label class="pg-field pg-field--checkbox" :class="{ 'pg-field--disabled': isUseClientDisabled }">
           <span class="pg-label">
-            Nullable
-            <HintIcon :hint="HINTS.nullableStrategy" />
-          </span>
-          <div class="pg-select-wrap">
-            <select v-model="nullableStrategy" class="pg-select">
-              <option value="ignore">ignore</option>
-              <option value="include">include</option>
-              <option value="nullableAsOptional">nullableAsOptional</option>
-            </select>
-            <ChevronDownIcon />
-          </div>
-        </label>
-
-        <label class="pg-field pg-field--wide">
-          <span class="pg-label">
-            Base URL
-            <HintIcon :hint="HINTS.baseUrl" />
-          </span>
-          <input
-            v-model="baseUrl"
-            type="text"
-            placeholder="https://api.example.com"
-            class="pg-input"
-          />
-        </label>
-
-        <label class="pg-field pg-field--checkbox">
-          <span class="pg-label">
-            Skip deprecated
-            <HintIcon :hint="HINTS.skipDeprecated" />
+            Use client
+            <HintIcon :hint="HINTS.useClient" />
           </span>
           <div class="pg-checkbox-wrap">
             <input
-              v-model="skipDeprecated"
+              v-model="useClient"
               type="checkbox"
               class="pg-checkbox"
-              id="skipDeprecated"
+              id="useClient"
+              :disabled="isUseClientDisabled"
             />
-            <label for="skipDeprecated" class="pg-toggle" />
+            <label for="useClient" class="pg-toggle" />
+          </div>
+        </label>
+
+        <label class="pg-field pg-field--checkbox" :class="{ 'pg-field--disabled': isMocksDisabled }">
+          <span class="pg-label">
+            Generate mocks
+            <HintIcon :hint="HINTS.generateMocks" />
+          </span>
+          <div class="pg-checkbox-wrap">
+            <input
+              v-model="generateMocksEnabled"
+              type="checkbox"
+              class="pg-checkbox"
+              id="generateMocksEnabled"
+              :disabled="isMocksDisabled"
+            />
+            <label for="generateMocksEnabled" class="pg-toggle" />
+          </div>
+        </label>
+
+        <label class="pg-field" :class="{ 'pg-field--disabled': isTestingFrameworkDisabled }">
+          <span class="pg-label">
+            Testing framework
+            <HintIcon :hint="HINTS.testingFramework" />
+          </span>
+          <div class="pg-select-wrap">
+            <select v-model="testingFramework" class="pg-select" :disabled="isTestingFrameworkDisabled">
+              <option value="vitest">vitest</option>
+              <option value="jest">jest</option>
+            </select>
+            <ChevronDownIcon />
           </div>
         </label>
 
@@ -475,6 +543,50 @@ function getNavHeight(): number {
             </div>
           </label>
 
+          <label class="pg-field">
+            <span class="pg-label">
+              Nullable
+              <HintIcon :hint="HINTS.nullableStrategy" />
+            </span>
+            <div class="pg-select-wrap">
+              <select v-model="nullableStrategy" class="pg-select">
+                <option value="ignore">ignore</option>
+                <option value="include">include</option>
+                <option value="nullableAsOptional">nullableAsOptional</option>
+              </select>
+              <ChevronDownIcon />
+            </div>
+          </label>
+
+          <label class="pg-field pg-field--wide">
+            <span class="pg-label">
+              Base URL
+              <HintIcon :hint="HINTS.baseUrl" />
+            </span>
+            <input
+              v-model="baseUrl"
+              type="text"
+              placeholder="https://api.example.com"
+              class="pg-input"
+            />
+          </label>
+
+          <label class="pg-field pg-field--checkbox">
+            <span class="pg-label">
+              Skip deprecated
+              <HintIcon :hint="HINTS.skipDeprecated" />
+            </span>
+            <div class="pg-checkbox-wrap">
+              <input
+                v-model="skipDeprecated"
+                type="checkbox"
+                class="pg-checkbox"
+                id="skipDeprecated"
+              />
+              <label for="skipDeprecated" class="pg-toggle" />
+            </div>
+          </label>
+
           <div class="pg-spacer" />
         </div>
       </Transition>
@@ -540,7 +652,30 @@ function getNavHeight(): number {
       <!-- Right: generated TypeScript -->
       <div class="pg-panel">
         <div class="pg-panel-header">
-          <span class="pg-panel-title">Generated TypeScript</span>
+          <!-- Tab switcher — only shown when mocks were generated -->
+          <div v-if="mockOutputHtml" class="pg-tabs-wrap">
+            <span class="pg-panel-title">Generated</span>
+            <div class="pg-tabs" role="tablist">
+              <button
+                class="pg-tab"
+                :class="{ 'pg-tab--active': activeTab === 'client' }"
+                role="tab"
+                :aria-selected="activeTab === 'client'"
+                type="button"
+                @click="activeTab = 'client'"
+              >Client</button>
+              <button
+                class="pg-tab"
+                :class="{ 'pg-tab--active': activeTab === 'mocks' }"
+                role="tab"
+                :aria-selected="activeTab === 'mocks'"
+                type="button"
+                @click="activeTab = 'mocks'"
+              >Mocks</button>
+            </div>
+          </div>
+          <span v-else class="pg-panel-title">Generated TypeScript</span>
+
           <button
             v-if="outputRaw"
             class="pg-copy-btn"
@@ -553,19 +688,27 @@ function getNavHeight(): number {
         </div>
 
         <div class="pg-output">
-          <div v-if="outputHtml" class="pg-highlighted" v-html="outputHtml" />
+          <!-- Client tab -->
+          <template v-if="activeTab === 'client'">
+            <div v-if="outputHtml" class="pg-highlighted" v-html="outputHtml" />
 
-          <div v-else-if="isLoading" class="pg-placeholder">
-            <div class="pg-skeleton pg-skeleton--short" />
-            <div class="pg-skeleton pg-skeleton--long" />
-            <div class="pg-skeleton pg-skeleton--medium" />
-            <div class="pg-skeleton pg-skeleton--long" />
-            <div class="pg-skeleton pg-skeleton--short" />
-          </div>
+            <div v-else-if="isLoading" class="pg-placeholder">
+              <div class="pg-skeleton pg-skeleton--short" />
+              <div class="pg-skeleton pg-skeleton--long" />
+              <div class="pg-skeleton pg-skeleton--medium" />
+              <div class="pg-skeleton pg-skeleton--long" />
+              <div class="pg-skeleton pg-skeleton--short" />
+            </div>
 
-          <div v-else class="pg-empty">
-            <p>Output will appear here after you click <strong>Generate</strong>.</p>
-          </div>
+            <div v-else class="pg-empty">
+              <p>Output will appear here after you click <strong>Generate</strong>.</p>
+            </div>
+          </template>
+
+          <!-- Mocks tab -->
+          <template v-else>
+            <div v-if="mockOutputHtml" class="pg-highlighted" v-html="mockOutputHtml" />
+          </template>
         </div>
       </div>
     </div>
@@ -701,6 +844,11 @@ function getNavHeight(): number {
 
 .pg-field--checkbox {
   min-width: unset;
+}
+
+.pg-field--disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .pg-spacer {
@@ -1097,6 +1245,57 @@ function getNavHeight(): number {
   50% {
     opacity: 1;
   }
+}
+
+/* ── Output tabs ─────────────────────────────────────────────────── */
+
+.pg-tabs-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pg-tabs {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.pg-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-base);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.pg-tab:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.pg-tab--active {
+  background: var(--vp-c-brand-1);
+  color: #fff;
+}
+
+.pg-tab--active:hover {
+  color: #fff;
 }
 
 /* ── Copy button ─────────────────────────────────────────────────── */

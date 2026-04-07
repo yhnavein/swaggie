@@ -104,7 +104,7 @@ The `src` option in browser mode accepts either a **URL string** (fetched at run
 
 ### Available templates in browser mode
 
-All seven built-in templates are bundled and available in browser mode: `axios`, `fetch`, `xior`, `swr-axios`, `tsq-xior`, `ng1`, `ng2`.
+All seven built-in templates are bundled and available in browser mode: `axios`, `fetch`, `xior`, `swr`, `tsq`, `ng1`, `ng2`. Composite pairs (e.g. `["swr", "axios"]`) are also supported — both named templates in the pair must be from this list.
 
 Custom template directories are not supported in browser mode.
 
@@ -120,19 +120,23 @@ The core options interface shared by both Node and browser entry points.
 interface ClientOptions {
   src: string | object;               // URL, file path, or parsed spec object
   out?: string;                       // Output file path (Node only)
-  template: Template;                 // HTTP client template
+  template: TemplateInput;            // HTTP client template, reactive pair, or custom path
   baseUrl?: string;                   // Base URL for the generated client
   preferAny?: boolean;
   skipDeprecated?: boolean;
+  useClient?: boolean;                // Prepend 'use client'; (Next.js App Router)
   servicePrefix?: string;
   dateFormat?: DateSupport;           // "Date" | "string"
   nullableStrategy?: NullableStrategy;
   generationMode?: GenerationMode;
   schemaDeclarationStyle?: SchemaDeclarationStyle;
   enumDeclarationStyle?: EnumDeclarationStyle;
+  mocks?: string;                     // Output path for generated mock file
+  testingFramework?: 'vitest' | 'jest';
   queryParamsSerialization: {
     allowDots?: boolean;
     arrayFormat?: ArrayFormat;
+    queryParamsAsObject?: boolean | number;
   };
   modifiers?: {
     parameters?: Record<string, 'optional' | 'required' | 'ignore'>;
@@ -143,7 +147,13 @@ interface ClientOptions {
 ### `Template`
 
 ```typescript
-type Template = 'axios' | 'fetch' | 'xior' | 'swr-axios' | 'tsq-xior' | 'ng1' | 'ng2';
+/** HTTP client templates (standalone) */
+type L1Template = 'axios' | 'fetch' | 'xior' | 'ng1' | 'ng2';
+/** Reactive query layer templates (must be paired with an HTTP client template) */
+type L2Template = 'swr' | 'tsq';
+
+/** What the user may supply as a `template` value */
+type TemplateInput = L1Template | L2Template | string | [string, string];
 ```
 
 ### `CodeGenResult`

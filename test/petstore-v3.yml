@@ -91,13 +91,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/Pet'
-  /pet/findByStatus:
+  /pet/find:
     get:
       tags:
         - pet
-      summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
-      operationId: findPetsByStatus
+      summary: Finds Pets
+      description: Find pets using different filters
+      operationId: findPets
       parameters:
         - name: status
           in: query
@@ -111,6 +111,75 @@ paths:
               - pending
               - sold
             default: available
+        - name: name
+          in: query
+          description: Name to filter by
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Type to filter by
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: owner
+          in: query
+          description: Owner to filter by
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Sort by field
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Sort order
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          explode: true
+          schema:
+            type: integer
+            format: int32
+        - name: city
+          in: query
+          description: City
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: registrationDate
+          in: query
+          description: Registration date
+          required: false
+          explode: true
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: successful operation

@@ -69,7 +69,7 @@ describe('getTypeFromSchema', () => {
     };
     const testCases: TestCase[] = [
       { schema: { type: 'array', items: {} }, expected: 'unknown[]' },
-      { schema: { type: 'array', items: null }, expected: 'unknown[]' },
+      { schema: { type: 'array', items: null as unknown as OA3.SchemaObject }, expected: 'unknown[]' },
       {
         schema: { type: 'array', items: { $ref: '#/components/schemas/Item' } },
         expected: 'Item[]',
@@ -256,8 +256,8 @@ describe('getTypeFromSchema', () => {
       { schema: { $ref: '' }, expected: 'unknown' },
       { schema: { $ref: '#/components/' }, expected: 'unknown' },
       { schema: { $ref: '#/components/schema/Test' }, expected: 'Test' },
-      { schema: null, expected: 'unknown' },
-      { schema: undefined, expected: 'unknown' },
+      { schema: null as unknown as OA3.SchemaObject, expected: 'unknown' },
+      { schema: undefined as unknown as OA3.SchemaObject, expected: 'unknown' },
       { schema: {}, expected: 'unknown' },
     ];
 

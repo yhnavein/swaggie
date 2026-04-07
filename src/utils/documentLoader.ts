@@ -35,9 +35,7 @@ async function loadFromUrl(url: string) {
 
 async function readLocalFile(filePath: string) {
   const contents = await new Promise((res, rej) =>
-    fs.readFile(filePath, 'utf8', (err, loadedContents) =>
-      err ? rej(err) : res(loadedContents)
-    )
+    fs.readFile(filePath, 'utf8', (err, loadedContents) => (err ? rej(err) : res(loadedContents)))
   );
   const spec = parseFileContents(contents as string, filePath) as OA3.Document;
 

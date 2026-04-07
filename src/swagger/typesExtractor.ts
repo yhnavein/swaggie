@@ -25,7 +25,7 @@ export function getParameterType(
     return unknownType;
   }
 
-  return getTypeFromSchemaResolved(param.schema, options, `${context}.schema`);
+  return getTypeFromSchemaResolved(param.schema as OA3.SchemaObject | OA3.ReferenceObject, options, `${context}.schema`);
 }
 
 /**
@@ -172,7 +172,7 @@ function getTypeFromSchemaInternal(
     return getTypeFromObject(schema, options, undefined, context);
   }
   if ('enum' in schema) {
-    return `${schema.enum.map((v) => JSON.stringify(v)).join(' | ')}`;
+    return `${(schema.enum ?? []).map((v) => JSON.stringify(v)).join(' | ')}`;
   }
   if (schema.type === 'integer' || schema.type === 'number') {
     return 'number';
@@ -368,25 +368,26 @@ export function getSafeIdentifier(name: string | undefined) {
  * It is used only for `allOf` property, as it enforces extending types.
  */
 export function getRefCompositeTypes(schema: OA3.SchemaObject) {
-  return schema.allOf
+  return (schema.allOf ?? [])
     .filter((v) => '$ref' in v)
     .map((s: OA3.ReferenceObject) => getSafeIdentifier(s.$ref.split('/').pop()));
 }
 
 /** Default values applied to every field of AppOptions that has a default. */
-export const APP_DEFAULTS: Partial<AppOptions> = {
-  template: 'axios',
+export const APP_DEFAULTS = {
+  template: 'axios' as const,
   servicePrefix: '',
-  nullableStrategy: 'ignore',
-  generationMode: 'full',
-  schemaDeclarationStyle: 'interface',
-  enumDeclarationStyle: 'union',
-  enumNamesStyle: 'original',
+  nullableStrategy: 'ignore' as const,
+  generationMode: 'full' as const,
+  schemaDeclarationStyle: 'interface' as const,
+  enumDeclarationStyle: 'union' as const,
+  enumNamesStyle: 'original' as const,
   queryParamsSerialization: {
     allowDots: true,
-    arrayFormat: 'repeat',
+    arrayFormat: 'repeat' as const,
+    queryParamsAsObject: false as false,
   },
-};
+} satisfies Partial<AppOptions>;
 
 /**
  * Fills in all AppOptions defaults for a partial ClientOptions object.

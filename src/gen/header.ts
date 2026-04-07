@@ -3,7 +3,6 @@
  * regardless of generation mode.
  */
 export const FILE_HEADER =
-  '/* istanbul ignore file -- auto-generated code */\n' +
   '/* tslint:disable */\n' +
   '/* eslint-disable */\n' +
   '//----------------------\n' +

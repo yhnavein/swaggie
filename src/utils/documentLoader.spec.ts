@@ -65,7 +65,8 @@ describe('loadSpecDocument', () => {
       await loadSpecDocument(path);
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect(e.message.includes('ENOENT') || e.message.includes('no such file')).toBe(true);
+      const err = e as Error;
+      expect(err.message.includes('ENOENT') || err.message.includes('no such file')).toBe(true);
     }
   });
 
@@ -154,14 +155,16 @@ describe('loadSpecDocument', () => {
     const allSchemaNames = Object.keys(spec.components.schemas || {});
     const externalUserName = allSchemaNames.find((name) => name !== 'User');
     expect(externalUserName).toBeDefined();
-    expect(spec.components.schemas[externalUserName].properties.external.type).toBe('boolean');
+    expect(spec.components.schemas[externalUserName!].properties.external.type).toBe('boolean');
     expect(responseRef).toBe(`#/components/schemas/${externalUserName}`);
   });
 
   test('should reject external http refs in local file specs', async () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-http-ref.yml');
 
-    await expect(loadSpecDocument(specPath)).rejects.toThrow('External HTTP refs are not supported');
+    await expect(loadSpecDocument(specPath)).rejects.toThrow(
+      'External HTTP refs are not supported'
+    );
   });
 
   test('should reject external refs without fragment', async () => {
@@ -176,8 +179,7 @@ describe('loadSpecDocument', () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-unsupported-target.yml');
     const spec = (await loadSpecDocument(specPath)) as any;
 
-    const schema =
-      spec.paths['/test'].get.responses['200'].content['application/json'].schema;
+    const schema = spec.paths['/test'].get.responses['200'].content['application/json'].schema;
     expect(schema.type).toBe('array');
     expect(schema.items.$ref).toBe('#/components/schemas/Pet');
   });
@@ -204,7 +206,10 @@ describe('loadSpecDocument', () => {
   });
 
   test('should reject external refs with invalid pointer fragment format', async () => {
-    const specPath = path.join(__dirname, '../../test/external-refs/main-invalid-fragment-format.yml');
+    const specPath = path.join(
+      __dirname,
+      '../../test/external-refs/main-invalid-fragment-format.yml'
+    );
 
     await expect(loadSpecDocument(specPath)).rejects.toThrow('Unsupported $ref pointer format');
   });
@@ -277,8 +282,7 @@ describe('loadSpecDocument', () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-legacy-definitions.yml');
     const spec = (await loadSpecDocument(specPath)) as any;
 
-    const ref =
-      spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
+    const ref = spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
     expect(ref).toMatch(/^#\/components\/schemas\//);
 
     const schemaName = ref.split('/').pop();
@@ -300,8 +304,7 @@ describe('loadSpecDocument', () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-extensionless-yaml.yml');
     const spec = (await loadSpecDocument(specPath)) as any;
 
-    const ref =
-      spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
+    const ref = spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
     expect(ref).toMatch(/^#\/components\/schemas\//);
     expect(Object.keys(spec.components.schemas || {})).toContain('PlainModel');
   });
@@ -310,8 +313,7 @@ describe('loadSpecDocument', () => {
     const specPath = path.join(__dirname, '../../test/external-refs/main-json-ext.yml');
     const spec = (await loadSpecDocument(specPath)) as any;
 
-    const ref =
-      spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
+    const ref = spec.paths['/test'].get.responses['200'].content['application/json'].schema.$ref;
     expect(ref).toMatch(/^#\/components\/schemas\//);
     expect(Object.keys(spec.components.schemas || {})).toContain('JsonBox');
   });

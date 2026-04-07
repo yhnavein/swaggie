@@ -1,0 +1,67 @@
+export const <%= it.camelCaseName %>Client = {
+  <% it.operations.forEach((operation) => { %>
+<%~ include('operation.ejs', operation); %>
+
+<% }); %>
+};
+
+<%
+var getOperations = it.operations.filter((o) => o.method === 'GET');
+var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
+
+// Helper: strip leading "get" and capitalise
+function toOpName(name) {
+  var n = name.toLowerCase().startsWith('get') ? name.substring(3) : name;
+  return n.charAt(0).toUpperCase() + n.slice(1);
+}
+
+// Returns a deep copy of operation with any parameter whose name collides with
+// the group object name (clientName) renamed to _<name> to avoid TS shadowing.
+function safeOperation(operation, clientName) {
+  var safeParams = operation.parameters.map(function(p) {
+    return p.name === clientName ? Object.assign({}, p, { name: '_' + p.name }) : p;
+  });
+  return Object.assign({}, operation, { parameters: safeParams });
+}
+%>
+
+export const <%= it.camelCaseName %> = {
+  queries: {
+<% getOperations.forEach((operation) => {
+  var opName = toOpName(operation.name);
+  var queryOperation = Object.assign({
+    rqOpName: 'use' + opName,
+    opKey: it.camelCaseName + opName,
+    clientName: it.camelCaseName,
+    httpConfigType: it.httpConfigType,
+  }, safeOperation(operation, it.camelCaseName));
+%>
+<%~ include('queryOperation.ejs', queryOperation); %>
+
+<% }); %>
+  },
+
+  mutations: {
+<% mutationOperations.forEach((operation) => {
+  var opName = operation.name.charAt(0).toUpperCase() + operation.name.slice(1);
+  var mutationOperation = Object.assign({
+    mutOpName: 'use' + opName,
+    clientName: it.camelCaseName,
+    httpConfigType: it.httpConfigType,
+  }, safeOperation(operation, it.camelCaseName));
+%>
+<%~ include('mutationOperation.ejs', mutationOperation); %>
+
+<% }); %>
+  },
+
+  queryKeys: {
+<% getOperations.forEach((operation) => {
+  var opName = toOpName(operation.name);
+  var keyName = opName.charAt(0).toLowerCase() + opName.slice(1);
+  var safeOp = safeOperation(operation, it.camelCaseName);
+%>
+    <%= keyName %>: (<% safeOp.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => ['<%= it.camelCaseName %>', '<%= it.camelCaseName + opName %>'<% safeOp.parameters.forEach((parameter) => { %>, <%= parameter.name %><% }); %>] as const,
+<% }); %>
+  },
+};

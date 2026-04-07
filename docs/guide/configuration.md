@@ -68,9 +68,16 @@ Output file path for the generated TypeScript client. Omit when using the progra
 
 ### `template`
 
-**Type:** `"axios" | "fetch" | "xior" | "swr-axios" | "tsq-xior" | "ng1" | "ng2"` &nbsp; **Default:** `"axios"`
+**Type:** `string | [string, string]` &nbsp; **Default:** `"axios"`
 
-The HTTP client template to use. See [Templates](/guide/templates) for a full comparison.
+The template to use for code generation. Accepts:
+
+- A single HTTP client template name: `"axios"`, `"fetch"`, `"xior"`, `"ng1"`, `"ng2"`
+- A single reactive layer template name (defaults to `fetch` as the HTTP client): `"swr"`, `"tsq"`
+- A 2-element array pairing a reactive layer with an HTTP client: `["swr", "axios"]`, `["tsq", "xior"]`, etc.
+- A path to a custom template directory
+
+See [Templates](/guide/templates) for a full comparison and valid combinations.
 
 ```json
 { "template": "fetch" }
@@ -203,6 +210,20 @@ When `true`, operations marked `deprecated: true` in the spec are excluded from 
 
 ---
 
+### `useClient`
+
+**Type:** `boolean` &nbsp; **Default:** `false`
+
+When `true`, prepends `'use client';` as the very first line of the generated file. Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates, which produce React hooks that can only run inside Client Components.
+
+```json
+{ "useClient": true }
+```
+
+Has no effect and should not be used outside of Next.js App Router (RSC) environments.
+
+---
+
 ### `servicePrefix`
 
 **Type:** `string` &nbsp; **Default:** `""`
@@ -236,8 +257,35 @@ Controls how query parameters are serialized. The defaults match what ASP.NET Co
 |---|---|---|---|
 | `allowDots` | `boolean` | `true` | Use dot notation for nested objects (`a.b=1` instead of `a[b]=1`) |
 | `arrayFormat` | `"repeat" \| "brackets" \| "indices"` | `"repeat"` | How arrays are serialized in the query string |
+| `queryParamsAsObject` | `boolean \| number` | — | Group all query parameters into a single typed object argument. `true` always groups; a number `N` groups only when there are more than `N` query params |
 
-See [Query Parameter Serialization](/guide/advanced#query-parameter-serialization) for the full matrix of formats.
+See [Query Parameter Serialization](/guide/advanced#query-parameter-serialization) and [Query Parameter Grouping](/guide/advanced#query-parameter-grouping) for full details.
+
+---
+
+### `mocks`
+
+**Type:** `string`
+
+Output path for the generated mock/stub file. When set, Swaggie writes a companion file exporting typed spy stubs for every client method and hook. Requires `testingFramework` and `out` to also be set.
+
+```json
+{ "mocks": "./src/__mocks__/api.ts" }
+```
+
+See [Mocking](/guide/mocking) for a full guide.
+
+---
+
+### `testingFramework`
+
+**Type:** `"vitest" | "jest"`
+
+The test framework whose spy functions (`vi.fn()` or `jest.fn()`) are used in the generated mock file. Requires `mocks` and `out` to also be set.
+
+```json
+{ "testingFramework": "vitest" }
+```
 
 ---
 

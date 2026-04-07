@@ -6,19 +6,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { type CodeGenResult, runCodeGenerator } from './index';
-import type { CliOptions } from './types';
+import type { CliOptions, FullAppOptions } from './types';
 
 const arrayFormatOption = new Option(
   '--arrayFormat <format>',
   'Determines how arrays should be serialized'
 ).choices(['indices', 'repeat', 'brackets']);
 
+const testingFrameworkOption = new Option(
+  '-T, --testingFramework <framework>',
+  'Test framework for generated mock stubs (requires --mocks and --out)'
+).choices(['vitest', 'jest']);
+
 const packageJson = readPackageJson();
 
-const modeOption = new Option('-m, --mode <mode>', 'Generation mode').choices([
-  'full',
-  'schemas',
-]);
+const modeOption = new Option('-m, --mode <mode>', 'Generation mode').choices(['full', 'schemas']);
 const schemaStyleOption = new Option(
   '-d, --schemaStyle <style>',
   'Schema object declaration style'
@@ -39,6 +41,10 @@ const nullableStrategyOption = new Option(
   '--nullables <strategy>',
   "Controls how OpenAPI 'nullable' is translated into TypeScript types"
 ).choices(['include', 'nullableAsOptional', 'ignore']);
+const queryParamsAsObjectOption = new Option(
+  '--queryParamsAsObject [threshold]',
+  'Group query params into a single object; pass a number to group only when query params count is greater than threshold'
+).argParser(parseQueryParamsAsObjectArg);
 
 const program = new Command();
 program
@@ -63,9 +69,18 @@ program
   .option('-b, --baseUrl <string>', 'Base URL that will be used as a default value in the clients')
   .option(
     '-t, --template <string>',
-    'Template used for generating API client. Default: "axios". Other: "fetch", "ng1", "ng2", "swr-axios", "xior", "tsq-xior"'
+    'Template used for generating API client. ' +
+      'L1 (HTTP client) templates: "axios" (default), "fetch", "xior", "ng1", "ng2". ' +
+      'L2 (reactive layer) templates must be paired with an L1 using a comma-separated value: ' +
+      '"swr,axios", "swr,fetch", "tsq,xior", "tsq,fetch", etc. ' +
+      'Providing only an L2 name (e.g. "swr") defaults to "fetch" as the L1.',
+    parseTemplateArg
   )
   .option('--preferAny', 'Use "any" type instead of "unknown"')
+  .option(
+    '-C, --useClient',
+    "Prepend 'use client'; to the generated file. Required for Next.js App Router with SWR or TanStack Query hooks"
+  )
   .option(
     '--skipDeprecated',
     'Skip deprecated operations. When enabled, deprecated operations will be skipped from the generated code'
@@ -84,13 +99,19 @@ program
   .addOption(enumStyleOption)
   .addOption(enumNamesStyleOption)
   .addOption(dateFormatOption)
-  .addOption(nullableStrategyOption);
+  .addOption(nullableStrategyOption)
+  .addOption(queryParamsAsObjectOption)
+  .option(
+    '--mocks <path>',
+    'Output path for the generated mock/stub file (requires --testingFramework and --out)'
+  )
+  .addOption(testingFrameworkOption);
 
 program.parse(process.argv);
 
 const options = program.opts<CliOptions>();
 
-runCodeGenerator(options).then(complete, error);
+runCodeGenerator(options as Partial<FullAppOptions>).then(complete, error);
 
 function complete([code, opts]: CodeGenResult) {
   if (opts.out) {
@@ -115,4 +136,30 @@ function readPackageJson() {
   } catch (e) {
     throw new Error('Could not read package.json file');
   }
+}
+
+function parseTemplateArg(value: string): string | [string, string] {
+  const parts = value.split(',').map((s) => s.trim());
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  if (parts.length === 2) {
+    return [parts[0], parts[1]];
+  }
+  throw new Error(
+    `--template accepts at most 2 comma-separated values (e.g. "swr,axios"). Got ${parts.length}.`
+  );
+}
+
+function parseQueryParamsAsObjectArg(value?: string): boolean | number {
+  if (value === undefined) {
+    return true;
+  }
+
+  const threshold = Number(value);
+  if (!Number.isInteger(threshold) || threshold < 0) {
+    throw new Error('--queryParamsAsObject threshold must be a non-negative integer');
+  }
+
+  return threshold;
 }
