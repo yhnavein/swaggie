@@ -146,21 +146,31 @@ describe('swr+axios template — vitest', () => {
   test('emits defaultSWRReturn const', () => {
     expect(output).toContain('const defaultSWRReturn');
     expect(output).toContain('isValidating: false');
+    expect(output).toContain('error: undefined');
+    expect(output).toContain('as unknown as KeyedMutator<any>');
   });
 
   test('emits defaultSWRMutationReturn const', () => {
     expect(output).toContain('const defaultSWRMutationReturn');
     expect(output).toContain('isMutating: false');
+    expect(output).toContain('reset:');
+    expect(output).toContain('Promise.resolve(undefined)');
   });
 
   test('emits withMockSWR helper', () => {
     expect(output).toContain('function withMockSWR');
     expect(output).toContain('mockSWR(');
+    expect(output).toContain('MockSWRReturn');
   });
 
   test('emits withMockSWRMutation helper', () => {
     expect(output).toContain('function withMockSWRMutation');
     expect(output).toContain('mockSWRMutation(');
+    expect(output).toContain('MockSWRMutationReturn');
+  });
+
+  test('imports KeyedMutator from swr', () => {
+    expect(output).toContain("import type { KeyedMutator } from 'swr'");
   });
 
   test('exports createClientMocks with spyOn stubs', () => {
@@ -199,12 +209,12 @@ describe('swr+axios template — jest', () => {
     expect(output).toContain("import { jest } from '@jest/globals'");
   });
 
-  test('helpers reference jest.spyOn type', () => {
-    expect(output).toContain('ReturnType<typeof jest.spyOn>');
+  test('helpers use jest.SpiedFunction generic', () => {
+    expect(output).toContain('jest.SpiedFunction<Fn>');
   });
 
-  test('uses jest.fn() in default return objects', () => {
-    expect(output).toContain('mutate: jest.fn()');
+  test('uses jest.fn() as unknown as KeyedMutator<any> for mutate', () => {
+    expect(output).toContain('mutate: jest.fn() as unknown as KeyedMutator<any>');
   });
 
   test('uses jest.spyOn for hook stubs', () => {

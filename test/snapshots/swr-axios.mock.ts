@@ -9,32 +9,73 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 import { jest } from '@jest/globals';
+import type { KeyedMutator } from 'swr';
 
 import * as realApi from './api';
 
 const defaultSWRReturn = {
-  data: undefined, isLoading: false, error: null, mutate: jest.fn(), isValidating: false,
+  data: undefined,
+  isLoading: false,
+  error: undefined,
+  mutate: jest.fn() as unknown as KeyedMutator<any>,
+  isValidating: false,
 };
 
 const defaultSWRMutationReturn = {
-  trigger: jest.fn(), isMutating: false, error: null, data: undefined, isValidating: false,
+  trigger: jest.fn(() => Promise.resolve(undefined)),
+  isMutating: false,
+  error: undefined,
+  data: undefined,
+  reset: jest.fn(),
 };
 
+interface MockSWRReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a loading state (default: false) */
+  isLoading?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | undefined | null;
+}
+
+interface MockSWRMutationReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a mutating state (default: false) */
+  isMutating?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | undefined | null;
+}
 
 /** Augments a spy with a `mockSWR` shorthand for useSWR query hooks. */
-function withMockSWR<T extends ReturnType<typeof jest.spyOn>>(spy: T) {
+function withMockSWR<Fn extends (...args: never[]) => unknown>(spy: jest.SpiedFunction<Fn>) {
   return Object.assign(spy, {
-    mockSWR({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
-      spy.mockReturnValue({ ...defaultSWRReturn, data, isLoading: isLoading ?? false, error: error ?? null });
+    mockSWR({ data, isLoading, error }: MockSWRReturn) {
+      spy.mockReturnValue({
+        ...defaultSWRReturn,
+        data,
+        isLoading: isLoading ?? false,
+        error: error ?? undefined,
+      } as ReturnType<Fn>);
     },
   });
 }
 
 /** Augments a spy with a `mockSWRMutation` shorthand for useSWRMutation hooks. */
-function withMockSWRMutation<T extends ReturnType<typeof jest.spyOn>>(spy: T) {
+function withMockSWRMutation<Fn extends (...args: never[]) => unknown>(spy: jest.SpiedFunction<Fn>) {
   return Object.assign(spy, {
-    mockSWRMutation({ data, isMutating, error }: { data?: unknown; isMutating?: boolean; error?: Error }) {
-      spy.mockReturnValue({ ...defaultSWRMutationReturn, trigger: jest.fn(), isMutating: isMutating ?? false, error: error ?? null, data });
+    mockSWRMutation({
+      data,
+      isMutating,
+      error,
+    }: MockSWRMutationReturn) {
+      spy.mockReturnValue({
+        ...defaultSWRMutationReturn,
+        trigger: jest.fn(() => Promise.resolve(undefined)),
+        isMutating: isMutating ?? false,
+        error: error ?? undefined,
+        data,
+      } as ReturnType<Fn>);
     },
   });
 }

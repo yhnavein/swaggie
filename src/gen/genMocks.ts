@@ -72,6 +72,9 @@ export default function generateMocks(
 
   // Framework import
   result += buildFrameworkImport(fw);
+  if (l2 === 'swr') {
+    result += buildSwrTypeImport();
+  }
   result += '\n';
 
   if (isNg2) {
@@ -188,6 +191,10 @@ function buildFrameworkImport(fw: TestingFramework): string {
     : "import { jest } from '@jest/globals';\n";
 }
 
+function buildSwrTypeImport(): string {
+  return "import type { KeyedMutator } from 'swr';\n";
+}
+
 /** Returns the spy function expression for the given framework. */
 function spyFn(fw: TestingFramework): string {
   return fw === 'vitest' ? 'vi.spyOn' : 'jest.spyOn';
@@ -204,13 +211,22 @@ function fwRef(fw: TestingFramework): string {
 }
 
 function buildSwrDefaults(fw: TestingFramework): string {
+  const ref = fwRef(fw);
   return `\
 const defaultSWRReturn = {
-  data: undefined, isLoading: false, error: null, mutate: ${fn(fw)}, isValidating: false,
+  data: undefined,
+  isLoading: false,
+  error: undefined,
+  mutate: ${fn(fw)} as unknown as KeyedMutator<any>,
+  isValidating: false,
 };
 
 const defaultSWRMutationReturn = {
-  trigger: ${fn(fw)}, isMutating: false, error: null, data: undefined, isValidating: false,
+  trigger: ${ref}.fn(() => Promise.resolve(undefined)),
+  isMutating: false,
+  error: undefined,
+  data: undefined,
+  reset: ${fn(fw)},
 };
 `;
 }
@@ -218,21 +234,53 @@ const defaultSWRMutationReturn = {
 function buildSwrHelpers(fw: TestingFramework): string {
   const ref = fwRef(fw);
   return `\
+interface MockSWRReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a loading state (default: false) */
+  isLoading?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | undefined | null;
+}
+
+interface MockSWRMutationReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a mutating state (default: false) */
+  isMutating?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | undefined | null;
+}
 
 /** Augments a spy with a \`mockSWR\` shorthand for useSWR query hooks. */
-function withMockSWR<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
+function withMockSWR<Fn extends (...args: never[]) => unknown>(spy: ${ref}.SpiedFunction<Fn>) {
   return Object.assign(spy, {
-    mockSWR({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
-      spy.mockReturnValue({ ...defaultSWRReturn, data, isLoading: isLoading ?? false, error: error ?? null });
+    mockSWR({ data, isLoading, error }: MockSWRReturn) {
+      spy.mockReturnValue({
+        ...defaultSWRReturn,
+        data,
+        isLoading: isLoading ?? false,
+        error: error ?? undefined,
+      } as ReturnType<Fn>);
     },
   });
 }
 
 /** Augments a spy with a \`mockSWRMutation\` shorthand for useSWRMutation hooks. */
-function withMockSWRMutation<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
+function withMockSWRMutation<Fn extends (...args: never[]) => unknown>(spy: ${ref}.SpiedFunction<Fn>) {
   return Object.assign(spy, {
-    mockSWRMutation({ data, isMutating, error }: { data?: unknown; isMutating?: boolean; error?: Error }) {
-      spy.mockReturnValue({ ...defaultSWRMutationReturn, trigger: ${fn(fw)}, isMutating: isMutating ?? false, error: error ?? null, data });
+    mockSWRMutation({
+      data,
+      isMutating,
+      error,
+    }: MockSWRMutationReturn) {
+      spy.mockReturnValue({
+        ...defaultSWRMutationReturn,
+        trigger: ${ref}.fn(() => Promise.resolve(undefined)),
+        isMutating: isMutating ?? false,
+        error: error ?? undefined,
+        data,
+      } as ReturnType<Fn>);
     },
   });
 }
