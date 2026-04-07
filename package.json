@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "1.9.0-alpha.16",
+  "version": "2.0.0",
   "description": "Generate a fully typed TypeScript API client from your OpenAPI 3 spec",
   "author": {
     "name": "Piotr Dabrowski",
@@ -66,7 +66,8 @@
     "service",
     "typescript",
     "codegen",
-    "TanStack Query"
+    "TanStack Query",
+    "mocks"
   ],
   "dependencies": {
     "case": "^1.6.3",

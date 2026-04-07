@@ -71,7 +71,7 @@ export const pet = {
 
 For TanStack Query (`tsq`) the helpers are `withMockQuery` / `withMockMutation` and the `mockQuery()` / `mockMutation()` shorthands are used instead.
 
-For plain L1-only templates (`axios`, `fetch`, `xior`) only the `*Client` stubs are generated — no hook layer.
+For plain HTTP client templates (`axios`, `fetch`, `xior`) only the `*Client` stubs are generated — no hook layer.
 
 ## Using the mock in tests
 

@@ -1,8 +1,8 @@
 # Templates
 
-Swaggie's template system is split into two independent layers: **HTTP client templates** (L1) and **reactive query layer templates** (L2). You can use an L1 template on its own, or combine an L2 with any compatible L1 to get a fully-typed reactive data-fetching layer on top.
+Swaggie's template system is split into two independent layers: **HTTP client templates** and **reactive query layer templates**. You can use an HTTP client template on its own, or combine a reactive layer template with any compatible HTTP client template to get a fully-typed reactive data-fetching layer on top.
 
-## HTTP client templates (L1)
+## HTTP client templates
 
 These are self-contained and produce a plain typed client with one method per API operation. Pick whichever library fits your project:
 
@@ -73,26 +73,26 @@ npm install xior
 
 Angular-specific clients. `ng1` uses `$http` and Angular 1 dependency injection. `ng2` generates injectable services using `HttpClient` and `InjectionToken`. Requires `@angular/common/http`.
 
-> Angular clients are not compatible with reactive query layers (L2).
+> Angular clients are not compatible with reactive query layer templates.
 
 ---
 
-## Reactive query layer templates (L2)
+## Reactive query layer templates
 
-L2 templates wrap an L1 client with a reactive data-fetching layer. They produce two exports per API group: the plain client object (identical to the L1 template) and a hooks namespace with `queries`, `mutations`, and `queryKeys`.
+Reactive layer templates wrap an HTTP client template with a reactive data-fetching layer. They produce two exports per API group: the plain client object (identical to the standalone HTTP client template) and a hooks namespace with `queries`, `mutations`, and `queryKeys`.
 
 | Template | Library | Best for |
 |---|---|---|
 | `swr` | [SWR](https://swr.vercel.app) | React apps using SWR for server state |
 | `tsq` | [TanStack Query](https://tanstack.com/query) | React apps using TanStack Query |
 
-L2 templates must be composed with a compatible L1. The compatible L1 templates are: **`axios`**, **`fetch`**, **`xior`**.
+Reactive layer templates must be composed with a compatible HTTP client template. The compatible HTTP client templates are: **`axios`**, **`fetch`**, **`xior`**.
 
 ---
 
-## Combining L1 and L2
+## Combining templates
 
-Pass the template as a **2-element array** with `[L2, L1]` in your config, or as a **comma-separated pair** on the CLI.
+Pass the template as a **2-element array** with `[reactive-layer, http-client]` in your config, or as a **comma-separated pair** on the CLI.
 
 ### In a config file
 
@@ -105,16 +105,16 @@ Pass the template as a **2-element array** with `[L2, L1]` in your config, or as
 ### On the CLI
 
 ```bash
-# [L2, L1] comma-separated
+# reactive-layer,http-client — comma-separated
 swaggie -s ./openapi.json -o ./client.ts -t swr,axios
 swaggie -s ./openapi.json -o ./client.ts -t tsq,xior
 swaggie -s ./openapi.json -o ./client.ts -t swr,fetch
 swaggie -s ./openapi.json -o ./client.ts -t tsq,axios
 ```
 
-### L2 alone — defaults to `fetch` as the L1
+### Reactive layer alone — defaults to `fetch`
 
-If you pass only an L2 name without a companion L1, Swaggie defaults to `fetch`:
+If you pass only a reactive layer template name without a companion HTTP client template, Swaggie defaults to `fetch`:
 
 ```json
 { "template": "swr" }
@@ -124,7 +124,7 @@ This is equivalent to `["swr", "fetch"]`.
 
 ### Valid combinations
 
-| L2 | Compatible L1 templates |
+| Reactive layer | Compatible HTTP client templates |
 |---|---|
 | `swr` | `axios`, `fetch`, `xior` |
 | `tsq` | `axios`, `fetch`, `xior` |
@@ -211,11 +211,11 @@ Or in your config file:
 }
 ```
 
-Custom paths also work in composite pairs. For example, to use your own reactive layer on top of the built-in `axios` L1:
+Custom paths also work in composite pairs. For example, to use your own reactive layer on top of the built-in `axios` HTTP client template:
 
 ```json
 {
-  "template": ["./my-l2-template/", "axios"]
+  "template": ["./my-reactive-template/", "axios"]
 }
 ```
 

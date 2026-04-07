@@ -29,6 +29,7 @@ See the [Example section](#example) for a quick demo, or visit the full document
 - JSDoc comments on all generated functions
 - Generates a single, small, tree-shakable output file
 - Dev-only dependency — zero runtime overhead
+- Ability to generate automatic client mocks for `vitest` and `jest`
 
 ---
 
@@ -148,7 +149,7 @@ The `$schema` field enables autocompletion and inline documentation in most edit
 
 Swaggie's templates are split into two independent layers that you can combine freely.
 
-### HTTP client templates (L1)
+### HTTP client templates
 
 These are standalone and cover the most common client libraries:
 
@@ -160,20 +161,20 @@ These are standalone and cover the most common client libraries:
 | `ng1`    | Angular 1 client |
 | `ng2`    | Angular 2+ client (uses `HttpClient` and `InjectionToken`) |
 
-### Reactive query layer templates (L2)
+### Reactive query layer templates
 
-These add a reactive data-fetching layer (SWR or TanStack Query hooks) on top of any compatible L1 client. They cannot be used alone — pair them with an L1 template using a 2-element array:
+These add a reactive data-fetching layer (SWR or TanStack Query hooks) on top of any compatible http client. They cannot be used alone — pair them with a basic template using a 2-element array:
 
 | Template | Description |
 | -------- | ----------- |
 | `swr`    | [SWR](https://swr.vercel.app) hooks for queries and mutations |
 | `tsq`    | [TanStack Query](https://tanstack.com/query) hooks for queries and mutations |
 
-Compatible L1 templates for L2: `axios`, `fetch`, `xior`. Angular clients are not compatible with reactive layers.
+Compatible http client templates: `axios`, `fetch`, `xior`. Angular clients are not compatible with reactive layers.
 
 ### Usage examples
 
-**Single L1 template (existing behaviour):**
+**Single http template (existing behaviour):**
 
 ```json
 { "template": "axios" }
@@ -183,7 +184,7 @@ Compatible L1 templates for L2: `axios`, `fetch`, `xior`. Angular clients are no
 swaggie -s ./openapi.json -o ./client.ts -t axios
 ```
 
-**L2 + L1 combination — in config:**
+**Pair combination — in config:**
 
 ```json
 { "template": ["swr", "axios"] }
@@ -196,7 +197,7 @@ swaggie -s ./openapi.json -o ./client.ts -t tsq,xior
 swaggie -s ./openapi.json -o ./client.ts -t swr,fetch
 ```
 
-**L2 alone — defaults to `fetch` as the L1:**
+**Reactive template only — defaults to `fetch` as the http client:**
 
 ```json
 { "template": "swr" }
@@ -432,7 +433,7 @@ Or in a config file:
 }
 ```
 
-The generated mock file exports the same names as the real client, so `vi.mock('./api', () => import('./__mocks__/api'))` is all you need in tests. For L2 (SWR/TSQ) templates, hook stubs come with shorthand helpers:
+The generated mock file exports the same names as the real client, so `vi.mock('./api', () => import('./__mocks__/api'))` is all you need in tests. For (SWR/TSQ) templates, hook stubs come with shorthand helpers:
 
 ```ts
 pet.queries.usePetById.mockSWR({ data: { id: 1, name: 'Rex' } });
