@@ -187,7 +187,7 @@ function buildNg2CreateClientMocks(
 
 function buildFrameworkImport(fw: TestingFramework): string {
   return fw === 'vitest'
-    ? "import { vi } from 'vitest';\n"
+    ? "import { type MockInstance, vi } from 'vitest';\n"
     : "import { jest } from '@jest/globals';\n";
 }
 
@@ -302,14 +302,22 @@ const defaultMutationReturn = {
 }
 
 function buildTsqHelpers(fw: TestingFramework): string {
-  const ref = fwRef(fw);
   return `\
 // ─── TanStack Query mock helpers ─────────────────────────────────────────────
 
+interface MockQueryReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a loading state (default: false) */
+  isLoading?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | null;
+}
+
 /** Augments a spy with a \`mockQuery\` shorthand for useQuery hooks. */
-function withMockQuery<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
+function withMockQuery<T extends MockInstance>(spy: T) {
   return Object.assign(spy, {
-    mockQuery({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
+    mockQuery({ data, isLoading, error }: MockQueryReturn) {
       const pending = isLoading ?? false;
       spy.mockReturnValue({
         ...defaultQueryReturn,
@@ -324,10 +332,19 @@ function withMockQuery<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
   });
 }
 
+interface MockMutationReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a mutating state (default: false) */
+  isPending?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | null;
+}
+
 /** Augments a spy with a \`mockMutation\` shorthand for useMutation hooks. */
-function withMockMutation<T extends ReturnType<typeof ${ref}.spyOn>>(spy: T) {
+function withMockMutation<T extends MockInstance>(spy: T) {
   return Object.assign(spy, {
-    mockMutation({ data, isPending, error }: { data?: unknown; isPending?: boolean; error?: Error }) {
+    mockMutation({ data, isPending, error }: MockMutationReturn) {
       spy.mockReturnValue({
         ...defaultMutationReturn,
         mutate: ${fn(fw)},
@@ -416,7 +433,7 @@ function buildCreateTsqHookMocks(
     for (const op of getOps) {
       const hookName = toHookName(op.name, 'use');
       lines.push(
-        `        ${hookName}: withMockQuery(${spy}(realApi.${camelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn)),`
+        `        ${hookName}: withMockQuery(${spy}(realApi.${camelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn as any)),`
       );
     }
     lines.push('      },');
@@ -424,7 +441,7 @@ function buildCreateTsqHookMocks(
     for (const op of mutOps) {
       const hookName = 'use' + pascal(op.name);
       lines.push(
-        `        ${hookName}: withMockMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn)),`
+        `        ${hookName}: withMockMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn as any)),`
       );
     }
     lines.push('      },');

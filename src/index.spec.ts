@@ -774,7 +774,7 @@ describe('runCodeGenerator — template validation', () => {
 
     const mockFile = await Bun.file(mocksPath).text();
     expect(mockFile).toContain('createClientMocks');
-    expect(mockFile).toContain("import { vi } from 'vitest'");
+    expect(mockFile).toContain("import { type MockInstance, vi } from 'vitest'");
     expect(mockFile).toContain("import * as realApi from './api'");
   });
 

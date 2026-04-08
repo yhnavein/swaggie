@@ -77,7 +77,7 @@ describe('xior template — vitest', () => {
   });
 
   test('imports vi from vitest', () => {
-    expect(output).toContain("import { vi } from 'vitest'");
+    expect(output).toContain("import { type MockInstance, vi } from 'vitest'");
   });
 
   test('imports realApi as namespace', () => {
@@ -140,7 +140,7 @@ describe('swr+axios template — vitest', () => {
   });
 
   test('imports vi from vitest', () => {
-    expect(output).toContain("import { vi } from 'vitest'");
+    expect(output).toContain("import { type MockInstance, vi } from 'vitest'");
   });
 
   test('emits defaultSWRReturn const', () => {
@@ -283,7 +283,7 @@ describe('ng2 template — vitest', () => {
   });
 
   test('imports vi from vitest', () => {
-    expect(output).toContain("import { vi } from 'vitest'");
+    expect(output).toContain("import { type MockInstance, vi } from 'vitest'");
   });
 
   test('uses type-only import of service classes', () => {

@@ -8,7 +8,7 @@
 //----------------------
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
-import { vi } from 'vitest';
+import { type MockInstance, vi } from 'vitest';
 
 import * as realApi from './api';
 

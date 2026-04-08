@@ -8,7 +8,7 @@
 //----------------------
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
-import { vi } from 'vitest';
+import { type MockInstance, vi } from 'vitest';
 
 import * as realApi from './api';
 
@@ -24,10 +24,19 @@ const defaultMutationReturn = {
 
 // ─── TanStack Query mock helpers ─────────────────────────────────────────────
 
+interface MockQueryReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a loading state (default: false) */
+  isLoading?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | null;
+}
+
 /** Augments a spy with a `mockQuery` shorthand for useQuery hooks. */
-function withMockQuery<T extends ReturnType<typeof vi.spyOn>>(spy: T) {
+function withMockQuery<T extends MockInstance>(spy: T) {
   return Object.assign(spy, {
-    mockQuery({ data, isLoading, error }: { data?: unknown; isLoading?: boolean; error?: Error }) {
+    mockQuery({ data, isLoading, error }: MockQueryReturn) {
       const pending = isLoading ?? false;
       spy.mockReturnValue({
         ...defaultQueryReturn,
@@ -42,10 +51,19 @@ function withMockQuery<T extends ReturnType<typeof vi.spyOn>>(spy: T) {
   });
 }
 
+interface MockMutationReturn {
+  /** The data to return from the mock */
+  data: unknown;
+  /** Whether to return a mutating state (default: false) */
+  isPending?: boolean;
+  /** Whether to return an error (default: undefined) */
+  error?: Error | null;
+}
+
 /** Augments a spy with a `mockMutation` shorthand for useMutation hooks. */
-function withMockMutation<T extends ReturnType<typeof vi.spyOn>>(spy: T) {
+function withMockMutation<T extends MockInstance>(spy: T) {
   return Object.assign(spy, {
-    mockMutation({ data, isPending, error }: { data?: unknown; isPending?: boolean; error?: Error }) {
+    mockMutation({ data, isPending, error }: MockMutationReturn) {
       spy.mockReturnValue({
         ...defaultMutationReturn,
         mutate: vi.fn(),
@@ -94,39 +112,39 @@ export function createApiHookMocks() {
   return {
     pet: {
       queries: {
-        useFindPets: withMockQuery(vi.spyOn(realApi.pet.queries, 'useFindPets').mockReturnValue(defaultQueryReturn)),
-        useFindPetsByTags: withMockQuery(vi.spyOn(realApi.pet.queries, 'useFindPetsByTags').mockReturnValue(defaultQueryReturn)),
-        usePetById: withMockQuery(vi.spyOn(realApi.pet.queries, 'usePetById').mockReturnValue(defaultQueryReturn)),
+        useFindPets: withMockQuery(vi.spyOn(realApi.pet.queries, 'useFindPets').mockReturnValue(defaultQueryReturn as any)),
+        useFindPetsByTags: withMockQuery(vi.spyOn(realApi.pet.queries, 'useFindPetsByTags').mockReturnValue(defaultQueryReturn as any)),
+        usePetById: withMockQuery(vi.spyOn(realApi.pet.queries, 'usePetById').mockReturnValue(defaultQueryReturn as any)),
       },
       mutations: {
-        useAddPet: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useAddPet').mockReturnValue(defaultMutationReturn)),
-        useDeletePet: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useDeletePet').mockReturnValue(defaultMutationReturn)),
-        useUpdatePet: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useUpdatePet').mockReturnValue(defaultMutationReturn)),
-        useUpdatePetWithForm: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useUpdatePetWithForm').mockReturnValue(defaultMutationReturn)),
-        useUploadFile: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useUploadFile').mockReturnValue(defaultMutationReturn)),
+        useAddPet: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useAddPet').mockReturnValue(defaultMutationReturn as any)),
+        useDeletePet: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useDeletePet').mockReturnValue(defaultMutationReturn as any)),
+        useUpdatePet: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useUpdatePet').mockReturnValue(defaultMutationReturn as any)),
+        useUpdatePetWithForm: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useUpdatePetWithForm').mockReturnValue(defaultMutationReturn as any)),
+        useUploadFile: withMockMutation(vi.spyOn(realApi.pet.mutations, 'useUploadFile').mockReturnValue(defaultMutationReturn as any)),
       },
     },
     store: {
       queries: {
-        useInventory: withMockQuery(vi.spyOn(realApi.store.queries, 'useInventory').mockReturnValue(defaultQueryReturn)),
-        useOrderById: withMockQuery(vi.spyOn(realApi.store.queries, 'useOrderById').mockReturnValue(defaultQueryReturn)),
+        useInventory: withMockQuery(vi.spyOn(realApi.store.queries, 'useInventory').mockReturnValue(defaultQueryReturn as any)),
+        useOrderById: withMockQuery(vi.spyOn(realApi.store.queries, 'useOrderById').mockReturnValue(defaultQueryReturn as any)),
       },
       mutations: {
-        useDeleteOrder: withMockMutation(vi.spyOn(realApi.store.mutations, 'useDeleteOrder').mockReturnValue(defaultMutationReturn)),
-        usePlaceOrder: withMockMutation(vi.spyOn(realApi.store.mutations, 'usePlaceOrder').mockReturnValue(defaultMutationReturn)),
+        useDeleteOrder: withMockMutation(vi.spyOn(realApi.store.mutations, 'useDeleteOrder').mockReturnValue(defaultMutationReturn as any)),
+        usePlaceOrder: withMockMutation(vi.spyOn(realApi.store.mutations, 'usePlaceOrder').mockReturnValue(defaultMutationReturn as any)),
       },
     },
     user: {
       queries: {
-        useUserByName: withMockQuery(vi.spyOn(realApi.user.queries, 'useUserByName').mockReturnValue(defaultQueryReturn)),
-        useLoginUser: withMockQuery(vi.spyOn(realApi.user.queries, 'useLoginUser').mockReturnValue(defaultQueryReturn)),
-        useLogoutUser: withMockQuery(vi.spyOn(realApi.user.queries, 'useLogoutUser').mockReturnValue(defaultQueryReturn)),
+        useUserByName: withMockQuery(vi.spyOn(realApi.user.queries, 'useUserByName').mockReturnValue(defaultQueryReturn as any)),
+        useLoginUser: withMockQuery(vi.spyOn(realApi.user.queries, 'useLoginUser').mockReturnValue(defaultQueryReturn as any)),
+        useLogoutUser: withMockQuery(vi.spyOn(realApi.user.queries, 'useLogoutUser').mockReturnValue(defaultQueryReturn as any)),
       },
       mutations: {
-        useCreateUser: withMockMutation(vi.spyOn(realApi.user.mutations, 'useCreateUser').mockReturnValue(defaultMutationReturn)),
-        useCreateUsersWithListInput: withMockMutation(vi.spyOn(realApi.user.mutations, 'useCreateUsersWithListInput').mockReturnValue(defaultMutationReturn)),
-        useDeleteUser: withMockMutation(vi.spyOn(realApi.user.mutations, 'useDeleteUser').mockReturnValue(defaultMutationReturn)),
-        useUpdateUser: withMockMutation(vi.spyOn(realApi.user.mutations, 'useUpdateUser').mockReturnValue(defaultMutationReturn)),
+        useCreateUser: withMockMutation(vi.spyOn(realApi.user.mutations, 'useCreateUser').mockReturnValue(defaultMutationReturn as any)),
+        useCreateUsersWithListInput: withMockMutation(vi.spyOn(realApi.user.mutations, 'useCreateUsersWithListInput').mockReturnValue(defaultMutationReturn as any)),
+        useDeleteUser: withMockMutation(vi.spyOn(realApi.user.mutations, 'useDeleteUser').mockReturnValue(defaultMutationReturn as any)),
+        useUpdateUser: withMockMutation(vi.spyOn(realApi.user.mutations, 'useUpdateUser').mockReturnValue(defaultMutationReturn as any)),
       },
     },
   };

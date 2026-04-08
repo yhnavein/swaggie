@@ -1,6 +1,6 @@
 {
   "name": "swaggie",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Generate a fully typed TypeScript API client from your OpenAPI 3 spec",
   "author": {
     "name": "Piotr Dabrowski",
