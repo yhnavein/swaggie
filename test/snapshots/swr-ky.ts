@@ -17,33 +17,25 @@ interface SwrConfig extends SWRConfiguration {
   /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
   key?: Key;
 }
-import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
+import ky, { type Options as KyOptions } from 'ky';
 
-export const axios = Axios.create({
-  baseURL: '',
-  paramsSerializer: (params: any) =>
-    encodeParams(params, null, {
-      allowDots: true,
-      arrayFormat: 'repeat',
-    }),
+export const http = ky.create({
+  prefix: '',
 });
-
 export const petClient = {
    /**
   * Add a new pet to the store
   * @param body
   */
   addPet(body: Pet ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet> {
-    const url = `/pet`;
+    $config?: KyOptions
+  ): Promise<Pet> {
+    const url = `pet`;
 
-    return axios.request<Pet>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).json<Pet>();
   },
 
    /**
@@ -53,18 +45,16 @@ export const petClient = {
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
+    $config?: KyOptions
+  ): Promise<unknown> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return axios.request<unknown>({
-      url: url,
-      method: 'DELETE',
+    return http.delete(url, {
       headers: {
         'api_key': apiKey,
       },
       ...$config,
-    });
+    }).json<unknown>();
   },
 
    /**
@@ -73,27 +63,25 @@ export const petClient = {
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet[]> {
-    const url = `/pet/find`;
+    $config?: KyOptions
+  ): Promise<Pet[]> {
+    const url = `pet/find`;
 
-    return axios.request<Pet[]>({
-      url: url,
-      method: 'GET',
-      params: {
-        'status': queryParams?.status,
-        'name': queryParams?.name,
-        'type': queryParams?.type,
-        'owner': queryParams?.owner,
-        'sortBy': queryParams?.sortBy,
-        'order': queryParams?.order,
-        'page': queryParams?.page,
-        'limit': queryParams?.limit,
-        'city': queryParams?.city,
-        'registrationDate': queryParams?.registrationDate,
+    return http.get(url, {
+      searchParams: {
+        'status': queryParams?.status as any,
+        'name': queryParams?.name as any,
+        'type': queryParams?.type as any,
+        'owner': queryParams?.owner as any,
+        'sortBy': queryParams?.sortBy as any,
+        'order': queryParams?.order as any,
+        'page': queryParams?.page as any,
+        'limit': queryParams?.limit as any,
+        'city': queryParams?.city as any,
+        'registrationDate': queryParams?.registrationDate as any,
       },
       ...$config,
-    });
+    }).json<Pet[]>();
   },
 
    /**
@@ -103,18 +91,16 @@ export const petClient = {
   * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet[]> {
-    const url = `/pet/findByTags`;
+    $config?: KyOptions
+  ): Promise<Pet[]> {
+    const url = `pet/findByTags`;
 
-    return axios.request<Pet[]>({
-      url: url,
-      method: 'GET',
-      params: {
-        'tags': tags,
+    return http.get(url, {
+      searchParams: {
+        'tags': tags as any,
       },
       ...$config,
-    });
+    }).json<Pet[]>();
   },
 
    /**
@@ -123,15 +109,13 @@ export const petClient = {
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
+    $config?: KyOptions
+  ): Promise<Pet> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return axios.request<Pet>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).json<Pet>();
   },
 
    /**
@@ -139,19 +123,17 @@ export const petClient = {
   * @param body
   */
   updatePet(body: Pet ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Pet> {
-    const url = `/pet`;
+    $config?: KyOptions
+  ): Promise<Pet> {
+    const url = `pet`;
 
-    return axios.request<Pet>({
-      url: url,
-      method: 'PUT',
-      data: new URLSearchParams(body as any),
+    return http.put(url, {
+      body: new URLSearchParams(body as any),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       ...$config,
-    });
+    }).json<Pet>();
   },
 
    /**
@@ -161,19 +143,17 @@ export const petClient = {
   */
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
+    $config?: KyOptions
+  ): Promise<unknown> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return axios.request<unknown>({
-      url: url,
-      method: 'POST',
-      params: {
-        'name': queryParams?.name,
-        'status': queryParams?.status,
+    return http.post(url, {
+      searchParams: {
+        'name': queryParams?.name as any,
+        'status': queryParams?.status as any,
       },
       ...$config,
-    });
+    }).json<unknown>();
   },
 
    /**
@@ -185,19 +165,17 @@ export const petClient = {
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<File> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
+    $config?: KyOptions
+  ): Promise<File> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    return axios.request<File>({
-      url: url,
-      method: 'POST',
-      data: body,
-      params: {
-        'additionalMetadata': additionalMetadata,
+    return http.post(url, {
+      body: body,
+      searchParams: {
+        'additionalMetadata': additionalMetadata as any,
       },
       ...$config,
-    });
+    }).blob() as Promise<File>;
   },
 
   };
@@ -213,13 +191,13 @@ export const pet = {
     useFindPets(
       queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
 
       const { data, error, isLoading, mutate } = useSWR<Pet[]>(
         cacheUrl,
-        () => petClient.findPets(queryParams, $httpConfig).then((resp) =&gt; resp.data),
+        () => petClient.findPets(queryParams, $httpConfig),
         config
       );
 
@@ -235,13 +213,13 @@ export const pet = {
     useFindPetsByTags(
       tags?: string[] | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
 
       const { data, error, isLoading, mutate } = useSWR<Pet[]>(
         cacheUrl,
-        () => petClient.findPetsByTags(tags, $httpConfig).then((resp) =&gt; resp.data),
+        () => petClient.findPetsByTags(tags, $httpConfig),
         config
       );
 
@@ -256,13 +234,13 @@ export const pet = {
     usePetById(
       petId: number,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.petById(petId, );
 
       const { data, error, isLoading, mutate } = useSWR<Pet>(
         cacheUrl,
-        () => petClient.getPetById(petId, $httpConfig).then((resp) =&gt; resp.data),
+        () => petClient.getPetById(petId, $httpConfig),
         config
       );
 
@@ -278,11 +256,11 @@ export const pet = {
     */
     useAddPet(
       $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<Pet, Error, string, { body: Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: Pet } }) =>
-          petClient.addPet(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          petClient.addPet(arg.body, $httpConfig),
         $config
       );
     },
@@ -294,11 +272,11 @@ export const pet = {
     */
     useDeletePet(
       $config?: SWRMutationConfiguration<unknown, Error, string, { apiKey: string | null; petId: number }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<unknown, Error, string, { apiKey: string | null; petId: number }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { apiKey: string | null; petId: number } }) =>
-          petClient.deletePet(arg.apiKey, arg.petId, $httpConfig).then((resp) =&gt; resp.data),
+          petClient.deletePet(arg.apiKey, arg.petId, $httpConfig),
         $config
       );
     },
@@ -309,11 +287,11 @@ export const pet = {
     */
     useUpdatePet(
       $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<Pet, Error, string, { body: Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: Pet } }) =>
-          petClient.updatePet(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          petClient.updatePet(arg.body, $httpConfig),
         $config
       );
     },
@@ -325,11 +303,11 @@ export const pet = {
     */
     useUpdatePetWithForm(
       $config?: SWRMutationConfiguration<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null } }) =>
-          petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig).then((resp) =&gt; resp.data),
+          petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig),
         $config
       );
     },
@@ -342,11 +320,11 @@ export const pet = {
     */
     useUploadFile(
       $config?: SWRMutationConfiguration<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
         '/pet/*/uploadImage',
         (_key: string, { arg }: { arg: { body: File | null; petId: number; additionalMetadata?: string | null } }) =>
-          petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) =&gt; resp.data),
+          petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig),
         $config
       );
     },
@@ -366,30 +344,26 @@ export const storeClient = {
   * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
+    $config?: KyOptions
+  ): Promise<unknown> {
+    const url = `store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return axios.request<unknown>({
-      url: url,
-      method: 'DELETE',
+    return http.delete(url, {
       ...$config,
-    });
+    }).json<unknown>();
   },
 
    /**
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
-  getInventory($config?: AxiosRequestConfig
-  ): AxiosPromise<Record<string, number>> {
-    const url = `/store/inventory`;
+  getInventory($config?: KyOptions
+  ): Promise<Record<string, number>> {
+    const url = `store/inventory`;
 
-    return axios.request<Record<string, number>>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).json<Record<string, number>>();
   },
 
    /**
@@ -398,15 +372,13 @@ export const storeClient = {
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Order> {
-    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
+    $config?: KyOptions
+  ): Promise<Order> {
+    const url = `store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return axios.request<Order>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).json<Order>();
   },
 
    /**
@@ -415,16 +387,14 @@ export const storeClient = {
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<Order> {
-    const url = `/store/order`;
+    $config?: KyOptions
+  ): Promise<Order> {
+    const url = `store/order`;
 
-    return axios.request<Order>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).json<Order>();
   },
 
   };
@@ -438,13 +408,13 @@ export const store = {
     */
     useInventory(
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.inventory();
 
       const { data, error, isLoading, mutate } = useSWR<Record<string, number>>(
         cacheUrl,
-        () => storeClient.getInventory($httpConfig).then((resp) =&gt; resp.data),
+        () => storeClient.getInventory($httpConfig),
         config
       );
 
@@ -459,13 +429,13 @@ export const store = {
     useOrderById(
       orderId: number,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
 
       const { data, error, isLoading, mutate } = useSWR<Order>(
         cacheUrl,
-        () => storeClient.getOrderById(orderId, $httpConfig).then((resp) =&gt; resp.data),
+        () => storeClient.getOrderById(orderId, $httpConfig),
         config
       );
 
@@ -482,11 +452,11 @@ export const store = {
     */
     useDeleteOrder(
       $config?: SWRMutationConfiguration<unknown, Error, string, { orderId: number }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<unknown, Error, string, { orderId: number }>(
         '/store/order/*',
         (_key: string, { arg }: { arg: { orderId: number } }) =>
-          storeClient.deleteOrder(arg.orderId, $httpConfig).then((resp) =&gt; resp.data),
+          storeClient.deleteOrder(arg.orderId, $httpConfig),
         $config
       );
     },
@@ -498,11 +468,11 @@ export const store = {
     */
     usePlaceOrder(
       $config?: SWRMutationConfiguration<Order, Error, string, { body?: Order | null }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<Order, Error, string, { body?: Order | null }>(
         '/store/order',
         (_key: string, { arg }: { arg: { body?: Order | null } }) =>
-          storeClient.placeOrder(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          storeClient.placeOrder(arg.body, $httpConfig),
         $config
       );
     },
@@ -521,16 +491,14 @@ export const userClient = {
   * @param body (optional)
   */
   createUser(body?: User | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<User> {
-    const url = `/user`;
+    $config?: KyOptions
+  ): Promise<User> {
+    const url = `user`;
 
-    return axios.request<User>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).json<User>();
   },
 
    /**
@@ -538,16 +506,14 @@ export const userClient = {
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<User> {
-    const url = `/user/createWithList`;
+    $config?: KyOptions
+  ): Promise<User> {
+    const url = `user/createWithList`;
 
-    return axios.request<User>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).json<User>();
   },
 
    /**
@@ -556,15 +522,13 @@ export const userClient = {
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    const url = `/user/${encodeURIComponent(`${username}`)}`;
+    $config?: KyOptions
+  ): Promise<unknown> {
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return axios.request<unknown>({
-      url: url,
-      method: 'DELETE',
+    return http.delete(url, {
       ...$config,
-    });
+    }).json<unknown>();
   },
 
    /**
@@ -572,15 +536,13 @@ export const userClient = {
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<User> {
-    const url = `/user/${encodeURIComponent(`${username}`)}`;
+    $config?: KyOptions
+  ): Promise<User> {
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return axios.request<User>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).json<User>();
   },
 
    /**
@@ -588,31 +550,27 @@ export const userClient = {
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<string> {
-    const url = `/user/login`;
+    $config?: KyOptions
+  ): Promise<string> {
+    const url = `user/login`;
 
-    return axios.request<string>({
-      url: url,
-      method: 'GET',
-      params: {
-        'username': queryParams?.username,
-        'password': queryParams?.password,
+    return http.get(url, {
+      searchParams: {
+        'username': queryParams?.username as any,
+        'password': queryParams?.password as any,
       },
       ...$config,
-    });
+    }).json<string>();
   },
 
   /** Logs out current logged in user session */
-  logoutUser($config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    const url = `/user/logout`;
+  logoutUser($config?: KyOptions
+  ): Promise<unknown> {
+    const url = `user/logout`;
 
-    return axios.request<unknown>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).json<unknown>();
   },
 
    /**
@@ -623,16 +581,14 @@ export const userClient = {
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
-    $config?: AxiosRequestConfig
-  ): AxiosPromise<unknown> {
-    const url = `/user/${encodeURIComponent(`${username}`)}`;
+    $config?: KyOptions
+  ): Promise<unknown> {
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return axios.request<unknown>({
-      url: url,
-      method: 'PUT',
-      data: body,
+    return http.put(url, {
+      body: body,
       ...$config,
-    });
+    }).json<unknown>();
   },
 
   };
@@ -647,13 +603,13 @@ export const user = {
     useUserByName(
       username: string,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.userByName(username, );
 
       const { data, error, isLoading, mutate } = useSWR<User>(
         cacheUrl,
-        () => userClient.getUserByName(username, $httpConfig).then((resp) =&gt; resp.data),
+        () => userClient.getUserByName(username, $httpConfig),
         config
       );
 
@@ -667,13 +623,13 @@ export const user = {
     useLoginUser(
       queryParams?: { username?: string | null; password?: string | null; } | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
 
       const { data, error, isLoading, mutate } = useSWR<string>(
         cacheUrl,
-        () => userClient.loginUser(queryParams, $httpConfig).then((resp) =&gt; resp.data),
+        () => userClient.loginUser(queryParams, $httpConfig),
         config
       );
 
@@ -683,13 +639,13 @@ export const user = {
   /** Logs out current logged in user session */
     useLogoutUser(
       $config?: Omit<SwrConfig, 'key'> & { key?: Key },
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.logoutUser();
 
       const { data, error, isLoading, mutate } = useSWR<unknown>(
         cacheUrl,
-        () => userClient.logoutUser($httpConfig).then((resp) =&gt; resp.data),
+        () => userClient.logoutUser($httpConfig),
         config
       );
 
@@ -706,11 +662,11 @@ export const user = {
     */
     useCreateUser(
       $config?: SWRMutationConfiguration<User, Error, string, { body?: User | null }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<User, Error, string, { body?: User | null }>(
         '/user',
         (_key: string, { arg }: { arg: { body?: User | null } }) =>
-          userClient.createUser(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          userClient.createUser(arg.body, $httpConfig),
         $config
       );
     },
@@ -721,11 +677,11 @@ export const user = {
     */
     useCreateUsersWithListInput(
       $config?: SWRMutationConfiguration<User, Error, string, { body?: User[] | null }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<User, Error, string, { body?: User[] | null }>(
         '/user/createWithList',
         (_key: string, { arg }: { arg: { body?: User[] | null } }) =>
-          userClient.createUsersWithListInput(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          userClient.createUsersWithListInput(arg.body, $httpConfig),
         $config
       );
     },
@@ -737,11 +693,11 @@ export const user = {
     */
     useDeleteUser(
       $config?: SWRMutationConfiguration<unknown, Error, string, { username: string }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<unknown, Error, string, { username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { username: string } }) =>
-          userClient.deleteUser(arg.username, $httpConfig).then((resp) =&gt; resp.data),
+          userClient.deleteUser(arg.username, $httpConfig),
         $config
       );
     },
@@ -754,11 +710,11 @@ export const user = {
     */
     useUpdateUser(
       $config?: SWRMutationConfiguration<unknown, Error, string, { body: FormData | null; username: string }>,
-      $httpConfig?: AxiosRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       return useSWRMutation<unknown, Error, string, { body: FormData | null; username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { body: FormData | null; username: string } }) =>
-          userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) =&gt; resp.data),
+          userClient.updateUser(arg.body, arg.username, $httpConfig),
         $config
       );
     },
@@ -828,7 +784,6 @@ export function encodeParams<T = any>(
 
   return encodedParams.join('&');
 }
-
 export interface Order {
   /** @format int64 */
   id?: number;

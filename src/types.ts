@@ -117,7 +117,7 @@ export interface FullAppOptions extends ClientOptions {
 }
 
 /** HTTP client templates (standalone, no reactive layer) */
-export type L1Template = 'axios' | 'fetch' | 'xior' | 'ng1' | 'ng2';
+export type L1Template = 'axios' | 'fetch' | 'xior' | 'ng1' | 'ng2' | 'ky';
 /** Reactive query layer templates (must be composed with an L1 template) */
 export type L2Template = 'swr' | 'tsq';
 /** Any named built-in template */

@@ -559,6 +559,7 @@ describe('prepareAppOptions', () => {
       expect(prepareAppOptions({ ...minimalOpts, template: 'axios' }).template).toBe('axios');
       expect(prepareAppOptions({ ...minimalOpts, template: 'fetch' }).template).toBe('fetch');
       expect(prepareAppOptions({ ...minimalOpts, template: 'xior' }).template).toBe('xior');
+      expect(prepareAppOptions({ ...minimalOpts, template: 'ky' }).template).toBe('ky');
     });
 
     test('passes through [L2, L1] array unchanged', () => {
@@ -666,6 +667,31 @@ describe('runCodeGenerator — template validation', () => {
     const [code] = await runCodeGenerator(parameters as any);
     expect(code).toBeDefined();
     expect(code).toContain('defaults');
+    expect(code).toContain('useSWR');
+  });
+
+  test('accepts "ky" template and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'ky',
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain("import ky");
+    expect(code).toContain('KyOptions');
+    expect(code).toContain('http.get(');
+  });
+
+  test('accepts ["swr", "ky"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'ky'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain("import ky");
     expect(code).toContain('useSWR');
   });
 

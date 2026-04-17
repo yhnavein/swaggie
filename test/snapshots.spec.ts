@@ -23,8 +23,10 @@ const snapshots: SnapshotEntry[] = [
   { snapshotName: 'fetch', template: 'fetch' },
   { snapshotName: 'ng1', template: 'ng1' },
   { snapshotName: 'ng2', template: 'ng2' },
+  { snapshotName: 'ky', template: 'ky' },
   { snapshotName: 'swr-xior', template: ['swr', 'xior'] },
   { snapshotName: 'swr-axios', template: ['swr', 'axios'] },
+  { snapshotName: 'swr-ky', template: ['swr', 'ky'] },
   { snapshotName: 'tsq', template: ['tsq', 'xior'] },
 ];
 

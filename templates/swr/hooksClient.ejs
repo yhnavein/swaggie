@@ -14,6 +14,7 @@ export const <%= it.camelCaseName %> = {
     clientName: it.camelCaseName,
     httpClientName: httpClientPrefix,
     httpConfigType: it.httpConfigType,
+    responseMapper: it.responseMapper,
     returnType: it.prefixApiType(safe.returnType),
     parameters: safe.parameters.map(function(p) {
       return Object.assign({}, p, { type: it.prefixApiType(p.type) });
@@ -34,6 +35,7 @@ export const <%= it.camelCaseName %> = {
     clientName: it.camelCaseName,
     httpClientName: httpClientPrefix,
     httpConfigType: it.httpConfigType,
+    responseMapper: it.responseMapper,
     returnType: it.prefixApiType(safe.returnType),
     parameters: safe.parameters.map(function(p) {
       return Object.assign({}, p, { type: it.prefixApiType(p.type) });

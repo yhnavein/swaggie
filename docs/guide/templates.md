@@ -11,6 +11,7 @@ These are self-contained and produce a plain typed client with one method per AP
 | `axios` | [Axios](https://axios-http.com) | React, Vue, Node.js — the most widely used default |
 | `fetch` | Native `fetch` | Browser apps or Node 18+ with no extra dependencies |
 | `xior` | [xior](https://github.com/suhaotian/xior) | Lightweight Axios-compatible alternative |
+| `ky` | [ky](https://github.com/sindresorhus/ky) | Modern fetch-based client with hooks API |
 | `ng1` | Angular 1 `$http` | Legacy Angular 1.x applications |
 | `ng2` | Angular `HttpClient` | Angular 2+ applications (uses `InjectionToken`) |
 
@@ -69,6 +70,35 @@ npm install xior
 
 ---
 
+### `ky`
+
+[ky](https://github.com/sindresorhus/ky) is a modern, fetch-based HTTP client with a hooks API. Methods return `Promise<T>` directly (no response wrapper), making the generated code simpler for straightforward use cases.
+
+**Dependencies:**
+
+```bash
+npm install ky
+```
+
+**Generated output (excerpt):**
+
+```typescript
+import ky, { type Options as KyOptions } from 'ky';
+
+export const http = ky.create({
+  prefixUrl: '/api',
+});
+
+export const petClient = {
+  getPetById(petId: number, $config?: KyOptions): Promise<Pet> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
+    return http.get(url, { ...$config }).json<Pet>();
+  },
+};
+```
+
+---
+
 ### `ng1` / `ng2`
 
 Angular-specific clients. `ng1` uses `$http` and Angular 1 dependency injection. `ng2` generates injectable services using `HttpClient` and `InjectionToken`. Requires `@angular/common/http`.
@@ -86,7 +116,7 @@ Reactive layer templates wrap an HTTP client template with a reactive data-fetch
 | `swr` | [SWR](https://swr.vercel.app) | React apps using SWR for server state |
 | `tsq` | [TanStack Query](https://tanstack.com/query) | React apps using TanStack Query |
 
-Reactive layer templates must be composed with a compatible HTTP client template. The compatible HTTP client templates are: **`axios`**, **`fetch`**, **`xior`**.
+Reactive layer templates must be composed with a compatible HTTP client template. The compatible HTTP client templates are: **`axios`**, **`fetch`**, **`xior`**, **`ky`**.
 
 ---
 
@@ -126,8 +156,8 @@ This is equivalent to `["swr", "fetch"]`.
 
 | Reactive layer | Compatible HTTP client templates |
 |---|---|
-| `swr` | `axios`, `fetch`, `xior` |
-| `tsq` | `axios`, `fetch`, `xior` |
+| `swr` | `axios`, `fetch`, `xior`, `ky` |
+| `tsq` | `axios`, `fetch`, `xior`, `ky` |
 
 ### Generated output (excerpt for `["swr", "axios"]`)
 
@@ -187,8 +217,10 @@ npm install xior @tanstack/react-query
 |---|---|
 | No framework / Node.js backend | `fetch` (zero deps) or `axios` |
 | React — prefer minimal bundle size | `xior` or `fetch` |
+| React — modern fetch-based client | `ky` |
 | React with SWR — backed by axios | `["swr", "axios"]` |
 | React with SWR — minimal bundle | `["swr", "xior"]` or `["swr", "fetch"]` |
+| React with SWR — ky hooks API | `["swr", "ky"]` |
 | React with TanStack Query | `["tsq", "xior"]` or `["tsq", "axios"]` |
 | Angular 2+ | `ng2` |
 | Angular 1 (legacy) | `ng1` |

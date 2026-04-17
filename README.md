@@ -159,6 +159,7 @@ These are standalone and cover the most common client libraries:
 | `axios`  | Default. Recommended for React, Vue, and most Node.js projects |
 | `fetch`  | Native browser/Node 18+ Fetch API — zero runtime dependencies |
 | `xior`   | Lightweight Axios-compatible alternative ([xior](https://github.com/suhaotian/xior#intro)) |
+| `ky`     | Modern fetch-based HTTP client with hooks ([ky](https://github.com/sindresorhus/ky)) |
 | `ng1`    | Angular 1 client |
 | `ng2`    | Angular 2+ client (uses `HttpClient` and `InjectionToken`) |
 
@@ -171,7 +172,7 @@ These add a reactive data-fetching layer (SWR or TanStack Query hooks) on top of
 | `swr`    | [SWR](https://swr.vercel.app) hooks for queries and mutations |
 | `tsq`    | [TanStack Query](https://tanstack.com/query) hooks for queries and mutations |
 
-Compatible http client templates: `axios`, `fetch`, `xior`. Angular clients are not compatible with reactive layers.
+Compatible http client templates: `axios`, `fetch`, `xior`, `ky`. Angular clients are not compatible with reactive layers.
 
 ### Usage examples
 

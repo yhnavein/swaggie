@@ -14,7 +14,7 @@ var httpClientName = it.httpClientName || it.clientName;
     ) {
       return useQuery<<%~ it.returnType %>, TError, TData>({
         queryKey: <%= it.clientName %>.queryKeys.<%= it.rqOpName.charAt(3).toLowerCase() + it.rqOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>),
-        queryFn: () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig).then(res => res.data),
+        queryFn: () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig)<%= it.responseMapper %>,
         ...$config
       });
     },

@@ -1,0 +1,50 @@
+<%~ it.jsDocs %>
+
+  <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
+<%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
+    <% }); %>
+$config?: KyOptions
+  ): Promise<<%~ it.returnType %>> {
+    const url = `<%= it.url.replace(/^\//, '') %>`;
+
+    return http.<%= it.method.toLowerCase() %>(url, {
+<% if(it.body) { -%>
+<% if(it.body.contentType === 'json') { -%>
+      json: <%= it.body.name %>,
+<% } else if(it.body.contentType === 'urlencoded') { -%>
+      body: new URLSearchParams(<%= it.body.name %> as any),
+<% } else { -%>
+      body: <%= it.body.name %>,
+<% } -%>
+<% } -%>
+<% if(it.query && it.query.length > 0) { -%>
+      searchParams: {
+<% it.query.forEach((parameter) => { -%>
+<% if (it.queryParamObject) { -%>
+        '<%= parameter.originalName %>': <%= it.queryParamObject.name %>?.<%= parameter.name %> as any,
+<% } else { -%>
+        '<%= parameter.originalName %>': <%= parameter.name %> as any,
+<% } -%>
+<% }); -%>
+      },
+<% } -%>
+<% if(it.headers && it.headers.length > 0) { -%>
+      headers: {
+<% it.headers.forEach((parameter) => { -%>
+<% if (parameter.value) { -%>
+        '<%= parameter.originalName %>': '<%= parameter.value %>',
+<% } else { -%>
+        '<%= parameter.originalName %>': <%= parameter.name %>,
+<% } -%>
+<% }); -%>
+      },
+<% } -%>
+      ...$config,
+<% if(it.responseContentType === 'binary') { -%>
+    }).blob() as Promise<<%~ it.returnType %>>;
+<% } else if(it.responseContentType === 'text') { -%>
+    }).text() as Promise<<%~ it.returnType %>>;
+<% } else { -%>
+    }).json<<%~ it.returnType %>>();
+<% } -%>
+  },

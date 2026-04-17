@@ -328,6 +328,7 @@ function getNavHeight(): number {
               <option value="axios">axios</option>
               <option value="fetch">fetch</option>
               <option value="xior">xior</option>
+              <option value="ky">ky</option>
               <option value="ng1">ng1</option>
               <option value="ng2">ng2</option>
             </select>

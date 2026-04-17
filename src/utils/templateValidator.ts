@@ -1,6 +1,6 @@
 import type { L1Template, L2Template, ResolvedTemplate, TemplateInput } from '../types';
 
-const L1_TEMPLATES: readonly L1Template[] = ['axios', 'fetch', 'xior', 'ng1', 'ng2'];
+const L1_TEMPLATES: readonly L1Template[] = ['axios', 'fetch', 'xior', 'ng1', 'ng2', 'ky'];
 const L2_TEMPLATES: readonly L2Template[] = ['swr', 'tsq'];
 
 /** L1 templates that are incompatible with any L2 (framework-specific clients) */
@@ -120,8 +120,36 @@ export function getHttpConfigType(template: ResolvedTemplate): string {
       return 'XiorRequestConfig';
     case 'fetch':
       return 'RequestInit';
+    case 'ky':
+      return 'KyOptions';
     default:
       // Custom path or unknown — fall back to a permissive type
       return 'Record<string, unknown>';
+  }
+}
+
+/**
+ * Returns the response mapper snippet used in L2 operation templates to extract
+ * the final data value from a client method call.
+ *
+ * Axios and xior wrap responses in `{ data: T }`, so the mapper unwraps `.data`.
+ * Fetch and ky resolve to `T` directly, so no unwrapping is needed.
+ *
+ * The returned string is appended after the client call expression:
+ *   `client.method(...args)` + responseMapper
+ *
+ * Examples:
+ *   axios/xior → `.then((resp) => resp.data)`
+ *   fetch/ky   → ``  (empty — the promise already resolves to T)
+ */
+export function getResponseMapper(template: ResolvedTemplate): string {
+  const l1 = getL1Template(template);
+  switch (l1) {
+    case 'fetch':
+    case 'ky':
+      return '';
+    default:
+      // axios, xior, and unknown custom templates all use { data: T } wrapper
+      return '.then((resp) => resp.data)';
   }
 }

@@ -10,7 +10,7 @@ import {
   orderBy,
 } from '../utils/utils';
 import { renderFile, hasTemplateFile } from '../utils/templateEngine';
-import { getL1Template, getHttpConfigType } from '../utils/templateValidator';
+import { getL1Template, getHttpConfigType, getResponseMapper } from '../utils/templateValidator';
 import { generateBarrelFile } from './createBarrel';
 import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
@@ -66,6 +66,7 @@ export default async function generateOperations(
       ...clientData,
       servicePrefix,
       httpConfigType: getHttpConfigType(options.template),
+      responseMapper: getResponseMapper(options.template),
       // In split-file mode, the hooks namespace is generated in a separate file.
       // Pass splitMode=true so the client.ejs template skips the hooks block.
       splitMode: !!options.hooksOut,
@@ -141,6 +142,7 @@ export async function generateHooks(
       ...clientData,
       servicePrefix,
       httpConfigType: getHttpConfigType(options.template),
+      responseMapper: getResponseMapper(options.template),
       // Template helper functions — defined once here, used in all L2 templates.
       toOpName,
       safeOperation,
@@ -592,6 +594,8 @@ function getL1HttpTypeImport(template: AppOptions['template']): string | null {
     case 'fetch':
       // RequestInit is a global built-in — no import needed
       return null;
+    case 'ky':
+      return "import type { Options as KyOptions } from 'ky';";
     default:
       return null;
   }
