@@ -31,14 +31,18 @@ const MOCK_FILE_HEADER = `\
  *   helpers (`mockSWR`, `mockQuery`, etc.) — L2 templates only (swr/tsq)
  * - `ApiHookMocks` type alias — L2 templates only
  *
- * @param spec              The OpenAPI document
- * @param options           Generator options (must have `testingFramework` set)
- * @param relativeApiImport Relative import path from the mock file to the real client file
+ * @param spec                 The OpenAPI document
+ * @param options              Generator options (must have `testingFramework` set)
+ * @param relativeApiImport    Relative import path from the mock file to the main client file
+ * @param relativeHooksImport  Relative import path from the mock file to the hooks file
+ *                             (only provided when --hooksOut is set). When present, hook mocks
+ *                             reference the hooks file instead of the main file.
  */
 export default function generateMocks(
   spec: OA3.Document,
   options: AppOptions,
-  relativeApiImport: string
+  relativeApiImport: string,
+  relativeHooksImport?: string
 ): string {
   const fw = options.testingFramework!;
   const template = options.template;
@@ -91,8 +95,14 @@ export default function generateMocks(
 
   // ── Standard path (axios / fetch / xior / swr / tsq) ───────────────────────
 
-  // Real client import — needed for spyOn targets
+  // Real client import — needed for spyOn targets on *Client methods
   result += `import * as realApi from '${relativeApiImport}';\n`;
+
+  // When hooks live in a separate file (--hooksOut), import that file too for hook spies
+  const hooksAlias = relativeHooksImport ? 'realHooks' : 'realApi';
+  if (relativeHooksImport && l2) {
+    result += `import * as realHooks from '${relativeHooksImport}';\n`;
+  }
   result += '\n';
 
   // SWR/TSQ helper functions and default return values (L2 only)
@@ -116,12 +126,12 @@ export default function generateMocks(
   // ── createApiHookMocks (L2 only) ────────────────────────────────────────────
   if (l2 === 'swr') {
     result += '\n';
-    result += buildCreateSwrHookMocks(preparedGroups, fw);
+    result += buildCreateSwrHookMocks(preparedGroups, fw, hooksAlias);
     result += '\n';
     result += 'export type ApiHookMocks = ReturnType<typeof createApiHookMocks>;\n';
   } else if (l2 === 'tsq') {
     result += '\n';
-    result += buildCreateTsqHookMocks(preparedGroups, fw);
+    result += buildCreateTsqHookMocks(preparedGroups, fw, hooksAlias);
     result += '\n';
     result += 'export type ApiHookMocks = ReturnType<typeof createApiHookMocks>;\n';
   }
@@ -383,7 +393,8 @@ function buildCreateClientMocks(
 
 function buildCreateSwrHookMocks(
   groups: { camelName: string; ops: IOperation[] }[],
-  fw: TestingFramework
+  fw: TestingFramework,
+  hooksAlias: string
 ): string {
   const spy = spyFn(fw);
   const lines: string[] = ['export function createApiHookMocks() {', '  return {'];
@@ -397,7 +408,7 @@ function buildCreateSwrHookMocks(
     for (const op of getOps) {
       const hookName = toHookName(op.name, 'use');
       lines.push(
-        `        ${hookName}: withMockSWR(${spy}(realApi.${camelName}.queries, '${hookName}').mockReturnValue(defaultSWRReturn)),`
+        `        ${hookName}: withMockSWR(${spy}(${hooksAlias}.${camelName}.queries, '${hookName}').mockReturnValue(defaultSWRReturn)),`
       );
     }
     lines.push('      },');
@@ -405,7 +416,7 @@ function buildCreateSwrHookMocks(
     for (const op of mutOps) {
       const hookName = 'use' + pascal(op.name);
       lines.push(
-        `        ${hookName}: withMockSWRMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn as any)),`
+        `        ${hookName}: withMockSWRMutation(${spy}(${hooksAlias}.${camelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn as any)),`
       );
     }
     lines.push('      },');
@@ -419,7 +430,8 @@ function buildCreateSwrHookMocks(
 
 function buildCreateTsqHookMocks(
   groups: { camelName: string; ops: IOperation[] }[],
-  fw: TestingFramework
+  fw: TestingFramework,
+  hooksAlias: string
 ): string {
   const spy = spyFn(fw);
   const lines: string[] = ['export function createApiHookMocks() {', '  return {'];
@@ -433,7 +445,7 @@ function buildCreateTsqHookMocks(
     for (const op of getOps) {
       const hookName = toHookName(op.name, 'use');
       lines.push(
-        `        ${hookName}: withMockQuery(${spy}(realApi.${camelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn as any)),`
+        `        ${hookName}: withMockQuery(${spy}(${hooksAlias}.${camelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn as any)),`
       );
     }
     lines.push('      },');
@@ -441,7 +453,7 @@ function buildCreateTsqHookMocks(
     for (const op of mutOps) {
       const hookName = 'use' + pascal(op.name);
       lines.push(
-        `        ${hookName}: withMockMutation(${spy}(realApi.${camelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn as any)),`
+        `        ${hookName}: withMockMutation(${spy}(${hooksAlias}.${camelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn as any)),`
       );
     }
     lines.push('      },');

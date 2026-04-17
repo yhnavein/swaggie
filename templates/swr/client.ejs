@@ -5,32 +5,21 @@ export const <%= it.camelCaseName -%>Client = {
   <% }); %>
 };
 
+<% if (!it.splitMode) { %>
 <%
 var getOperations = it.operations.filter((o) => o.method === 'GET');
 var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
-
-function toOpName(name) {
-  var n = name.toLowerCase().startsWith('get') ? name.substring(3) : name;
-  return n.charAt(0).toUpperCase() + n.slice(1);
-}
-
-function safeOperation(operation, clientName) {
-  var safeParams = operation.parameters.map(function(p) {
-    return p.name === clientName ? Object.assign({}, p, { name: '_' + p.name }) : p;
-  });
-  return Object.assign({}, operation, { parameters: safeParams });
-}
 %>
 
 export const <%= it.camelCaseName %> = {
   queries: {
 <% getOperations.forEach((operation) => {
-  var opName = toOpName(operation.name);
+  var opName = it.toOpName(operation.name);
   var swrOperation = Object.assign({
     swrOpName: 'use' + opName,
     clientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
-  }, safeOperation(operation, it.camelCaseName));
+  }, it.safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('swrOperation.ejs', swrOperation); %>
 
@@ -44,7 +33,7 @@ export const <%= it.camelCaseName %> = {
     mutOpName: 'use' + opName,
     clientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
-  }, safeOperation(operation, it.camelCaseName));
+  }, it.safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('swrMutationOperation.ejs', swrMutationOperation); %>
 
@@ -53,11 +42,12 @@ export const <%= it.camelCaseName %> = {
 
   queryKeys: {
 <% getOperations.forEach((operation) => {
-  var opName = toOpName(operation.name);
+  var opName = it.toOpName(operation.name);
   var keyName = opName.charAt(0).toLowerCase() + opName.slice(1);
-  var safeOp = safeOperation(operation, it.camelCaseName);
+  var safeOp = it.safeOperation(operation, it.camelCaseName);
 %>
     <%= keyName %>: (<% safeOp.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => `<%= operation.url %><% if(safeOp.query && safeOp.query.length > 0) { %>?${encodeParams({<% safeOp.query.forEach((parameter) => { %>'<%= parameter.originalName %>': <%= safeOp.queryParamObject ? `${safeOp.queryParamObject.name}?.${parameter.name}` : parameter.name %>, <% }); %>})}<% } %>`,
 <% }); %>
   },
 };
+<% } /* end !splitMode */ %>

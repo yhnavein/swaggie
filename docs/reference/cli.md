@@ -39,7 +39,8 @@ swaggie -s <spec-url-or-path> -o <output-file>
 | `--allowDots` | — | `boolean` | `true` | Use dot notation for nested object query params (`a.b=1` vs `a[b]=1`). |
 | `--arrayFormat` | — | `string` | `repeat` | Array serialization in query strings: `indices`, `repeat`, or `brackets`. |
 | `--queryParamsAsObject` | — | `boolean \| number` | — | Group all query parameters into a single typed object argument. Pass without a value to always group, or pass a number `N` to group only when there are more than `N` query parameters. See [Query Parameter Grouping](/guide/advanced#query-parameter-grouping). |
-| `--useClient` | `-C` | `boolean` | `false` | Prepend `'use client';` as the first line of the generated file. Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates. Has no effect and should not be used outside of RSC environments. |
+| `--useClient` | `-C` | `boolean` | `false` | Prepend `'use client';` to the hooks file (when `--hooksOut` is set) or the main file (single-file mode). Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates. Has no effect outside RSC environments. |
+| `--hooksOut` | — | `string` | — | Output path for the generated hooks file (L2 templates only). When set, reactive hooks are written to this file and the main `--out` file contains only HTTP clients and types. See [Next.js split-file mode](/guide/configuration#hooksout). |
 | `--mocks` | — | `string` | — | Output path for the generated mock/stub file. Requires `--testingFramework` and `--out`. See [Mocking](/guide/mocking). |
 | `--testingFramework` | `-T` | `string` | — | Test framework for generated mock stubs: `vitest` or `jest`. Requires `--mocks` and `--out`. |
 | `--version` | `-V` | — | — | Print the installed version number and exit. |
@@ -114,19 +115,27 @@ swaggie -s ./spec.json -o ./client.ts --skipDeprecated
 
 ### Next.js App Router (SWR or TanStack Query)
 
-SWR and TanStack Query hooks can only run in Client Components. Use `--useClient` (or `-C`) to prepend the required `'use client';` directive:
+SWR and TanStack Query hooks can only run in Client Components. Use `--hooksOut` to split the generated output into two files — a server-safe clients file and a client-only hooks file — and `--useClient` (or `-C`) to add the `'use client';` directive to the hooks file:
 
 ```bash
+# Split-file mode (recommended for Next.js App Router)
+swaggie -s ./spec.json \
+  -o ./src/api/client.ts \
+  --hooksOut ./src/api/hooks.ts \
+  -t swr,axios \
+  --useClient
+
+# Single-file mode (legacy — hooks and clients in one file)
 swaggie -s ./spec.json -o ./src/api/client.ts -t swr,axios --useClient
-swaggie -s ./spec.json -o ./src/api/client.ts -t tsq,fetch -C
 ```
 
-Or in a config file:
+Or in a config file (split-file mode):
 
 ```json
 {
   "src": "./spec.json",
   "out": "./src/api/client.ts",
+  "hooksOut": "./src/api/hooks.ts",
   "template": ["swr", "axios"],
   "useClient": true
 }

@@ -102,6 +102,13 @@ program
   .addOption(nullableStrategyOption)
   .addOption(queryParamsAsObjectOption)
   .option(
+    '--hooksOut <filePath>',
+    'Output path for the generated hooks file (L2 templates only). ' +
+      'When set, reactive hooks are written to this file and the main --out file contains only HTTP clients and types. ' +
+      'The hooks file imports the main file as `import * as API from \'./api\'`. ' +
+      'Use together with --useClient for Next.js App Router.'
+  )
+  .option(
     '--mocks <path>',
     'Output path for the generated mock/stub file (requires --testingFramework and --out)'
   )

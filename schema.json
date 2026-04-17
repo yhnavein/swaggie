@@ -101,8 +101,13 @@
         },
         "useClient": {
           "default": false,
-          "description": "Prepend 'use client'; as the very first line of the generated file. Required for Next.js App Router when using SWR or TanStack Query hooks, which can only run in Client Components. Has no effect and should not be used outside of RSC environments.",
+          "description": "Prepend 'use client'; as the very first line of the generated hooks file (when hooksOut is set) or the main file (legacy single-file mode). Required for Next.js App Router when using SWR or TanStack Query hooks, which can only run in Client Components. Has no effect and should not be used outside of RSC environments.",
           "type": "boolean"
+        },
+        "hooksOut": {
+          "description": "Output path for the generated reactive hooks file. Only applicable when using an L2 template (swr, tsq). When set, the reactive hook namespaces are written to this file and the main `out` file contains only the HTTP clients and TypeScript types. The hooks file imports the main file as `import * as API from './api'`. Use together with `useClient` for Next.js App Router. Requires `out` to also be set.",
+          "type": "string",
+          "examples": ["./src/generated/hooks.ts", "./src/api/hooks.ts"]
         },
         "dateFormat": {
           "default": "Date",

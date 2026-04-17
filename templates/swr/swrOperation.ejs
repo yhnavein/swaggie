@@ -1,4 +1,5 @@
 <% var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : ''; %>
+<% var httpClientName = it.httpClientName || it.clientName; %>
 <%~ docs %>
     <%= it.swrOpName %>(
 <% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
@@ -10,7 +11,7 @@
 
       const { data, error, isLoading, mutate } = useSWR<<%~ it.returnType %>>(
         cacheUrl,
-        () => <%= it.clientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig).then((resp) => resp.data),
+        () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig).then((resp) => resp.data),
         config
       );
 

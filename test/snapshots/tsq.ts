@@ -742,6 +742,7 @@ export const user = {
     logoutUser: () => ['user', 'userLogoutUser'] as const,
   },
 };
+export { encodeParams } from 'xior';
 export interface Order {
   /** @format int64 */
   id?: number;

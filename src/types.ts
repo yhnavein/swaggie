@@ -54,12 +54,24 @@ export interface ClientOptions {
   enumNamesStyle?: EnumNamesStyle;
 
   /**
-   * Prepends `'use client';` as the very first line of the generated file.
+   * Prepends `'use client';` as the very first line of the generated hooks file
+   * (when `hooksOut` is set) or the main generated file (legacy single-file mode).
    * Required for Next.js App Router when using SWR or TanStack Query hooks,
    * which can only run in Client Components.
    * Has no effect and should not be used with non-RSC environments.
    */
   useClient?: boolean;
+
+  /**
+   * Output path for the generated reactive hooks file (L2 templates only).
+   * When set, the reactive hook namespaces (`pet.queries`, `pet.mutations`,
+   * `pet.queryKeys`) are written to this file instead of the main `out` file.
+   * The hooks file imports the main file as `import * as API from './api'`.
+   * When `useClient` is also set, the `'use client';` directive is prepended
+   * only to this file (the main file remains server-safe).
+   * Requires `out` to also be set.
+   */
+  hooksOut?: string;
 
   /**
    * Output path for the generated mock/stub file. Requires `testingFramework`
