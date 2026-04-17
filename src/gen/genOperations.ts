@@ -548,25 +548,36 @@ export function safeOperation<T extends { parameters: Array<{ name: string }> }>
   return { ...operation, parameters: safeParams };
 }
 
+// `API` is included here because it is the namespace we emit ourselves — it
+// must never be prefixed with a second `API.` in the output.
 const PRIMITIVES =
-  /^(unknown|string|number|boolean|void|null|undefined|any|never|Date|object|Record|Array|Pick|Omit|Required|Partial|Readonly|NonNullable|ReturnType|InstanceType|Parameters|ConstructorParameters)$/;
+  /^(API|unknown|string|number|boolean|void|null|undefined|any|never|Date|object|Record|Array|Pick|Omit|Required|Partial|Readonly|NonNullable|ReturnType|InstanceType|Parameters|ConstructorParameters)$/;
 
 /**
  * Prefixes named (non-primitive) TypeScript type names in a type string with
  * the `API.` namespace so they resolve to types exported from the main file
  * when the hooks are in a separate file (split-file / --hooksOut mode).
  *
- * @example prefixApiType('Pet')         → 'API.Pet'
- * @example prefixApiType('Pet[]')       → 'API.Pet[]'
- * @example prefixApiType('Pet | null')  → 'API.Pet | null'
- * @example prefixApiType('unknown')     → 'unknown'
- * @example prefixApiType('{ id: number }') → '{ id: number }' (inline object)
+ * Works on any type string structure — bare names, arrays, unions, intersections,
+ * and inline object types (including PascalCase names used as property value types
+ * inside `{ key: SomeType }` shapes).
+ *
+ * @example prefixApiType('Pet')                          → 'API.Pet'
+ * @example prefixApiType('Pet[]')                        → 'API.Pet[]'
+ * @example prefixApiType('Pet | null')                   → 'API.Pet | null'
+ * @example prefixApiType('unknown')                      → 'unknown'
+ * @example prefixApiType('{ id: number }')               → '{ id: number }'
+ * @example prefixApiType('{ profile: MyEnum; }')         → '{ profile: API.MyEnum; }'
+ * @example prefixApiType('API.Pet')                      → 'API.Pet' (API itself is in the exclude list)
  */
 export function prefixApiType(typeStr: string): string {
-  if (!typeStr || typeStr.startsWith('{') || typeStr.startsWith('[') || typeStr.startsWith('API.')) {
+  if (!typeStr) {
     return typeStr;
   }
-  return typeStr.replace(/\b([A-Z][A-Za-z0-9_]*)\b/g, (match) =>
+  // The negative lookbehind `(?<!\.)` skips identifiers that are already part
+  // of a namespace reference (e.g. `API.Pet` — when the regex reaches `Pet` it
+  // is preceded by `.`, so we leave it alone).
+  return typeStr.replace(/(?<!\.)\b([A-Z][A-Za-z0-9_]*)\b/g, (match) =>
     PRIMITIVES.test(match) ? match : `API.${match}`
   );
 }
