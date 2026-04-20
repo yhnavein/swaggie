@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { runCodeGenerator } from 'swaggie/browser';
 import generateMocks from '../../../src/gen/genMocks';
+import { generateClientSetup } from '../../../src/gen/genOperations';
 import { parse as parseYaml } from 'yaml';
 import { codeToHtml } from 'shiki';
 import HintIcon from './HintIcon.vue';
@@ -64,11 +65,14 @@ const isUseClientDisabled = computed(() => !l2Template.value);
 
 const generateMocksEnabled = ref<boolean>(s('generateMocksEnabled', false));
 const testingFramework = ref<string>(s('testingFramework', 'vitest'));
+const generateSetupEnabled = ref<boolean>(s('generateSetupEnabled', false));
 
 /** Mocks only make sense for full generation mode */
 const isMocksDisabled = computed(() => generationMode.value !== 'full');
 /** testingFramework select is only relevant when mocks are enabled */
 const isTestingFrameworkDisabled = computed(() => !generateMocksEnabled.value || isMocksDisabled.value);
+/** Setup only makes sense for full generation mode */
+const isSetupDisabled = computed(() => generationMode.value !== 'full');
 
 // ─── Settings — advanced row ──────────────────────────────────────────────────
 
@@ -86,7 +90,9 @@ const outputHtml = ref<string>('');
 const outputRaw = ref<string>('');
 const mockOutputHtml = ref<string>('');
 const mockOutputRaw = ref<string>('');
-const activeTab = ref<'client' | 'mocks'>('client');
+const setupOutputHtml = ref<string>('');
+const setupOutputRaw = ref<string>('');
+const activeTab = ref<'client' | 'mocks' | 'setup'>('client');
 const isLoading = ref<boolean>(false);
 const errorMessage = ref<string>('');
 const warningMessage = ref<string>('');
@@ -152,6 +158,8 @@ async function generate() {
   outputRaw.value = '';
   mockOutputHtml.value = '';
   mockOutputRaw.value = '';
+  setupOutputHtml.value = '';
+  setupOutputRaw.value = '';
   activeTab.value = 'client';
 
   try {
@@ -201,6 +209,14 @@ async function generate() {
       mockOutputHtml.value = await renderHighlighted(mockCode);
     }
 
+    // Generate setup scaffold if enabled.
+    // Use './api' and './api.setup' as placeholder relative import paths for the preview.
+    if (generateSetupEnabled.value && !isSetupDisabled.value) {
+      const setupCode = generateClientSetup(opts, './api', './api.setup');
+      setupOutputRaw.value = setupCode;
+      setupOutputHtml.value = await renderHighlighted(setupCode);
+    }
+
     saveSession({
       l1Template: l1Template.value,
       l2Template: l2Template.value,
@@ -220,6 +236,7 @@ async function generate() {
       arrayFormat: arrayFormat.value,
       generateMocksEnabled: generateMocksEnabled.value,
       testingFramework: testingFramework.value,
+      generateSetupEnabled: generateSetupEnabled.value,
     });
   } catch (err: unknown) {
     errorMessage.value = err instanceof Error ? err.message : String(err);
@@ -231,7 +248,12 @@ async function generate() {
 // ─── Copy to clipboard ────────────────────────────────────────────────────────
 
 async function copyToClipboard() {
-  const content = activeTab.value === 'mocks' ? mockOutputRaw.value : outputRaw.value;
+  const content =
+    activeTab.value === 'mocks'
+      ? mockOutputRaw.value
+      : activeTab.value === 'setup'
+        ? setupOutputRaw.value
+        : outputRaw.value;
   if (!content) return;
   try {
     await navigator.clipboard.writeText(content);
@@ -243,6 +265,13 @@ async function copyToClipboard() {
     // Clipboard not available (e.g., non-secure context)
   }
 }
+
+// ─── Tab reset when secondary outputs are cleared ────────────────────────────
+
+watch([mockOutputHtml, setupOutputHtml], () => {
+  if (activeTab.value === 'mocks' && !mockOutputHtml.value) activeTab.value = 'client';
+  if (activeTab.value === 'setup' && !setupOutputHtml.value) activeTab.value = 'client';
+});
 
 // ─── Example specs dropdown ───────────────────────────────────────────────────
 
@@ -424,37 +453,6 @@ function getNavHeight(): number {
           </div>
         </label>
 
-        <label class="pg-field pg-field--checkbox" :class="{ 'pg-field--disabled': isMocksDisabled }">
-          <span class="pg-label">
-            Generate mocks
-            <HintIcon :hint="HINTS.generateMocks" />
-          </span>
-          <div class="pg-checkbox-wrap">
-            <input
-              v-model="generateMocksEnabled"
-              type="checkbox"
-              class="pg-checkbox"
-              id="generateMocksEnabled"
-              :disabled="isMocksDisabled"
-            />
-            <label for="generateMocksEnabled" class="pg-toggle" />
-          </div>
-        </label>
-
-        <label class="pg-field" :class="{ 'pg-field--disabled': isTestingFrameworkDisabled }">
-          <span class="pg-label">
-            Testing framework
-            <HintIcon :hint="HINTS.testingFramework" />
-          </span>
-          <div class="pg-select-wrap">
-            <select v-model="testingFramework" class="pg-select" :disabled="isTestingFrameworkDisabled">
-              <option value="vitest">vitest</option>
-              <option value="jest">jest</option>
-            </select>
-            <ChevronDownIcon />
-          </div>
-        </label>
-
         <!-- Push buttons to the right -->
         <div class="pg-spacer" />
 
@@ -501,6 +499,60 @@ function getNavHeight(): number {
                 <div class="pg-checkbox-wrap">
                   <input v-model="allowDots" type="checkbox" class="pg-checkbox" id="allowDots" />
                   <label for="allowDots" class="pg-toggle" />
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Generate group -->
+          <div class="pg-group">
+            <div class="pg-group-label">Generate</div>
+            <div class="pg-group-fields">
+              <label class="pg-field pg-field--checkbox" :class="{ 'pg-field--disabled': isMocksDisabled }">
+                <span class="pg-label">
+                  Mocks
+                  <HintIcon :hint="HINTS.generateMocks" />
+                </span>
+                <div class="pg-checkbox-wrap">
+                  <input
+                    v-model="generateMocksEnabled"
+                    type="checkbox"
+                    class="pg-checkbox"
+                    id="generateMocksEnabled"
+                    :disabled="isMocksDisabled"
+                  />
+                  <label for="generateMocksEnabled" class="pg-toggle" />
+                </div>
+              </label>
+
+              <label class="pg-field" :class="{ 'pg-field--disabled': isTestingFrameworkDisabled }">
+                <span class="pg-label">
+                  Framework
+                  <HintIcon :hint="HINTS.testingFramework" />
+                </span>
+                <div class="pg-select-wrap">
+                  <select v-model="testingFramework" class="pg-select" :disabled="isTestingFrameworkDisabled">
+                    <option value="vitest">vitest</option>
+                    <option value="jest">jest</option>
+                  </select>
+                  <ChevronDownIcon />
+                </div>
+              </label>
+
+              <label class="pg-field pg-field--checkbox" :class="{ 'pg-field--disabled': isSetupDisabled }">
+                <span class="pg-label">
+                  Setup file
+                  <HintIcon :hint="HINTS.generateSetup" />
+                </span>
+                <div class="pg-checkbox-wrap">
+                  <input
+                    v-model="generateSetupEnabled"
+                    type="checkbox"
+                    class="pg-checkbox"
+                    id="generateSetupEnabled"
+                    :disabled="isSetupDisabled"
+                  />
+                  <label for="generateSetupEnabled" class="pg-toggle" />
                 </div>
               </label>
             </div>
@@ -653,8 +705,8 @@ function getNavHeight(): number {
       <!-- Right: generated TypeScript -->
       <div class="pg-panel">
         <div class="pg-panel-header">
-          <!-- Tab switcher — only shown when mocks were generated -->
-          <div v-if="mockOutputHtml" class="pg-tabs-wrap">
+          <!-- Tab switcher — shown when mocks or setup were generated -->
+          <div v-if="mockOutputHtml || setupOutputHtml" class="pg-tabs-wrap">
             <span class="pg-panel-title">Generated</span>
             <div class="pg-tabs" role="tablist">
               <button
@@ -666,6 +718,7 @@ function getNavHeight(): number {
                 @click="activeTab = 'client'"
               >Client</button>
               <button
+                v-if="mockOutputHtml"
                 class="pg-tab"
                 :class="{ 'pg-tab--active': activeTab === 'mocks' }"
                 role="tab"
@@ -673,6 +726,15 @@ function getNavHeight(): number {
                 type="button"
                 @click="activeTab = 'mocks'"
               >Mocks</button>
+              <button
+                v-if="setupOutputHtml"
+                class="pg-tab"
+                :class="{ 'pg-tab--active': activeTab === 'setup' }"
+                role="tab"
+                :aria-selected="activeTab === 'setup'"
+                type="button"
+                @click="activeTab = 'setup'"
+              >Setup</button>
             </div>
           </div>
           <span v-else class="pg-panel-title">Generated TypeScript</span>
@@ -707,8 +769,13 @@ function getNavHeight(): number {
           </template>
 
           <!-- Mocks tab -->
-          <template v-else>
+          <template v-else-if="activeTab === 'mocks'">
             <div v-if="mockOutputHtml" class="pg-highlighted" v-html="mockOutputHtml" />
+          </template>
+
+          <!-- Setup tab -->
+          <template v-else-if="activeTab === 'setup'">
+            <div v-if="setupOutputHtml" class="pg-highlighted" v-html="setupOutputHtml" />
           </template>
         </div>
       </div>

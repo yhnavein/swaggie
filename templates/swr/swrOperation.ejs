@@ -11,7 +11,7 @@
 
       const { data, error, isLoading, mutate } = useSWR<<%~ it.returnType %>>(
         cacheUrl,
-        () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig)<%= it.responseMapper %>,
+        () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig)<%~ it.responseMapper %>,
         config
       );
 

@@ -38,7 +38,7 @@ export const pet = {
 
       const { data, error, isLoading, mutate } = useSWR<API.Pet[]>(
         cacheUrl,
-        () => API.petClient.findPets(queryParams, $httpConfig).then((resp) =&gt; resp.data),
+        () => API.petClient.findPets(queryParams, $httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -60,7 +60,7 @@ export const pet = {
 
       const { data, error, isLoading, mutate } = useSWR<API.Pet[]>(
         cacheUrl,
-        () => API.petClient.findPetsByTags(tags, $httpConfig).then((resp) =&gt; resp.data),
+        () => API.petClient.findPetsByTags(tags, $httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -81,7 +81,7 @@ export const pet = {
 
       const { data, error, isLoading, mutate } = useSWR<API.Pet>(
         cacheUrl,
-        () => API.petClient.getPetById(petId, $httpConfig).then((resp) =&gt; resp.data),
+        () => API.petClient.getPetById(petId, $httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -101,7 +101,7 @@ export const pet = {
       return useSWRMutation<API.Pet, Error, string, { body: API.Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: API.Pet } }) =>
-          API.petClient.addPet(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          API.petClient.addPet(arg.body, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -117,7 +117,7 @@ export const pet = {
       return useSWRMutation<unknown, Error, string, { apiKey: string | null; petId: number }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { apiKey: string | null; petId: number } }) =>
-          API.petClient.deletePet(arg.apiKey, arg.petId, $httpConfig).then((resp) =&gt; resp.data),
+          API.petClient.deletePet(arg.apiKey, arg.petId, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -132,7 +132,7 @@ export const pet = {
       return useSWRMutation<API.Pet, Error, string, { body: API.Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: API.Pet } }) =>
-          API.petClient.updatePet(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          API.petClient.updatePet(arg.body, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -148,7 +148,7 @@ export const pet = {
       return useSWRMutation<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null } }) =>
-          API.petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig).then((resp) =&gt; resp.data),
+          API.petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -165,7 +165,7 @@ export const pet = {
       return useSWRMutation<API.File, Error, string, { body: API.File | null; petId: number; additionalMetadata?: string | null }>(
         '/pet/*/uploadImage',
         (_key: string, { arg }: { arg: { body: API.File | null; petId: number; additionalMetadata?: string | null } }) =>
-          API.petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) =&gt; resp.data),
+          API.petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -193,7 +193,7 @@ export const store = {
 
       const { data, error, isLoading, mutate } = useSWR<Record<string, number>>(
         cacheUrl,
-        () => API.storeClient.getInventory($httpConfig).then((resp) =&gt; resp.data),
+        () => API.storeClient.getInventory($httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -214,7 +214,7 @@ export const store = {
 
       const { data, error, isLoading, mutate } = useSWR<API.Order>(
         cacheUrl,
-        () => API.storeClient.getOrderById(orderId, $httpConfig).then((resp) =&gt; resp.data),
+        () => API.storeClient.getOrderById(orderId, $httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -235,7 +235,7 @@ export const store = {
       return useSWRMutation<unknown, Error, string, { orderId: number }>(
         '/store/order/*',
         (_key: string, { arg }: { arg: { orderId: number } }) =>
-          API.storeClient.deleteOrder(arg.orderId, $httpConfig).then((resp) =&gt; resp.data),
+          API.storeClient.deleteOrder(arg.orderId, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -251,7 +251,7 @@ export const store = {
       return useSWRMutation<API.Order, Error, string, { body?: API.Order | null }>(
         '/store/order',
         (_key: string, { arg }: { arg: { body?: API.Order | null } }) =>
-          API.storeClient.placeOrder(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          API.storeClient.placeOrder(arg.body, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -279,7 +279,7 @@ export const user = {
 
       const { data, error, isLoading, mutate } = useSWR<API.User>(
         cacheUrl,
-        () => API.userClient.getUserByName(username, $httpConfig).then((resp) =&gt; resp.data),
+        () => API.userClient.getUserByName(username, $httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -299,7 +299,7 @@ export const user = {
 
       const { data, error, isLoading, mutate } = useSWR<string>(
         cacheUrl,
-        () => API.userClient.loginUser(queryParams, $httpConfig).then((resp) =&gt; resp.data),
+        () => API.userClient.loginUser(queryParams, $httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -315,7 +315,7 @@ export const user = {
 
       const { data, error, isLoading, mutate } = useSWR<unknown>(
         cacheUrl,
-        () => API.userClient.logoutUser($httpConfig).then((resp) =&gt; resp.data),
+        () => API.userClient.logoutUser($httpConfig).then((resp) => resp.data),
         config
       );
 
@@ -336,7 +336,7 @@ export const user = {
       return useSWRMutation<API.User, Error, string, { body?: API.User | null }>(
         '/user',
         (_key: string, { arg }: { arg: { body?: API.User | null } }) =>
-          API.userClient.createUser(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          API.userClient.createUser(arg.body, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -351,7 +351,7 @@ export const user = {
       return useSWRMutation<API.User, Error, string, { body?: API.User[] | null }>(
         '/user/createWithList',
         (_key: string, { arg }: { arg: { body?: API.User[] | null } }) =>
-          API.userClient.createUsersWithListInput(arg.body, $httpConfig).then((resp) =&gt; resp.data),
+          API.userClient.createUsersWithListInput(arg.body, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -367,7 +367,7 @@ export const user = {
       return useSWRMutation<unknown, Error, string, { username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { username: string } }) =>
-          API.userClient.deleteUser(arg.username, $httpConfig).then((resp) =&gt; resp.data),
+          API.userClient.deleteUser(arg.username, $httpConfig).then((resp) => resp.data),
         $config
       );
     },
@@ -384,7 +384,7 @@ export const user = {
       return useSWRMutation<unknown, Error, string, { body: API.FormData | null; username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { body: API.FormData | null; username: string } }) =>
-          API.userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) =&gt; resp.data),
+          API.userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) => resp.data),
         $config
       );
     },

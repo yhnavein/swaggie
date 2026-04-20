@@ -26,7 +26,7 @@ var httpClientName = it.httpClientName || it.clientName;
       $httpConfig?: <%= it.httpConfigType %>
     ) {
       return useMutation<<%~ it.returnType %>, TError, <%~ variablesType %>>({
-        mutationFn: (<%= hasParams ? 'vars' : '' %>) => <%= httpClientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig)<%= it.responseMapper %>,
+        mutationFn: (<%= hasParams ? 'vars' : '' %>) => <%= httpClientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig)<%~ it.responseMapper %>,
         ...$config
       });
     },
