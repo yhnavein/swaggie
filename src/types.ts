@@ -88,6 +88,27 @@ export interface ClientOptions {
    */
   testingFramework?: TestingFramework;
 
+  /**
+   * Output path for the write-once client setup file. When provided, Swaggie
+   * generates a setup scaffold at this path on the first run and never overwrites
+   * it on subsequent runs (use `forceSetup` to override this).
+   *
+   * For the `ky` template, the generated `api.ts` imports from this file and uses
+   * its exported `createKyConfig()` to initialise the ky instance with hooks.
+   * For other templates (`axios`, `xior`, `fetch`), the setup file is a standalone
+   * scaffold showing how to configure the exported HTTP client — `api.ts` does not
+   * import it.
+   *
+   * Requires `out` to also be set.
+   */
+  clientSetup?: string;
+
+  /**
+   * When `true`, overwrites the setup file even if it already exists.
+   * Has no effect unless `clientSetup` is also set.
+   */
+  forceSetup?: boolean;
+
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
     /** Global-level modifiers for parameter with a given name */

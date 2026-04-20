@@ -30,6 +30,21 @@ const snapshots: SnapshotEntry[] = [
   { snapshotName: 'tsq', template: ['tsq', 'xior'] },
 ];
 
+type ClientSetupSnapshotEntry = {
+  snapshotName: string;
+  setupSnapshotName: string;
+  template: TemplateInput;
+};
+
+/** Snapshots that test the --clientSetup mode (main file + write-once setup scaffold) */
+const clientSetupSnapshots: ClientSetupSnapshotEntry[] = [
+  {
+    snapshotName: 'ky-with-setup',
+    setupSnapshotName: 'ky-setup',
+    template: 'ky',
+  },
+];
+
 /** Snapshots that test the split-file (--hooksOut) mode */
 const hooksSnapshots: HooksSnapshotEntry[] = [
   {
@@ -201,6 +216,40 @@ describe('petstore mock snapshots', () => {
         const existingSnapshot = await Bun.file(snapshotFile).text();
 
         expect(existingSnapshot).toBe(generatedCode);
+      }
+    });
+  }
+});
+
+describe('petstore --clientSetup snapshots', () => {
+  for (const { snapshotName, setupSnapshotName, template } of clientSetupSnapshots) {
+    test(`should match existing ${snapshotName} + ${setupSnapshotName} snapshots`, async () => {
+      const mainSnapshotFile = `./test/snapshots/${snapshotName}.ts`;
+      const setupSnapshotFile = `./test/snapshots/${setupSnapshotName}.ts`;
+
+      const mainOut = `./.tmp/test/clientsetup-${snapshotName}.ts`;
+      const setupOut = `./.tmp/test/clientsetup-${setupSnapshotName}.ts`;
+
+      const parameters: FullAppOptions = {
+        ...BASE_PARAMS,
+        out: mainOut,
+        template: template as any,
+        clientSetup: setupOut,
+        forceSetup: true,
+      };
+
+      const [generatedCode] = await runCodeGenerator(parameters);
+      const setupCode = await Bun.file(setupOut).text();
+
+      if (process.env.UPDATE_SNAPSHOTS) {
+        await Bun.file(mainSnapshotFile).write(generatedCode);
+        await Bun.file(setupSnapshotFile).write(setupCode);
+      } else {
+        const existingMainSnapshot = await Bun.file(mainSnapshotFile).text();
+        const existingSetupSnapshot = await Bun.file(setupSnapshotFile).text();
+
+        expect(existingMainSnapshot).toBe(generatedCode);
+        expect(existingSetupSnapshot).toBe(setupCode);
       }
     });
   }

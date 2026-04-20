@@ -95,6 +95,8 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
     --hooksOut <filePath>      Output path for the generated hooks file (L2 templates only). Splits hooks into a separate server-safe file
     --mocks <path>             Output path for a generated mock/stub file (requires --testingFramework and --out)
 -T, --testingFramework <name>  Framework for generated mocks: "vitest" or "jest" (requires --mocks and --out)
+    --clientSetup <path>       Output path for the write-once client setup file. Generated on first run; never overwritten unless --forceSetup is set. For the ky template, the generated api.ts imports from this file. For other templates, it is a standalone scaffold. Requires --out
+    --forceSetup               Overwrite the setup file even if it already exists (requires --clientSetup)
 -h, --help                     Show help
 ```
 

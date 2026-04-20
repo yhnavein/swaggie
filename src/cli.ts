@@ -112,7 +112,18 @@ program
     '--mocks <path>',
     'Output path for the generated mock/stub file (requires --testingFramework and --out)'
   )
-  .addOption(testingFrameworkOption);
+  .addOption(testingFrameworkOption)
+  .option(
+    '--clientSetup <path>',
+    'Output path for the write-once client setup file. ' +
+      'Generated on the first run; never overwritten on subsequent runs (use --forceSetup to override). ' +
+      'For the ky template, the generated api.ts imports from this file. ' +
+      'For other templates, it is a standalone scaffold. Requires --out.'
+  )
+  .option(
+    '--forceSetup',
+    'Overwrite the client setup file even if it already exists (requires --clientSetup)'
+  );
 
 program.parse(process.argv);
 

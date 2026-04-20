@@ -1,0 +1,46 @@
+/**
+ * Axios client setup — GENERATED ONCE, will NOT be overwritten on subsequent runs.
+ * Re-generate intentionally with: swaggie ... --clientSetup <path> --forceSetup
+ *
+ * This file is a write-once scaffold for configuring the Axios instance exported
+ * from the generated API client. It is NOT imported by api.ts — call
+ * `setupApiClient()` once at your application startup.
+ *
+ * Usage in your app:
+ *   import { setupApiClient } from '<%= it.relativeSetupImport %>';
+ *   setupApiClient(); // call once before any API requests
+ *
+ * The setup function can accept any parameters your app needs (e.g. an auth ref):
+ *   export function setupApiClient(authRef: AuthRef): () => void { ... }
+ */
+import { axios } from '<%= it.relativeApiImport %>';
+
+/**
+ * Configures the shared Axios instance with request/response interceptors.
+ * Returns a cleanup function that ejects the interceptors — useful for
+ * React effects or other lifecycle-managed contexts.
+ */
+export function setupApiClient(): () => void {
+  const requestInterceptor = axios.interceptors.request.use(
+    (config) => {
+      // TODO: Add request interceptors, e.g. attach an Authorization header:
+      // config.headers.Authorization = `Bearer ${getToken()}`;
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  const responseInterceptor = axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      // TODO: Add response error handling, e.g. redirect on 401:
+      // if (error.response?.status === 401) { loginWithRedirect(); }
+      return Promise.reject(error);
+    }
+  );
+
+  return () => {
+    axios.interceptors.request.eject(requestInterceptor);
+    axios.interceptors.response.eject(responseInterceptor);
+  };
+}

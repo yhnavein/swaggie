@@ -7,7 +7,7 @@ $config?: KyOptions
   ): Promise<<%~ it.returnType %>> {
     const url = `<%= it.url.replace(/^\//, '') %>`;
 
-    return http.<%= it.method.toLowerCase() %>(url, {
+    return <%= it.httpAccessor %>.<%= it.method.toLowerCase() %>(url, {
 <% if(it.body) { -%>
 <% if(it.body.contentType === 'json') { -%>
       json: <%= it.body.name %>,

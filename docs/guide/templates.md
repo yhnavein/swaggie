@@ -86,7 +86,7 @@ npm install ky
 import ky, { type Options as KyOptions } from 'ky';
 
 export const http = ky.create({
-  prefixUrl: '/api',
+  prefix: '/api',
 });
 
 export const petClient = {
@@ -95,6 +95,88 @@ export const petClient = {
     return http.get(url, { ...$config }).json<Pet>();
   },
 };
+```
+
+#### Using `--clientSetup` with ky
+
+Because ky requires hooks (interceptors) to be provided at instance creation time — unlike axios or xior where interceptors can be attached after the fact — Swaggie provides a `--clientSetup` flag that generates a **write-once setup file** and switches the generated client to a lazy initialisation pattern.
+
+```bash
+swaggie -s ./openapi.json -o ./src/api.ts -t ky --clientSetup ./src/api.setup.ts
+```
+
+On the **first run**, this generates two files:
+
+- `src/api.ts` — the main generated client, now using `initKyHttp()` / `getKyHttp()` instead of a simple singleton
+- `src/api.setup.ts` — a **write-once** scaffold you fill in once and own forever
+
+On **subsequent runs**, `api.ts` is always regenerated, but `api.setup.ts` is **never overwritten**. Use `--forceSetup` to regenerate it intentionally.
+
+**`src/api.setup.ts` (generated scaffold):**
+
+```typescript
+// GENERATED ONCE — will not be overwritten on subsequent runs.
+import type { Options as KyOptions } from 'ky';
+
+export type KySetupConfig = Pick<KyOptions, 'hooks' | 'prefix' | 'retry' | 'timeout'>;
+
+export function createKyConfig(): KySetupConfig {
+  return {
+    prefix: '/api',
+    hooks: {
+      beforeRequest: [
+        // TODO: attach Authorization header, agent headers, test cookies, etc.
+      ],
+      afterResponse: [
+        // TODO: handle 401 redirect, error monitoring, etc.
+      ],
+      beforeError: [],
+    },
+  };
+}
+```
+
+**Usage in your app (e.g. a React provider):**
+
+```typescript
+import { initKyHttp } from './api';
+initKyHttp(); // call once at startup, before any API requests
+```
+
+**Passing runtime values into hooks** (e.g. an auth ref from a React context):
+
+Since `createKyConfig()` is called once with no arguments, pass runtime dependencies via module-level variables in the setup file:
+
+```typescript
+// api.setup.ts
+let _getToken: () => Promise<string> = () => Promise.resolve('');
+
+export function configureKyClient(opts: { getToken: () => Promise<string> }) {
+  _getToken = opts.getToken;
+}
+
+export function createKyConfig(): KySetupConfig {
+  return {
+    prefix: '/api',
+    hooks: {
+      beforeRequest: [
+        async ({ request }) => {
+          const token = await _getToken();
+          if (token) request.headers.set('Authorization', `Bearer ${token}`);
+        },
+      ],
+    },
+  };
+}
+```
+
+Then at startup:
+```typescript
+import { configureKyClient } from './api.setup';
+import { initKyHttp } from './api';
+
+configureKyClient({ getToken: () => authRef.current.getAccessToken() });
+initKyHttp();
 ```
 
 ---
@@ -208,6 +290,35 @@ npm install axios swr
 ```bash
 npm install xior @tanstack/react-query
 ```
+
+---
+
+## Client setup file (`--clientSetup`)
+
+The `--clientSetup <path>` flag generates a **write-once** setup scaffold alongside the main generated client. This is especially important for the `ky` template, where hooks must be provided at instance creation time.
+
+```bash
+# ky: generates both api.ts (imports setup) and api.setup.ts (scaffold)
+swaggie -s ./openapi.json -o ./src/api.ts -t ky --clientSetup ./src/api.setup.ts
+
+# axios/xior: generates api.setup.ts as a standalone interceptor scaffold
+swaggie -s ./openapi.json -o ./src/api.ts -t xior --clientSetup ./src/api.setup.ts
+```
+
+| Template | `api.ts` imports setup file? | Setup file purpose |
+|---|---|---|
+| `ky` | **Yes** — `api.ts` calls `createKyConfig()` from the setup file | Provide ky hooks (beforeRequest, afterResponse, etc.) |
+| `axios` / `xior` | No | Scaffold showing how to attach interceptors to `http` |
+| `fetch` | No | Scaffold showing how to wrap the default fetch |
+
+**The setup file is never overwritten** on subsequent runs. Use `--forceSetup` to regenerate it intentionally (e.g. after upgrading Swaggie).
+
+```bash
+# Regenerate the setup scaffold (overwrites existing file)
+swaggie -s ./openapi.json -o ./src/api.ts -t ky --clientSetup ./src/api.setup.ts --forceSetup
+```
+
+See the [`ky` template section](#ky) above for a detailed walkthrough and usage examples.
 
 ---
 

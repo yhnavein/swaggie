@@ -1,0 +1,38 @@
+/**
+ * Fetch client setup — GENERATED ONCE, will NOT be overwritten on subsequent runs.
+ * Re-generate intentionally with: swaggie ... --clientSetup <path> --forceSetup
+ *
+ * This file is a write-once scaffold for configuring the fetch-based client
+ * exported from the generated API client. It is NOT imported by api.ts — call
+ * `setupApiClient()` once at your application startup.
+ *
+ * Usage in your app:
+ *   import { setupApiClient } from '<%= it.relativeSetupImport %>';
+ *   setupApiClient(); // call once before any API requests
+ *
+ * The setup function can accept any parameters your app needs (e.g. an auth ref):
+ *   export function setupApiClient(authRef: AuthRef): void { ... }
+ */
+import { defaults } from '<%= it.relativeApiImport %>';
+
+/**
+ * Configures the shared fetch client defaults.
+ * Override `defaults.fetch` to wrap the native fetch with custom behaviour
+ * (auth headers, error handling, logging, etc.).
+ */
+export function setupApiClient(): void {
+  const originalFetch = defaults.fetch ?? globalThis.fetch;
+
+  defaults.fetch = async (input, init) => {
+    // TODO: Add pre-request logic, e.g. attach an Authorization header:
+    // const token = await getToken();
+    // init = { ...init, headers: { ...init?.headers, Authorization: `Bearer ${token}` } };
+
+    const response = await originalFetch(input, init);
+
+    // TODO: Add post-response logic, e.g. handle 401 Unauthorized:
+    // if (response.status === 401) { loginWithRedirect(); }
+
+    return response;
+  };
+}

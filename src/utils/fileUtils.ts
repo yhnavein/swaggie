@@ -1,4 +1,4 @@
-import { mkdir, writeFileSync } from 'node:fs';
+import { existsSync, mkdir, writeFileSync } from 'node:fs';
 import { dirname, relative } from 'node:path';
 
 /**
@@ -34,4 +34,24 @@ export function saveFile(filePath: string, contents: string) {
       resolve(true);
     });
   });
+}
+
+/**
+ * Writes `contents` to `filePath` only when the file does not already exist,
+ * or when `force` is `true`. Useful for write-once scaffold files that should
+ * survive re-generation without losing user edits.
+ *
+ * @returns `'written'` when the file was created/overwritten, `'skipped'` when
+ *          it already existed and `force` was not set.
+ */
+export async function saveFileIfMissing(
+  filePath: string,
+  contents: string,
+  force = false
+): Promise<'written' | 'skipped'> {
+  if (!force && existsSync(filePath)) {
+    return 'skipped';
+  }
+  await saveFile(filePath, contents);
+  return 'written';
 }

@@ -25,18 +25,28 @@ import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
  * Function that will analyze paths in the spec and generate the code for all the operations.
+ *
+ * @param relativeSetupImport - When `--clientSetup` is active for the ky template, the relative
+ *   import path from the generated `api.ts` to the setup file (e.g. `'./api.setup'`).
+ *   Used to embed the import in `baseClientWithSetup.ejs` and passed to each operation
+ *   as `httpAccessor` (`'getKyHttp()'` vs the default `'http'`).
  */
 export default async function generateOperations(
   spec: OA3.Document,
-  options: AppOptions
+  options: AppOptions,
+  relativeSetupImport?: string
 ): Promise<string> {
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix;
+  const isKyWithSetup = getL1Template(options.template) === 'ky' && !!options.clientSetup;
+
   const baseClientData = {
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,
+    // For the ky+setup variant, embed the relative import to the setup file
+    ...(isKyWithSetup && relativeSetupImport ? { relativeSetupImport } : {}),
   };
 
   // When a composite [L2, L1] template is used, the L2 base client contains
@@ -47,7 +57,12 @@ export default async function generateOperations(
   if (hasTemplateFile('baseClientL2.ejs') && !options.hooksOut) {
     baseClients += renderFile('baseClientL2.ejs', baseClientData);
   }
-  baseClients += renderFile('baseClient.ejs', baseClientData);
+  // For ky with --clientSetup, use the lazy initKyHttp/getKyHttp pattern.
+  // We rely on the template being present (always bundled for ky), so no
+  // hasTemplateFile guard — hasTemplateFile returns false for directory templates.
+  const baseClientTemplate =
+    isKyWithSetup ? 'baseClientWithSetup.ejs' : 'baseClient.ejs';
+  baseClients += renderFile(baseClientTemplate, baseClientData);
 
   // When hooksOut is set, the 'use client' directive belongs in the hooks file only.
   // In single-file mode (no hooksOut), keep prepending it to the main file.
@@ -67,6 +82,9 @@ export default async function generateOperations(
       servicePrefix,
       httpConfigType: getHttpConfigType(options.template),
       responseMapper: getResponseMapper(options.template),
+      // For the ky+setup variant, operations call getKyHttp() instead of the
+      // module-level `http` singleton.
+      httpAccessor: isKyWithSetup ? 'getKyHttp()' : 'http',
       // In split-file mode, the hooks namespace is generated in a separate file.
       // Pass splitMode=true so the client.ejs template skips the hooks block.
       splitMode: !!options.hooksOut,
@@ -81,6 +99,37 @@ export default async function generateOperations(
   result += generateBarrelFile(groups, options);
 
   return result;
+}
+
+/**
+ * Generates the content of the write-once client setup scaffold file.
+ *
+ * For the `ky` template, renders `baseClientSetup.ejs` which exports a
+ * `createKyConfig()` function imported by the generated `api.ts`.
+ * For other templates (`axios`, `xior`, `fetch`), renders a standalone
+ * interceptor scaffold that is NOT imported by `api.ts`.
+ *
+ * @param relativeApiImport - Relative import path from the setup file back to api.ts
+ * @param relativeSetupImport - Relative import path from api.ts to the setup file
+ *   (only used in the ky scaffold comment to show the correct usage example)
+ */
+export function generateClientSetup(
+  options: AppOptions,
+  relativeApiImport: string,
+  relativeSetupImport: string
+): string {
+  const setupData = {
+    baseUrl: options.baseUrl,
+    relativeApiImport,
+    relativeSetupImport,
+  };
+
+  try {
+    return renderFile('baseClientSetup.ejs', setupData);
+  } catch {
+    // Template not available for this L1 (e.g. ng1/ng2 don't have a setup template)
+    return '';
+  }
 }
 
 /**

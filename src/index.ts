@@ -43,6 +43,12 @@ function verifyOptions(options: Partial<FullAppOptions>) {
   if (options.hooksOut && !options.out) {
     throw new Error('--hooksOut requires --out to be set');
   }
+  if (options.clientSetup && !options.out) {
+    throw new Error('--clientSetup requires --out to be set');
+  }
+  if (options.forceSetup && !options.clientSetup) {
+    throw new Error('--forceSetup requires --clientSetup to be set');
+  }
   if (options.hooksOut) {
     // Validate after normalization — template may be a bare L2 string or a pair
     const tpl = options.template;
@@ -120,6 +126,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     mocks,
     testingFramework,
     hooksOut,
+    clientSetup,
+    forceSetup,
     ...rest
   } = cliOpts;
   const mergedQueryParamsSerialization = {
@@ -147,6 +155,8 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     ...(mocks !== undefined ? { mocks } : {}),
     ...(testingFramework !== undefined ? { testingFramework } : {}),
     ...(hooksOut !== undefined ? { hooksOut } : {}),
+    ...(clientSetup !== undefined ? { clientSetup } : {}),
+    ...(forceSetup !== undefined ? { forceSetup } : {}),
   };
 }
 

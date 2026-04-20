@@ -1,10 +1,10 @@
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import generateOperations, { generateHooks } from './genOperations';
+import generateOperations, { generateHooks, generateClientSetup } from './genOperations';
 import generateMocks from './genMocks';
 import generateTypes from './genTypes';
 import { FILE_HEADER } from './header';
-import { saveFile, prepareOutputFilename, deriveRelativeImport } from '../utils';
+import { saveFile, saveFileIfMissing, prepareOutputFilename, deriveRelativeImport } from '../utils';
 import type { AppOptions } from '../types';
 
 export { FILE_HEADER } from './header';
@@ -15,10 +15,28 @@ export default async function generateCode(
 ): Promise<string> {
   let fileContents = '';
 
+  // Pre-compute setup file paths so they can be embedded in the generated api.ts
+  // (ky with --clientSetup imports from the setup file at build time).
+  let resolvedSetupPath: string | null = null;
+  let relativeSetupImportForMain: string | null = null;
+
+  if (options.clientSetup && options.out) {
+    resolvedSetupPath = prepareOutputFilename(options.clientSetup);
+    const resolvedOutPath = prepareOutputFilename(options.out);
+    if (resolvedSetupPath && resolvedOutPath) {
+      // From api.ts → setup file (used inside baseClientWithSetup.ejs import)
+      relativeSetupImportForMain = deriveRelativeImport(resolvedOutPath, resolvedSetupPath);
+    }
+  }
+
   if (options.generationMode === 'schemas') {
     fileContents = FILE_HEADER + generateTypes(spec, options, false);
   } else {
-    fileContents = await generateOperations(spec, options);
+    fileContents = await generateOperations(
+      spec,
+      options,
+      relativeSetupImportForMain ?? undefined
+    );
     fileContents += generateTypes(spec, options);
   }
 
@@ -26,6 +44,29 @@ export default async function generateCode(
     const destFile = prepareOutputFilename(options.out);
     if (destFile) {
       await saveFile(destFile, fileContents);
+    }
+  }
+
+  // Generate the write-once setup scaffold when --clientSetup is set
+  if (options.clientSetup && options.out && resolvedSetupPath) {
+    const resolvedOutPath = prepareOutputFilename(options.out);
+    if (resolvedOutPath) {
+      // From setup file → api.ts (used inside the scaffold's import of `http`)
+      const relativeApiImport = deriveRelativeImport(resolvedSetupPath, resolvedOutPath);
+      const setupContents = generateClientSetup(
+        options,
+        relativeApiImport,
+        relativeSetupImportForMain ?? './api'
+      );
+      if (setupContents) {
+        const result = await saveFileIfMissing(
+          resolvedSetupPath,
+          setupContents,
+          options.forceSetup ?? false
+        );
+        // result === 'skipped' when the file already exists and --forceSetup was not set
+        void result;
+      }
     }
   }
 
