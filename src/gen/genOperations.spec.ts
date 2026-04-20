@@ -1431,6 +1431,14 @@ describe('prefixApiType', () => {
   test('handles empty and falsy input', () => {
     expect(prefixApiType('')).toBe('');
   });
+
+  test('leaves Web API globals unprefixed', () => {
+    expect(prefixApiType('FormData')).toBe('FormData');
+    expect(prefixApiType('File')).toBe('File');
+    expect(prefixApiType('Blob')).toBe('Blob');
+    expect(prefixApiType('URLSearchParams')).toBe('URLSearchParams');
+    expect(prefixApiType('ArrayBuffer')).toBe('ArrayBuffer');
+  });
 });
 
 describe('toOpName', () => {

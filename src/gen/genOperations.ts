@@ -601,8 +601,10 @@ export function safeOperation<T extends { parameters: Array<{ name: string }> }>
 
 // `API` is included here because it is the namespace we emit ourselves — it
 // must never be prefixed with a second `API.` in the output.
+// Web API / Browser globals are included so they are never incorrectly namespaced
+// as `API.FormData`, `API.File`, `API.Blob`, etc.
 const PRIMITIVES =
-  /^(API|unknown|string|number|boolean|void|null|undefined|any|never|Date|object|Record|Array|Pick|Omit|Required|Partial|Readonly|NonNullable|ReturnType|InstanceType|Parameters|ConstructorParameters)$/;
+  /^(API|unknown|string|number|boolean|void|null|undefined|any|never|Date|object|Record|Array|Pick|Omit|Required|Partial|Readonly|NonNullable|ReturnType|InstanceType|Parameters|ConstructorParameters|FormData|File|Blob|URLSearchParams|ArrayBuffer|ReadableStream|Response|Request|Headers|Event|EventTarget)$/;
 
 /**
  * Prefixes named (non-primitive) TypeScript type names in a type string with

@@ -160,11 +160,11 @@ export const pet = {
     * @param additionalMetadata (optional) - Additional Metadata
     */
     useUploadFile(
-      $config?: SWRMutationConfiguration<API.File, Error, string, { body: API.File | null; petId: number; additionalMetadata?: string | null }>,
+      $config?: SWRMutationConfiguration<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
       $httpConfig?: AxiosRequestConfig    ) {
-      return useSWRMutation<API.File, Error, string, { body: API.File | null; petId: number; additionalMetadata?: string | null }>(
+      return useSWRMutation<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
         '/pet/*/uploadImage',
-        (_key: string, { arg }: { arg: { body: API.File | null; petId: number; additionalMetadata?: string | null } }) =>
+        (_key: string, { arg }: { arg: { body: File | null; petId: number; additionalMetadata?: string | null } }) =>
           API.petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) => resp.data),
         $config
       );
@@ -379,11 +379,11 @@ export const user = {
     * @param username - name that needs to be updated
     */
     useUpdateUser(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { body: API.FormData | null; username: string }>,
+      $config?: SWRMutationConfiguration<unknown, Error, string, { body: FormData | null; username: string }>,
       $httpConfig?: AxiosRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { body: API.FormData | null; username: string }>(
+      return useSWRMutation<unknown, Error, string, { body: FormData | null; username: string }>(
         '/user/*',
-        (_key: string, { arg }: { arg: { body: API.FormData | null; username: string } }) =>
+        (_key: string, { arg }: { arg: { body: FormData | null; username: string } }) =>
           API.userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) => resp.data),
         $config
       );

@@ -146,10 +146,10 @@ export const pet = {
     * @param $config (optional) Additional configuration for TanStack Query
     * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
-    useUploadFile<TData = API.File, TError = Error>(
-      $config?: UseMutationOptions<API.File, TError, { body: API.File | null; petId: number; additionalMetadata?: string | null }>,
+    useUploadFile<TData = File, TError = Error>(
+      $config?: UseMutationOptions<File, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useMutation<API.File, TError, { body: API.File | null; petId: number; additionalMetadata?: string | null }>({
+      return useMutation<File, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>({
         mutationFn: (vars) => API.petClient.uploadFile(vars.body, vars.petId, vars.additionalMetadata, $httpConfig).then((resp) => resp.data),
         ...$config
       });
@@ -352,9 +352,9 @@ export const user = {
     * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
    */
     useUpdateUser<TData = unknown, TError = Error>(
-      $config?: UseMutationOptions<unknown, TError, { body: API.FormData | null; username: string }>,
+      $config?: UseMutationOptions<unknown, TError, { body: FormData | null; username: string }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useMutation<unknown, TError, { body: API.FormData | null; username: string }>({
+      return useMutation<unknown, TError, { body: FormData | null; username: string }>({
         mutationFn: (vars) => API.userClient.updateUser(vars.body, vars.username, $httpConfig).then((resp) => resp.data),
         ...$config
       });
