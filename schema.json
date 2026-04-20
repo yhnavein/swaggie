@@ -14,13 +14,17 @@
         },
         "arrayFormat": {
           "description": "Determines how arrays should be serialized",
-          "enum": [
-            "indices",
-            "repeat",
-            "brackets"
-          ],
+          "enum": ["indices", "repeat", "brackets"],
           "type": "string",
           "default": "repeat"
+        },
+        "queryParamsAsObject": {
+          "description": "Group all query parameters into a single object argument. Pass `true` to always group, or a positive integer N to group only when there are more than N query parameters.",
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "integer", "minimum": 0 }
+          ],
+          "default": false
         }
       }
     },
@@ -33,11 +37,7 @@
           "description": "Global-level modifiers for parameters with a matching name",
           "additionalProperties": {
             "type": "string",
-            "enum": [
-              "optional",
-              "required",
-              "ignore"
-            ],
+            "enum": ["optional", "required", "ignore"],
             "description": "Modify the parameter in the following way: `optional` - make the parameter optional, `required` - make the parameter required, `ignore` - remove the parameter from the operations"
           }
         }
@@ -61,7 +61,7 @@
           "oneOf": [
             {
               "type": "string",
-              "examples": ["axios", "fetch", "xior", "ng1", "ng2", "swr", "tsq"]
+              "examples": ["axios", "fetch", "xior", "ky", "ng1", "ng2", "swr", "tsq"]
             },
             {
               "type": "array",
@@ -72,9 +72,11 @@
                 ["swr", "axios"],
                 ["swr", "fetch"],
                 ["swr", "xior"],
+                ["swr", "ky"],
                 ["tsq", "axios"],
                 ["tsq", "fetch"],
-                ["tsq", "xior"]
+                ["tsq", "xior"],
+                ["tsq", "ky"]
               ]
             }
           ]
@@ -112,57 +114,38 @@
         "dateFormat": {
           "default": "Date",
           "description": "It determines how Date fields will be handled and what type they will have in models",
-          "enum": [
-            "Date",
-            "string"
-          ],
+          "enum": ["Date", "string"],
           "type": "string"
         },
         "nullableStrategy": {
           "type": "string",
           "default": "ignore",
           "description": "Controls how OpenAPI 'nullable' is translated into TypeScript types",
-          "enum": [
-            "include",
-            "nullableAsOptional",
-            "ignore"
-          ]
+          "enum": ["include", "nullableAsOptional", "ignore"]
         },
         "generationMode": {
           "type": "string",
           "default": "full",
           "description": "Controls whether to generate full API client code or only schemas",
-          "enum": [
-            "full",
-            "schemas"
-          ]
+          "enum": ["full", "schemas"]
         },
         "schemaDeclarationStyle": {
           "type": "string",
           "default": "interface",
           "description": "Controls whether object schemas are generated as interfaces or type aliases",
-          "enum": [
-            "interface",
-            "type"
-          ]
+          "enum": ["interface", "type"]
         },
         "enumDeclarationStyle": {
           "type": "string",
           "default": "union",
           "description": "Controls whether plain string enums are generated as union types or TypeScript enums",
-          "enum": [
-            "union",
-            "enum"
-          ]
+          "enum": ["union", "enum"]
         },
         "enumNamesStyle": {
           "type": "string",
           "default": "original",
           "description": "Controls how enum member names are formatted when generating TypeScript enum declarations. Only applies when enumDeclarationStyle is set to 'enum'.",
-          "enum": [
-            "original",
-            "PascalCase"
-          ]
+          "enum": ["original", "PascalCase"]
         },
         "mocks": {
           "description": "Output path for the generated mock/stub file. Requires `testingFramework` and `out` to also be set. When provided, a companion mock file is generated alongside the main client, exporting typed spy stubs for every operation and hook.",
@@ -177,14 +160,21 @@
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },
+        "clientSetup": {
+          "description": "Output path for the write-once client setup file. Generated on the first run; never overwritten on subsequent runs unless `forceSetup` is set. For the `ky` template, the generated `api.ts` imports from this file and uses its exported `createKyConfig()` to initialise the ky instance with hooks. For other templates (`axios`, `xior`, `fetch`), it is a standalone scaffold showing how to configure the exported HTTP client — `api.ts` does not import it. Requires `out` to also be set.",
+          "type": "string",
+          "examples": ["./src/api.setup.ts", "./src/client/api.setup.ts"]
+        },
+        "forceSetup": {
+          "description": "When `true`, overwrites the client setup file even if it already exists. Has no effect unless `clientSetup` is also set.",
+          "type": "boolean",
+          "default": false
+        },
         "modifiers": {
           "$ref": "#/definitions/GlobalModifiers"
         }
       },
-      "required": [
-        "out",
-        "src"
-      ],
+      "required": ["out", "src"],
       "type": "object"
     }
   },

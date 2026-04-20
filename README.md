@@ -21,7 +21,7 @@ See the [Example section](#example) for a quick demo, or visit the full document
 ## Features
 
 - Generates TypeScript code from OpenAPI 3.0, 3.1, and 3.2 specs
-- Supports multiple HTTP client libraries out of the box: `fetch`, `axios`, `xior`, `Angular 1`, `Angular 2+`; with optional reactive layers (`swr`, `tsq`) that compose with any compatible HTTP client
+- Supports multiple HTTP client libraries out of the box: `fetch`, `axios`, `xior`, `ky`, `Angular 1`, `Angular 2+`; with optional reactive layers (`swr`, `tsq`) that compose with any compatible HTTP client
 - **Auto-generated mock/stub files** for Vitest and Jest — typed spies for every client method and hook, with ergonomic helpers like `mockSWR()` and `mockQuery()`
 - Custom templates — bring your own to fit your existing codebase
 - Supports `allOf`, `oneOf`, `anyOf`, `$ref`, nullable types, and various enum definitions
@@ -79,7 +79,7 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 -s, --src <url|path>           URL or file path to the OpenAPI spec
 -o, --out <filePath>           Output file path (omit to print to stdout)
 -b, --baseUrl <string>         Base URL that will be used as a default value in the clients
--t, --template <string>        Template to use. Single name: "axios", "fetch", "xior", "ng1", "ng2", "swr", "tsq". Reactive pair: "swr,axios" / "tsq,xior" / etc. (default: "axios")
+-t, --template <string>        Template to use. Single name: "axios", "fetch", "xior", "ky", "ng1", "ng2", "swr", "tsq". Reactive pair: "swr,axios" / "tsq,xior" / etc. (default: "axios")
 -m, --mode <mode>              Generation mode: "full" or "schemas" (default: "full")
 -d, --schemaStyle <style>      Schema object style: "interface" or "type" (default: "interface")
     --enumStyle <style>        Enum style for plain string enums: "union" or "enum" (default: "union")
