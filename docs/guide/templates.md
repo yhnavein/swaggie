@@ -11,6 +11,7 @@ These are self-contained and produce a plain typed client with one method per AP
 | `axios` | [Axios](https://axios-http.com) | React, Vue, Node.js — the most widely used default |
 | `fetch` | Native `fetch` | Browser apps or Node 18+ with no extra dependencies |
 | `xior` | [xior](https://github.com/suhaotian/xior) | Lightweight Axios-compatible alternative |
+| `ky` | [ky](https://github.com/sindresorhus/ky) | Modern fetch-based client with hooks API |
 | `ng1` | Angular 1 `$http` | Legacy Angular 1.x applications |
 | `ng2` | Angular `HttpClient` | Angular 2+ applications (uses `InjectionToken`) |
 
@@ -69,6 +70,117 @@ npm install xior
 
 ---
 
+### `ky`
+
+[ky](https://github.com/sindresorhus/ky) is a modern, fetch-based HTTP client with a hooks API. Methods return `Promise<T>` directly (no response wrapper), making the generated code simpler for straightforward use cases.
+
+**Dependencies:**
+
+```bash
+npm install ky
+```
+
+**Generated output (excerpt):**
+
+```typescript
+import ky, { type Options as KyOptions } from 'ky';
+
+export const http = ky.create({
+  prefix: '/api',
+});
+
+export const petClient = {
+  getPetById(petId: number, $config?: KyOptions): Promise<Pet> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
+    return http.get(url, { ...$config }).json<Pet>();
+  },
+};
+```
+
+#### Using `--clientSetup` with ky
+
+Because ky requires hooks (interceptors) to be provided at instance creation time — unlike axios or xior where interceptors can be attached after the fact — Swaggie provides a `--clientSetup` flag that generates a **write-once setup file** and switches the generated client to a lazy initialisation pattern.
+
+```bash
+swaggie -s ./openapi.json -o ./src/api.ts -t ky --clientSetup ./src/api.setup.ts
+```
+
+On the **first run**, this generates two files:
+
+- `src/api.ts` — the main generated client, now using `initKyHttp()` / `getKyHttp()` instead of a simple singleton
+- `src/api.setup.ts` — a **write-once** scaffold you fill in once and own forever
+
+On **subsequent runs**, `api.ts` is always regenerated, but `api.setup.ts` is **never overwritten**. Use `--forceSetup` to regenerate it intentionally.
+
+**`src/api.setup.ts` (generated scaffold):**
+
+```typescript
+// GENERATED ONCE — will not be overwritten on subsequent runs.
+import type { Options as KyOptions } from 'ky';
+
+export type KySetupConfig = Pick<KyOptions, 'hooks' | 'prefix' | 'retry' | 'timeout'>;
+
+export function createKyConfig(): KySetupConfig {
+  return {
+    prefix: '/api',
+    hooks: {
+      beforeRequest: [
+        // TODO: attach Authorization header, agent headers, test cookies, etc.
+      ],
+      afterResponse: [
+        // TODO: handle 401 redirect, error monitoring, etc.
+      ],
+      beforeError: [],
+    },
+  };
+}
+```
+
+**Usage in your app (e.g. a React provider):**
+
+```typescript
+import { initKyHttp } from './api';
+initKyHttp(); // call once at startup, before any API requests
+```
+
+**Passing runtime values into hooks** (e.g. an auth ref from a React context):
+
+Since `createKyConfig()` is called once with no arguments, pass runtime dependencies via module-level variables in the setup file:
+
+```typescript
+// api.setup.ts
+let _getToken: () => Promise<string> = () => Promise.resolve('');
+
+export function configureKyClient(opts: { getToken: () => Promise<string> }) {
+  _getToken = opts.getToken;
+}
+
+export function createKyConfig(): KySetupConfig {
+  return {
+    prefix: '/api',
+    hooks: {
+      beforeRequest: [
+        async ({ request }) => {
+          const token = await _getToken();
+          if (token) request.headers.set('Authorization', `Bearer ${token}`);
+        },
+      ],
+    },
+  };
+}
+```
+
+Then at startup:
+```typescript
+import { configureKyClient } from './api.setup';
+import { initKyHttp } from './api';
+
+configureKyClient({ getToken: () => authRef.current.getAccessToken() });
+initKyHttp();
+```
+
+---
+
 ### `ng1` / `ng2`
 
 Angular-specific clients. `ng1` uses `$http` and Angular 1 dependency injection. `ng2` generates injectable services using `HttpClient` and `InjectionToken`. Requires `@angular/common/http`.
@@ -86,7 +198,7 @@ Reactive layer templates wrap an HTTP client template with a reactive data-fetch
 | `swr` | [SWR](https://swr.vercel.app) | React apps using SWR for server state |
 | `tsq` | [TanStack Query](https://tanstack.com/query) | React apps using TanStack Query |
 
-Reactive layer templates must be composed with a compatible HTTP client template. The compatible HTTP client templates are: **`axios`**, **`fetch`**, **`xior`**.
+Reactive layer templates must be composed with a compatible HTTP client template. The compatible HTTP client templates are: **`axios`**, **`fetch`**, **`xior`**, **`ky`**.
 
 ---
 
@@ -126,8 +238,8 @@ This is equivalent to `["swr", "fetch"]`.
 
 | Reactive layer | Compatible HTTP client templates |
 |---|---|
-| `swr` | `axios`, `fetch`, `xior` |
-| `tsq` | `axios`, `fetch`, `xior` |
+| `swr` | `axios`, `fetch`, `xior`, `ky` |
+| `tsq` | `axios`, `fetch`, `xior`, `ky` |
 
 ### Generated output (excerpt for `["swr", "axios"]`)
 
@@ -181,14 +293,45 @@ npm install xior @tanstack/react-query
 
 ---
 
+## Client setup file (`--clientSetup`)
+
+The `--clientSetup <path>` flag generates a **write-once** setup scaffold alongside the main generated client. This is especially important for the `ky` template, where hooks must be provided at instance creation time.
+
+```bash
+# ky: generates both api.ts (imports setup) and api.setup.ts (scaffold)
+swaggie -s ./openapi.json -o ./src/api.ts -t ky --clientSetup ./src/api.setup.ts
+
+# axios/xior: generates api.setup.ts as a standalone interceptor scaffold
+swaggie -s ./openapi.json -o ./src/api.ts -t xior --clientSetup ./src/api.setup.ts
+```
+
+| Template | `api.ts` imports setup file? | Setup file purpose |
+|---|---|---|
+| `ky` | **Yes** — `api.ts` calls `createKyConfig()` from the setup file | Provide ky hooks (beforeRequest, afterResponse, etc.) |
+| `axios` / `xior` | No | Scaffold showing how to attach interceptors to `http` |
+| `fetch` | No | Scaffold showing how to wrap the default fetch |
+
+**The setup file is never overwritten** on subsequent runs. Use `--forceSetup` to regenerate it intentionally (e.g. after upgrading Swaggie).
+
+```bash
+# Regenerate the setup scaffold (overwrites existing file)
+swaggie -s ./openapi.json -o ./src/api.ts -t ky --clientSetup ./src/api.setup.ts --forceSetup
+```
+
+See the [`ky` template section](#ky) above for a detailed walkthrough and usage examples.
+
+---
+
 ## Choosing the right template
 
 | Scenario | Template |
 |---|---|
 | No framework / Node.js backend | `fetch` (zero deps) or `axios` |
 | React — prefer minimal bundle size | `xior` or `fetch` |
+| React — modern fetch-based client | `ky` |
 | React with SWR — backed by axios | `["swr", "axios"]` |
 | React with SWR — minimal bundle | `["swr", "xior"]` or `["swr", "fetch"]` |
+| React with SWR — ky hooks API | `["swr", "ky"]` |
 | React with TanStack Query | `["tsq", "xior"]` or `["tsq", "axios"]` |
 | Angular 2+ | `ng2` |
 | Angular 1 (legacy) | `ng1` |

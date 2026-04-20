@@ -1,0 +1,50 @@
+/**
+ * Xior client setup — GENERATED ONCE, will NOT be overwritten on subsequent runs.
+ * Re-generate intentionally with: swaggie ... --clientSetup <path> --forceSetup
+ *
+ * This file is a write-once scaffold for configuring the xior instance exported
+ * from the generated API client. It is NOT imported by api.ts — call
+ * `setupApiClient()` once at your application startup.
+ *
+ * Usage in your app:
+ *   import { setupApiClient } from '<%= it.relativeSetupImport %>';
+ *   const cleanup = setupApiClient(); // call once before any API requests
+ *
+ * The setup function can accept any parameters your app needs (e.g. an auth ref):
+ *   export function setupApiClient(authRef: AuthRef): () => void { ... }
+ */
+import { http } from '<%= it.relativeApiImport %>';
+
+/**
+ * Registers interceptors on the shared xior instance.
+ * Returns a cleanup function that ejects the interceptors — useful for
+ * React effects or other lifecycle-managed contexts.
+ */
+export function setupApiClient(): () => void {
+  const requestInterceptor = http.interceptors.request.use(
+    (config) => {
+      // TODO: Add request interceptors, e.g. attach an Authorization header:
+      // const token = await authRef.current.getAccessToken();
+      // if (token) config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  const responseInterceptor = http.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      // TODO: Add response error handling, e.g. redirect on 401:
+      // if (error.response?.status === 401) {
+      //   await authRef.current.loginWithRedirect({ returnTo: window.location.toString() });
+      //   return;
+      // }
+      return Promise.reject(error);
+    }
+  );
+
+  return () => {
+    http.interceptors.request.eject(requestInterceptor);
+    http.interceptors.response.eject(responseInterceptor);
+  };
+}

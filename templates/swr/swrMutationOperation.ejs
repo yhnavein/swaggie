@@ -17,6 +17,7 @@ var callArgs = it.parameters.map(function(p) { return 'arg.' + p.name; });
 var swrKey = it.url.replace(/\$\{(?:[^{}]|\{[^{}]*\})*\}/g, '*');
 
 var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : '';
+var httpClientName = it.httpClientName || it.clientName;
 %>
 <%~ docs %>
     <%= it.mutOpName %>(
@@ -26,7 +27,7 @@ var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : '';
       return useSWRMutation<<%~ it.returnType %>, Error, string, <%~ variablesType %>>(
         '<%= swrKey %>',
         (_key: string, { arg }<%= hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) =>
-          <%= it.clientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig).then((resp) => resp.data),
+          <%= httpClientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig)<%~ it.responseMapper %>,
         $config
       );
     },

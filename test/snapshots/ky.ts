@@ -10,40 +10,25 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
-export const defaults = {
-  baseUrl: '',
-  paramsSerializer: (params: any) =>
-    encodeParams(params, null, {
-      allowDots: true,
-      arrayFormat: 'repeat',
-    }),
-};
+import ky, { type Options as KyOptions } from 'ky';
 
+export const http = ky.create({
+  prefix: '',
+});
 export const petClient = {
    /**
   * Add a new pet to the store
   * @param body
   */
   addPet(body: Pet ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Pet> {
-    const url = `${defaults.baseUrl}/pet?`;
+    const url = `pet`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<Pet>);
+    return http.post(url, {
+      json: body,
+      ...$config,
+    }).json<Pet>();
   },
 
  /**
@@ -53,24 +38,16 @@ export const petClient = {
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'api_key': apiKey ?? '',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
-      method: 'DELETE',
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    return http.delete(url, {
+      headers: {
+        'api_key': apiKey,
+      },
+      ...$config,
+    }).json<unknown>();
   },
 
  /**
@@ -79,25 +56,25 @@ export const petClient = {
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Pet[]> {
-    const url = `${defaults.baseUrl}/pet/find?${defaults.paramsSerializer({'status': queryParams?.status,
-      'name': queryParams?.name,
-      'type': queryParams?.type,
-      'owner': queryParams?.owner,
-      'sortBy': queryParams?.sortBy,
-      'order': queryParams?.order,
-      'page': queryParams?.page,
-      'limit': queryParams?.limit,
-      'city': queryParams?.city,
-      'registrationDate': queryParams?.registrationDate,
-      })}`;
+    const url = `pet/find`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
+      searchParams: {
+        'status': queryParams?.status as any,
+        'name': queryParams?.name as any,
+        'type': queryParams?.type as any,
+        'owner': queryParams?.owner as any,
+        'sortBy': queryParams?.sortBy as any,
+        'order': queryParams?.order as any,
+        'page': queryParams?.page as any,
+        'limit': queryParams?.limit as any,
+        'city': queryParams?.city as any,
+        'registrationDate': queryParams?.registrationDate as any,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Pet[]>);
+    }).json<Pet[]>();
   },
 
  /**
@@ -107,16 +84,16 @@ export const petClient = {
   * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Pet[]> {
-    const url = `${defaults.baseUrl}/pet/findByTags?${defaults.paramsSerializer({'tags': tags,
-      })}`;
+    const url = `pet/findByTags`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
+      searchParams: {
+        'tags': tags as any,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Pet[]>);
+    }).json<Pet[]>();
   },
 
  /**
@@ -125,15 +102,13 @@ export const petClient = {
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Pet> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Pet>);
+    }).json<Pet>();
   },
 
  /**
@@ -141,25 +116,17 @@ export const petClient = {
   * @param body
   */
   updatePet(body: Pet ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Pet> {
-    const url = `${defaults.baseUrl}/pet?`;
+    const url = `pet`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/x-www-form-urlencoded',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
-      method: 'PUT',
+    return http.put(url, {
       body: new URLSearchParams(body as any),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<Pet>);
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      ...$config,
+    }).json<Pet>();
   },
 
  /**
@@ -169,17 +136,17 @@ export const petClient = {
   */
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?${defaults.paramsSerializer({'name': queryParams?.name,
-      'status': queryParams?.status,
-      })}`;
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return fetch(url, {
-      method: 'POST',
+    return http.post(url, {
+      searchParams: {
+        'name': queryParams?.name as any,
+        'status': queryParams?.status as any,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    }).json<unknown>();
   },
 
  /**
@@ -191,17 +158,17 @@ export const petClient = {
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<File> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${defaults.paramsSerializer({'additionalMetadata': additionalMetadata,
-      })}`;
+    const url = `pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    return fetch(url, {
-      method: 'POST',
+    return http.post(url, {
       body: body,
+      searchParams: {
+        'additionalMetadata': additionalMetadata as any,
+      },
       ...$config,
-    })
-    .then((response) => response.blob() as Promise<File>);
+    }).blob() as Promise<File>;
   },
 
 };
@@ -212,30 +179,26 @@ export const storeClient = {
   * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    const url = `store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return fetch(url, {
-      method: 'DELETE',
+    return http.delete(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    }).json<unknown>();
   },
 
  /**
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
-  getInventory($config?: RequestInit
+  getInventory($config?: KyOptions
   ): Promise<Record<string, number>> {
-    const url = `${defaults.baseUrl}/store/inventory?`;
+    const url = `store/inventory`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Record<string, number>>);
+    }).json<Record<string, number>>();
   },
 
  /**
@@ -244,15 +207,13 @@ export const storeClient = {
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Order> {
-    const url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    const url = `store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Order>);
+    }).json<Order>();
   },
 
  /**
@@ -261,25 +222,14 @@ export const storeClient = {
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<Order> {
-    const url = `${defaults.baseUrl}/store/order?`;
+    const url = `store/order`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<Order>);
+    return http.post(url, {
+      json: body,
+      ...$config,
+    }).json<Order>();
   },
 
 };
@@ -290,25 +240,14 @@ export const userClient = {
   * @param body (optional)
   */
   createUser(body?: User | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<User> {
-    const url = `${defaults.baseUrl}/user?`;
+    const url = `user`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<User>);
+    return http.post(url, {
+      json: body,
+      ...$config,
+    }).json<User>();
   },
 
  /**
@@ -316,25 +255,14 @@ export const userClient = {
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<User> {
-    const url = `${defaults.baseUrl}/user/createWithList?`;
+    const url = `user/createWithList`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<User>);
+    return http.post(url, {
+      json: body,
+      ...$config,
+    }).json<User>();
   },
 
  /**
@@ -343,15 +271,13 @@ export const userClient = {
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return fetch(url, {
-      method: 'DELETE',
+    return http.delete(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    }).json<unknown>();
   },
 
  /**
@@ -359,15 +285,13 @@ export const userClient = {
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<User> {
-    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<User>);
+    }).json<User>();
   },
 
  /**
@@ -375,29 +299,27 @@ export const userClient = {
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<string> {
-    const url = `${defaults.baseUrl}/user/login?${defaults.paramsSerializer({'username': queryParams?.username,
-      'password': queryParams?.password,
-      })}`;
+    const url = `user/login`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
+      searchParams: {
+        'username': queryParams?.username as any,
+        'password': queryParams?.password as any,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<string>);
+    }).json<string>();
   },
 
 /** Logs out current logged in user session */
-  logoutUser($config?: RequestInit
+  logoutUser($config?: KyOptions
   ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/user/logout?`;
+    const url = `user/logout`;
 
-    return fetch(url, {
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    }).json<unknown>();
   },
 
  /**
@@ -408,16 +330,14 @@ export const userClient = {
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
-    $config?: RequestInit
+    $config?: KyOptions
   ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return fetch(url, {
-      method: 'PUT',
+    return http.put(url, {
       body: body,
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    }).json<unknown>();
   },
 
 };
@@ -478,7 +398,6 @@ export function encodeParams<T = any>(
 
   return encodedParams.join('&');
 }
-
 export interface Order {
   /** @format int64 */
   id?: number;

@@ -777,7 +777,7 @@ export const user = {
  * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
  * Kudos to @suhaotian for the original implementation
  */
-function encodeParams<T = any>(
+export function encodeParams<T = any>(
   params: T,
   parentKey: string | null = null,
   options?: {

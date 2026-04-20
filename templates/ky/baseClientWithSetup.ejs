@@ -1,0 +1,34 @@
+import ky, { type KyInstance, type Options as KyOptions } from 'ky';
+import { createKyConfig } from '<%= it.relativeSetupImport %>';
+
+let _http: KyInstance | null = null;
+
+/**
+ * Initialises the ky HTTP client using the configuration returned by
+ * `createKyConfig()` from your setup file.
+ *
+ * Call this once at application startup — for example inside a React provider
+ * or your app's entry point — before any API calls are made.
+ *
+ * Re-calling this function replaces the existing instance. ky instances are
+ * immutable, so hook changes require re-initialisation.
+ */
+export function initKyHttp(): void {
+  _http = ky.create(createKyConfig());
+}
+
+/**
+ * Returns the initialised ky instance. Throws if called before `initKyHttp()`.
+ *
+ * This guard prevents accidental use of the client before it has been
+ * configured with hooks (auth, error handling, etc.).
+ */
+export function getKyHttp(): KyInstance {
+  if (!_http) {
+    throw new Error(
+      '[Swaggie] ky client is not initialised. ' +
+        'Call initKyHttp() at application startup before making any API requests.'
+    );
+  }
+  return _http;
+}

@@ -212,7 +212,7 @@ export const pet = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Pet[], TError, TData>({
         queryKey: pet.queryKeys.findPets(queryParams, ),
-        queryFn: () => petClient.findPets(queryParams, $httpConfig).then(res => res.data),
+        queryFn: () => petClient.findPets(queryParams, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -231,7 +231,7 @@ export const pet = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Pet[], TError, TData>({
         queryKey: pet.queryKeys.findPetsByTags(tags, ),
-        queryFn: () => petClient.findPetsByTags(tags, $httpConfig).then(res => res.data),
+        queryFn: () => petClient.findPetsByTags(tags, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -249,7 +249,7 @@ export const pet = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Pet, TError, TData>({
         queryKey: pet.queryKeys.petById(petId, ),
-        queryFn: () => petClient.getPetById(petId, $httpConfig).then(res => res.data),
+        queryFn: () => petClient.getPetById(petId, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -267,7 +267,7 @@ export const pet = {
       $config?: UseMutationOptions<Pet, TError, { body: Pet }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<Pet, TError, { body: Pet }>({
-        mutationFn: (vars) => petClient.addPet(vars.body, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => petClient.addPet(vars.body, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -283,7 +283,7 @@ export const pet = {
       $config?: UseMutationOptions<unknown, TError, { apiKey: string | null; petId: number }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { apiKey: string | null; petId: number }>({
-        mutationFn: (vars) => petClient.deletePet(vars.apiKey, vars.petId, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => petClient.deletePet(vars.apiKey, vars.petId, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -298,7 +298,7 @@ export const pet = {
       $config?: UseMutationOptions<Pet, TError, { body: Pet }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<Pet, TError, { body: Pet }>({
-        mutationFn: (vars) => petClient.updatePet(vars.body, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => petClient.updatePet(vars.body, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -314,7 +314,7 @@ export const pet = {
       $config?: UseMutationOptions<unknown, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>({
-        mutationFn: (vars) => petClient.updatePetWithForm(vars.petId, vars.queryParams, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => petClient.updatePetWithForm(vars.petId, vars.queryParams, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -331,7 +331,7 @@ export const pet = {
       $config?: UseMutationOptions<File, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<File, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>({
-        mutationFn: (vars) => petClient.uploadFile(vars.body, vars.petId, vars.additionalMetadata, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => petClient.uploadFile(vars.body, vars.petId, vars.additionalMetadata, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -428,7 +428,7 @@ export const store = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Record<string, number>, TError, TData>({
         queryKey: store.queryKeys.inventory(),
-        queryFn: () => storeClient.getInventory($httpConfig).then(res => res.data),
+        queryFn: () => storeClient.getInventory($httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -446,7 +446,7 @@ export const store = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<Order, TError, TData>({
         queryKey: store.queryKeys.orderById(orderId, ),
-        queryFn: () => storeClient.getOrderById(orderId, $httpConfig).then(res => res.data),
+        queryFn: () => storeClient.getOrderById(orderId, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -465,7 +465,7 @@ export const store = {
       $config?: UseMutationOptions<unknown, TError, { orderId: number }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { orderId: number }>({
-        mutationFn: (vars) => storeClient.deleteOrder(vars.orderId, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => storeClient.deleteOrder(vars.orderId, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -481,7 +481,7 @@ export const store = {
       $config?: UseMutationOptions<Order, TError, { body?: Order | null }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<Order, TError, { body?: Order | null }>({
-        mutationFn: (vars) => storeClient.placeOrder(vars.body, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => storeClient.placeOrder(vars.body, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -631,7 +631,7 @@ export const user = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<User, TError, TData>({
         queryKey: user.queryKeys.userByName(username, ),
-        queryFn: () => userClient.getUserByName(username, $httpConfig).then(res => res.data),
+        queryFn: () => userClient.getUserByName(username, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -648,7 +648,7 @@ export const user = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<string, TError, TData>({
         queryKey: user.queryKeys.loginUser(queryParams, ),
-        queryFn: () => userClient.loginUser(queryParams, $httpConfig).then(res => res.data),
+        queryFn: () => userClient.loginUser(queryParams, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -662,7 +662,7 @@ export const user = {
       $httpConfig?: XiorRequestConfig    ) {
       return useQuery<unknown, TError, TData>({
         queryKey: user.queryKeys.logoutUser(),
-        queryFn: () => userClient.logoutUser($httpConfig).then(res => res.data),
+        queryFn: () => userClient.logoutUser($httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -681,7 +681,7 @@ export const user = {
       $config?: UseMutationOptions<User, TError, { body?: User | null }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<User, TError, { body?: User | null }>({
-        mutationFn: (vars) => userClient.createUser(vars.body, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => userClient.createUser(vars.body, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -696,7 +696,7 @@ export const user = {
       $config?: UseMutationOptions<User, TError, { body?: User[] | null }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<User, TError, { body?: User[] | null }>({
-        mutationFn: (vars) => userClient.createUsersWithListInput(vars.body, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => userClient.createUsersWithListInput(vars.body, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -712,7 +712,7 @@ export const user = {
       $config?: UseMutationOptions<unknown, TError, { username: string }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { username: string }>({
-        mutationFn: (vars) => userClient.deleteUser(vars.username, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => userClient.deleteUser(vars.username, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -729,7 +729,7 @@ export const user = {
       $config?: UseMutationOptions<unknown, TError, { body: FormData | null; username: string }>,
       $httpConfig?: XiorRequestConfig    ) {
       return useMutation<unknown, TError, { body: FormData | null; username: string }>({
-        mutationFn: (vars) => userClient.updateUser(vars.body, vars.username, $httpConfig).then(res => res.data),
+        mutationFn: (vars) => userClient.updateUser(vars.body, vars.username, $httpConfig).then((resp) => resp.data),
         ...$config
       });
     },
@@ -742,6 +742,7 @@ export const user = {
     logoutUser: () => ['user', 'userLogoutUser'] as const,
   },
 };
+export { encodeParams } from 'xior';
 export interface Order {
   /** @format int64 */
   id?: number;

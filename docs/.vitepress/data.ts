@@ -46,6 +46,8 @@ export const HINTS: Record<string, string> = {
     'When enabled, a companion mock file is generated alongside the client. It exports typed spy stubs for every method and hook, ready to drop into your tests. Only available in "full" generation mode.',
   testingFramework:
     'The test framework whose spy functions are used in the generated mock file. "vitest" uses vi.fn(), "jest" uses jest.fn(). Only relevant when "Generate mocks" is enabled.',
+  generateSetup:
+    'When enabled, a write-once client setup file scaffold is generated alongside the client. For the ky template, the setup file exports createKyConfig() which is imported by the generated client to initialise ky with hooks. For other templates (axios, xior, fetch) it shows how to attach interceptors. Only available in "full" generation mode.',
 };
 
 export const EXAMPLE_SPEC = `openapi: "3.0.3"

@@ -214,13 +214,46 @@ When `true`, operations marked `deprecated: true` in the spec are excluded from 
 
 **Type:** `boolean` &nbsp; **Default:** `false`
 
-When `true`, prepends `'use client';` as the very first line of the generated file. Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates, which produce React hooks that can only run inside Client Components.
+When `true`, prepends `'use client';` as the very first line of the generated hooks file (when `hooksOut` is set) or the main generated file (single-file mode). Required for [Next.js App Router](https://nextjs.org/docs/app) when using `swr` or `tsq` templates, which produce React hooks that can only run inside Client Components.
 
 ```json
 { "useClient": true }
 ```
 
 Has no effect and should not be used outside of Next.js App Router (RSC) environments.
+
+---
+
+### `hooksOut`
+
+**Type:** `string` &nbsp; **Default:** not set
+
+Output path for the generated reactive hooks file. Only applicable when using an L2 template (`swr`, `tsq`). When set, Swaggie generates **two files**:
+
+- **`out`** — HTTP client objects (`petClient`, `storeClient`, …) + TypeScript types. No `'use client'` directive. Safe to import on the server side (e.g. Next.js Server Components or API routes).
+- **`hooksOut`** — Reactive hook namespaces (`pet.queries`, `pet.mutations`, `pet.queryKeys`, …). Imports the main file as `import * as API from './api'`. Gets the `'use client'` directive when `useClient` is set.
+
+This is the recommended setup for **Next.js App Router** projects that want server-safe clients alongside client-only hooks.
+
+```json
+{
+  "src": "./openapi.yaml",
+  "out": "./src/api/client.ts",
+  "hooksOut": "./src/api/hooks.ts",
+  "template": ["swr", "axios"],
+  "useClient": true
+}
+```
+
+```bash
+swaggie -s ./openapi.yaml -o ./src/api/client.ts --hooksOut ./src/api/hooks.ts -t swr,axios --useClient
+```
+
+::: tip Usage in Next.js
+Import `petClient` from `./client` in Server Components or API routes. Import `pet.queries.usePetById` from `./hooks` inside Client Components only.
+:::
+
+Requires `out` to also be set.
 
 ---
 

@@ -559,6 +559,7 @@ describe('prepareAppOptions', () => {
       expect(prepareAppOptions({ ...minimalOpts, template: 'axios' }).template).toBe('axios');
       expect(prepareAppOptions({ ...minimalOpts, template: 'fetch' }).template).toBe('fetch');
       expect(prepareAppOptions({ ...minimalOpts, template: 'xior' }).template).toBe('xior');
+      expect(prepareAppOptions({ ...minimalOpts, template: 'ky' }).template).toBe('ky');
     });
 
     test('passes through [L2, L1] array unchanged', () => {
@@ -666,6 +667,31 @@ describe('runCodeGenerator — template validation', () => {
     const [code] = await runCodeGenerator(parameters as any);
     expect(code).toBeDefined();
     expect(code).toContain('defaults');
+    expect(code).toContain('useSWR');
+  });
+
+  test('accepts "ky" template and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: 'ky',
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain("import ky");
+    expect(code).toContain('KyOptions');
+    expect(code).toContain('http.get(');
+  });
+
+  test('accepts ["swr", "ky"] template pair and generates code', async () => {
+    const parameters = {
+      src: './test/petstore-v3.yml',
+      template: ['swr', 'ky'],
+    };
+
+    const [code] = await runCodeGenerator(parameters as any);
+    expect(code).toBeDefined();
+    expect(code).toContain("import ky");
     expect(code).toContain('useSWR');
   });
 
@@ -792,5 +818,224 @@ describe('runCodeGenerator — template validation', () => {
     const mockFile = await Bun.file(mocksPath).text();
     expect(mockFile).toContain("import { jest } from '@jest/globals'");
     expect(mockFile).toContain('jest.spyOn(');
+  });
+
+  describe('--hooksOut', () => {
+    test('fails when --hooksOut is provided without --out', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          template: ['swr', 'axios'],
+          hooksOut: './.tmp/test/hooks.ts',
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('--hooksOut requires --out to be set');
+      }
+    });
+
+    test('fails when --hooksOut is used with a non-L2 template', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          out: './.tmp/test/api.ts',
+          template: 'axios',
+          hooksOut: './.tmp/test/hooks.ts',
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('--hooksOut requires an L2 template');
+      }
+    });
+
+    test('generates separate hooks file when --hooksOut is set', async () => {
+      const outPath = './.tmp/test/hooks-split/api.ts';
+      const hooksPath = './.tmp/test/hooks-split/hooks.ts';
+
+      const [mainCode] = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: ['swr', 'axios'],
+        hooksOut: hooksPath,
+      } as any);
+
+      const hooksFile = await Bun.file(hooksPath).text();
+
+      // Main file should NOT contain hook exports or SWR imports
+      expect(mainCode).not.toContain('useSWR');
+      expect(mainCode).not.toContain('export const pet =');
+      // Main file SHOULD contain HTTP client
+      expect(mainCode).toContain('export const petClient =');
+      // Main file SHOULD export encodeParams
+      expect(mainCode).toContain('export function encodeParams');
+
+      // Hooks file SHOULD contain SWR imports and hook exports
+      expect(hooksFile).toContain("import useSWR");
+      expect(hooksFile).toContain("import * as API from './api'");
+      expect(hooksFile).toContain('export const pet =');
+      // Hooks file should NOT contain HTTP client setup
+      expect(hooksFile).not.toContain('petClient =');
+    });
+
+    test('prepends use client directive only to hooks file when --hooksOut and --useClient are set', async () => {
+      const outPath = './.tmp/test/hooks-use-client/api.ts';
+      const hooksPath = './.tmp/test/hooks-use-client/hooks.ts';
+
+      const [mainCode] = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: ['swr', 'axios'],
+        hooksOut: hooksPath,
+        useClient: true,
+      } as any);
+
+      const hooksFile = await Bun.file(hooksPath).text();
+
+      expect(mainCode.startsWith("'use client'")).toBe(false);
+      expect(hooksFile.startsWith("'use client';\n")).toBe(true);
+    });
+
+    test('generates hooks file that references main file via API namespace', async () => {
+      const outPath = './.tmp/test/hooks-api-ref/api.ts';
+      const hooksPath = './.tmp/test/hooks-api-ref/hooks.ts';
+
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: ['tsq', 'xior'],
+        hooksOut: hooksPath,
+      } as any);
+
+      const hooksFile = await Bun.file(hooksPath).text();
+
+      // Hooks reference API.petClient for HTTP calls
+      expect(hooksFile).toContain('API.petClient.');
+      // Return types are prefixed with API.
+      expect(hooksFile).toContain('API.Pet');
+      // Local queryKeys references use bare name (not API.pet.queryKeys)
+      expect(hooksFile).toContain('pet.queryKeys.');
+    });
+  });
+
+  // ── --clientSetup flag validation ─────────────────────────────────────────
+
+  describe('--clientSetup', () => {
+    test('fails when --clientSetup is provided without --out', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          template: 'ky',
+          clientSetup: './.tmp/test/api.setup.ts',
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('--clientSetup requires --out to be set');
+      }
+    });
+
+    test('fails when --forceSetup is provided without --clientSetup', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          out: './.tmp/test/api.ts',
+          forceSetup: true,
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('--forceSetup requires --clientSetup to be set');
+      }
+    });
+
+    test('ky with --clientSetup generates lazy initKyHttp/getKyHttp in api.ts', async () => {
+      const outPath = './.tmp/test/ky-with-setup/api.ts';
+      const setupPath = './.tmp/test/ky-with-setup/api.setup.ts';
+
+      const [code] = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: 'ky',
+        clientSetup: setupPath,
+      } as any);
+
+      expect(code).toContain('initKyHttp');
+      expect(code).toContain('getKyHttp');
+      expect(code).toContain("import { createKyConfig }");
+      expect(code).toContain("getKyHttp().");
+      expect(code).not.toContain('export const http = ky.create');
+    });
+
+    test('ky with --clientSetup writes setup scaffold that is not overwritten on second run', async () => {
+      const outPath = './.tmp/test/ky-setup-guard/api.ts';
+      const setupPath = './.tmp/test/ky-setup-guard/api.setup.ts';
+
+      // First run — scaffold should be created (forceSetup to clear any prior state)
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: 'ky',
+        clientSetup: setupPath,
+        forceSetup: true,
+      } as any);
+
+      const setupFile = await Bun.file(setupPath).text();
+      expect(setupFile).toContain('createKyConfig');
+      expect(setupFile).toContain('GENERATED ONCE');
+
+      // Overwrite with a sentinel to detect re-generation
+      await Bun.file(setupPath).write('// sentinel');
+
+      // Second run — scaffold must NOT be overwritten
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: 'ky',
+        clientSetup: setupPath,
+      } as any);
+
+      const afterSecondRun = await Bun.file(setupPath).text();
+      expect(afterSecondRun).toBe('// sentinel');
+    });
+
+    test('ky with --clientSetup and --forceSetup overwrites existing setup file', async () => {
+      const outPath = './.tmp/test/ky-force-setup/api.ts';
+      const setupPath = './.tmp/test/ky-force-setup/api.setup.ts';
+
+      // Write sentinel
+      await Bun.write(setupPath, '// sentinel');
+
+      await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: 'ky',
+        clientSetup: setupPath,
+        forceSetup: true,
+      } as any);
+
+      const setupFile = await Bun.file(setupPath).text();
+      expect(setupFile).toContain('createKyConfig');
+      expect(setupFile).not.toBe('// sentinel');
+    });
+
+    test('xior with --clientSetup generates interceptor scaffold (not imported by api.ts)', async () => {
+      const outPath = './.tmp/test/xior-with-setup/api.ts';
+      const setupPath = './.tmp/test/xior-with-setup/api.setup.ts';
+
+      const [code] = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        out: outPath,
+        template: 'xior',
+        clientSetup: setupPath,
+      } as any);
+
+      // api.ts must NOT import the setup file for xior
+      expect(code).not.toContain('api.setup');
+      // api.ts should still be the normal xior template
+      expect(code).toContain("import xior");
+
+      const setupFile = await Bun.file(setupPath).text();
+      expect(setupFile).toContain('setupApiClient');
+      expect(setupFile).toContain('interceptors.request.use');
+      expect(setupFile).toContain('GENERATED ONCE');
+    });
   });
 });

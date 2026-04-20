@@ -10,7 +10,7 @@ import {
   orderBy,
 } from '../utils/utils';
 import { renderFile, hasTemplateFile } from '../utils/templateEngine';
-import { getL1Template, getHttpConfigType } from '../utils/templateValidator';
+import { getL1Template, getHttpConfigType, getResponseMapper } from '../utils/templateValidator';
 import { generateBarrelFile } from './createBarrel';
 import { FILE_HEADER } from './header';
 import type { ApiOperation, AppOptions } from '../types';
@@ -25,30 +25,48 @@ import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
  * Function that will analyze paths in the spec and generate the code for all the operations.
+ *
+ * @param relativeSetupImport - When `--clientSetup` is active for the ky template, the relative
+ *   import path from the generated `api.ts` to the setup file (e.g. `'./api.setup'`).
+ *   Used to embed the import in `baseClientWithSetup.ejs` and passed to each operation
+ *   as `httpAccessor` (`'getKyHttp()'` vs the default `'http'`).
  */
 export default async function generateOperations(
   spec: OA3.Document,
-  options: AppOptions
+  options: AppOptions,
+  relativeSetupImport?: string
 ): Promise<string> {
   const operations = getOperations(spec);
   const groups = groupOperationsByGroupName(operations);
   const servicePrefix = options.servicePrefix;
+  const isKyWithSetup = getL1Template(options.template) === 'ky' && !!options.clientSetup;
+
   const baseClientData = {
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,
+    // For the ky+setup variant, embed the relative import to the setup file
+    ...(isKyWithSetup && relativeSetupImport ? { relativeSetupImport } : {}),
   };
 
   // When a composite [L2, L1] template is used, the L2 base client contains
   // reactive library imports (e.g. useSWR, useQuery). These are placed first
   // so all imports appear at the top of the file before the HTTP client setup.
+  // When hooksOut is set, the L2 base client goes into the hooks file instead.
   let baseClients = '';
-  if (hasTemplateFile('baseClientL2.ejs')) {
+  if (hasTemplateFile('baseClientL2.ejs') && !options.hooksOut) {
     baseClients += renderFile('baseClientL2.ejs', baseClientData);
   }
-  baseClients += renderFile('baseClient.ejs', baseClientData);
+  // For ky with --clientSetup, use the lazy initKyHttp/getKyHttp pattern.
+  // We rely on the template being present (always bundled for ky), so no
+  // hasTemplateFile guard — hasTemplateFile returns false for directory templates.
+  const baseClientTemplate =
+    isKyWithSetup ? 'baseClientWithSetup.ejs' : 'baseClient.ejs';
+  baseClients += renderFile(baseClientTemplate, baseClientData);
 
-  const clientDirective = options.useClient ? "'use client';\n" : '';
+  // When hooksOut is set, the 'use client' directive belongs in the hooks file only.
+  // In single-file mode (no hooksOut), keep prepending it to the main file.
+  const clientDirective = options.useClient && !options.hooksOut ? "'use client';\n" : '';
   let result = clientDirective + FILE_HEADER + baseClients;
 
   for (const name in groups) {
@@ -63,12 +81,125 @@ export default async function generateOperations(
       ...clientData,
       servicePrefix,
       httpConfigType: getHttpConfigType(options.template),
+      responseMapper: getResponseMapper(options.template),
+      // For the ky+setup variant, operations call getKyHttp() instead of the
+      // module-level `http` singleton.
+      httpAccessor: isKyWithSetup ? 'getKyHttp()' : 'http',
+      // In split-file mode, the hooks namespace is generated in a separate file.
+      // Pass splitMode=true so the client.ejs template skips the hooks block.
+      splitMode: !!options.hooksOut,
+      // Template helper functions — defined once here, used in all L2 templates.
+      toOpName,
+      safeOperation,
     });
 
     result += renderedFile;
   }
 
   result += generateBarrelFile(groups, options);
+
+  return result;
+}
+
+/**
+ * Generates the content of the write-once client setup scaffold file.
+ *
+ * For the `ky` template, renders `baseClientSetup.ejs` which exports a
+ * `createKyConfig()` function imported by the generated `api.ts`.
+ * For other templates (`axios`, `xior`, `fetch`), renders a standalone
+ * interceptor scaffold that is NOT imported by `api.ts`.
+ *
+ * @param relativeApiImport - Relative import path from the setup file back to api.ts
+ * @param relativeSetupImport - Relative import path from api.ts to the setup file
+ *   (only used in the ky scaffold comment to show the correct usage example)
+ */
+export function generateClientSetup(
+  options: AppOptions,
+  relativeApiImport: string,
+  relativeSetupImport: string
+): string {
+  const setupData = {
+    baseUrl: options.baseUrl,
+    relativeApiImport,
+    relativeSetupImport,
+  };
+
+  try {
+    return renderFile('baseClientSetup.ejs', setupData);
+  } catch {
+    // Template not available for this L1 (e.g. ng1/ng2 don't have a setup template)
+    return '';
+  }
+}
+
+/**
+ * Generates the reactive hooks file content (for use with --hooksOut).
+ *
+ * The hooks file contains:
+ * - An optional `'use client';` directive (when useClient is set)
+ * - The L2 reactive library imports (useSWR / useQuery etc.)
+ * - A namespace import of the main file: `import * as API from '<relativeMainImport>'`
+ * - One `export const <name> = { queries, mutations, queryKeys }` per tag group,
+ *   referencing HTTP client methods via `API.<name>Client.*`
+ *
+ * This function requires the template engine to already be initialized with the
+ * L2 template files (i.e. `loadAllTemplateFiles` must have been called first).
+ */
+export async function generateHooks(
+  spec: OA3.Document,
+  options: AppOptions,
+  relativeMainImport: string
+): Promise<string> {
+  const operations = getOperations(spec);
+  const groups = groupOperationsByGroupName(operations);
+  const servicePrefix = options.servicePrefix;
+  const baseClientData = {
+    servicePrefix,
+    baseUrl: options.baseUrl,
+    ...options.queryParamsSerialization,
+  };
+
+  // L2 base client contains the reactive library imports (useSWR, useQuery, etc.)
+  let header = '';
+  if (hasTemplateFile('baseClientL2.ejs')) {
+    header += renderFile('baseClientL2.ejs', baseClientData);
+  }
+
+  const clientDirective = options.useClient ? "'use client';\n" : '';
+  let result = clientDirective + FILE_HEADER + header;
+
+  // Import the L1 $httpConfig type directly from its source package so it is
+  // available in the hooks file without having to prefix it with API.
+  const l1HttpTypeImport = getL1HttpTypeImport(options.template);
+  if (l1HttpTypeImport) {
+    result += l1HttpTypeImport + '\n';
+  }
+
+  // Import the main file as a namespace so we can reference API.*Client, API.encodeParams,
+  // and API.DomainTypes (used in hook generics via prefixApiType in the templates).
+  result += `import * as API from '${relativeMainImport}';\n\n`;
+
+  for (const name in groups) {
+    const group = groups[name];
+    const clientData = prepareClient(servicePrefix + name, group, spec.components, options);
+
+    if (!clientData) {
+      continue;
+    }
+
+    const renderedFile = renderFile('hooksClient.ejs', {
+      ...clientData,
+      servicePrefix,
+      httpConfigType: getHttpConfigType(options.template),
+      responseMapper: getResponseMapper(options.template),
+      // Template helper functions — defined once here, used in all L2 templates.
+      toOpName,
+      safeOperation,
+      prefixApiType,
+    });
+
+    result += renderedFile;
+  }
 
   return result;
 }
@@ -427,6 +558,98 @@ function getRequestBody(
   }
 
   return null;
+}
+
+/**
+ * Returns a TypeScript import statement for the L1 HTTP config type so that it
+ * is available in the hooks file by its bare name (e.g. `AxiosRequestConfig`)
+ * without needing an `API.` prefix.
+ *
+ * Returns `null` for `fetch` (uses the built-in `RequestInit` — no import needed)
+ * and for custom/unknown L1 templates.
+ */
+// ─── Template helper functions ─────────────────────────────────────────────
+// Defined here in TypeScript and passed into template data so the EJS files
+// have no local function definitions and no duplication across templates.
+
+/**
+ * Converts an operation name to the PascalCase suffix used in hook/query key
+ * names: strips a leading "get" prefix (case-insensitive), then capitalises.
+ *
+ * @example toOpName('getPetById')      → 'PetById'
+ * @example toOpName('findPetsByStatus') → 'FindPetsByStatus'
+ */
+export function toOpName(name: string): string {
+  const n = name.toLowerCase().startsWith('get') ? name.slice(3) : name;
+  return n.charAt(0).toUpperCase() + n.slice(1);
+}
+
+/**
+ * Returns a copy of `operation` where any parameter whose name matches
+ * `clientName` is renamed to `_<name>` to avoid TypeScript variable shadowing
+ * inside the hook object literal.
+ */
+export function safeOperation<T extends { parameters: Array<{ name: string }> }>(
+  operation: T,
+  clientName: string
+): T {
+  const safeParams = operation.parameters.map((p) =>
+    p.name === clientName ? { ...p, name: `_${p.name}` } : p
+  );
+  return { ...operation, parameters: safeParams };
+}
+
+// `API` is included here because it is the namespace we emit ourselves — it
+// must never be prefixed with a second `API.` in the output.
+// Web API / Browser globals are included so they are never incorrectly namespaced
+// as `API.FormData`, `API.File`, `API.Blob`, etc.
+const PRIMITIVES =
+  /^(API|unknown|string|number|boolean|void|null|undefined|any|never|Date|object|Record|Array|Pick|Omit|Required|Partial|Readonly|NonNullable|ReturnType|InstanceType|Parameters|ConstructorParameters|FormData|File|Blob|URLSearchParams|ArrayBuffer|ReadableStream|Response|Request|Headers|Event|EventTarget)$/;
+
+/**
+ * Prefixes named (non-primitive) TypeScript type names in a type string with
+ * the `API.` namespace so they resolve to types exported from the main file
+ * when the hooks are in a separate file (split-file / --hooksOut mode).
+ *
+ * Works on any type string structure — bare names, arrays, unions, intersections,
+ * and inline object types (including PascalCase names used as property value types
+ * inside `{ key: SomeType }` shapes).
+ *
+ * @example prefixApiType('Pet')                          → 'API.Pet'
+ * @example prefixApiType('Pet[]')                        → 'API.Pet[]'
+ * @example prefixApiType('Pet | null')                   → 'API.Pet | null'
+ * @example prefixApiType('unknown')                      → 'unknown'
+ * @example prefixApiType('{ id: number }')               → '{ id: number }'
+ * @example prefixApiType('{ profile: MyEnum; }')         → '{ profile: API.MyEnum; }'
+ * @example prefixApiType('API.Pet')                      → 'API.Pet' (API itself is in the exclude list)
+ */
+export function prefixApiType(typeStr: string): string {
+  if (!typeStr) {
+    return typeStr;
+  }
+  // The negative lookbehind `(?<!\.)` skips identifiers that are already part
+  // of a namespace reference (e.g. `API.Pet` — when the regex reaches `Pet` it
+  // is preceded by `.`, so we leave it alone).
+  return typeStr.replace(/(?<!\.)\b([A-Z][A-Za-z0-9_]*)\b/g, (match) =>
+    PRIMITIVES.test(match) ? match : `API.${match}`
+  );
+}
+
+function getL1HttpTypeImport(template: AppOptions['template']): string | null {
+  const l1 = getL1Template(template);
+  switch (l1) {
+    case 'axios':
+      return "import type { AxiosRequestConfig } from 'axios';";
+    case 'xior':
+      return "import type { XiorRequestConfig } from 'xior';";
+    case 'fetch':
+      // RequestInit is a global built-in — no import needed
+      return null;
+    case 'ky':
+      return "import type { Options as KyOptions } from 'ky';";
+    default:
+      return null;
+  }
 }
 
 function upsertFixedHeader(headers: IOperationParam[], headerName: string, value: string): void {

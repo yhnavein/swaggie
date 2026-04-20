@@ -10,14 +10,16 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
-export const defaults = {
-  baseUrl: '',
+import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
+
+export const axios = Axios.create({
+  baseURL: '',
   paramsSerializer: (params: any) =>
     encodeParams(params, null, {
       allowDots: true,
       arrayFormat: 'repeat',
     }),
-};
+});
 
 export const petClient = {
    /**
@@ -25,164 +27,149 @@ export const petClient = {
   * @param body
   */
   addPet(body: Pet ,
-    $config?: RequestInit
-  ): Promise<Pet> {
-    const url = `${defaults.baseUrl}/pet?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Pet> {
+    const url = `/pet`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
+    return axios.request<Pet>({
+      url: url,
       method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<Pet>);
+      data: body,
+      ...$config,
+    });
   },
 
- /**
+   /**
   * Deletes a pet
   * @param apiKey (optional) (API name: api_key)
   * @param petId - ID of the pet
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
-    $config?: RequestInit
-  ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<unknown> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'api_key': apiKey ?? '',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
+    return axios.request<unknown>({
+      url: url,
       method: 'DELETE',
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+      headers: {
+        'api_key': apiKey,
+      },
+      ...$config,
+    });
   },
 
- /**
+   /**
   * Finds Pets
   * Find pets using different filters
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-    $config?: RequestInit
-  ): Promise<Pet[]> {
-    const url = `${defaults.baseUrl}/pet/find?${defaults.paramsSerializer({'status': queryParams?.status,
-      'name': queryParams?.name,
-      'type': queryParams?.type,
-      'owner': queryParams?.owner,
-      'sortBy': queryParams?.sortBy,
-      'order': queryParams?.order,
-      'page': queryParams?.page,
-      'limit': queryParams?.limit,
-      'city': queryParams?.city,
-      'registrationDate': queryParams?.registrationDate,
-      })}`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Pet[]> {
+    const url = `/pet/find`;
 
-    return fetch(url, {
+    return axios.request<Pet[]>({
+      url: url,
       method: 'GET',
+      params: {
+        'status': queryParams?.status,
+        'name': queryParams?.name,
+        'type': queryParams?.type,
+        'owner': queryParams?.owner,
+        'sortBy': queryParams?.sortBy,
+        'order': queryParams?.order,
+        'page': queryParams?.page,
+        'limit': queryParams?.limit,
+        'city': queryParams?.city,
+        'registrationDate': queryParams?.registrationDate,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Pet[]>);
+    });
   },
 
- /**
+   /**
   * Finds Pets by tags
   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   * @deprecated
   * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
-    $config?: RequestInit
-  ): Promise<Pet[]> {
-    const url = `${defaults.baseUrl}/pet/findByTags?${defaults.paramsSerializer({'tags': tags,
-      })}`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Pet[]> {
+    const url = `/pet/findByTags`;
 
-    return fetch(url, {
+    return axios.request<Pet[]>({
+      url: url,
       method: 'GET',
+      params: {
+        'tags': tags,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Pet[]>);
+    });
   },
 
- /**
+   /**
   * Find pet by ID
   * Returns a single pet
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
-    $config?: RequestInit
-  ): Promise<Pet> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Pet> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
-    return fetch(url, {
+    return axios.request<Pet>({
+      url: url,
       method: 'GET',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Pet>);
+    });
   },
 
- /**
+   /**
   * Update an existing pet by Id
   * @param body
   */
   updatePet(body: Pet ,
-    $config?: RequestInit
-  ): Promise<Pet> {
-    const url = `${defaults.baseUrl}/pet?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Pet> {
+    const url = `/pet`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/x-www-form-urlencoded',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
+    return axios.request<Pet>({
+      url: url,
       method: 'PUT',
-      body: new URLSearchParams(body as any),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<Pet>);
+      data: new URLSearchParams(body as any),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      ...$config,
+    });
   },
 
- /**
+   /**
   * Updates a pet in the store with form data
   * @param petId - ID of the pet
   * @param queryParams (optional) - Grouped query parameters object (name, status)
   */
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
-    $config?: RequestInit
-  ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}?${defaults.paramsSerializer({'name': queryParams?.name,
-      'status': queryParams?.status,
-      })}`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<unknown> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
-    return fetch(url, {
+    return axios.request<unknown>({
+      url: url,
       method: 'POST',
+      params: {
+        'name': queryParams?.name,
+        'status': queryParams?.status,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    });
   },
 
- /**
+   /**
   * uploads an image
   * @param body (optional)
   * @param petId - ID of the pet
@@ -191,20 +178,23 @@ export const petClient = {
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
-    $config?: RequestInit
-  ): Promise<File> {
-    const url = `${defaults.baseUrl}/pet/${encodeURIComponent(`${petId}`)}/uploadImage?${defaults.paramsSerializer({'additionalMetadata': additionalMetadata,
-      })}`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<File> {
+    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    return fetch(url, {
+    return axios.request<File>({
+      url: url,
       method: 'POST',
-      body: body,
+      data: body,
+      params: {
+        'additionalMetadata': additionalMetadata,
+      },
       ...$config,
-    })
-    .then((response) => response.blob() as Promise<File>);
+    });
   },
 
-};
+  };
+
 export const storeClient = {
    /**
   * Delete purchase order by ID
@@ -212,77 +202,69 @@ export const storeClient = {
   * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
-    $config?: RequestInit
-  ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<unknown> {
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return fetch(url, {
+    return axios.request<unknown>({
+      url: url,
       method: 'DELETE',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    });
   },
 
- /**
+   /**
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
-  getInventory($config?: RequestInit
-  ): Promise<Record<string, number>> {
-    const url = `${defaults.baseUrl}/store/inventory?`;
+  getInventory($config?: AxiosRequestConfig
+  ): AxiosPromise<Record<string, number>> {
+    const url = `/store/inventory`;
 
-    return fetch(url, {
+    return axios.request<Record<string, number>>({
+      url: url,
       method: 'GET',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Record<string, number>>);
+    });
   },
 
- /**
+   /**
   * Find purchase order by ID
   * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
-    $config?: RequestInit
-  ): Promise<Order> {
-    const url = `${defaults.baseUrl}/store/order/${encodeURIComponent(`${orderId}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Order> {
+    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return fetch(url, {
+    return axios.request<Order>({
+      url: url,
       method: 'GET',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<Order>);
+    });
   },
 
- /**
+   /**
   * Place an order for a pet
   * Place a new order in the store
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
-    $config?: RequestInit
-  ): Promise<Order> {
-    const url = `${defaults.baseUrl}/store/order?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<Order> {
+    const url = `/store/order`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
+    return axios.request<Order>({
+      url: url,
       method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<Order>);
+      data: body,
+      ...$config,
+    });
   },
 
-};
+  };
+
 export const userClient = {
    /**
   * Create user
@@ -290,117 +272,101 @@ export const userClient = {
   * @param body (optional)
   */
   createUser(body?: User | null,
-    $config?: RequestInit
-  ): Promise<User> {
-    const url = `${defaults.baseUrl}/user?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<User> {
+    const url = `/user`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
+    return axios.request<User>({
+      url: url,
       method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<User>);
+      data: body,
+      ...$config,
+    });
   },
 
- /**
+   /**
   * Creates list of users with given input array
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
-    $config?: RequestInit
-  ): Promise<User> {
-    const url = `${defaults.baseUrl}/user/createWithList?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<User> {
+    const url = `/user/createWithList`;
 
-    const { headers: $configHeaders, ...$configRest } = $config ?? {};
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
-    if ($configHeaders) {
-      new Headers($configHeaders).forEach((value, key) => headers.set(key, value));
-    }
-
-    return fetch(url, {
+    return axios.request<User>({
+      url: url,
       method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-      ...$configRest,
-    })
-    .then((response) => response.json() as Promise<User>);
+      data: body,
+      ...$config,
+    });
   },
 
- /**
+   /**
   * Delete user
   * This can only be done by the logged in user.
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
-    $config?: RequestInit
-  ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<unknown> {
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
-    return fetch(url, {
+    return axios.request<unknown>({
+      url: url,
       method: 'DELETE',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    });
   },
 
- /**
+   /**
   * Get user by user name
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
-    $config?: RequestInit
-  ): Promise<User> {
-    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<User> {
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
-    return fetch(url, {
+    return axios.request<User>({
+      url: url,
       method: 'GET',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<User>);
+    });
   },
 
- /**
+   /**
   * Logs user into the system
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
-    $config?: RequestInit
-  ): Promise<string> {
-    const url = `${defaults.baseUrl}/user/login?${defaults.paramsSerializer({'username': queryParams?.username,
-      'password': queryParams?.password,
-      })}`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<string> {
+    const url = `/user/login`;
 
-    return fetch(url, {
+    return axios.request<string>({
+      url: url,
       method: 'GET',
+      params: {
+        'username': queryParams?.username,
+        'password': queryParams?.password,
+      },
       ...$config,
-    })
-    .then((response) => response.json() as Promise<string>);
+    });
   },
 
-/** Logs out current logged in user session */
-  logoutUser($config?: RequestInit
-  ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/user/logout?`;
+  /** Logs out current logged in user session */
+  logoutUser($config?: AxiosRequestConfig
+  ): AxiosPromise<unknown> {
+    const url = `/user/logout`;
 
-    return fetch(url, {
+    return axios.request<unknown>({
+      url: url,
       method: 'GET',
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    });
   },
 
- /**
+   /**
   * Update user
   * This can only be done by the logged in user.
   * @param body (optional)
@@ -408,19 +374,20 @@ export const userClient = {
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
-    $config?: RequestInit
-  ): Promise<unknown> {
-    const url = `${defaults.baseUrl}/user/${encodeURIComponent(`${username}`)}?`;
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<unknown> {
+    const url = `/user/${encodeURIComponent(`${username}`)}`;
 
-    return fetch(url, {
+    return axios.request<unknown>({
+      url: url,
       method: 'PUT',
-      body: body,
+      data: body,
       ...$config,
-    })
-    .then((response) => response.json() as Promise<unknown>);
+    });
   },
 
-};
+  };
+
 
 /**
  * Serializes a params object into a query string that is compatible with different REST APIs.

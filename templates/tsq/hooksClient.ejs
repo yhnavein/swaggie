@@ -1,0 +1,63 @@
+<%
+var getOperations = it.operations.filter((o) => o.method === 'GET');
+var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
+var httpClientPrefix = 'API.' + it.camelCaseName;
+%>
+
+export const <%= it.camelCaseName %> = {
+  queries: {
+<% getOperations.forEach((operation) => {
+  var opName = it.toOpName(operation.name);
+  var safe = it.safeOperation(operation, it.camelCaseName);
+  var queryOperation = Object.assign({}, safe, {
+    rqOpName: 'use' + opName,
+    opKey: it.camelCaseName + opName,
+    clientName: it.camelCaseName,
+    httpClientName: httpClientPrefix,
+    httpConfigType: it.httpConfigType,
+    responseMapper: it.responseMapper,
+    returnType: it.prefixApiType(safe.returnType),
+    parameters: safe.parameters.map(function(p) {
+      return Object.assign({}, p, { type: it.prefixApiType(p.type) });
+    }),
+  });
+%>
+<%~ include('queryOperation.ejs', queryOperation); %>
+
+<% }); %>
+  },
+
+  mutations: {
+<% mutationOperations.forEach((operation) => {
+  var opName = operation.name.charAt(0).toUpperCase() + operation.name.slice(1);
+  var safe = it.safeOperation(operation, it.camelCaseName);
+  var mutationOperation = Object.assign({}, safe, {
+    mutOpName: 'use' + opName,
+    clientName: it.camelCaseName,
+    httpClientName: httpClientPrefix,
+    httpConfigType: it.httpConfigType,
+    responseMapper: it.responseMapper,
+    returnType: it.prefixApiType(safe.returnType),
+    parameters: safe.parameters.map(function(p) {
+      return Object.assign({}, p, { type: it.prefixApiType(p.type) });
+    }),
+  });
+%>
+<%~ include('mutationOperation.ejs', mutationOperation); %>
+
+<% }); %>
+  },
+
+  queryKeys: {
+<% getOperations.forEach((operation) => {
+  var opName = it.toOpName(operation.name);
+  var keyName = opName.charAt(0).toLowerCase() + opName.slice(1);
+  var safeOp = it.safeOperation(operation, it.camelCaseName);
+  var prefixedParams = safeOp.parameters.map(function(p) {
+    return Object.assign({}, p, { type: it.prefixApiType(p.type) });
+  });
+%>
+    <%= keyName %>: (<% prefixedParams.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => ['<%= it.camelCaseName %>', '<%= it.camelCaseName + opName %>'<% safeOp.parameters.forEach((parameter) => { %>, <%= parameter.name %><% }); %>] as const,
+<% }); %>
+  },
+};

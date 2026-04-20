@@ -7,6 +7,8 @@ import {
   getOperationName,
   getParamName,
   getParams,
+  prefixApiType,
+  toOpName,
 } from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions } from '../../test/test.utils';
@@ -1370,6 +1372,89 @@ describe('getParams', () => {
     expect(param.name).toBe('test');
     expect(param.type).toBe('string');
     expect(param.optional).toBe(false);
+  });
+});
+
+describe('prefixApiType', () => {
+  test('prefixes a bare named type', () => {
+    expect(prefixApiType('Pet')).toBe('API.Pet');
+  });
+
+  test('prefixes an array of a named type', () => {
+    expect(prefixApiType('Pet[]')).toBe('API.Pet[]');
+  });
+
+  test('prefixes named types in a union', () => {
+    expect(prefixApiType('Pet | Order')).toBe('API.Pet | API.Order');
+  });
+
+  test('prefixes a named type in a nullable union', () => {
+    expect(prefixApiType('Pet | null')).toBe('API.Pet | null');
+  });
+
+  test('leaves primitive types unprefixed', () => {
+    expect(prefixApiType('unknown')).toBe('unknown');
+    expect(prefixApiType('string')).toBe('string');
+    expect(prefixApiType('number')).toBe('number');
+    expect(prefixApiType('boolean')).toBe('boolean');
+    expect(prefixApiType('Date')).toBe('Date');
+    expect(prefixApiType('Record<string, number>')).toBe('Record<string, number>');
+  });
+
+  test('prefixes named type values inside an inline object type', () => {
+    expect(prefixApiType('{ profile: MyEnum; }')).toBe('{ profile: API.MyEnum; }');
+  });
+
+  test('prefixes multiple named types inside an inline object type', () => {
+    const input = '{ aggregationProfile: ChargeAggregationProfileSlugV5; window: ConsumptionWindowV5; }';
+    const expected = '{ aggregationProfile: API.ChargeAggregationProfileSlugV5; window: API.ConsumptionWindowV5; }';
+    expect(prefixApiType(input)).toBe(expected);
+  });
+
+  test('leaves primitive property value types inside an inline object unprefixed', () => {
+    expect(prefixApiType('{ id: number; name: string; active: boolean; }')).toBe(
+      '{ id: number; name: string; active: boolean; }'
+    );
+  });
+
+  test('mixes named and primitive types inside an inline object', () => {
+    const input = '{ id: number; status: OrderStatus; label: string; }';
+    const expected = '{ id: number; status: API.OrderStatus; label: string; }';
+    expect(prefixApiType(input)).toBe(expected);
+  });
+
+  test('does not double-prefix already-namespaced types', () => {
+    expect(prefixApiType('API.Pet')).toBe('API.Pet');
+    expect(prefixApiType('API.Pet[]')).toBe('API.Pet[]');
+  });
+
+  test('handles empty and falsy input', () => {
+    expect(prefixApiType('')).toBe('');
+  });
+
+  test('leaves Web API globals unprefixed', () => {
+    expect(prefixApiType('FormData')).toBe('FormData');
+    expect(prefixApiType('File')).toBe('File');
+    expect(prefixApiType('Blob')).toBe('Blob');
+    expect(prefixApiType('URLSearchParams')).toBe('URLSearchParams');
+    expect(prefixApiType('ArrayBuffer')).toBe('ArrayBuffer');
+  });
+});
+
+describe('toOpName', () => {
+  test('strips leading get prefix (case-insensitive)', () => {
+    expect(toOpName('getPetById')).toBe('PetById');
+    expect(toOpName('GetPetById')).toBe('PetById');
+  });
+
+  test('does not strip get from non-get prefix', () => {
+    expect(toOpName('generateReport')).toBe('GenerateReport');
+    expect(toOpName('getaway')).toBe('Away');
+  });
+
+  test('capitalises the first letter for non-get operations', () => {
+    expect(toOpName('createPet')).toBe('CreatePet');
+    expect(toOpName('deletePet')).toBe('DeletePet');
   });
 });
 

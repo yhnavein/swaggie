@@ -4,7 +4,7 @@ import type { OpenAPIV3 as OA3 } from 'openapi-types';
 import generateCode from './gen';
 import type { AppOptions, CliOptions, EnumNamesStyle, FullAppOptions } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
-import { validateTemplate, normalizeTemplate } from './utils/templateValidator';
+import { validateTemplate, normalizeTemplate, isL2Template } from './utils/templateValidator';
 import { APP_DEFAULTS } from './swagger';
 
 /**
@@ -39,6 +39,28 @@ function verifyOptions(options: Partial<FullAppOptions>) {
     throw new Error(
       '--mocks requires --out to be set, since the mock file needs to import the generated client'
     );
+  }
+  if (options.hooksOut && !options.out) {
+    throw new Error('--hooksOut requires --out to be set');
+  }
+  if (options.clientSetup && !options.out) {
+    throw new Error('--clientSetup requires --out to be set');
+  }
+  if (options.forceSetup && !options.clientSetup) {
+    throw new Error('--forceSetup requires --clientSetup to be set');
+  }
+  if (options.hooksOut) {
+    // Validate after normalization — template may be a bare L2 string or a pair
+    const tpl = options.template;
+    const isL2 =
+      (typeof tpl === 'string' && isL2Template(tpl)) ||
+      (Array.isArray(tpl) && typeof tpl[0] === 'string' && isL2Template(tpl[0]));
+    if (!isL2) {
+      throw new Error(
+        '--hooksOut requires an L2 template (swr, tsq). ' +
+          'Reactive hooks are only generated for L2 template pairs.'
+      );
+    }
   }
 }
 
@@ -103,6 +125,9 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     queryParamsSerialization = {},
     mocks,
     testingFramework,
+    hooksOut,
+    clientSetup,
+    forceSetup,
     ...rest
   } = cliOpts;
   const mergedQueryParamsSerialization = {
@@ -129,6 +154,9 @@ export function prepareAppOptions(cliOpts: CliOptions): AppOptions {
     queryParamsSerialization: mergedQueryParamsSerialization,
     ...(mocks !== undefined ? { mocks } : {}),
     ...(testingFramework !== undefined ? { testingFramework } : {}),
+    ...(hooksOut !== undefined ? { hooksOut } : {}),
+    ...(clientSetup !== undefined ? { clientSetup } : {}),
+    ...(forceSetup !== undefined ? { forceSetup } : {}),
   };
 }
 

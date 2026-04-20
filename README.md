@@ -21,7 +21,7 @@ See the [Example section](#example) for a quick demo, or visit the full document
 ## Features
 
 - Generates TypeScript code from OpenAPI 3.0, 3.1, and 3.2 specs
-- Supports multiple HTTP client libraries out of the box: `fetch`, `axios`, `xior`, `Angular 1`, `Angular 2+`; with optional reactive layers (`swr`, `tsq`) that compose with any compatible HTTP client
+- Supports multiple HTTP client libraries out of the box: `fetch`, `axios`, `xior`, `ky`, `Angular 1`, `Angular 2+`; with optional reactive layers (`swr`, `tsq`) that compose with any compatible HTTP client
 - **Auto-generated mock/stub files** for Vitest and Jest — typed spies for every client method and hook, with ergonomic helpers like `mockSWR()` and `mockQuery()`
 - Custom templates — bring your own to fit your existing codebase
 - Supports `allOf`, `oneOf`, `anyOf`, `$ref`, nullable types, and various enum definitions
@@ -79,7 +79,7 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
 -s, --src <url|path>           URL or file path to the OpenAPI spec
 -o, --out <filePath>           Output file path (omit to print to stdout)
 -b, --baseUrl <string>         Base URL that will be used as a default value in the clients
--t, --template <string>        Template to use. Single name: "axios", "fetch", "xior", "ng1", "ng2", "swr", "tsq". Reactive pair: "swr,axios" / "tsq,xior" / etc. (default: "axios")
+-t, --template <string>        Template to use. Single name: "axios", "fetch", "xior", "ky", "ng1", "ng2", "swr", "tsq". Reactive pair: "swr,axios" / "tsq,xior" / etc. (default: "axios")
 -m, --mode <mode>              Generation mode: "full" or "schemas" (default: "full")
 -d, --schemaStyle <style>      Schema object style: "interface" or "type" (default: "interface")
     --enumStyle <style>        Enum style for plain string enums: "union" or "enum" (default: "union")
@@ -91,9 +91,12 @@ swaggie -s https://petstore3.swagger.io/api/v3/openapi.json -o ./client/petstore
     --servicePrefix            Prefix for service names — useful when generating multiple APIs
     --allowDots                Use dot notation to serialize nested object query params
     --arrayFormat              How arrays are serialized: "indices", "repeat", or "brackets"
--C, --useClient                Prepend 'use client'; directive (Next.js App Router + SWR/TSQ)
+-C, --useClient                Prepend 'use client'; to the hooks file (with --hooksOut) or the main file (single-file mode)
+    --hooksOut <filePath>      Output path for the generated hooks file (L2 templates only). Splits hooks into a separate server-safe file
     --mocks <path>             Output path for a generated mock/stub file (requires --testingFramework and --out)
 -T, --testingFramework <name>  Framework for generated mocks: "vitest" or "jest" (requires --mocks and --out)
+    --clientSetup <path>       Output path for the write-once client setup file. Generated on first run; never overwritten unless --forceSetup is set. For the ky template, the generated api.ts imports from this file. For other templates, it is a standalone scaffold. Requires --out
+    --forceSetup               Overwrite the setup file even if it already exists (requires --clientSetup)
 -h, --help                     Show help
 ```
 
@@ -158,6 +161,7 @@ These are standalone and cover the most common client libraries:
 | `axios`  | Default. Recommended for React, Vue, and most Node.js projects |
 | `fetch`  | Native browser/Node 18+ Fetch API — zero runtime dependencies |
 | `xior`   | Lightweight Axios-compatible alternative ([xior](https://github.com/suhaotian/xior#intro)) |
+| `ky`     | Modern fetch-based HTTP client with hooks ([ky](https://github.com/sindresorhus/ky)) |
 | `ng1`    | Angular 1 client |
 | `ng2`    | Angular 2+ client (uses `HttpClient` and `InjectionToken`) |
 
@@ -170,7 +174,7 @@ These add a reactive data-fetching layer (SWR or TanStack Query hooks) on top of
 | `swr`    | [SWR](https://swr.vercel.app) hooks for queries and mutations |
 | `tsq`    | [TanStack Query](https://tanstack.com/query) hooks for queries and mutations |
 
-Compatible http client templates: `axios`, `fetch`, `xior`. Angular clients are not compatible with reactive layers.
+Compatible http client templates: `axios`, `fetch`, `xior`, `ky`. Angular clients are not compatible with reactive layers.
 
 ### Usage examples
 
@@ -409,6 +413,52 @@ biome check ./FILE_PATH.ts --apply-unsafe
 ```
 
 Either tool needs to be installed separately and configured for your project.
+
+---
+
+## Next.js App Router — Split-file Mode
+
+SWR and TanStack Query hooks can only run in React Client Components. In Next.js App Router projects you may want:
+
+- The HTTP clients and types available on **both** the server and client sides
+- The reactive hooks restricted to **Client Components only** (with `'use client';`)
+
+Use `--hooksOut` to generate two separate files:
+
+```bash
+swaggie -s ./openapi.yaml \
+  -o ./src/api/client.ts \
+  --hooksOut ./src/api/hooks.ts \
+  -t swr,axios \
+  --useClient
+```
+
+Or in a config file:
+
+```json
+{
+  "src": "./openapi.yaml",
+  "out": "./src/api/client.ts",
+  "hooksOut": "./src/api/hooks.ts",
+  "template": ["swr", "axios"],
+  "useClient": true
+}
+```
+
+This produces:
+
+- `client.ts` — HTTP client objects + TypeScript types. No `'use client'` directive. Safe to import in Server Components and API routes.
+- `hooks.ts` — Reactive hook namespaces. Has `'use client';` at the top. Imports the main file as `import * as API from './client'`.
+
+In your components:
+
+```ts
+// Server Component or API route — no 'use client' needed
+import { petClient } from './api/client';
+
+// Client Component only
+import { pet } from './api/hooks';
+```
 
 ---
 

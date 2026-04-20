@@ -54,12 +54,24 @@ export interface ClientOptions {
   enumNamesStyle?: EnumNamesStyle;
 
   /**
-   * Prepends `'use client';` as the very first line of the generated file.
+   * Prepends `'use client';` as the very first line of the generated hooks file
+   * (when `hooksOut` is set) or the main generated file (legacy single-file mode).
    * Required for Next.js App Router when using SWR or TanStack Query hooks,
    * which can only run in Client Components.
    * Has no effect and should not be used with non-RSC environments.
    */
   useClient?: boolean;
+
+  /**
+   * Output path for the generated reactive hooks file (L2 templates only).
+   * When set, the reactive hook namespaces (`pet.queries`, `pet.mutations`,
+   * `pet.queryKeys`) are written to this file instead of the main `out` file.
+   * The hooks file imports the main file as `import * as API from './api'`.
+   * When `useClient` is also set, the `'use client';` directive is prepended
+   * only to this file (the main file remains server-safe).
+   * Requires `out` to also be set.
+   */
+  hooksOut?: string;
 
   /**
    * Output path for the generated mock/stub file. Requires `testingFramework`
@@ -75,6 +87,27 @@ export interface ClientOptions {
    * Requires `mocks` and `out` to also be set.
    */
   testingFramework?: TestingFramework;
+
+  /**
+   * Output path for the write-once client setup file. When provided, Swaggie
+   * generates a setup scaffold at this path on the first run and never overwrites
+   * it on subsequent runs (use `forceSetup` to override this).
+   *
+   * For the `ky` template, the generated `api.ts` imports from this file and uses
+   * its exported `createKyConfig()` to initialise the ky instance with hooks.
+   * For other templates (`axios`, `xior`, `fetch`), the setup file is a standalone
+   * scaffold showing how to configure the exported HTTP client — `api.ts` does not
+   * import it.
+   *
+   * Requires `out` to also be set.
+   */
+  clientSetup?: string;
+
+  /**
+   * When `true`, overwrites the setup file even if it already exists.
+   * Has no effect unless `clientSetup` is also set.
+   */
+  forceSetup?: boolean;
 
   /** Offers ability to adjust the OpenAPI spec before it is processed */
   modifiers?: {
@@ -105,7 +138,7 @@ export interface FullAppOptions extends ClientOptions {
 }
 
 /** HTTP client templates (standalone, no reactive layer) */
-export type L1Template = 'axios' | 'fetch' | 'xior' | 'ng1' | 'ng2';
+export type L1Template = 'axios' | 'fetch' | 'xior' | 'ng1' | 'ng2' | 'ky';
 /** Reactive query layer templates (must be composed with an L1 template) */
 export type L2Template = 'swr' | 'tsq';
 /** Any named built-in template */
