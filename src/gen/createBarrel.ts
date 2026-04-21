@@ -16,6 +16,8 @@ export function generateBarrelFile(clients: ClientGroups, clientOptions: AppOpti
 
   const viewData = {
     servicePrefix: clientOptions.servicePrefix,
+    allowDots: clientOptions.queryParamsSerialization.allowDots,
+    arrayFormat: clientOptions.queryParamsSerialization.arrayFormat,
     clients: files
       .filter((c) => c)
       .map((c) => ({

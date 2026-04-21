@@ -18,15 +18,15 @@ $config?: KyOptions
 <% } -%>
 <% } -%>
 <% if(it.query && it.query.length > 0) { -%>
-      searchParams: {
+      searchParams: encodeParams({
 <% it.query.forEach((parameter) => { -%>
 <% if (it.queryParamObject) { -%>
-        '<%= parameter.originalName %>': <%= it.queryParamObject.name %>?.<%= parameter.name %> as any,
+        '<%= parameter.originalName %>': <%= it.queryParamObject.name %>?.<%= parameter.name %>,
 <% } else { -%>
-        '<%= parameter.originalName %>': <%= parameter.name %> as any,
+        '<%= parameter.originalName %>': <%= parameter.name %>,
 <% } -%>
 <% }); -%>
-      },
+      }),
 <% } -%>
 <% if(it.headers && it.headers.length > 0) { -%>
       headers: {

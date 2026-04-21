@@ -7,7 +7,7 @@ import { test, describe, expect } from 'bun:test';
  * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
  * Kudos to @suhaotian for the original implementation
  */
-function encodeParams<T = any>(
+function _encodeParams<T = any>(
   params: T,
   parentKey: string | null = null,
   options?: {
@@ -46,7 +46,7 @@ function encodeParams<T = any>(
         }
         if (typeof value === 'object') {
           // If the value is an object or array, recursively encode its contents
-          const result = encodeParams(value, encodedKey, options);
+          const result = _encodeParams(value, encodedKey, options);
           if (result !== '') encodedParams.push(result);
         } else {
           // Otherwise, encode the key-value pair
@@ -57,6 +57,19 @@ function encodeParams<T = any>(
   }
 
   return encodedParams.join('&');
+}
+
+/** Serializes a params object into a query string. Options override the generated defaults (allowDots, arrayFormat). */
+function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  return _encodeParams(params, parentKey, options);
 }
 
 const date = new Date('2020-04-16T00:00:00.000Z');

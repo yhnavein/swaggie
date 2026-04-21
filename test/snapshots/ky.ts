@@ -61,18 +61,18 @@ export const petClient = {
     const url = `pet/find`;
 
     return http.get(url, {
-      searchParams: {
-        'status': queryParams?.status as any,
-        'name': queryParams?.name as any,
-        'type': queryParams?.type as any,
-        'owner': queryParams?.owner as any,
-        'sortBy': queryParams?.sortBy as any,
-        'order': queryParams?.order as any,
-        'page': queryParams?.page as any,
-        'limit': queryParams?.limit as any,
-        'city': queryParams?.city as any,
-        'registrationDate': queryParams?.registrationDate as any,
-      },
+      searchParams: encodeParams({
+        'status': queryParams?.status,
+        'name': queryParams?.name,
+        'type': queryParams?.type,
+        'owner': queryParams?.owner,
+        'sortBy': queryParams?.sortBy,
+        'order': queryParams?.order,
+        'page': queryParams?.page,
+        'limit': queryParams?.limit,
+        'city': queryParams?.city,
+        'registrationDate': queryParams?.registrationDate,
+      }),
       ...$config,
     }).json<Pet[]>();
   },
@@ -89,9 +89,9 @@ export const petClient = {
     const url = `pet/findByTags`;
 
     return http.get(url, {
-      searchParams: {
-        'tags': tags as any,
-      },
+      searchParams: encodeParams({
+        'tags': tags,
+      }),
       ...$config,
     }).json<Pet[]>();
   },
@@ -141,10 +141,10 @@ export const petClient = {
     const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.post(url, {
-      searchParams: {
-        'name': queryParams?.name as any,
-        'status': queryParams?.status as any,
-      },
+      searchParams: encodeParams({
+        'name': queryParams?.name,
+        'status': queryParams?.status,
+      }),
       ...$config,
     }).json<unknown>();
   },
@@ -164,9 +164,9 @@ export const petClient = {
 
     return http.post(url, {
       body: body,
-      searchParams: {
-        'additionalMetadata': additionalMetadata as any,
-      },
+      searchParams: encodeParams({
+        'additionalMetadata': additionalMetadata,
+      }),
       ...$config,
     }).blob() as Promise<File>;
   },
@@ -304,10 +304,10 @@ export const userClient = {
     const url = `user/login`;
 
     return http.get(url, {
-      searchParams: {
-        'username': queryParams?.username as any,
-        'password': queryParams?.password as any,
-      },
+      searchParams: encodeParams({
+        'username': queryParams?.username,
+        'password': queryParams?.password,
+      }),
       ...$config,
     }).json<string>();
   },
@@ -347,7 +347,7 @@ export const userClient = {
  * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
  * Kudos to @suhaotian for the original implementation
  */
-export function encodeParams<T = any>(
+function _encodeParams<T = any>(
   params: T,
   parentKey: string | null = null,
   options?: {
@@ -386,7 +386,7 @@ export function encodeParams<T = any>(
         }
         if (typeof value === 'object') {
           // If the value is an object or array, recursively encode its contents
-          const result = encodeParams(value, encodedKey, options);
+          const result = _encodeParams(value, encodedKey, options);
           if (result !== '') encodedParams.push(result);
         } else {
           // Otherwise, encode the key-value pair
@@ -397,6 +397,23 @@ export function encodeParams<T = any>(
   }
 
   return encodedParams.join('&');
+}
+
+/** Serializes a params object into a query string. Options override the generated defaults (allowDots, arrayFormat). */
+export function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  return _encodeParams(params, parentKey, {
+    allowDots: true,
+    arrayFormat: 'repeat',
+    ...options,
+  });
 }
 export interface Order {
   /** @format int64 */
