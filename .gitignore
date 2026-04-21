@@ -68,3 +68,4 @@ test/api*.json
 # Vitepress
 docs/.vitepress/dist
 docs/.vitepress/cache
+docs/public/schema.json

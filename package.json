@@ -41,7 +41,7 @@
     "bundle-templates": "bun scripts/bundle-templates.ts",
     "rm-tests": "find dist/ \\( -name '*.spec.js' -o -name 'types.js' \\) -type f -delete",
     "types": "tsc --project tsconfig.types.json && cp test/index.d.ts ./dist/",
-    "docs:build": "vitepress build docs",
+    "docs:build": "cp schema.json docs/public/schema.json && vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:preview": "vitepress preview docs"
   },

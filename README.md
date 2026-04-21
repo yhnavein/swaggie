@@ -124,7 +124,7 @@ swaggie -c swaggie.config.json
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
+  "$schema": "https://yhnavein.github.io/swaggie/schema.json",
   "src": "https://petstore3.swagger.io/api/v3/openapi.json",
   "out": "./src/client/petstore.ts",
   "template": "axios",

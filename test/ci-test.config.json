@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
+  "$schema": "https://yhnavein.github.io/swaggie/schema.json",
   "out": "./.tmp/ci-test/petstore.ts",
   "src": "./test/petstore-v3.json",
   "template": "axios",

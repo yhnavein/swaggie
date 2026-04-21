@@ -8,7 +8,7 @@ Create a JSON file (conventionally named `swaggie.config.json`) at the root of y
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/yhnavein/swaggie/master/schema.json",
+  "$schema": "https://yhnavein.github.io/swaggie/schema.json",
   "src": "https://petstore3.swagger.io/api/v3/openapi.json",
   "out": "./src/api/petstore.ts",
   "template": "axios",
