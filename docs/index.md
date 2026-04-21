@@ -25,7 +25,7 @@ features:
 
   - icon: 🔌
     title: Multiple HTTP Clients
-    details: Ships with templates for fetch, axios, xior, SWR + axios, TanStack Query + xior, Angular 1, and Angular 2+. Switch without rewriting your app logic.
+    details: Ships with templates for fetch, axios, xior, ky, Angular 1, and Angular 2+. Switch without rewriting your app logic. Need reactivity? Layer SWR or TanStack Query on top of any compatible client.
 
   - icon: ⚡
     title: Zero Runtime Overhead
@@ -39,9 +39,9 @@ features:
     title: Tree-shakeable Output
     details: Each API group is exported as its own named object, so your bundler can dead-code-eliminate anything you don't use.
 
-  - icon: ✏️
-    title: Custom Templates
-    details: Don't see your HTTP client? Bring your own EJS template directory and Swaggie will use it instead. Full access to parsed operation and schema data.
+  - icon: 🧪
+    title: Automatic Mock Generation
+    details: Generate typed mock/stub files alongside your client for Vitest or Jest. Every method and hook gets a typed spy, with ergonomic helpers like mockSWR() and mockQuery() — drop them straight into your tests.
 ---
 
 <script setup>

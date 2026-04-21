@@ -257,6 +257,39 @@ Requires `out` to also be set.
 
 ---
 
+### `clientSetup`
+
+**Type:** `string` &nbsp; **Default:** not set
+
+Output path for a write-once client setup file. On the first run Swaggie generates this file; on subsequent runs it is **never overwritten** (use `forceSetup` to override that behaviour).
+
+The role of the file depends on the template:
+
+- **`ky`** — The generated `api.ts` imports from this file and uses its exported `createKyConfig()` to initialise the ky instance with interceptors and hooks. You are expected to customise this file once.
+- **Other templates (`axios`, `xior`, `fetch`, …)** — The file is a standalone scaffold showing how to configure the exported HTTP client. The generated `api.ts` does **not** import it; it is purely a starting point for your own setup code.
+
+```json
+{ "clientSetup": "./src/api/api.setup.ts" }
+```
+
+Requires `out` to also be set.
+
+---
+
+### `forceSetup`
+
+**Type:** `boolean` &nbsp; **Default:** `false`
+
+When `true`, overwrites the client setup file even if it already exists. Useful when you want to regenerate the scaffold after a template change or major upgrade.
+
+```json
+{ "forceSetup": true }
+```
+
+Has no effect unless `clientSetup` is also set.
+
+---
+
 ### `servicePrefix`
 
 **Type:** `string` &nbsp; **Default:** `""`
