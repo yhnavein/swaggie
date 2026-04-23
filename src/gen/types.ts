@@ -4,7 +4,16 @@ import type { MyContentType } from '../utils/utils';
 
 export interface ClientData {
   clientName: string;
+  /** Used for HTTP client exports (e.g. `defaultClient`). May be a JS reserved word. */
   camelCaseName: string;
+  /**
+   * Used for reactive hooks namespace exports (e.g. `export const main = {}`).
+   * Differs from `camelCaseName` when the latter is a JS reserved word — for
+   * example when no tags are present in the spec, `camelCaseName` is `'default'`
+   * (valid in `defaultClient`) but `hooksCamelCaseName` is `'main'` so that the
+   * hooks `export const` is syntactically valid.
+   */
+  hooksCamelCaseName: string;
   operations: IOperation[];
   baseUrl?: string;
 }

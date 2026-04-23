@@ -26,7 +26,7 @@ var httpClientName = it.httpClientName || it.clientName;
     ) {
       return useSWRMutation<<%~ it.returnType %>, Error, string, <%~ variablesType %>>(
         '<%= swrKey %>',
-        (_key: string, { arg }<%= hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) =>
+        (_key: string, { arg }<%~ hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) =>
           <%= httpClientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig)<%~ it.responseMapper %>,
         $config
       );

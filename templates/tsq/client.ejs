@@ -11,14 +11,15 @@ var getOperations = it.operations.filter((o) => o.method === 'GET');
 var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
 %>
 
-export const <%= it.camelCaseName %> = {
+export const <%= it.hooksCamelCaseName %> = {
   queries: {
 <% getOperations.forEach((operation) => {
   var opName = it.toOpName(operation.name);
   var queryOperation = Object.assign({
     rqOpName: 'use' + opName,
-    opKey: it.camelCaseName + opName,
-    clientName: it.camelCaseName,
+    opKey: it.hooksCamelCaseName + opName,
+    clientName: it.hooksCamelCaseName,
+    httpClientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
   }, it.safeOperation(operation, it.camelCaseName));
@@ -33,7 +34,8 @@ export const <%= it.camelCaseName %> = {
   var opName = operation.name.charAt(0).toUpperCase() + operation.name.slice(1);
   var mutationOperation = Object.assign({
     mutOpName: 'use' + opName,
-    clientName: it.camelCaseName,
+    clientName: it.hooksCamelCaseName,
+    httpClientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
   }, it.safeOperation(operation, it.camelCaseName));
@@ -49,7 +51,7 @@ export const <%= it.camelCaseName %> = {
   var keyName = opName.charAt(0).toLowerCase() + opName.slice(1);
   var safeOp = it.safeOperation(operation, it.camelCaseName);
 %>
-    <%= keyName %>: (<% safeOp.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => ['<%= it.camelCaseName %>', '<%= it.camelCaseName + opName %>'<% safeOp.parameters.forEach((parameter) => { %>, <%= parameter.name %><% }); %>] as const,
+    <%= keyName %>: (<% safeOp.parameters.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => ['<%= it.hooksCamelCaseName %>', '<%= it.hooksCamelCaseName + opName %>'<% safeOp.parameters.forEach((parameter) => { %>, <%= parameter.name %><% }); %>] as const,
 <% }); %>
   },
 };

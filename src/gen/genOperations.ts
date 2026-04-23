@@ -216,9 +216,17 @@ function prepareClient(
     return null;
   }
 
+  const camelCaseName = camel(name);
+  // `default` is a JS reserved word — it is valid in `defaultClient` (HTTP
+  // client export) but not as a standalone `export const default = {}` used by
+  // the reactive hooks templates. When the camel-cased name would be `default`,
+  // we use `main` for the hooks namespace instead.
+  const hooksCamelCaseName = camelCaseName === 'default' ? 'main' : camelCaseName;
+
   return {
     clientName: name,
-    camelCaseName: camel(name),
+    camelCaseName,
+    hooksCamelCaseName,
     operations: preparedOperations,
     baseUrl: options.baseUrl,
   };

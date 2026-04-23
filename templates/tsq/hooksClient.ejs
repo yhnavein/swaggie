@@ -4,15 +4,15 @@ var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
 var httpClientPrefix = 'API.' + it.camelCaseName;
 %>
 
-export const <%= it.camelCaseName %> = {
+export const <%= it.hooksCamelCaseName %> = {
   queries: {
 <% getOperations.forEach((operation) => {
   var opName = it.toOpName(operation.name);
   var safe = it.safeOperation(operation, it.camelCaseName);
   var queryOperation = Object.assign({}, safe, {
     rqOpName: 'use' + opName,
-    opKey: it.camelCaseName + opName,
-    clientName: it.camelCaseName,
+    opKey: it.hooksCamelCaseName + opName,
+    clientName: it.hooksCamelCaseName,
     httpClientName: httpClientPrefix,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
@@ -33,7 +33,7 @@ export const <%= it.camelCaseName %> = {
   var safe = it.safeOperation(operation, it.camelCaseName);
   var mutationOperation = Object.assign({}, safe, {
     mutOpName: 'use' + opName,
-    clientName: it.camelCaseName,
+    clientName: it.hooksCamelCaseName,
     httpClientName: httpClientPrefix,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
@@ -57,7 +57,7 @@ export const <%= it.camelCaseName %> = {
     return Object.assign({}, p, { type: it.prefixApiType(p.type) });
   });
 %>
-    <%= keyName %>: (<% prefixedParams.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => ['<%= it.camelCaseName %>', '<%= it.camelCaseName + opName %>'<% safeOp.parameters.forEach((parameter) => { %>, <%= parameter.name %><% }); %>] as const,
+    <%= keyName %>: (<% prefixedParams.forEach((parameter) => { %><%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>, <% }); %>) => ['<%= it.hooksCamelCaseName %>', '<%= it.hooksCamelCaseName + opName %>'<% safeOp.parameters.forEach((parameter) => { %>, <%= parameter.name %><% }); %>] as const,
 <% }); %>
   },
 };

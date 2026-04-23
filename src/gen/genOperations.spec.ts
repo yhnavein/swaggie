@@ -1,9 +1,10 @@
-import { test, describe, expect } from 'bun:test';
+import { test, describe, expect, beforeAll } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
-import {
+import generateOperations, {
   prepareOperations,
   fixDuplicateOperations,
+  generateHooks,
   getOperationName,
   getParamName,
   getParams,
@@ -11,8 +12,10 @@ import {
   toOpName,
 } from './genOperations';
 import type { ApiOperation } from '../types';
-import { getClientOptions } from '../../test/test.utils';
+import { getClientOptions, getDocument } from '../../test/test.utils';
 import { IBodyParam, PositionedParameter } from './types';
+import { loadAllTemplateFiles } from '../utils';
+import { normalizeTemplate } from '../utils/templateValidator';
 
 describe('prepareOperations', () => {
   const opts = getClientOptions();
@@ -1470,3 +1473,140 @@ interface ExtendedApiOperation extends Omit<ApiOperation, 'parameters' | 'reques
     | OA3.ReferenceObject
     | (OA3.RequestBodyObject & { [key: `x-${string}`]: number | string });
 }
+
+// ─── hooksCamelCaseName: reserved-word guard for hooks exports ────────────────
+
+/**
+ * A minimal spec where no operation has tags. The group name falls back to
+ * 'default', which is a JS reserved word and must not appear as
+ * `export const default = {}` in reactive hooks output.
+ */
+const NO_TAGS_SPEC = getDocument({
+  paths: {
+    '/health': {
+      get: {
+        operationId: 'getHealth',
+        responses: {
+          '200': { description: 'ok' },
+        },
+      },
+      post: {
+        operationId: 'createHealth',
+        responses: {
+          '201': { description: 'created' },
+        },
+      },
+    },
+  },
+});
+
+// ─── SWR mutation HTML-escaping regression ───────────────────────────────────
+
+/**
+ * A spec with a POST mutation that has a query parameter whose type is a
+ * string-literal enum (e.g. `"search"`). The generated SWR mutation must emit
+ * the raw `"search"` in the `{ arg }` destructuring annotation, not the
+ * HTML-escaped `&quot;search&quot;`.
+ */
+const STRING_LITERAL_PARAM_SPEC = getDocument({
+  paths: {
+    '/deployments/{name}/operations': {
+      post: {
+        operationId: 'operateDeployment',
+        tags: ['deployments'],
+        parameters: [
+          {
+            name: 'type',
+            in: 'query',
+            required: true,
+            schema: { type: 'string', enum: ['search', 'compute'] },
+          },
+          {
+            name: 'name',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { type: 'object' } },
+          },
+        },
+        responses: {
+          '200': { description: 'ok' },
+        },
+      },
+    },
+  },
+});
+
+describe('SWR mutation — no HTML escaping in arg destructuring type', () => {
+  beforeAll(() => {
+    loadAllTemplateFiles(normalizeTemplate(['swr', 'xior'] as any));
+  });
+
+  test('single-file swr: string-literal param types are not HTML-escaped in arg type annotation', async () => {
+    const opts = getClientOptions({ template: normalizeTemplate(['swr', 'xior'] as any) as any });
+    const output = await generateOperations(STRING_LITERAL_PARAM_SPEC, opts);
+
+    // The raw double-quote must appear in the generated code
+    expect(output).toContain('"search"');
+    expect(output).toContain('"compute"');
+    // The HTML-escaped form must never appear
+    expect(output).not.toContain('&quot;');
+  });
+
+  test('split-file swr: string-literal param types are not HTML-escaped in arg type annotation', async () => {
+    const opts = getClientOptions({
+      template: normalizeTemplate(['swr', 'xior'] as any) as any,
+      hooksOut: './.tmp/test/hooks-html-escape-test.ts',
+    });
+    const hooksOutput = await generateHooks(STRING_LITERAL_PARAM_SPEC, opts, './api');
+
+    expect(hooksOutput).toContain('"search"');
+    expect(hooksOutput).toContain('"compute"');
+    expect(hooksOutput).not.toContain('&quot;');
+  });
+});
+
+describe('hooksCamelCaseName — reserved-word guard', () => {
+  beforeAll(() => {
+    loadAllTemplateFiles(normalizeTemplate(['tsq', 'xior'] as any));
+  });
+
+  test('single-file tsq: emits `export const main` and references `main.queryKeys` inside hook body', async () => {
+    const opts = getClientOptions({ template: normalizeTemplate(['tsq', 'xior'] as any) as any });
+    const output = await generateOperations(NO_TAGS_SPEC, opts);
+
+    // The HTTP client export must still use 'default' (i.e. defaultClient)
+    expect(output).toContain('export const defaultClient');
+    // The hooks namespace must NOT use the reserved word 'default'
+    expect(output).not.toContain('export const default ');
+    // It must use 'main' for the namespace export
+    expect(output).toContain('export const main =');
+    // The queryKeys reference inside the hook body must also use 'main', not 'default'
+    expect(output).toContain('main.queryKeys.');
+    expect(output).not.toContain('default.queryKeys.');
+    // The HTTP client call inside the hook body must still call 'defaultClient'
+    expect(output).toContain('defaultClient.');
+  });
+
+  test('split-file tsq: hooks file emits `export const main` and references `main.queryKeys` inside hook body', async () => {
+    const opts = getClientOptions({
+      template: normalizeTemplate(['tsq', 'xior'] as any) as any,
+      hooksOut: './.tmp/test/hooks-default-test.ts',
+    });
+    const hooksOutput = await generateHooks(NO_TAGS_SPEC, opts, './api');
+
+    expect(hooksOutput).not.toContain('export const default ');
+    expect(hooksOutput).toContain('export const main =');
+    // queryKeys reference inside the hook body must also use 'main'
+    expect(hooksOutput).toContain('main.queryKeys.');
+    expect(hooksOutput).not.toContain('default.queryKeys.');
+    // The HTTP client is accessed via the API namespace import, not 'mainClient'
+    expect(hooksOutput).toContain('API.defaultClient.');
+    expect(hooksOutput).not.toContain('API.mainClient.');
+  });
+});

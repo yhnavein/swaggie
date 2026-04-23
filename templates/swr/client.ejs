@@ -11,13 +11,14 @@ var getOperations = it.operations.filter((o) => o.method === 'GET');
 var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
 %>
 
-export const <%= it.camelCaseName %> = {
+export const <%= it.hooksCamelCaseName %> = {
   queries: {
 <% getOperations.forEach((operation) => {
   var opName = it.toOpName(operation.name);
   var swrOperation = Object.assign({
     swrOpName: 'use' + opName,
-    clientName: it.camelCaseName,
+    clientName: it.hooksCamelCaseName,
+    httpClientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
   }, it.safeOperation(operation, it.camelCaseName));
@@ -32,7 +33,8 @@ export const <%= it.camelCaseName %> = {
   var opName = operation.name.charAt(0).toUpperCase() + operation.name.slice(1);
   var swrMutationOperation = Object.assign({
     mutOpName: 'use' + opName,
-    clientName: it.camelCaseName,
+    clientName: it.hooksCamelCaseName,
+    httpClientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
   }, it.safeOperation(operation, it.camelCaseName));

@@ -4,14 +4,14 @@ var mutationOperations = it.operations.filter((o) => o.method !== 'GET');
 var httpClientPrefix = 'API.' + it.camelCaseName;
 %>
 
-export const <%= it.camelCaseName %> = {
+export const <%= it.hooksCamelCaseName %> = {
   queries: {
 <% getOperations.forEach((operation) => {
   var opName = it.toOpName(operation.name);
   var safe = it.safeOperation(operation, it.camelCaseName);
   var swrOperation = Object.assign({}, safe, {
     swrOpName: 'use' + opName,
-    clientName: it.camelCaseName,
+    clientName: it.hooksCamelCaseName,
     httpClientName: httpClientPrefix,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
@@ -32,7 +32,7 @@ export const <%= it.camelCaseName %> = {
   var safe = it.safeOperation(operation, it.camelCaseName);
   var swrMutationOperation = Object.assign({}, safe, {
     mutOpName: 'use' + opName,
-    clientName: it.camelCaseName,
+    clientName: it.hooksCamelCaseName,
     httpClientName: httpClientPrefix,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
