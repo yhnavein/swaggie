@@ -1442,6 +1442,27 @@ describe('prefixApiType', () => {
     expect(prefixApiType('URLSearchParams')).toBe('URLSearchParams');
     expect(prefixApiType('ArrayBuffer')).toBe('ArrayBuffer');
   });
+
+  test('does not prefix double-quoted string literal enum values', () => {
+    expect(prefixApiType('"AZURE" | "AWS" | "GCP"')).toBe('"AZURE" | "AWS" | "GCP"');
+  });
+
+  test('does not prefix single-quoted string literal enum values', () => {
+    expect(prefixApiType("'search' | 'compute'")).toBe("'search' | 'compute'");
+  });
+
+  test('does not prefix quoted enum values inside an inline object type', () => {
+    const input = '{ provider?: "AZURE" | "AWS" | "GCP" | null; region?: string | null; }';
+    expect(prefixApiType(input)).toBe(input);
+  });
+
+  test('prefixes named types but leaves quoted string literals untouched in a mixed union', () => {
+    expect(prefixApiType('"available" | Pet')).toBe('"available" | API.Pet');
+  });
+
+  test('prefixes named types but leaves quoted string literals untouched inside a generic', () => {
+    expect(prefixApiType('Record<"asc" | "desc", Pet>')).toBe('Record<"asc" | "desc", API.Pet>');
+  });
 });
 
 describe('toOpName', () => {

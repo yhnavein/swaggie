@@ -623,23 +623,36 @@ const PRIMITIVES =
  * and inline object types (including PascalCase names used as property value types
  * inside `{ key: SomeType }` shapes).
  *
- * @example prefixApiType('Pet')                          → 'API.Pet'
- * @example prefixApiType('Pet[]')                        → 'API.Pet[]'
- * @example prefixApiType('Pet | null')                   → 'API.Pet | null'
- * @example prefixApiType('unknown')                      → 'unknown'
- * @example prefixApiType('{ id: number }')               → '{ id: number }'
- * @example prefixApiType('{ profile: MyEnum; }')         → '{ profile: API.MyEnum; }'
- * @example prefixApiType('API.Pet')                      → 'API.Pet' (API itself is in the exclude list)
+ * Quoted string literals (single or double) are left entirely untouched so that
+ * enum-derived types like `"AZURE" | "AWS"` are never incorrectly rewritten to
+ * `"API.AZURE" | "API.AWS"`.
+ *
+ * @example prefixApiType('Pet')                             → 'API.Pet'
+ * @example prefixApiType('Pet[]')                           → 'API.Pet[]'
+ * @example prefixApiType('Pet | null')                      → 'API.Pet | null'
+ * @example prefixApiType('unknown')                         → 'unknown'
+ * @example prefixApiType('{ id: number }')                  → '{ id: number }'
+ * @example prefixApiType('{ profile: MyEnum; }')            → '{ profile: API.MyEnum; }'
+ * @example prefixApiType('API.Pet')                         → 'API.Pet'
+ * @example prefixApiType('"AZURE" | "AWS"')                 → '"AZURE" | "AWS"'
+ * @example prefixApiType('"available" | Pet')               → '"available" | API.Pet'
  */
 export function prefixApiType(typeStr: string): string {
   if (!typeStr) {
     return typeStr;
   }
-  // The negative lookbehind `(?<!\.)` skips identifiers that are already part
-  // of a namespace reference (e.g. `API.Pet` — when the regex reaches `Pet` it
-  // is preceded by `.`, so we leave it alone).
-  return typeStr.replace(/(?<!\.)\b([A-Z][A-Za-z0-9_]*)\b/g, (match) =>
-    PRIMITIVES.test(match) ? match : `API.${match}`
+  // The alternation has two branches:
+  //   Group 1: a full quoted string literal ("..." or '...') — returned as-is so
+  //            that enum-derived values like "AZURE" are never prefixed.
+  //   Group 2: an uppercase-starting identifier that is NOT already preceded by a
+  //            dot (negative lookbehind) — prefixed with API. unless it is a known
+  //            primitive / built-in.
+  return typeStr.replace(
+    /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(?<!\.)\b([A-Z][A-Za-z0-9_]*)\b/g,
+    (match, quotedLiteral: string | undefined, ident: string | undefined) => {
+      if (quotedLiteral !== undefined) return quotedLiteral;
+      return PRIMITIVES.test(ident!) ? ident! : `API.${ident}`;
+    },
   );
 }
 
