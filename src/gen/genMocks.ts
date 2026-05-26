@@ -67,8 +67,13 @@ export default function generateMocks(
     .map((name) => {
       const fullName = servicePrefix + name;
       const camelName = camel(fullName);
+      // `default` is a JS reserved word and cannot be used as a standalone
+      // `export const` identifier. The hooks templates rename it to `main`
+      // (see genOperations.ts — hooksCamelCaseName). Mock code that references
+      // the hooks namespace must use the same safe name.
+      const hooksCamelName = camelName === 'default' ? 'main' : camelName;
       const ops = prepareOperations(groups[name], options, spec.components);
-      return { name, camelName, ops };
+      return { name, camelName, hooksCamelName, ops };
     })
     .filter((g) => g.ops.length > 0);
 
@@ -392,23 +397,23 @@ function buildCreateClientMocks(
 }
 
 function buildCreateSwrHookMocks(
-  groups: { camelName: string; ops: IOperation[] }[],
+  groups: { camelName: string; hooksCamelName: string; ops: IOperation[] }[],
   fw: TestingFramework,
   hooksAlias: string
 ): string {
   const spy = spyFn(fw);
   const lines: string[] = ['export function createApiHookMocks() {', '  return {'];
 
-  for (const { camelName, ops } of groups) {
+  for (const { hooksCamelName, ops } of groups) {
     const getOps = ops.filter((o) => o.method === 'GET');
     const mutOps = ops.filter((o) => o.method !== 'GET');
 
-    lines.push(`    ${camelName}: {`);
+    lines.push(`    ${hooksCamelName}: {`);
     lines.push('      queries: {');
     for (const op of getOps) {
       const hookName = toHookName(op.name, 'use');
       lines.push(
-        `        ${hookName}: withMockSWR(${spy}(${hooksAlias}.${camelName}.queries, '${hookName}').mockReturnValue(defaultSWRReturn)),`
+        `        ${hookName}: withMockSWR(${spy}(${hooksAlias}.${hooksCamelName}.queries, '${hookName}').mockReturnValue(defaultSWRReturn)),`
       );
     }
     lines.push('      },');
@@ -416,7 +421,7 @@ function buildCreateSwrHookMocks(
     for (const op of mutOps) {
       const hookName = 'use' + pascal(op.name);
       lines.push(
-        `        ${hookName}: withMockSWRMutation(${spy}(${hooksAlias}.${camelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn as any)),`
+        `        ${hookName}: withMockSWRMutation(${spy}(${hooksAlias}.${hooksCamelName}.mutations, '${hookName}').mockReturnValue(defaultSWRMutationReturn as any)),`
       );
     }
     lines.push('      },');
@@ -429,23 +434,23 @@ function buildCreateSwrHookMocks(
 }
 
 function buildCreateTsqHookMocks(
-  groups: { camelName: string; ops: IOperation[] }[],
+  groups: { camelName: string; hooksCamelName: string; ops: IOperation[] }[],
   fw: TestingFramework,
   hooksAlias: string
 ): string {
   const spy = spyFn(fw);
   const lines: string[] = ['export function createApiHookMocks() {', '  return {'];
 
-  for (const { camelName, ops } of groups) {
+  for (const { hooksCamelName, ops } of groups) {
     const getOps = ops.filter((o) => o.method === 'GET');
     const mutOps = ops.filter((o) => o.method !== 'GET');
 
-    lines.push(`    ${camelName}: {`);
+    lines.push(`    ${hooksCamelName}: {`);
     lines.push('      queries: {');
     for (const op of getOps) {
       const hookName = toHookName(op.name, 'use');
       lines.push(
-        `        ${hookName}: withMockQuery(${spy}(${hooksAlias}.${camelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn as any)),`
+        `        ${hookName}: withMockQuery(${spy}(${hooksAlias}.${hooksCamelName}.queries, '${hookName}').mockReturnValue(defaultQueryReturn as any)),`
       );
     }
     lines.push('      },');
@@ -453,7 +458,7 @@ function buildCreateTsqHookMocks(
     for (const op of mutOps) {
       const hookName = 'use' + pascal(op.name);
       lines.push(
-        `        ${hookName}: withMockMutation(${spy}(${hooksAlias}.${camelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn as any)),`
+        `        ${hookName}: withMockMutation(${spy}(${hooksAlias}.${hooksCamelName}.mutations, '${hookName}').mockReturnValue(defaultMutationReturn as any)),`
       );
     }
     lines.push('      },');

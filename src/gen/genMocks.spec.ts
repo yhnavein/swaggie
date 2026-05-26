@@ -338,6 +338,110 @@ describe('ng2 template — jest', () => {
   });
 });
 
+// ─── no-tags spec: default → main rename ─────────────────────────────────────
+
+// A spec with no tags on any operation — all operations fall into the
+// 'default' group which is a JS reserved word. Hook mock references must use
+// 'main' (the safe name used by the hooks templates), while HTTP client
+// references must still use 'defaultClient'.
+const NO_TAGS_SPEC = getDocument({
+  paths: {
+    '/health': {
+      get: {
+        operationId: 'getHealth',
+        responses: {
+          '200': { description: 'ok' },
+        },
+      },
+      post: {
+        operationId: 'createHealth',
+        responses: {
+          '201': { description: 'created' },
+        },
+      },
+    },
+  },
+});
+
+describe('no-tags spec — swr hook mocks use "main" not "default"', () => {
+  let output: string;
+
+  beforeAll(() => {
+    loadAllTemplateFiles(normalizeTemplate(['swr', 'axios'] as any));
+    output = generateMocks(NO_TAGS_SPEC, opts(['swr', 'axios'], 'vitest'), './api');
+  });
+
+  test('hook object key is "main", not "default"', () => {
+    expect(output).toContain('main: {');
+    expect(output).not.toContain('default: {');
+  });
+
+  test('spyOn targets realApi.main.queries, not realApi.default.queries', () => {
+    expect(output).toContain('realApi.main.queries');
+    expect(output).not.toContain('realApi.default.queries');
+  });
+
+  test('spyOn targets realApi.main.mutations, not realApi.default.mutations', () => {
+    expect(output).toContain('realApi.main.mutations');
+    expect(output).not.toContain('realApi.default.mutations');
+  });
+
+  test('HTTP client spy still uses defaultClient', () => {
+    expect(output).toContain('realApi.defaultClient');
+  });
+});
+
+describe('no-tags spec — tsq hook mocks use "main" not "default"', () => {
+  let output: string;
+
+  beforeAll(() => {
+    loadAllTemplateFiles(normalizeTemplate(['tsq', 'xior'] as any));
+    output = generateMocks(NO_TAGS_SPEC, opts(['tsq', 'xior'], 'vitest'), './api');
+  });
+
+  test('hook object key is "main", not "default"', () => {
+    expect(output).toContain('main: {');
+    expect(output).not.toContain('default: {');
+  });
+
+  test('spyOn targets realApi.main.queries, not realApi.default.queries', () => {
+    expect(output).toContain('realApi.main.queries');
+    expect(output).not.toContain('realApi.default.queries');
+  });
+
+  test('spyOn targets realApi.main.mutations, not realApi.default.mutations', () => {
+    expect(output).toContain('realApi.main.mutations');
+    expect(output).not.toContain('realApi.default.mutations');
+  });
+
+  test('HTTP client spy still uses defaultClient', () => {
+    expect(output).toContain('realApi.defaultClient');
+  });
+});
+
+describe('no-tags spec — swr hook mocks with separate hooksOut use "main"', () => {
+  let output: string;
+
+  beforeAll(() => {
+    loadAllTemplateFiles(normalizeTemplate(['swr', 'axios'] as any));
+    output = generateMocks(NO_TAGS_SPEC, opts(['swr', 'axios'], 'vitest'), './api', './hooks');
+  });
+
+  test('spyOn targets realHooks.main.queries, not realHooks.default.queries', () => {
+    expect(output).toContain('realHooks.main.queries');
+    expect(output).not.toContain('realHooks.default.queries');
+  });
+
+  test('spyOn targets realHooks.main.mutations, not realHooks.default.mutations', () => {
+    expect(output).toContain('realHooks.main.mutations');
+    expect(output).not.toContain('realHooks.default.mutations');
+  });
+
+  test('HTTP client spy still targets realApi.defaultClient', () => {
+    expect(output).toContain('realApi.defaultClient');
+  });
+});
+
 // ─── relativeApiImport is forwarded correctly ─────────────────────────────────
 
 describe('relativeApiImport propagation', () => {
