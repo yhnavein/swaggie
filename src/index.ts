@@ -129,8 +129,8 @@ function verifyEntryOptions(opts: AppOptions) {
 }
 
 /**
- * Throws if any file-path CLI flags are combined with an array config file.
- * Each entry in the array must define its own output paths.
+ * Throws if any file-path CLI flags are combined with a multi-config file.
+ * Each entry in "configs" must define its own output paths.
  */
 function verifyOptionsForArrayConfig(options: Partial<FullAppOptions>) {
   const blocked: Array<[keyof FullAppOptions, string]> = [
@@ -142,7 +142,7 @@ function verifyOptionsForArrayConfig(options: Partial<FullAppOptions>) {
   for (const [key, flag] of blocked) {
     if (options[key]) {
       throw new Error(
-        `${flag} cannot be used with an array config file. Set "${key}" in each config entry instead.`
+        `${flag} cannot be used with a multi-config file. Set "${key}" in each entry under "configs" instead.`
       );
     }
   }
@@ -177,22 +177,23 @@ export async function applyConfigFile(
     );
   }
 
-  if (!parsedConfig) {
+  if (!parsedConfig || typeof parsedConfig !== 'object') {
     return Promise.reject(
       new Error('Could not correctly load config file. It does not exist or you cannot access it')
     );
   }
 
-  if (Array.isArray(parsedConfig)) {
-    if (parsedConfig.length < 1) {
+  if ('configs' in (parsedConfig as object)) {
+    const entries = (parsedConfig as { configs: unknown }).configs;
+    if (!Array.isArray(entries) || entries.length < 1) {
       return Promise.reject(
         new Error(
-          `Config file "${configUrl}" contains an empty array. Provide at least one config entry.`
+          `Config file "${configUrl}" has a "configs" key but it is not a non-empty array. Provide at least one config entry.`
         )
       );
     }
     verifyOptionsForArrayConfig(options);
-    return parsedConfig.map((entry) => prepareAppOptions({ ...entry, ...options }));
+    return entries.map((entry) => prepareAppOptions({ ...entry, ...options }));
   }
 
   return prepareAppOptions({ ...parsedConfig, ...options } as CliOptions);

@@ -215,14 +215,16 @@ describe('runCodeGenerator', () => {
     expect(opts1.out).toBe('./.tmp/multi-out-2.ts');
   });
 
-  test('fails fast when second entry in array config is invalid', async () => {
+  test('fails fast when second entry in multi-config is invalid', async () => {
     const tmpPath = './.tmp/test/bad-second-entry.json';
     await Bun.write(
       tmpPath,
-      JSON.stringify([
-        { src: './test/petstore-v3.yml', out: './.tmp/test/bad-batch-1.ts' },
-        { src: './test/nonexistent-spec.yml', out: './.tmp/test/bad-batch-2.ts' },
-      ])
+      JSON.stringify({
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/bad-batch-1.ts' },
+          { src: './test/nonexistent-spec.yml', out: './.tmp/test/bad-batch-2.ts' },
+        ],
+      })
     );
 
     try {
@@ -233,12 +235,12 @@ describe('runCodeGenerator', () => {
     }
   });
 
-  test('fails when array config is combined with --out', async () => {
+  test('fails when multi-config file is combined with --out', async () => {
     try {
       await runCodeGenerator({ config: './test/multi-config.json', out: './.tmp/override.ts' });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('--out cannot be used with an array config file');
+      expect((e as Error).message).toContain('--out cannot be used with a multi-config file');
     }
   });
 });
@@ -302,15 +304,14 @@ describe('applyConfigFile', () => {
     });
   });
 
-  test('fails with a clear error when config file contains an empty array', async () => {
-    // Write a temp config file containing an empty JSON array
-    const tmpPath = './.tmp/test/empty-array-config.json';
-    await Bun.write(tmpPath, '[]');
+  test('fails with a clear error when config file has an empty configs array', async () => {
+    const tmpPath = './.tmp/test/empty-configs-config.json';
+    await Bun.write(tmpPath, '{"configs":[]}');
     try {
       await applyConfigFile({ config: tmpPath });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('empty array');
+      expect((e as Error).message).toContain('"configs"');
     }
   });
 
@@ -338,16 +339,16 @@ describe('applyConfigFile', () => {
     expect(arr[1].template).toBe('fetch');
   });
 
-  test('should throw when --out is combined with an array config', async () => {
+  test('should throw when --out is combined with a multi-config file', async () => {
     try {
       await applyConfigFile({ config: './test/multi-config.json', out: './.tmp/override.ts' });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('--out cannot be used with an array config file');
+      expect((e as Error).message).toContain('--out cannot be used with a multi-config file');
     }
   });
 
-  test('should throw when --hooksOut is combined with an array config', async () => {
+  test('should throw when --hooksOut is combined with a multi-config file', async () => {
     try {
       await applyConfigFile({
         config: './test/multi-config.json',
@@ -355,11 +356,11 @@ describe('applyConfigFile', () => {
       });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('--hooksOut cannot be used with an array config file');
+      expect((e as Error).message).toContain('--hooksOut cannot be used with a multi-config file');
     }
   });
 
-  test('should throw when --mocks is combined with an array config', async () => {
+  test('should throw when --mocks is combined with a multi-config file', async () => {
     try {
       await applyConfigFile({
         config: './test/multi-config.json',
@@ -367,11 +368,11 @@ describe('applyConfigFile', () => {
       });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('--mocks cannot be used with an array config file');
+      expect((e as Error).message).toContain('--mocks cannot be used with a multi-config file');
     }
   });
 
-  test('should throw when --clientSetup is combined with an array config', async () => {
+  test('should throw when --clientSetup is combined with a multi-config file', async () => {
     try {
       await applyConfigFile({
         config: './test/multi-config.json',
@@ -380,7 +381,7 @@ describe('applyConfigFile', () => {
       throw new Error('Expected error to be thrown');
     } catch (e) {
       expect((e as Error).message).toContain(
-        '--clientSetup cannot be used with an array config file'
+        '--clientSetup cannot be used with a multi-config file'
       );
     }
   });

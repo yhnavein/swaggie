@@ -43,6 +43,20 @@
         }
       }
     },
+    "MultiConfig": {
+      "additionalProperties": false,
+      "description": "Multi-config format. Allows generating multiple API clients in a single Swaggie run.",
+      "type": "object",
+      "required": ["configs"],
+      "properties": {
+        "configs": {
+          "description": "List of individual Swaggie configs to run sequentially.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/Globals" },
+          "minItems": 1
+        }
+      }
+    },
     "Globals": {
       "additionalProperties": true,
       "description": "Main settings of the application",
@@ -183,10 +197,7 @@
       "$ref": "#/definitions/Globals"
     },
     {
-      "type": "array",
-      "description": "Array of Swaggie configs. Allows generating multiple API clients in a single run.",
-      "items": { "$ref": "#/definitions/Globals" },
-      "minItems": 1
+      "$ref": "#/definitions/MultiConfig"
     }
   ]
 }
