@@ -178,9 +178,15 @@
       "type": "object"
     }
   },
-  "allOf": [
+  "oneOf": [
     {
       "$ref": "#/definitions/Globals"
+    },
+    {
+      "type": "array",
+      "description": "Array of Swaggie configs. Allows generating multiple API clients in a single run.",
+      "items": { "$ref": "#/definitions/Globals" },
+      "minItems": 1
     }
   ]
 }

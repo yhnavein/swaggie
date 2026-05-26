@@ -5,8 +5,8 @@ import { Command, Option } from 'commander';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { type CodeGenResult, runCodeGenerator } from './index';
-import type { CliOptions, FullAppOptions } from './types';
+import { runCodeGenerator } from './index';
+import type { BatchCodeGenResult, CliOptions, CodeGenResult, FullAppOptions } from './types';
 
 const arrayFormatOption = new Option(
   '--arrayFormat <format>',
@@ -131,12 +131,18 @@ const options = program.opts<CliOptions>();
 
 runCodeGenerator(options as Partial<FullAppOptions>).then(complete, error);
 
-function complete([code, opts]: CodeGenResult) {
-  if (opts.out) {
-    const from = typeof opts.src === 'string' ? `from ${bold(opts.src)} ` : '';
-    console.info(cyan(`Api ${from}code generated into ${bold(opts.out)}`));
-  } else {
-    console.log(code);
+function complete(result: CodeGenResult | BatchCodeGenResult) {
+  const results: CodeGenResult[] = Array.isArray(result[0])
+    ? (result as BatchCodeGenResult)
+    : [result as CodeGenResult];
+
+  for (const [code, opts] of results) {
+    if (opts.out) {
+      const from = typeof opts.src === 'string' ? `from ${bold(opts.src)} ` : '';
+      console.info(cyan(`Api ${from}code generated into ${bold(opts.out)}`));
+    } else {
+      console.log(code);
+    }
   }
 
   process.exit(0);

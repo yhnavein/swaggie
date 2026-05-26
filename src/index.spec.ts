@@ -198,6 +198,49 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
     }).not.toThrow('Could not correctly load config file');
   });
+
+  test('works with an array config and returns BatchCodeGenResult', async () => {
+    const result = await runCodeGenerator({ config: './test/multi-config.json' });
+
+    expect(Array.isArray(result)).toBe(true);
+    const results = result as import('./types').BatchCodeGenResult;
+    expect(results).toHaveLength(2);
+    const [code0, opts0] = results[0];
+    const [code1, opts1] = results[1];
+    expect(typeof code0).toBe('string');
+    expect(typeof code1).toBe('string');
+    expect(code0.length).toBeGreaterThan(0);
+    expect(code1.length).toBeGreaterThan(0);
+    expect(opts0.out).toBe('./.tmp/multi-out-1.ts');
+    expect(opts1.out).toBe('./.tmp/multi-out-2.ts');
+  });
+
+  test('fails fast when second entry in array config is invalid', async () => {
+    const tmpPath = './.tmp/test/bad-second-entry.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify([
+        { src: './test/petstore-v3.yml', out: './.tmp/test/bad-batch-1.ts' },
+        { src: './test/nonexistent-spec.yml', out: './.tmp/test/bad-batch-2.ts' },
+      ])
+    );
+
+    try {
+      await runCodeGenerator({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+    }
+  });
+
+  test('fails when array config is combined with --out', async () => {
+    try {
+      await runCodeGenerator({ config: './test/multi-config.json', out: './.tmp/override.ts' });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--out cannot be used with an array config file');
+    }
+  });
 });
 
 describe('applyConfigFile', () => {
@@ -267,7 +310,78 @@ describe('applyConfigFile', () => {
       await applyConfigFile({ config: tmpPath });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('empty array');
+    }
+  });
+
+  test('should return an array of AppOptions for an array config', async () => {
+    const result = await applyConfigFile({ config: './test/multi-config.json' });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr).toHaveLength(2);
+    expect(arr[0].src).toBe('./test/petstore-v3.yml');
+    expect(arr[0].out).toBe('./.tmp/multi-out-1.ts');
+    expect(arr[1].src).toBe('./test/petstore-v3.json');
+    expect(arr[1].out).toBe('./.tmp/multi-out-2.ts');
+  });
+
+  test('should apply CLI flag overrides to every entry in array config', async () => {
+    const result = await applyConfigFile({
+      config: './test/multi-config.json',
+      template: 'fetch',
+    });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('fetch');
+    expect(arr[1].template).toBe('fetch');
+  });
+
+  test('should throw when --out is combined with an array config', async () => {
+    try {
+      await applyConfigFile({ config: './test/multi-config.json', out: './.tmp/override.ts' });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--out cannot be used with an array config file');
+    }
+  });
+
+  test('should throw when --hooksOut is combined with an array config', async () => {
+    try {
+      await applyConfigFile({
+        config: './test/multi-config.json',
+        hooksOut: './.tmp/hooks.ts',
+      });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--hooksOut cannot be used with an array config file');
+    }
+  });
+
+  test('should throw when --mocks is combined with an array config', async () => {
+    try {
+      await applyConfigFile({
+        config: './test/multi-config.json',
+        mocks: './.tmp/mocks.ts',
+      });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--mocks cannot be used with an array config file');
+    }
+  });
+
+  test('should throw when --clientSetup is combined with an array config', async () => {
+    try {
+      await applyConfigFile({
+        config: './test/multi-config.json',
+        clientSetup: './.tmp/setup.ts',
+      });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain(
+        '--clientSetup cannot be used with an array config file'
+      );
     }
   });
 });

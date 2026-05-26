@@ -1,0 +1,10 @@
+[
+  {
+    "src": "./test/petstore-v3.yml",
+    "out": "./.tmp/multi-out-1.ts"
+  },
+  {
+    "src": "./test/petstore-v3.json",
+    "out": "./.tmp/multi-out-2.ts"
+  }
+]
