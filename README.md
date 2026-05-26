@@ -543,4 +543,5 @@ function error(e) {
 <a href="https://www.britishcouncil.org"><img alt="British Council" src="./docs/public/used-in/bc-logo.png" /></a>
 <a href="https://kpmg.com/"><img alt="KPMG" src="./docs/public/used-in/kpmg-logo.png" /></a>
 <a href="https://klarna.com/"><img alt="Klarna" src="./docs/public/used-in/klarna-logo.png" /></a>
+<a href="https://cribl.io/"><img alt="Cribl" src="./docs/public/used-in/cribl-logo.png" /></a>
 </div>
