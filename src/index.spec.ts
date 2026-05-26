@@ -385,6 +385,149 @@ describe('applyConfigFile', () => {
       );
     }
   });
+
+  test('top-level template default applies to all entries', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-template.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        template: 'fetch',
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-2.ts' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('fetch');
+    expect(arr[1].template).toBe('fetch');
+  });
+
+  test('top-level useClient default applies to all entries', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-useclient.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        useClient: true,
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-uc-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-uc-2.ts' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].useClient).toBe(true);
+    expect(arr[1].useClient).toBe(true);
+  });
+
+  test('per-entry value overrides top-level default', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-override.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        template: 'fetch',
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-ov-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-ov-2.ts', template: 'axios' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('fetch');
+    expect(arr[1].template).toBe('axios');
+  });
+
+  test('CLI flag overrides both top-level default and per-entry value', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-cli-wins.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        template: 'fetch',
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-cli-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-cli-2.ts', template: 'xior' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath, template: 'ky' });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('ky');
+    expect(arr[1].template).toBe('ky');
+  });
+
+  test('top-level src throws a descriptive error', async () => {
+    const tmpPath = './.tmp/test/top-level-src.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        src: './test/petstore-v3.yml',
+        configs: [{ src: './test/petstore-v3.yml', out: './.tmp/test/tls-1.ts' }],
+      })
+    );
+
+    try {
+      await applyConfigFile({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('"src"');
+      expect((e as Error).message).toContain('top-level default');
+    }
+  });
+
+  test('top-level out throws a descriptive error', async () => {
+    const tmpPath = './.tmp/test/top-level-out.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        out: './.tmp/test/shared-out.ts',
+        configs: [{ src: './test/petstore-v3.yml', out: './.tmp/test/tlo-1.ts' }],
+      })
+    );
+
+    try {
+      await applyConfigFile({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('"out"');
+      expect((e as Error).message).toContain('top-level default');
+    }
+  });
+
+  test('top-level hooksOut, mocks, and clientSetup each throw a descriptive error', async () => {
+    for (const key of ['hooksOut', 'mocks', 'clientSetup']) {
+      const tmpPath = `./.tmp/test/top-level-${key}.json`;
+      await Bun.write(
+        tmpPath,
+        JSON.stringify({
+          [key]: './.tmp/test/blocked.ts',
+          configs: [{ src: './test/petstore-v3.yml', out: './.tmp/test/blocked-entry.ts' }],
+        })
+      );
+
+      try {
+        await applyConfigFile({ config: tmpPath });
+        throw new Error(`Expected error to be thrown for key "${key}"`);
+      } catch (e) {
+        expect((e as Error).message).toContain(`"${key}"`);
+        expect((e as Error).message).toContain('top-level default');
+      }
+    }
+  });
 });
 
 describe('prepareAppOptions', () => {

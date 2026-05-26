@@ -129,6 +129,22 @@ function verifyEntryOptions(opts: AppOptions) {
 }
 
 /**
+ * Throws if any per-entry-only keys are present as top-level defaults in a
+ * multi-config file. These keys must live inside each entry under "configs".
+ */
+function verifyTopLevelDefaults(configUrl: string, defaults: Record<string, unknown>) {
+  const blocked = ['src', 'out', 'hooksOut', 'mocks', 'clientSetup'];
+  for (const key of blocked) {
+    if (key in defaults) {
+      throw new Error(
+        `"${key}" cannot be a top-level default in multi-config file "${configUrl}". ` +
+          `Set it inside each entry under "configs" instead.`
+      );
+    }
+  }
+}
+
+/**
  * Throws if any file-path CLI flags are combined with a multi-config file.
  * Each entry in "configs" must define its own output paths.
  */
@@ -184,7 +200,10 @@ export async function applyConfigFile(
   }
 
   if ('configs' in (parsedConfig as object)) {
-    const entries = (parsedConfig as { configs: unknown }).configs;
+    const { configs: entries, ...topLevelDefaults } = parsedConfig as {
+      configs: unknown;
+      [k: string]: unknown;
+    };
     if (!Array.isArray(entries) || entries.length < 1) {
       return Promise.reject(
         new Error(
@@ -192,8 +211,11 @@ export async function applyConfigFile(
         )
       );
     }
+    verifyTopLevelDefaults(configUrl, topLevelDefaults);
     verifyOptionsForArrayConfig(options);
-    return entries.map((entry) => prepareAppOptions({ ...entry, ...options }));
+    return entries.map((entry) =>
+      prepareAppOptions({ ...topLevelDefaults, ...entry, ...options })
+    );
   }
 
   return prepareAppOptions({ ...parsedConfig, ...options } as CliOptions);
