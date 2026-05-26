@@ -20,10 +20,7 @@
         },
         "queryParamsAsObject": {
           "description": "Group all query parameters into a single object argument. Pass `true` to always group, or a positive integer N to group only when there are more than N query parameters.",
-          "oneOf": [
-            { "type": "boolean" },
-            { "type": "integer", "minimum": 0 }
-          ],
+          "oneOf": [{ "type": "boolean" }, { "type": "integer", "minimum": 0 }],
           "default": false
         }
       }
@@ -43,18 +40,11 @@
         }
       }
     },
-    "Globals": {
+    "GlobalsDefaults": {
       "additionalProperties": true,
-      "description": "Main settings of the application",
+      "description": "Shared settings that can be used as top-level defaults in a multi-config file or directly in a single-config file. The keys 'src', 'out', 'hooksOut', 'mocks', and 'clientSetup' are not part of this definition — they belong either in a single-config root (via Globals) or inside each entry under 'configs'.",
+      "type": "object",
       "properties": {
-        "out": {
-          "description": "The path to the file where the API would be generated. Use stdout if left empty.",
-          "type": "string"
-        },
-        "src": {
-          "description": "The url or path to the Open API spec file. Both JSON and YAML are supported",
-          "type": "string"
-        },
         "template": {
           "default": "axios",
           "description": "Template that will be used for generating the API client. Use a single L1 template name (e.g. \"axios\"), a single L2 name (defaults to \"fetch\" as L1), or a [L2, L1] array for custom pairings.",
@@ -106,11 +96,6 @@
           "description": "Prepend 'use client'; as the very first line of the generated hooks file (when hooksOut is set) or the main file (legacy single-file mode). Required for Next.js App Router when using SWR or TanStack Query hooks, which can only run in Client Components. Has no effect and should not be used outside of RSC environments.",
           "type": "boolean"
         },
-        "hooksOut": {
-          "description": "Output path for the generated reactive hooks file. Only applicable when using an L2 template (swr, tsq). When set, the reactive hook namespaces are written to this file and the main `out` file contains only the HTTP clients and TypeScript types. The hooks file imports the main file as `import * as API from './api'`. Use together with `useClient` for Next.js App Router. Requires `out` to also be set.",
-          "type": "string",
-          "examples": ["./src/generated/hooks.ts", "./src/api/hooks.ts"]
-        },
         "dateFormat": {
           "default": "Date",
           "description": "It determines how Date fields will be handled and what type they will have in models",
@@ -147,11 +132,6 @@
           "description": "Controls how enum member names are formatted when generating TypeScript enum declarations. Only applies when enumDeclarationStyle is set to 'enum'.",
           "enum": ["original", "PascalCase"]
         },
-        "mocks": {
-          "description": "Output path for the generated mock/stub file. Requires `testingFramework` and `out` to also be set. When provided, a companion mock file is generated alongside the main client, exporting typed spy stubs for every operation and hook.",
-          "type": "string",
-          "examples": ["./src/__mocks__/api.ts", "./src/api/api.mock.ts"]
-        },
         "testingFramework": {
           "description": "The test framework to use for generated mock stubs. `vitest` uses `vi.fn()`, `jest` uses `jest.fn()`. Requires `mocks` and `out` to also be set.",
           "type": "string",
@@ -159,11 +139,6 @@
         },
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
-        },
-        "clientSetup": {
-          "description": "Output path for the write-once client setup file. Generated on the first run; never overwritten on subsequent runs unless `forceSetup` is set. For the `ky` template, the generated `api.ts` imports from this file and uses its exported `createKyConfig()` to initialise the ky instance with hooks. For other templates (`axios`, `xior`, `fetch`), it is a standalone scaffold showing how to configure the exported HTTP client — `api.ts` does not import it. Requires `out` to also be set.",
-          "type": "string",
-          "examples": ["./src/api.setup.ts", "./src/client/api.setup.ts"]
         },
         "forceSetup": {
           "description": "When `true`, overwrites the client setup file even if it already exists. Has no effect unless `clientSetup` is also set.",
@@ -173,14 +148,62 @@
         "modifiers": {
           "$ref": "#/definitions/GlobalModifiers"
         }
-      },
+      }
+    },
+    "Globals": {
+      "additionalProperties": true,
+      "description": "Main settings of the application",
+      "type": "object",
       "required": ["out", "src"],
-      "type": "object"
+      "allOf": [{ "$ref": "#/definitions/GlobalsDefaults" }],
+      "properties": {
+        "src": {
+          "description": "The url or path to the Open API spec file. Both JSON and YAML are supported",
+          "type": "string"
+        },
+        "out": {
+          "description": "The path to the file where the API would be generated. Use stdout if left empty.",
+          "type": "string"
+        },
+        "hooksOut": {
+          "description": "Output path for the generated reactive hooks file. Only applicable when using an L2 template (swr, tsq). When set, the reactive hook namespaces are written to this file and the main `out` file contains only the HTTP clients and TypeScript types. The hooks file imports the main file as `import * as API from './api'`. Use together with `useClient` for Next.js App Router. Requires `out` to also be set.",
+          "type": "string",
+          "examples": ["./src/generated/hooks.ts", "./src/api/hooks.ts"]
+        },
+        "mocks": {
+          "description": "Output path for the generated mock/stub file. Requires `testingFramework` and `out` to also be set. When provided, a companion mock file is generated alongside the main client, exporting typed spy stubs for every operation and hook.",
+          "type": "string",
+          "examples": ["./src/__mocks__/api.ts", "./src/api/api.mock.ts"]
+        },
+        "clientSetup": {
+          "description": "Output path for the write-once client setup file. Generated on the first run; never overwritten on subsequent runs unless `forceSetup` is set. For the `ky` template, the generated `api.ts` imports from this file and uses its exported `createKyConfig()` to initialise the ky instance with hooks. For other templates (`axios`, `xior`, `fetch`), it is a standalone scaffold showing how to configure the exported HTTP client — `api.ts` does not import it. Requires `out` to also be set.",
+          "type": "string",
+          "examples": ["./src/api.setup.ts", "./src/client/api.setup.ts"]
+        }
+      }
+    },
+    "MultiConfig": {
+      "additionalProperties": true,
+      "description": "Multi-config format. Allows generating multiple API clients in a single Swaggie run. Top-level properties (except 'configs') act as shared defaults for all entries and can be overridden per entry.",
+      "type": "object",
+      "required": ["configs"],
+      "allOf": [{ "$ref": "#/definitions/GlobalsDefaults" }],
+      "properties": {
+        "configs": {
+          "description": "List of individual Swaggie configs to run sequentially.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/Globals" },
+          "minItems": 1
+        }
+      }
     }
   },
-  "allOf": [
+  "oneOf": [
     {
       "$ref": "#/definitions/Globals"
+    },
+    {
+      "$ref": "#/definitions/MultiConfig"
     }
   ]
 }

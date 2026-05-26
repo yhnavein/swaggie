@@ -186,6 +186,13 @@ export interface AppOptions extends ClientOptions {
   testingFramework?: TestingFramework;
 }
 
+export type CodeGenResult = [string, AppOptions];
+
+/**
+ * Result of a batch run — one entry per config in the array.
+ */
+export type BatchCodeGenResult = CodeGenResult[];
+
 /**
  * Local type that represent Operation as understood by Swaggie
  **/

@@ -198,6 +198,51 @@ describe('runCodeGenerator', () => {
       await runCodeGenerator(parameters);
     }).not.toThrow('Could not correctly load config file');
   });
+
+  test('works with an array config and returns BatchCodeGenResult', async () => {
+    const result = await runCodeGenerator({ config: './test/multi-config.json' });
+
+    expect(Array.isArray(result)).toBe(true);
+    const results = result as import('./types').BatchCodeGenResult;
+    expect(results).toHaveLength(2);
+    const [code0, opts0] = results[0];
+    const [code1, opts1] = results[1];
+    expect(typeof code0).toBe('string');
+    expect(typeof code1).toBe('string');
+    expect(code0.length).toBeGreaterThan(0);
+    expect(code1.length).toBeGreaterThan(0);
+    expect(opts0.out).toBe('./.tmp/multi-out-1.ts');
+    expect(opts1.out).toBe('./.tmp/multi-out-2.ts');
+  });
+
+  test('fails fast when second entry in multi-config is invalid', async () => {
+    const tmpPath = './.tmp/test/bad-second-entry.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/bad-batch-1.ts' },
+          { src: './test/nonexistent-spec.yml', out: './.tmp/test/bad-batch-2.ts' },
+        ],
+      })
+    );
+
+    try {
+      await runCodeGenerator({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+    }
+  });
+
+  test('fails when multi-config file is combined with --out', async () => {
+    try {
+      await runCodeGenerator({ config: './test/multi-config.json', out: './.tmp/override.ts' });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--out cannot be used with a multi-config file');
+    }
+  });
 });
 
 describe('applyConfigFile', () => {
@@ -259,15 +304,228 @@ describe('applyConfigFile', () => {
     });
   });
 
-  test('fails with a clear error when config file contains an empty array', async () => {
-    // Write a temp config file containing an empty JSON array
-    const tmpPath = './.tmp/test/empty-array-config.json';
-    await Bun.write(tmpPath, '[]');
+  test('fails with a clear error when config file has an empty configs array', async () => {
+    const tmpPath = './.tmp/test/empty-configs-config.json';
+    await Bun.write(tmpPath, '{"configs":[]}');
     try {
       await applyConfigFile({ config: tmpPath });
       throw new Error('Expected error to be thrown');
     } catch (e) {
-      expect((e as Error).message).toContain('Could not correctly load config file');
+      expect((e as Error).message).toContain('"configs"');
+    }
+  });
+
+  test('should return an array of AppOptions for an array config', async () => {
+    const result = await applyConfigFile({ config: './test/multi-config.json' });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr).toHaveLength(2);
+    expect(arr[0].src).toBe('./test/petstore-v3.yml');
+    expect(arr[0].out).toBe('./.tmp/multi-out-1.ts');
+    expect(arr[1].src).toBe('./test/petstore-v3.json');
+    expect(arr[1].out).toBe('./.tmp/multi-out-2.ts');
+  });
+
+  test('should apply CLI flag overrides to every entry in array config', async () => {
+    const result = await applyConfigFile({
+      config: './test/multi-config.json',
+      template: 'fetch',
+    });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('fetch');
+    expect(arr[1].template).toBe('fetch');
+  });
+
+  test('should throw when --out is combined with a multi-config file', async () => {
+    try {
+      await applyConfigFile({ config: './test/multi-config.json', out: './.tmp/override.ts' });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--out cannot be used with a multi-config file');
+    }
+  });
+
+  test('should throw when --hooksOut is combined with a multi-config file', async () => {
+    try {
+      await applyConfigFile({
+        config: './test/multi-config.json',
+        hooksOut: './.tmp/hooks.ts',
+      });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--hooksOut cannot be used with a multi-config file');
+    }
+  });
+
+  test('should throw when --mocks is combined with a multi-config file', async () => {
+    try {
+      await applyConfigFile({
+        config: './test/multi-config.json',
+        mocks: './.tmp/mocks.ts',
+      });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('--mocks cannot be used with a multi-config file');
+    }
+  });
+
+  test('should throw when --clientSetup is combined with a multi-config file', async () => {
+    try {
+      await applyConfigFile({
+        config: './test/multi-config.json',
+        clientSetup: './.tmp/setup.ts',
+      });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain(
+        '--clientSetup cannot be used with a multi-config file'
+      );
+    }
+  });
+
+  test('top-level template default applies to all entries', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-template.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        template: 'fetch',
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-2.ts' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('fetch');
+    expect(arr[1].template).toBe('fetch');
+  });
+
+  test('top-level useClient default applies to all entries', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-useclient.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        useClient: true,
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-uc-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-uc-2.ts' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].useClient).toBe(true);
+    expect(arr[1].useClient).toBe(true);
+  });
+
+  test('per-entry value overrides top-level default', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-override.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        template: 'fetch',
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-ov-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-ov-2.ts', template: 'axios' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('fetch');
+    expect(arr[1].template).toBe('axios');
+  });
+
+  test('CLI flag overrides both top-level default and per-entry value', async () => {
+    const tmpPath = './.tmp/test/top-level-defaults-cli-wins.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        template: 'fetch',
+        configs: [
+          { src: './test/petstore-v3.yml', out: './.tmp/test/tld-cli-1.ts' },
+          { src: './test/petstore-v3.json', out: './.tmp/test/tld-cli-2.ts', template: 'xior' },
+        ],
+      })
+    );
+
+    const result = await applyConfigFile({ config: tmpPath, template: 'ky' });
+
+    expect(Array.isArray(result)).toBe(true);
+    const arr = result as import('./types').AppOptions[];
+    expect(arr[0].template).toBe('ky');
+    expect(arr[1].template).toBe('ky');
+  });
+
+  test('top-level src throws a descriptive error', async () => {
+    const tmpPath = './.tmp/test/top-level-src.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        src: './test/petstore-v3.yml',
+        configs: [{ src: './test/petstore-v3.yml', out: './.tmp/test/tls-1.ts' }],
+      })
+    );
+
+    try {
+      await applyConfigFile({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('"src"');
+      expect((e as Error).message).toContain('top-level default');
+    }
+  });
+
+  test('top-level out throws a descriptive error', async () => {
+    const tmpPath = './.tmp/test/top-level-out.json';
+    await Bun.write(
+      tmpPath,
+      JSON.stringify({
+        out: './.tmp/test/shared-out.ts',
+        configs: [{ src: './test/petstore-v3.yml', out: './.tmp/test/tlo-1.ts' }],
+      })
+    );
+
+    try {
+      await applyConfigFile({ config: tmpPath });
+      throw new Error('Expected error to be thrown');
+    } catch (e) {
+      expect((e as Error).message).toContain('"out"');
+      expect((e as Error).message).toContain('top-level default');
+    }
+  });
+
+  test('top-level hooksOut, mocks, and clientSetup each throw a descriptive error', async () => {
+    for (const key of ['hooksOut', 'mocks', 'clientSetup']) {
+      const tmpPath = `./.tmp/test/top-level-${key}.json`;
+      await Bun.write(
+        tmpPath,
+        JSON.stringify({
+          [key]: './.tmp/test/blocked.ts',
+          configs: [{ src: './test/petstore-v3.yml', out: './.tmp/test/blocked-entry.ts' }],
+        })
+      );
+
+      try {
+        await applyConfigFile({ config: tmpPath });
+        throw new Error(`Expected error to be thrown for key "${key}"`);
+      } catch (e) {
+        expect((e as Error).message).toContain(`"${key}"`);
+        expect((e as Error).message).toContain('top-level default');
+      }
     }
   });
 });
