@@ -9,11 +9,11 @@
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? <%= it.clientName %>.queryKeys.<%= it.swrOpName.charAt(3).toLowerCase() + it.swrOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>);
 
-      const { data, error, isLoading, mutate } = useSWR<<%~ it.returnType %>>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<<%~ it.returnType %>>(
         cacheUrl,
         () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig)<%~ it.responseMapper %>,
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },

@@ -217,13 +217,13 @@ export const pet = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
 
-      const { data, error, isLoading, mutate } = useSWR<Pet[]>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet[]>(
         cacheUrl,
         () => petClient.findPets(queryParams, $httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
    /**
@@ -239,13 +239,13 @@ export const pet = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
 
-      const { data, error, isLoading, mutate } = useSWR<Pet[]>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet[]>(
         cacheUrl,
         () => petClient.findPetsByTags(tags, $httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
    /**
@@ -260,13 +260,13 @@ export const pet = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.petById(petId, );
 
-      const { data, error, isLoading, mutate } = useSWR<Pet>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet>(
         cacheUrl,
         () => petClient.getPetById(petId, $httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
   },
@@ -442,13 +442,13 @@ export const store = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.inventory();
 
-      const { data, error, isLoading, mutate } = useSWR<Record<string, number>>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<Record<string, number>>(
         cacheUrl,
         () => storeClient.getInventory($httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
    /**
@@ -463,13 +463,13 @@ export const store = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
 
-      const { data, error, isLoading, mutate } = useSWR<Order>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<Order>(
         cacheUrl,
         () => storeClient.getOrderById(orderId, $httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
   },
@@ -651,13 +651,13 @@ export const user = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.userByName(username, );
 
-      const { data, error, isLoading, mutate } = useSWR<User>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<User>(
         cacheUrl,
         () => userClient.getUserByName(username, $httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
    /**
@@ -671,13 +671,13 @@ export const user = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
 
-      const { data, error, isLoading, mutate } = useSWR<string>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<string>(
         cacheUrl,
         () => userClient.loginUser(queryParams, $httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
   /** Logs out current logged in user session */
@@ -687,13 +687,13 @@ export const user = {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.logoutUser();
 
-      const { data, error, isLoading, mutate } = useSWR<unknown>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<unknown>(
         cacheUrl,
         () => userClient.logoutUser($httpConfig).then((resp) => resp.data),
         config
       );
 
-      return { data, isLoading, error, mutate };
+      return { data, isLoading, isValidating, error, mutate };
     },
 
   },
