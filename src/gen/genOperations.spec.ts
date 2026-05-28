@@ -8,6 +8,7 @@ import generateOperations, {
   getOperationName,
   getParamName,
   getParams,
+  matchesPattern,
   prefixApiType,
   toOpName,
 } from './genOperations';
@@ -1012,6 +1013,238 @@ describe('prepareOperations', () => {
       expect(operations[0].name).toBe('getPetById');
     });
   });
+
+  describe('exclude', () => {
+    const baseOps: ApiOperation[] = [
+      {
+        operationId: 'getPets',
+        method: 'get',
+        path: '/pets',
+        tags: ['pets'],
+        parameters: [],
+        responses: {},
+        group: 'pets',
+      },
+      {
+        operationId: 'adminGetUsers',
+        method: 'get',
+        path: '/admin/users',
+        tags: ['admin'],
+        parameters: [],
+        responses: {},
+        group: 'admin',
+      },
+      {
+        operationId: 'adminDeleteUser',
+        method: 'delete',
+        path: '/admin/users/{id}',
+        tags: ['admin'],
+        parameters: [],
+        responses: {},
+        group: 'admin',
+      },
+      {
+        operationId: 'internalSync',
+        method: 'post',
+        path: '/internal/sync',
+        tags: ['internal'],
+        parameters: [],
+        responses: {},
+        group: 'internal',
+      },
+    ];
+
+    test('should have no effect when exclude is not set', () => {
+      const operations = prepareOperations(baseOps, getClientOptions());
+      // fixDuplicateOperations sorts by operationId alphabetically
+      expect(operations.map((o) => o.name)).toEqual([
+        'adminDeleteUser',
+        'adminGetUsers',
+        'getPets',
+        'internalSync',
+      ]);
+    });
+
+    test('should have no effect when exclude is an empty object', () => {
+      const operations = prepareOperations(baseOps, getClientOptions({ exclude: {} }));
+      expect(operations.map((o) => o.name)).toEqual([
+        'adminDeleteUser',
+        'adminGetUsers',
+        'getPets',
+        'internalSync',
+      ]);
+    });
+
+    describe('exclude.tags', () => {
+      test('should exclude operations whose first tag exactly matches', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { tags: ['admin'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getPets', 'internalSync']);
+      });
+
+      test('should exclude operations matching a wildcard tag pattern with *', () => {
+        const ops: ApiOperation[] = [
+          ...baseOps,
+          {
+            operationId: 'adminV2List',
+            method: 'get',
+            path: '/admin/v2/list',
+            tags: ['adminV2'],
+            parameters: [],
+            responses: {},
+            group: 'adminV2',
+          },
+        ];
+        const operations = prepareOperations(ops, getClientOptions({ exclude: { tags: ['admin*'] } }));
+        expect(operations.map((o) => o.name)).toEqual(['getPets', 'internalSync']);
+      });
+
+      test('should exclude operations matching a wildcard tag pattern with ?', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { tags: ['?dmin'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getPets', 'internalSync']);
+      });
+
+      test('should not exclude operations whose tag does not match the pattern', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { tags: ['unknown*'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual([
+          'adminDeleteUser',
+          'adminGetUsers',
+          'getPets',
+          'internalSync',
+        ]);
+      });
+
+      test('should exclude an operation when a non-first tag matches the pattern', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createUser',
+            method: 'post',
+            path: '/users',
+            // 'users' is the grouping tag; 'skip' is a marker tag
+            tags: ['users', 'skip'],
+            parameters: [],
+            responses: {},
+            group: 'users',
+          },
+          {
+            operationId: 'getUsers',
+            method: 'get',
+            path: '/users',
+            tags: ['users'],
+            parameters: [],
+            responses: {},
+            group: 'users',
+          },
+        ];
+
+        const operations = prepareOperations(
+          ops,
+          getClientOptions({ exclude: { tags: ['skip'] } })
+        );
+
+        expect(operations.map((o) => o.name)).toEqual(['getUsers']);
+      });
+
+      test('should not exclude operations that have no tags', () => {
+        const noTagOps: ApiOperation[] = [
+          {
+            operationId: 'getHealth',
+            method: 'get',
+            path: '/health',
+            parameters: [],
+            responses: {},
+            group: null,
+          },
+        ];
+        const operations = prepareOperations(
+          noTagOps,
+          getClientOptions({ exclude: { tags: ['admin'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getHealth']);
+      });
+
+      test('should support multiple tag patterns', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { tags: ['admin', 'internal'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getPets']);
+      });
+    });
+
+    describe('exclude.operationIds', () => {
+      test('should exclude an operation by exact operationId', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { operationIds: ['internalSync'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual([
+          'adminDeleteUser',
+          'adminGetUsers',
+          'getPets',
+        ]);
+      });
+
+      test('should exclude operations matching a wildcard operationId pattern with *', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { operationIds: ['admin*'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getPets', 'internalSync']);
+      });
+
+      test('should exclude operations matching a wildcard pattern with ? for single char', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { operationIds: ['?etPets'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual([
+          'adminDeleteUser',
+          'adminGetUsers',
+          'internalSync',
+        ]);
+      });
+
+      test('should not exclude operations whose operationId does not match', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { operationIds: ['unknown*'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual([
+          'adminDeleteUser',
+          'adminGetUsers',
+          'getPets',
+          'internalSync',
+        ]);
+      });
+
+      test('should support multiple operationId patterns', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { operationIds: ['admin*', 'internalSync'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getPets']);
+      });
+    });
+
+    describe('exclude.tags + exclude.operationIds combined', () => {
+      test('should apply union of both exclusion sets', () => {
+        const operations = prepareOperations(
+          baseOps,
+          getClientOptions({ exclude: { tags: ['admin'], operationIds: ['internalSync'] } })
+        );
+        expect(operations.map((o) => o.name)).toEqual(['getPets']);
+      });
+    });
+  });
 });
 
 describe('fixDuplicateOperations', () => {
@@ -1479,6 +1712,72 @@ describe('toOpName', () => {
   test('capitalises the first letter for non-get operations', () => {
     expect(toOpName('createPet')).toBe('CreatePet');
     expect(toOpName('deletePet')).toBe('DeletePet');
+  });
+});
+
+describe('matchesPattern', () => {
+  describe('exact match (no wildcards)', () => {
+    test('matches identical string', () => {
+      expect(matchesPattern('getPetById', 'getPetById')).toBe(true);
+    });
+
+    test('does not match different string', () => {
+      expect(matchesPattern('getPetById', 'createPet')).toBe(false);
+    });
+
+    test('is case-sensitive', () => {
+      expect(matchesPattern('getPetById', 'getpetbyid')).toBe(false);
+    });
+  });
+
+  describe('* wildcard', () => {
+    test('matches any suffix', () => {
+      expect(matchesPattern('adminGetUsers', 'admin*')).toBe(true);
+      expect(matchesPattern('adminDeletePet', 'admin*')).toBe(true);
+    });
+
+    test('does not match when prefix differs', () => {
+      expect(matchesPattern('getPets', 'admin*')).toBe(false);
+    });
+
+    test('matches any prefix with trailing *', () => {
+      expect(matchesPattern('getAdminUsers', '*Admin*')).toBe(true);
+    });
+
+    test('* alone matches any string', () => {
+      expect(matchesPattern('anything', '*')).toBe(true);
+      expect(matchesPattern('', '*')).toBe(true);
+    });
+
+    test('matches infix position', () => {
+      expect(matchesPattern('getAdminUsers', 'get*Users')).toBe(true);
+      expect(matchesPattern('getUsers', 'get*Users')).toBe(true);
+    });
+
+    test('does not over-match across boundary', () => {
+      expect(matchesPattern('adminXYZ', '*admin')).toBe(false);
+    });
+  });
+
+  describe('? wildcard', () => {
+    test('matches exactly one character', () => {
+      expect(matchesPattern('getPets', '?etPets')).toBe(true);
+    });
+
+    test('does not match zero characters', () => {
+      expect(matchesPattern('etPets', '?etPets')).toBe(false);
+    });
+
+    test('does not match two characters', () => {
+      expect(matchesPattern('getaPets', '?etPets')).toBe(false);
+    });
+  });
+
+  describe('regex-special characters are treated as literals', () => {
+    test('dot is literal', () => {
+      expect(matchesPattern('a.b', 'a.b')).toBe(true);
+      expect(matchesPattern('axb', 'a.b')).toBe(false);
+    });
   });
 });
 

@@ -283,6 +283,98 @@ When `true`, any operation marked `deprecated: true` in the spec is excluded fro
 
 ---
 
+## Excluding Operations
+
+**Option:** `exclude` (object, default not set)
+
+Excludes specific operations from the generated output by tag or `operationId`. Useful when you consume a third-party spec that includes internal or admin endpoints you don't need in your client — without having to modify the spec itself.
+
+Types that are only referenced by excluded operations are automatically pruned from the generated output as well.
+
+```json
+{
+  "exclude": {
+    "tags": ["admin", "internal"],
+    "operationIds": ["deleteAccount", "resetDatabase"]
+  }
+}
+```
+
+Both `tags` and `operationIds` are optional independently. Using both together excludes operations that match **either** list.
+
+### Matching by tag
+
+The value matched against is the **raw tag string** from the spec — exactly as written, not the sanitized group name that Swaggie uses for client object names. For example, a tag written as `"pet store"` in the spec must be excluded as `"pet store"`, not `"petstore"`.
+
+**All tags** on an operation are checked. If any of them match an exclude pattern, the operation is excluded. This means you can add a marker tag such as `"skip"` alongside the operation's normal grouping tag, and excluding `"skip"` will correctly catch it:
+
+```yaml
+paths:
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [users, skip]   # 'users' drives the client group; 'skip' is the marker
+```
+
+```json
+{ "exclude": { "tags": ["skip"] } }
+```
+
+Note that only the **first tag** drives the client object grouping name (`usersClient`). The additional tags serve filtering and documentation purposes only. Operations with no tags are unaffected by a tag filter.
+
+### Matching by `operationId`
+
+The value matched is the `operationId` exactly as it appears in the spec, before any of Swaggie's normalization (camelCasing, duplicate-suffix appending, etc.).
+
+### Wildcard patterns
+
+Both `tags` and `operationIds` support `*` and `?` wildcard characters:
+
+| Pattern | Meaning |
+|---|---|
+| `*` | Any sequence of characters (including none) |
+| `?` | Any single character |
+
+```json
+{
+  "exclude": {
+    "operationIds": ["admin*", "internal_?etResource"]
+  }
+}
+```
+
+::: warning Regex patterns are not supported
+Do not use regex syntax (e.g. `admin.*`, `/^admin/`, `admin(Get|List)`). Swaggie will throw an error if it detects a regex pattern in an exclude entry. Use `*` and `?` wildcards instead.
+:::
+
+### Example — excluding an entire tag group
+
+```json
+{
+  "src": "./openapi.yaml",
+  "out": "./src/api/client.ts",
+  "exclude": {
+    "tags": ["admin"]
+  }
+}
+```
+
+All operations tagged `"admin"` are removed from the output. If none of the remaining operations reference the types used exclusively by those operations, those types are dropped too.
+
+### Example — excluding operations by wildcard pattern
+
+```json
+{
+  "exclude": {
+    "operationIds": ["admin*", "internal*"]
+  }
+}
+```
+
+This removes every operation whose `operationId` starts with `admin` or `internal`, regardless of which tag group it belongs to.
+
+---
+
 ## Service Name Prefix
 
 **Option:** `servicePrefix` (string, default `""`)

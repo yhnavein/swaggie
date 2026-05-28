@@ -8,6 +8,7 @@ import type {
   CliOptions,
   CodeGenResult,
   EnumNamesStyle,
+  ExcludeOptions,
   FullAppOptions,
 } from './types';
 import { loadSpecDocument, verifyDocumentSpec, loadAllTemplateFiles } from './utils';
@@ -86,6 +87,7 @@ function verifyOptions(options: Partial<FullAppOptions>) {
       );
     }
   }
+  verifyExcludeOptions(options.exclude);
 }
 
 /**
@@ -123,6 +125,43 @@ function verifyEntryOptions(opts: AppOptions) {
       throw new Error(
         '"hooksOut" requires an L2 template (swr, tsq). ' +
           'Reactive hooks are only generated for L2 template pairs.'
+      );
+    }
+  }
+  verifyExcludeOptions(opts.exclude);
+}
+
+/**
+ * Returns true when a pattern looks like a regex (starts with `/` or contains
+ * regex-specific metacharacters that are not our supported wildcards).
+ * Our supported wildcards are `*` and `?` only.
+ */
+function isRegexPattern(pattern: string): boolean {
+  if (pattern.startsWith('/')) {
+    return true;
+  }
+  // Characters that are regex metacharacters but are NOT our supported wildcards
+  const regexOnlyChars = /[\\^$.|+()[\]{}]/;
+  return regexOnlyChars.test(pattern);
+}
+
+/**
+ * Throws if any pattern in `exclude.tags` or `exclude.operationIds` looks like
+ * a regex. Only plain strings and * / ? wildcards are supported.
+ */
+function verifyExcludeOptions(exclude: ExcludeOptions | undefined) {
+  if (!exclude) {
+    return;
+  }
+  const allPatterns: Array<[string, string]> = [
+    ...(exclude.tags ?? []).map((p): [string, string] => ['exclude.tags', p]),
+    ...(exclude.operationIds ?? []).map((p): [string, string] => ['exclude.operationIds', p]),
+  ];
+  for (const [field, pattern] of allPatterns) {
+    if (isRegexPattern(pattern)) {
+      throw new Error(
+        `Invalid pattern "${pattern}" in ${field}: regex patterns are not supported. ` +
+          'Use plain strings or wildcard patterns with * and ? only.'
       );
     }
   }
