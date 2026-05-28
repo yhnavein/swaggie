@@ -70,14 +70,9 @@ function withMockSWR<Fn extends (...args: never[]) => unknown>(spy: jest.SpiedFu
 /** Augments a spy with a `mockSWRMutation` shorthand for useSWRMutation hooks. */
 function withMockSWRMutation<Fn extends (...args: never[]) => unknown>(spy: jest.SpiedFunction<Fn>) {
   return Object.assign(spy, {
-    mockSWRMutation({
-      data,
-      ...rest
-    }: MockSWRMutationReturn) {
+    mockSWRMutation({ ...rest }: MockSWRMutationReturn) {
       spy.mockReturnValue({
         ...defaultSWRMutationReturn,
-        trigger: jest.fn(() => Promise.resolve(undefined)),
-        data,
         ...rest,
       } as ReturnType<Fn>);
     },
