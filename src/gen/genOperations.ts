@@ -255,6 +255,18 @@ export function prepareOperations(
     ops = ops.filter((op) => !op.deprecated);
   }
 
+  if (options.exclude?.tags?.length) {
+    ops = ops.filter(
+      (op) => !op.tags?.some((t) => options.exclude!.tags!.some((p) => matchesPattern(t, p)))
+    );
+  }
+
+  if (options.exclude?.operationIds?.length) {
+    ops = ops.filter(
+      (op) => !options.exclude!.operationIds!.some((p) => matchesPattern(op.operationId ?? '', p))
+    );
+  }
+
   return ops.map((op) => {
     const operationContext = `${op.method.toUpperCase()} ${op.path} (${op.operationId || 'unknown operationId'})`;
 
@@ -671,6 +683,23 @@ function getL1HttpTypeImport(template: AppOptions['template']): string | null {
     default:
       return null;
   }
+}
+
+/**
+ * Matches a value against a pattern that may contain `*` (any sequence of
+ * characters) or `?` (any single character). Falls back to exact equality for
+ * patterns that contain neither wildcard (fast path).
+ */
+export function matchesPattern(value: string, pattern: string): boolean {
+  if (!pattern.includes('*') && !pattern.includes('?')) {
+    return value === pattern;
+  }
+  const regex = new RegExp(
+    '^' +
+      pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') +
+      '$'
+  );
+  return regex.test(value);
 }
 
 function upsertFixedHeader(headers: IOperationParam[], headerName: string, value: string): void {

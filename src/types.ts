@@ -6,6 +6,19 @@ interface QueryParamsSerializationOptions {
   queryParamsAsObject?: boolean | number;
 }
 
+export interface ExcludeOptions {
+  /**
+   * Exclude operations whose first tag matches any of these values.
+   * Supports * (any sequence of characters) and ? (any single character) wildcards.
+   */
+  tags?: string[];
+  /**
+   * Exclude operations whose operationId matches any of these values.
+   * Supports * (any sequence of characters) and ? (any single character) wildcards.
+   */
+  operationIds?: string[];
+}
+
 export interface ClientOptions {
   /**
    * Path or URL to the Swagger specification file (JSON or YAML).
@@ -116,6 +129,9 @@ export interface ClientOptions {
       [key: string]: 'optional' | 'required' | 'ignore';
     };
   };
+
+  /** Excludes specific operations from code generation by tag or operationId */
+  exclude?: ExcludeOptions;
 }
 
 export interface CliOptions extends Omit<FullAppOptions, 'enumNamesStyle'> {

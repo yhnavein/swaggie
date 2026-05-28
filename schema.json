@@ -25,6 +25,22 @@
         }
       }
     },
+    "ExcludeOptions": {
+      "additionalProperties": false,
+      "description": "Excludes specific operations from code generation by tag or operationId. Supports * (any sequence of characters) and ? (any single character) wildcard patterns.",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Exclude operations whose first tag matches any of these values. Supports * and ? wildcards."
+        },
+        "operationIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Exclude operations whose operationId matches any of these values. Supports * and ? wildcards."
+        }
+      }
+    },
     "GlobalModifiers": {
       "additionalProperties": false,
       "description": "Global modifiers for parameters. It gives flexibility to adjust the OpenAPI spec before it is processed",
@@ -147,6 +163,9 @@
         },
         "modifiers": {
           "$ref": "#/definitions/GlobalModifiers"
+        },
+        "exclude": {
+          "$ref": "#/definitions/ExcludeOptions"
         }
       }
     },

@@ -800,6 +800,17 @@ describe('prepareAppOptions', () => {
       const result = prepareAppOptions({ ...minimalOpts, modifiers });
       expect(result.modifiers).toEqual(modifiers);
     });
+
+    test('preserves exclude when provided', () => {
+      const exclude = { tags: ['admin'], operationIds: ['internal*'] };
+      const result = prepareAppOptions({ ...minimalOpts, exclude });
+      expect(result.exclude).toEqual(exclude);
+    });
+
+    test('exclude is absent from result when not provided', () => {
+      const result = prepareAppOptions(minimalOpts);
+      expect(result.exclude).toBeUndefined();
+    });
   });
 
   describe('template normalization', () => {
@@ -1172,6 +1183,114 @@ describe('runCodeGenerator — template validation', () => {
       expect(hooksFile).toContain('API.Pet');
       // Local queryKeys references use bare name (not API.pet.queryKeys)
       expect(hooksFile).toContain('pet.queryKeys.');
+    });
+  });
+
+  // ── exclude option validation ─────────────────────────────────────────────
+
+  describe('exclude option validation', () => {
+    test('fails when exclude.operationIds contains a regex pattern starting with /', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          exclude: { operationIds: ['/admin.*/'] },
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('Invalid pattern');
+        expect((e as Error).message).toContain('/admin.*/');
+        expect((e as Error).message).toContain('exclude.operationIds');
+        expect((e as Error).message).toContain('regex patterns are not supported');
+      }
+    });
+
+    test('fails when exclude.tags contains a pattern with regex metacharacters', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          exclude: { tags: ['admin.*'] },
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('Invalid pattern');
+        expect((e as Error).message).toContain('admin.*');
+        expect((e as Error).message).toContain('exclude.tags');
+      }
+    });
+
+    test('fails when exclude.operationIds contains a pattern with ( character', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          exclude: { operationIds: ['admin(get|list)'] },
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('Invalid pattern');
+        expect((e as Error).message).toContain('regex patterns are not supported');
+      }
+    });
+
+    test('fails when exclude.operationIds contains a pattern with [ character', async () => {
+      try {
+        await runCodeGenerator({
+          src: './test/petstore-v3.yml',
+          exclude: { operationIds: ['admin[A-Z]*'] },
+        } as any);
+        throw new Error('Expected error to be thrown');
+      } catch (e) {
+        expect((e as Error).message).toContain('Invalid pattern');
+        expect((e as Error).message).toContain('regex patterns are not supported');
+      }
+    });
+
+    test('accepts a plain string pattern without throwing', async () => {
+      const result = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        exclude: { operationIds: ['listPets'] },
+      } as any);
+      expect(result).toBeDefined();
+    });
+
+    test('accepts a * wildcard pattern without throwing', async () => {
+      const result = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        exclude: { operationIds: ['admin*'] },
+      } as any);
+      expect(result).toBeDefined();
+    });
+
+    test('accepts a ? wildcard pattern without throwing', async () => {
+      const result = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        exclude: { operationIds: ['?istPets'] },
+      } as any);
+      expect(result).toBeDefined();
+    });
+
+    test('accepts an empty exclude object without throwing', async () => {
+      const result = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        exclude: {},
+      } as any);
+      expect(result).toBeDefined();
+    });
+
+    test('excludes matched operations from generated code', async () => {
+      const [code] = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        exclude: { operationIds: ['listPets'] },
+      } as any) as [string, any];
+      expect(code).not.toContain('listPets');
+    });
+
+    test('excludes all operations matching a tag from generated code', async () => {
+      const [withExclude] = await runCodeGenerator({
+        src: './test/petstore-v3.yml',
+        exclude: { tags: ['pet'] },
+      } as any) as [string, any];
+      // All pet operations excluded — petClient should not appear
+      expect(withExclude).not.toContain('petClient');
     });
   });
 
