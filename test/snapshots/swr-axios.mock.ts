@@ -34,28 +34,34 @@ interface MockSWRReturn {
   data: unknown;
   /** Whether to return a loading state (default: false) */
   isLoading?: boolean;
+  /** Whether to return a validating state (default: false) */
+  isValidating?: boolean;
   /** Whether to return an error (default: undefined) */
   error?: Error | undefined | null;
+  /** The mutate function to return (default: empty mock) */
+  mutate?: KeyedMutator<any>;
 }
 
 interface MockSWRMutationReturn {
   /** The data to return from the mock */
-  data: unknown;
+  data?: unknown;
   /** Whether to return a mutating state (default: false) */
   isMutating?: boolean;
   /** Whether to return an error (default: undefined) */
   error?: Error | undefined | null;
+  /** The trigger function to return (default: empty mock) */
+  trigger?: (...args: unknown[]) => Promise<unknown>;
+  /** The reset function to return (default: empty mock) */
+  reset?: () => void;
 }
 
 /** Augments a spy with a `mockSWR` shorthand for useSWR query hooks. */
 function withMockSWR<Fn extends (...args: never[]) => unknown>(spy: jest.SpiedFunction<Fn>) {
   return Object.assign(spy, {
-    mockSWR({ data, isLoading, error }: MockSWRReturn) {
+    mockSWR({ ...rest }: MockSWRReturn) {
       spy.mockReturnValue({
         ...defaultSWRReturn,
-        data,
-        isLoading: isLoading ?? false,
-        error: error ?? undefined,
+        ...rest,
       } as ReturnType<Fn>);
     },
   });
@@ -66,15 +72,13 @@ function withMockSWRMutation<Fn extends (...args: never[]) => unknown>(spy: jest
   return Object.assign(spy, {
     mockSWRMutation({
       data,
-      isMutating,
-      error,
+      ...rest
     }: MockSWRMutationReturn) {
       spy.mockReturnValue({
         ...defaultSWRMutationReturn,
         trigger: jest.fn(() => Promise.resolve(undefined)),
-        isMutating: isMutating ?? false,
-        error: error ?? undefined,
         data,
+        ...rest,
       } as ReturnType<Fn>);
     },
   });
