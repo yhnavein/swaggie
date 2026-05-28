@@ -376,7 +376,28 @@ Override the required/optional/ignored status of specific parameters globally, w
 | Value | Effect |
 |---|---|
 | `"ignore"` | Parameter is removed from all generated method signatures |
-| `"optional"` | Parameter is always optional regardless of what the spec says |
+| `"optional"` | Parameter becomes optional (`?`) everywhere it appears |
 | `"required"` | Parameter is always required |
 
 See [Parameter Modifiers](/guide/advanced#parameter-modifiers) for more detail.
+
+---
+
+### `exclude`
+
+**Type:** `object`
+
+Exclude specific operations from the generated output by tag or `operationId`. Types used exclusively by excluded operations are automatically removed as well.
+
+```json
+{
+  "exclude": {
+    "tags": ["admin", "internal"],
+    "operationIds": ["deleteAccount", "admin*"]
+  }
+}
+```
+
+Both fields are optional independently, and both support `*` (any sequence) and `?` (any single character) wildcard patterns. Regex syntax is not supported and will cause an error.
+
+See [Excluding Operations](/guide/advanced#excluding-operations) for full details and examples.

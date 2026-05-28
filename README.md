@@ -396,6 +396,21 @@ Sometimes an API spec marks a parameter as required, but your client handles it 
 - `"optional"` — the parameter becomes optional regardless of what the spec says
 - `"required"` — the parameter is always required (generally better to just fix the spec)
 
+### Excluding Operations
+
+Use `exclude` to drop entire operations from the generated output by tag or `operationId` — without modifying the spec. Types used exclusively by excluded operations are pruned automatically. Both fields support `*` and `?` wildcards.
+
+```json
+{
+  "exclude": {
+    "tags": ["admin", "internal"],
+    "operationIds": ["deleteAccount", "admin*"]
+  }
+}
+```
+
+See the [full documentation](https://yhnavein.github.io/swaggie/guide/advanced#excluding-operations) for details and examples.
+
 ### Code Quality
 
 Swaggie's output is functional but not always perfectly formatted, since it uses a templating engine internally. It is strongly recommended to run the output through a formatter to ensure consistent style across regenerations.

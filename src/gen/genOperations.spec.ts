@@ -1122,6 +1122,37 @@ describe('prepareOperations', () => {
         ]);
       });
 
+      test('should exclude an operation when a non-first tag matches the pattern', () => {
+        const ops: ApiOperation[] = [
+          {
+            operationId: 'createUser',
+            method: 'post',
+            path: '/users',
+            // 'users' is the grouping tag; 'skip' is a marker tag
+            tags: ['users', 'skip'],
+            parameters: [],
+            responses: {},
+            group: 'users',
+          },
+          {
+            operationId: 'getUsers',
+            method: 'get',
+            path: '/users',
+            tags: ['users'],
+            parameters: [],
+            responses: {},
+            group: 'users',
+          },
+        ];
+
+        const operations = prepareOperations(
+          ops,
+          getClientOptions({ exclude: { tags: ['skip'] } })
+        );
+
+        expect(operations.map((o) => o.name)).toEqual(['getUsers']);
+      });
+
       test('should not exclude operations that have no tags', () => {
         const noTagOps: ApiOperation[] = [
           {
