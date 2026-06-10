@@ -4,7 +4,7 @@
 <%~ docs %>
     <%= it.swrOpName %>(
 <% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
-<% }); %>      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+<% }); %>      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: <%= it.httpConfigType %>
     ) {
       const { key, ...config } = $config || {};

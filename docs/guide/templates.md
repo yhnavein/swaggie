@@ -244,7 +244,7 @@ This is equivalent to `["swr", "fetch"]`.
 ### Generated output (excerpt for `["swr", "axios"]`)
 
 ```typescript
-import useSWR, { type SWRConfiguration, type Key } from 'swr';
+import useSWR, { type SWRConfiguration, type Key as SWRKey } from 'swr';
 import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
 import Axios, { type AxiosPromise, type AxiosRequestConfig } from 'axios';
 
