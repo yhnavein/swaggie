@@ -5,7 +5,7 @@
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
 config?: HttpConfig
-  ): Observable<<%~ it.returnType %>> {
+  ): <%~ it.responseShape === 'full' ? 'Observable<' + it.apiResponseType + '<' + it.returnType + '>>' : 'Observable<' + it.returnType + '>' %> {
 <% if(it.query && it.query.length > 0) { -%>
     const params = paramsSerializer({
 <% it.query.forEach((parameter) => { -%>
@@ -29,15 +29,27 @@ config?: HttpConfig
     }
 <% } -%>
 <% }); } -%>
+<%
+var fullMap = '.pipe(\n      map((response) => ({ data: response.body as ' + it.returnType + ', headers: response.headers, status: response.status }))\n    )';
+var bodyArg = it.body
+  ? (it.body.contentType === 'urlencoded' ? 'new URLSearchParams(' + it.body.name + ' as any)' : it.body.name)
+  : 'null';
+-%>
+<% if (it.responseShape === 'full') { -%>
+<% if(it.method === 'GET') { -%>
+    return this.http.get<<%~ it.returnType %>>(this.baseUrl + url, { ...config, observe: 'response' as const })<%~ fullMap %>;
+<% } else if(it.method === 'DELETE') { -%>
+    return this.http.delete<<%~ it.returnType %>>(this.baseUrl + url, { ...config, observe: 'response' as const })<%~ fullMap %>;
+<% } else if(['POST', 'PUT', 'PATCH'].includes(it.method)) { -%>
+    return this.http.<%= it.method.toLowerCase() %><%~ '<' + it.returnType + '>' %>(this.baseUrl + url, <%~ bodyArg %>, { ...config, observe: 'response' as const })<%~ fullMap %>;
+<% } -%>
+<% } else { -%>
 <% if(it.method === 'GET') { -%>
     return this.http.get<<%~ it.returnType %>>(this.baseUrl + url, config);
 <% } else if(it.method === 'DELETE') { -%>
     return this.http.delete<<%~ it.returnType %>>(this.baseUrl + url, config);
-<% } else if(['POST', 'PUT', 'PATCH'].includes(it.method)) {
-  const bodyArg = it.body
-    ? (it.body.contentType === 'urlencoded' ? 'new URLSearchParams(' + it.body.name + ' as any)' : it.body.name)
-    : 'null';
--%>
+<% } else if(['POST', 'PUT', 'PATCH'].includes(it.method)) { -%>
     return this.http.<%= it.method.toLowerCase() %><%~ '<' + it.returnType + '>' %>(this.baseUrl + url, <%~ bodyArg %>, config);
-<% } %>
+<% } -%>
+<% } -%>
   }

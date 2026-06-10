@@ -19,13 +19,14 @@ var rawDocs = it.jsDocs
   : '';
 var docs = rawDocs ? rawDocs.replace(/^/gm, '  ') + '\n' : '';
 var httpClientName = it.httpClientName || it.clientName;
+var dataType = it.responseShape === 'full' ? it.apiResponseType + '<' + it.returnType + '>' : it.returnType;
 %>
 <%~ docs %>
-    <%= it.mutOpName %><TData = <%~ it.returnType %>, TError = Error>(
-      $config?: UseMutationOptions<<%~ it.returnType %>, TError, <%~ variablesType %>>,
+    <%= it.mutOpName %><TData = <%~ dataType %>, TError = Error>(
+      $config?: UseMutationOptions<<%~ dataType %>, TError, <%~ variablesType %>>,
       $httpConfig?: <%= it.httpConfigType %>
     ) {
-      return useMutation<<%~ it.returnType %>, TError, <%~ variablesType %>>({
+      return useMutation<<%~ dataType %>, TError, <%~ variablesType %>>({
         mutationFn: (<%= hasParams ? 'vars' : '' %>) => <%= httpClientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig)<%~ it.responseMapper %>,
         ...$config
       });

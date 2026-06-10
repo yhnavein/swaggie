@@ -45,6 +45,12 @@ const queryParamsAsObjectOption = new Option(
   '--queryParamsAsObject [threshold]',
   'Group query params into a single object; pass a number to group only when query params count is greater than threshold'
 ).argParser(parseQueryParamsAsObjectArg);
+const responseShapeOption = new Option(
+  '--responseShape <shape>',
+  "Standardize operation return shape across templates: 'body' returns the body (T); " +
+    "'full' returns an APIResponse<T> wrapper with data, headers and statusCode. " +
+    'When omitted, each template keeps its current default return shape.'
+).choices(['body', 'full']);
 
 const program = new Command();
 program
@@ -101,6 +107,7 @@ program
   .addOption(dateFormatOption)
   .addOption(nullableStrategyOption)
   .addOption(queryParamsAsObjectOption)
+  .addOption(responseShapeOption)
   .option(
     '--hooksOut <filePath>',
     'Output path for the generated hooks file (L2 templates only). ' +

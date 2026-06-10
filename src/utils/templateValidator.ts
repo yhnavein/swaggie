@@ -1,4 +1,10 @@
-import type { L1Template, L2Template, ResolvedTemplate, TemplateInput } from '../types';
+import type {
+  L1Template,
+  L2Template,
+  ResolvedTemplate,
+  ResponseShape,
+  TemplateInput,
+} from '../types';
 
 const L1_TEMPLATES: readonly L1Template[] = ['axios', 'fetch', 'xior', 'ng1', 'ng2', 'ky'];
 const L2_TEMPLATES: readonly L2Template[] = ['swr', 'tsq'];
@@ -138,11 +144,24 @@ export function getHttpConfigType(template: ResolvedTemplate): string {
  * The returned string is appended after the client call expression:
  *   `client.method(...args)` + responseMapper
  *
- * Examples:
+ * When `responseShape` is set (`'body'` or `'full'`), every L1 operation already
+ * resolves to the final shape (`T` or `APIResponse<T>`), so no extra mapping is
+ * needed and this returns an empty string regardless of the L1 template.
+ *
+ * Examples (responseShape unset):
  *   axios/xior → `.then((resp) => resp.data)`
  *   fetch/ky   → ``  (empty — the promise already resolves to T)
  */
-export function getResponseMapper(template: ResolvedTemplate): string {
+export function getResponseMapper(
+  template: ResolvedTemplate,
+  responseShape?: ResponseShape
+): string {
+  // When the response shape is standardized, the L1 operation already returns
+  // the final value (body or APIResponse wrapper) — no unwrapping needed.
+  if (responseShape) {
+    return '';
+  }
+
   const l1 = getL1Template(template);
   switch (l1) {
     case 'fetch':

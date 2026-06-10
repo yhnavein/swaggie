@@ -32,3 +32,10 @@ export function getKyHttp(): KyInstance {
   }
   return _http;
 }
+<% if (it.responseShape === 'full') { %>
+export interface <%= it.apiResponseType %><T> {
+  data: T;
+  headers: Headers;
+  status: number;
+}
+<% } %>

@@ -156,6 +156,11 @@
         "queryParamsSerialization": {
           "$ref": "#/definitions/QueryParamsSerialization"
         },
+        "responseShape": {
+          "description": "Standardizes the value each generated operation returns. When omitted, each template keeps its current default return shape (non-breaking). 'body' returns just the response body (T). 'full' returns an APIResponse<T> wrapper exposing data, headers (template-native type) and statusCode.",
+          "type": "string",
+          "enum": ["body", "full"]
+        },
         "forceSetup": {
           "description": "When `true`, overwrites the client setup file even if it already exists. Has no effect unless `clientSetup` is also set.",
           "type": "boolean",

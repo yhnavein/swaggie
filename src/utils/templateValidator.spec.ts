@@ -6,6 +6,7 @@ import {
   isL1Template,
   isL2Template,
   getL1Template,
+  getResponseMapper,
 } from './templateValidator';
 
 describe('isL1Template', () => {
@@ -166,5 +167,33 @@ describe('getL1Template', () => {
     expect(getL1Template(['swr', 'axios'])).toBe('axios');
     expect(getL1Template(['tsq', 'xior'])).toBe('xior');
     expect(getL1Template(['swr', 'fetch'])).toBe('fetch');
+  });
+});
+
+describe('getResponseMapper', () => {
+  test('unwraps .data for axios/xior when responseShape is unset', () => {
+    expect(getResponseMapper('axios')).toBe('.then((resp) => resp.data)');
+    expect(getResponseMapper('xior')).toBe('.then((resp) => resp.data)');
+    expect(getResponseMapper(['swr', 'axios'])).toBe('.then((resp) => resp.data)');
+  });
+
+  test('is empty for fetch/ky when responseShape is unset', () => {
+    expect(getResponseMapper('fetch')).toBe('');
+    expect(getResponseMapper('ky')).toBe('');
+    expect(getResponseMapper(['tsq', 'fetch'])).toBe('');
+  });
+
+  test("is always empty when responseShape is 'body' (L1 already returns T)", () => {
+    expect(getResponseMapper('axios', 'body')).toBe('');
+    expect(getResponseMapper('xior', 'body')).toBe('');
+    expect(getResponseMapper('fetch', 'body')).toBe('');
+    expect(getResponseMapper(['swr', 'axios'], 'body')).toBe('');
+  });
+
+  test("is always empty when responseShape is 'full' (L1 already returns APIResponse)", () => {
+    expect(getResponseMapper('axios', 'full')).toBe('');
+    expect(getResponseMapper('xior', 'full')).toBe('');
+    expect(getResponseMapper('fetch', 'full')).toBe('');
+    expect(getResponseMapper(['tsq', 'xior'], 'full')).toBe('');
   });
 });

@@ -22,6 +22,8 @@ export const <%= it.hooksCamelCaseName %> = {
     httpClientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
+    responseShape: it.responseShape,
+    apiResponseType: it.apiResponseType,
   }, it.safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('queryOperation.ejs', queryOperation); %>
@@ -38,6 +40,8 @@ export const <%= it.hooksCamelCaseName %> = {
     httpClientName: it.camelCaseName,
     httpConfigType: it.httpConfigType,
     responseMapper: it.responseMapper,
+    responseShape: it.responseShape,
+    apiResponseType: it.apiResponseType,
   }, it.safeOperation(operation, it.camelCaseName));
 %>
 <%~ include('mutationOperation.ejs', mutationOperation); %>

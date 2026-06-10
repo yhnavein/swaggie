@@ -3,3 +3,10 @@ import ky, { type Options as KyOptions } from 'ky';
 export const http = ky.create({
   prefix: '<%= it.baseUrl || '' %>',
 });
+<% if (it.responseShape === 'full') { %>
+export interface <%= it.apiResponseType %><T> {
+  data: T;
+  headers: Headers;
+  status: number;
+}
+<% } %>

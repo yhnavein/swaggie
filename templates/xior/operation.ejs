@@ -1,10 +1,22 @@
+<%
+var returnTypeWrapped = 'Promise<XiorResponse<' + it.returnType + '>>';
+var responseMapper = '';
+if (it.responseShape === 'full') {
+  // XiorResponse<T> already exposes { data, headers, status } and is therefore
+  // structurally assignable to APIResponse<T> — no remap needed.
+  returnTypeWrapped = 'Promise<' + it.apiResponseType + '<' + it.returnType + '>>';
+} else if (it.responseShape === 'body') {
+  returnTypeWrapped = 'Promise<' + it.returnType + '>';
+  responseMapper = '.then((resp) => resp.data)';
+}
+%>
 <%~ it.jsDocs %>
 
   <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
 $config?: XiorRequestConfig
-  ): Promise<XiorResponse<<%~ it.returnType %>>> {
+  ): <%~ returnTypeWrapped %> {
     const url = `<%= it.url %>`;
 
     return http.request<<%~ it.returnType %>>({
@@ -40,5 +52,5 @@ $config?: XiorRequestConfig
       },
 <% } -%>
       ...$config,
-    });
+    })<%~ responseMapper %>;
   },
