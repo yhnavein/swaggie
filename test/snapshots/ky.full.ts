@@ -53,7 +53,7 @@ export const petClient = {
 
     return http.delete(url, {
       headers: {
-        'api_key': apiKey,
+        'api_key': apiKey ?? undefined,
       },
       ...$config,
     }).then(async (response) => ({

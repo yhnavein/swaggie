@@ -73,7 +73,7 @@ export const petClient = {
 
     return getKyHttp().delete(url, {
       headers: {
-        'api_key': apiKey,
+        'api_key': apiKey ?? undefined,
       },
       ...$config,
     }).json<unknown>();

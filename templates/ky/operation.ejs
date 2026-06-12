@@ -40,7 +40,7 @@ $config?: KyOptions
 <% if (parameter.value) { -%>
         '<%= parameter.originalName %>': '<%= parameter.value %>',
 <% } else { -%>
-        '<%= parameter.originalName %>': <%= parameter.name %>,
+        '<%= parameter.originalName %>': <%= parameter.name %> ?? undefined,
 <% } -%>
 <% }); -%>
       },
