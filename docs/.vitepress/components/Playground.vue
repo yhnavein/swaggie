@@ -82,6 +82,7 @@ const preferAny = ref<boolean>(s('preferAny', false));
 const servicePrefix = ref<string>(s('servicePrefix', ''));
 const allowDots = ref<boolean>(s('allowDots', true));
 const arrayFormat = ref<string>(s('arrayFormat', 'repeat'));
+const responseShape = ref<string>(s('responseShape', ''));
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
@@ -193,6 +194,7 @@ async function generate() {
         allowDots: allowDots.value,
         arrayFormat: arrayFormat.value as any,
       },
+      responseShape: (responseShape.value || undefined) as any,
     });
 
     outputRaw.value = code;
@@ -234,6 +236,7 @@ async function generate() {
       servicePrefix: servicePrefix.value,
       allowDots: allowDots.value,
       arrayFormat: arrayFormat.value,
+      responseShape: responseShape.value,
       generateMocksEnabled: generateMocksEnabled.value,
       testingFramework: testingFramework.value,
       generateSetupEnabled: generateSetupEnabled.value,
@@ -567,6 +570,21 @@ function getNavHeight(): number {
               <select v-model="dateFormat" class="pg-select">
                 <option value="Date">Date</option>
                 <option value="string">string</option>
+              </select>
+              <ChevronDownIcon />
+            </div>
+          </label>
+
+          <label class="pg-field">
+            <span class="pg-label">
+              Response shape
+              <HintIcon :hint="HINTS.responseShape" />
+            </span>
+            <div class="pg-select-wrap">
+              <select v-model="responseShape" class="pg-select">
+                <option value="">default</option>
+                <option value="body">body</option>
+                <option value="full">full</option>
               </select>
               <ChevronDownIcon />
             </div>

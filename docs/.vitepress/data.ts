@@ -48,6 +48,8 @@ export const HINTS: Record<string, string> = {
     'The test framework whose spy functions are used in the generated mock file. "vitest" uses vi.fn(), "jest" uses jest.fn(). Only relevant when "Generate mocks" is enabled.',
   generateSetup:
     'When enabled, a write-once client setup file scaffold is generated alongside the client. For the ky template, the setup file exports createKyConfig() which is imported by the generated client to initialise ky with hooks. For other templates (axios, xior, fetch) it shows how to attach interceptors. Only available in "full" generation mode.',
+  responseShape:
+    '"default" keeps each template\'s current return shape (non-breaking). "body" standardizes all templates to return just the response body (T) — breaking for axios/xior which normally return their full response. "full" wraps every response in an APIResponse<T> object with data, headers and status.',
 };
 
 export const EXAMPLE_SPEC = `openapi: "3.0.3"
