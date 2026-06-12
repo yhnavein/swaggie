@@ -8,4 +8,11 @@ export const http = xior.create({
       arrayFormat: '<%= it.arrayFormat %>',
     }),
 });
+<% if (it.responseShape === 'full') { %>
+export interface <%= it.apiResponseType %><T> {
+  data: T;
+  headers: XiorResponse<T>['headers'];
+  status: number;
+}
+<% } %>
 

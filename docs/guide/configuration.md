@@ -210,6 +210,38 @@ When `true`, operations marked `deprecated: true` in the spec are excluded from 
 
 ---
 
+### `responseShape`
+
+**Type:** `"body" | "full"` &nbsp; **Default:** _(unset)_
+
+Standardizes the value every generated operation returns, across all templates. When omitted, each template keeps its current default return shape (this is the non-breaking default): `axios` and `xior` return their full native response object, while `fetch`, `ky`, `ng1` and `ng2` return the response body only.
+
+- **`"body"`** — every template returns just the response body (`T`). This unwraps `axios`/`xior` responses (a breaking change for those two) and is a no-op for the others.
+- **`"full"`** — every template returns a unified `APIResponse<T>` wrapper:
+
+  ```typescript
+  export interface APIResponse<T> {
+    data: T;
+    headers: /* template-native headers type */;
+    status: number;
+  }
+  ```
+
+  The `headers` field keeps each template's native type (`Headers` for `fetch`/`ky`, `AxiosResponse['headers']` for `axios`, `HttpHeaders` for `ng2`, etc.). `data` and `status` are uniform everywhere. For `axios` and `xior` the native response object (which already matches this shape) is returned directly, so there is no extra wrapping cost.
+
+When using a reactive (`swr` / `tsq`) template, `full` also changes the hook data type to `APIResponse<T>`, so components read `data?.data`.
+
+Any explicit value is a deliberate, potentially breaking change relative to the template's default shape — hence the default is to leave output untouched.
+
+```json
+{ "responseShape": "full" }
+```
+
+> [!NOTE]
+> The generated wrapper is named `APIResponse`. Like the third-party type imports Swaggie already emits (e.g. `AxiosRequestConfig`), this name is not guarded against collisions — avoid naming a schema `APIResponse` in your spec when using `responseShape: "full"`.
+
+---
+
 ### `useClient`
 
 **Type:** `boolean` &nbsp; **Default:** `false`

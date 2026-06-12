@@ -4,7 +4,7 @@
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
     config?: IRequestShortcutConfig
-  ): IPromise<<%~ it.returnType %>> {
+  ): <%~ it.responseShape === 'full' ? 'IPromise<' + it.apiResponseType + '<' + it.returnType + '>>' : 'IPromise<' + it.returnType + '>' %> {
     let url = `<%= it.url %>?`;
 <% if(it.query && it.query.length > 0) { %>
   <% it.query.forEach((parameter) => { %>
@@ -26,7 +26,7 @@
       config = { ...config, headers: { ...config?.headers, '<%= parameter.originalName %>': <%= parameter.name %> } };
     }
 <% } %><% }); } %>
-    return this.$<%= it.method.toLowerCase() %>(
+    return this.$<%= it.method.toLowerCase() %><%= it.responseShape === 'full' ? 'Full' : '' %>(
       url,
 <% if(['POST', 'PUT', 'PATCH'].includes(it.method)) { %>
   <% if(it.body) { %>

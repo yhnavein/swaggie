@@ -5,14 +5,15 @@ var rawDocs = it.jsDocs
   : '';
 var docs = rawDocs ? rawDocs.replace(/^/gm, '  ') + '\n' : '';
 var httpClientName = it.httpClientName || it.clientName;
+var dataType = it.responseShape === 'full' ? it.apiResponseType + '<' + it.returnType + '>' : it.returnType;
 %>
 <%~ docs %>
-    <%= it.rqOpName %><TData = <%~ it.returnType %>, TError = Error>(
+    <%= it.rqOpName %><TData = <%~ dataType %>, TError = Error>(
 <% it.parameters.forEach((parameter) => { %>      <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %><%= parameter.optional ? (parameter.skippable ? ' | null' : ' | null | undefined') : '' %>,
-<% }); %>      $config?: Omit<UseQueryOptions<<%~ it.returnType %>, TError, TData>, 'queryKey' | 'queryFn'>,
+<% }); %>      $config?: Omit<UseQueryOptions<<%~ dataType %>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: <%= it.httpConfigType %>
     ) {
-      return useQuery<<%~ it.returnType %>, TError, TData>({
+      return useQuery<<%~ dataType %>, TError, TData>({
         queryKey: <%= it.clientName %>.queryKeys.<%= it.rqOpName.charAt(3).toLowerCase() + it.rqOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>),
         queryFn: () => <%= httpClientName %>Client.<%= it.name %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>$httpConfig)<%~ it.responseMapper %>,
         ...$config

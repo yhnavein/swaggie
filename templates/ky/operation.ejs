@@ -1,10 +1,16 @@
+<%
+var parseMethod = it.responseContentType === 'binary' ? 'blob' : (it.responseContentType === 'text' ? 'text' : 'json');
+var returnTypeWrapped = it.responseShape === 'full'
+  ? 'Promise<' + it.apiResponseType + '<' + it.returnType + '>>'
+  : 'Promise<' + it.returnType + '>';
+%>
 <%~ it.jsDocs %>
 
   <%= it.name %>(<% it.parameters.forEach((parameter) => { %>
 <%= parameter.name %><%= parameter.skippable ? '?' : '' %>: <%~ parameter.type %> <%= parameter.optional ? (parameter.skippable ? '| null' : '| null | undefined') : '' %>,
     <% }); %>
 $config?: KyOptions
-  ): Promise<<%~ it.returnType %>> {
+  ): <%~ returnTypeWrapped %> {
     const url = `<%= it.url.replace(/^\//, '') %>`;
 
     return <%= it.httpAccessor %>.<%= it.method.toLowerCase() %>(url, {
@@ -40,7 +46,13 @@ $config?: KyOptions
       },
 <% } -%>
       ...$config,
-<% if(it.responseContentType === 'binary') { -%>
+<% if (it.responseShape === 'full') { -%>
+    }).then(async (response) => ({
+      data: (await response.<%= parseMethod %>()) as <%~ it.returnType %>,
+      headers: response.headers,
+      status: response.status,
+    }));
+<% } else if(it.responseContentType === 'binary') { -%>
     }).blob() as Promise<<%~ it.returnType %>>;
 <% } else if(it.responseContentType === 'text') { -%>
     }).text() as Promise<<%~ it.returnType %>>;

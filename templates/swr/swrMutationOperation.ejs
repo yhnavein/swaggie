@@ -18,13 +18,14 @@ var swrKey = it.url.replace(/\$\{(?:[^{}]|\{[^{}]*\})*\}/g, '*');
 
 var docs = it.jsDocs ? it.jsDocs.replace(/^/gm, '  ') + '\n' : '';
 var httpClientName = it.httpClientName || it.clientName;
+var dataType = it.responseShape === 'full' ? it.apiResponseType + '<' + it.returnType + '>' : it.returnType;
 %>
 <%~ docs %>
     <%= it.mutOpName %>(
-      $config?: SWRMutationConfiguration<<%~ it.returnType %>, Error, string, <%~ variablesType %>>,
+      $config?: SWRMutationConfiguration<<%~ dataType %>, Error, string, <%~ variablesType %>>,
       $httpConfig?: <%= it.httpConfigType %>
     ) {
-      return useSWRMutation<<%~ it.returnType %>, Error, string, <%~ variablesType %>>(
+      return useSWRMutation<<%~ dataType %>, Error, string, <%~ variablesType %>>(
         '<%= swrKey %>',
         (_key: string, { arg }<%~ hasParams ? ': { arg: ' + variablesType + ' }' : '' %>) =>
           <%= httpClientName %>Client.<%= it.name %>(<%= callArgs.join(', ') %><%= callArgs.length > 0 ? ', ' : '' %>$httpConfig)<%~ it.responseMapper %>,

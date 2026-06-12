@@ -10,13 +10,7 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
-import useSWR, { type SWRConfiguration, type Key as SWRKey } from 'swr';
-import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
-
-interface SwrConfig extends SWRConfiguration {
-  /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
-  key?: SWRKey;
-}
+import { type UseQueryOptions, type UseMutationOptions, useQuery, useMutation } from '@tanstack/react-query';
 import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
 
 export const http = xior.create({
@@ -27,6 +21,11 @@ export const http = xior.create({
       arrayFormat: 'repeat',
     }),
 });
+export interface APIResponse<T> {
+  data: T;
+  headers: XiorResponse<T>['headers'];
+  status: number;
+}
 
 export const petClient = {
    /**
@@ -35,7 +34,7 @@ export const petClient = {
   */
   addPet(body: Pet ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet>> {
+  ): Promise<APIResponse<Pet>> {
     const url = `/pet`;
 
     return http.request<Pet>({
@@ -46,7 +45,7 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * Deletes a pet
   * @param apiKey (optional) (API name: api_key)
   * @param petId - ID of the pet
@@ -54,7 +53,7 @@ export const petClient = {
   deletePet(apiKey: string | null | undefined,
     petId: number ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
+  ): Promise<APIResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<unknown>({
@@ -67,14 +66,14 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * Finds Pets
   * Find pets using different filters
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet[]>> {
+  ): Promise<APIResponse<Pet[]>> {
     const url = `/pet/find`;
 
     return http.request<Pet[]>({
@@ -96,7 +95,7 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * Finds Pets by tags
   * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
   * @deprecated
@@ -104,7 +103,7 @@ export const petClient = {
   */
   findPetsByTags(tags?: string[] | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet[]>> {
+  ): Promise<APIResponse<Pet[]>> {
     const url = `/pet/findByTags`;
 
     return http.request<Pet[]>({
@@ -117,14 +116,14 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * Find pet by ID
   * Returns a single pet
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet>> {
+  ): Promise<APIResponse<Pet>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<Pet>({
@@ -134,13 +133,13 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * Update an existing pet by Id
   * @param body
   */
   updatePet(body: Pet ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet>> {
+  ): Promise<APIResponse<Pet>> {
     const url = `/pet`;
 
     return http.request<Pet>({
@@ -154,7 +153,7 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * Updates a pet in the store with form data
   * @param petId - ID of the pet
   * @param queryParams (optional) - Grouped query parameters object (name, status)
@@ -162,7 +161,7 @@ export const petClient = {
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
+  ): Promise<APIResponse<unknown>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}`;
 
     return http.request<unknown>({
@@ -176,7 +175,7 @@ export const petClient = {
     });
   },
 
-   /**
+ /**
   * uploads an image
   * @param body (optional)
   * @param petId - ID of the pet
@@ -186,7 +185,7 @@ export const petClient = {
     petId: number ,
     additionalMetadata?: string | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<File>> {
+  ): Promise<APIResponse<File>> {
     const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
     return http.request<File>({
@@ -200,7 +199,7 @@ export const petClient = {
     });
   },
 
-  };
+};
 
 
 export const pet = {
@@ -209,21 +208,18 @@ export const pet = {
     * Finds Pets
     * Find pets using different filters
     * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
-    */
-    useFindPets(
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useFindPets<TData = APIResponse<Pet[]>, TError = Error>(
       queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+      $config?: Omit<UseQueryOptions<APIResponse<Pet[]>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet[]>(
-        cacheUrl,
-        () => petClient.findPets(queryParams, $httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<Pet[]>, TError, TData>({
+        queryKey: pet.queryKeys.findPets(queryParams, ),
+        queryFn: () => petClient.findPets(queryParams, $httpConfig),
+        ...$config
+      });
     },
 
    /**
@@ -231,42 +227,36 @@ export const pet = {
     * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
     * @deprecated
     * @param tags (optional) - Tags to filter by
-    */
-    useFindPetsByTags(
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useFindPetsByTags<TData = APIResponse<Pet[]>, TError = Error>(
       tags?: string[] | null,
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+      $config?: Omit<UseQueryOptions<APIResponse<Pet[]>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet[]>(
-        cacheUrl,
-        () => petClient.findPetsByTags(tags, $httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<Pet[]>, TError, TData>({
+        queryKey: pet.queryKeys.findPetsByTags(tags, ),
+        queryFn: () => petClient.findPetsByTags(tags, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Find pet by ID
     * Returns a single pet
     * @param petId - ID of the pet
-    */
-    usePetById(
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    usePetById<TData = APIResponse<Pet>, TError = Error>(
       petId: number,
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+      $config?: Omit<UseQueryOptions<APIResponse<Pet>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? pet.queryKeys.petById(petId, );
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet>(
-        cacheUrl,
-        () => petClient.getPetById(petId, $httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<Pet>, TError, TData>({
+        queryKey: pet.queryKeys.petById(petId, ),
+        queryFn: () => petClient.getPetById(petId, $httpConfig),
+        ...$config
+      });
     },
 
   },
@@ -275,63 +265,63 @@ export const pet = {
    /**
     * Add a new pet to the store
     * @param body
-    */
-    useAddPet(
-      $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useAddPet<TData = APIResponse<Pet>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<Pet>, TError, { body: Pet }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<Pet, Error, string, { body: Pet }>(
-        '/pet',
-        (_key: string, { arg }: { arg: { body: Pet } }) =>
-          petClient.addPet(arg.body, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<Pet>, TError, { body: Pet }>({
+        mutationFn: (vars) => petClient.addPet(vars.body, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Deletes a pet
     * @param apiKey (optional) (API name: api_key)
     * @param petId - ID of the pet
-    */
-    useDeletePet(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { apiKey: string | null; petId: number }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useDeletePet<TData = APIResponse<unknown>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<unknown>, TError, { apiKey: string | null; petId: number }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { apiKey: string | null; petId: number }>(
-        '/pet/*',
-        (_key: string, { arg }: { arg: { apiKey: string | null; petId: number } }) =>
-          petClient.deletePet(arg.apiKey, arg.petId, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<unknown>, TError, { apiKey: string | null; petId: number }>({
+        mutationFn: (vars) => petClient.deletePet(vars.apiKey, vars.petId, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Update an existing pet by Id
     * @param body
-    */
-    useUpdatePet(
-      $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useUpdatePet<TData = APIResponse<Pet>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<Pet>, TError, { body: Pet }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<Pet, Error, string, { body: Pet }>(
-        '/pet',
-        (_key: string, { arg }: { arg: { body: Pet } }) =>
-          petClient.updatePet(arg.body, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<Pet>, TError, { body: Pet }>({
+        mutationFn: (vars) => petClient.updatePet(vars.body, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Updates a pet in the store with form data
     * @param petId - ID of the pet
     * @param queryParams (optional) - Grouped query parameters object (name, status)
-    */
-    useUpdatePetWithForm(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useUpdatePetWithForm<TData = APIResponse<unknown>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<unknown>, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>(
-        '/pet/*',
-        (_key: string, { arg }: { arg: { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null } }) =>
-          petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<unknown>, TError, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>({
+        mutationFn: (vars) => petClient.updatePetWithForm(vars.petId, vars.queryParams, $httpConfig),
+        ...$config
+      });
     },
 
    /**
@@ -339,24 +329,24 @@ export const pet = {
     * @param body (optional)
     * @param petId - ID of the pet
     * @param additionalMetadata (optional) - Additional Metadata
-    */
-    useUploadFile(
-      $config?: SWRMutationConfiguration<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useUploadFile<TData = APIResponse<File>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<File>, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
-        '/pet/*/uploadImage',
-        (_key: string, { arg }: { arg: { body: File | null; petId: number; additionalMetadata?: string | null } }) =>
-          petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<File>, TError, { body: File | null; petId: number; additionalMetadata?: string | null }>({
+        mutationFn: (vars) => petClient.uploadFile(vars.body, vars.petId, vars.additionalMetadata, $httpConfig),
+        ...$config
+      });
     },
 
   },
 
   queryKeys: {
-    findPets: (queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null, ) => `/pet/find?${encodeParams({'status': queryParams?.status, 'name': queryParams?.name, 'type': queryParams?.type, 'owner': queryParams?.owner, 'sortBy': queryParams?.sortBy, 'order': queryParams?.order, 'page': queryParams?.page, 'limit': queryParams?.limit, 'city': queryParams?.city, 'registrationDate': queryParams?.registrationDate, })}`,
-    findPetsByTags: (tags?: string[] | null, ) => `/pet/findByTags?${encodeParams({'tags': tags, })}`,
-    petById: (petId: number, ) => `/pet/${encodeURIComponent(`${petId}`)}`,
+    findPets: (queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null, ) => ['pet', 'petFindPets', queryParams] as const,
+    findPetsByTags: (tags?: string[] | null, ) => ['pet', 'petFindPetsByTags', tags] as const,
+    petById: (petId: number, ) => ['pet', 'petPetById', petId] as const,
   },
 };
 export const storeClient = {
@@ -367,7 +357,7 @@ export const storeClient = {
   */
   deleteOrder(orderId: number ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
+  ): Promise<APIResponse<unknown>> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return http.request<unknown>({
@@ -377,12 +367,12 @@ export const storeClient = {
     });
   },
 
-   /**
+ /**
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
   getInventory($config?: XiorRequestConfig
-  ): Promise<XiorResponse<Record<string, number>>> {
+  ): Promise<APIResponse<Record<string, number>>> {
     const url = `/store/inventory`;
 
     return http.request<Record<string, number>>({
@@ -392,14 +382,14 @@ export const storeClient = {
     });
   },
 
-   /**
+ /**
   * Find purchase order by ID
   * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Order>> {
+  ): Promise<APIResponse<Order>> {
     const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
 
     return http.request<Order>({
@@ -409,14 +399,14 @@ export const storeClient = {
     });
   },
 
-   /**
+ /**
   * Place an order for a pet
   * Place a new order in the store
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Order>> {
+  ): Promise<APIResponse<Order>> {
     const url = `/store/order`;
 
     return http.request<Order>({
@@ -427,7 +417,7 @@ export const storeClient = {
     });
   },
 
-  };
+};
 
 
 export const store = {
@@ -435,41 +425,35 @@ export const store = {
    /**
     * Returns pet inventories by status
     * Returns a map of status codes to quantities
-    */
-    useInventory(
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useInventory<TData = APIResponse<Record<string, number>>, TError = Error>(
+      $config?: Omit<UseQueryOptions<APIResponse<Record<string, number>>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? store.queryKeys.inventory();
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Record<string, number>>(
-        cacheUrl,
-        () => storeClient.getInventory($httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<Record<string, number>>, TError, TData>({
+        queryKey: store.queryKeys.inventory(),
+        queryFn: () => storeClient.getInventory($httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Find purchase order by ID
     * For valid response try integer IDs with value &le; 5 or &gt; 10. Other values will generate exceptions.
     * @param orderId - ID of order that needs to be fetched
-    */
-    useOrderById(
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useOrderById<TData = APIResponse<Order>, TError = Error>(
       orderId: number,
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+      $config?: Omit<UseQueryOptions<APIResponse<Order>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Order>(
-        cacheUrl,
-        () => storeClient.getOrderById(orderId, $httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<Order>, TError, TData>({
+        queryKey: store.queryKeys.orderById(orderId, ),
+        queryFn: () => storeClient.getOrderById(orderId, $httpConfig),
+        ...$config
+      });
     },
 
   },
@@ -479,39 +463,39 @@ export const store = {
     * Delete purchase order by ID
     * For valid response try integer IDs with value &lt; 1000. Anything above 1000 or nonintegers will generate API errors
     * @param orderId - ID of the order that needs to be deleted
-    */
-    useDeleteOrder(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { orderId: number }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useDeleteOrder<TData = APIResponse<unknown>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<unknown>, TError, { orderId: number }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { orderId: number }>(
-        '/store/order/*',
-        (_key: string, { arg }: { arg: { orderId: number } }) =>
-          storeClient.deleteOrder(arg.orderId, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<unknown>, TError, { orderId: number }>({
+        mutationFn: (vars) => storeClient.deleteOrder(vars.orderId, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Place an order for a pet
     * Place a new order in the store
     * @param body (optional)
-    */
-    usePlaceOrder(
-      $config?: SWRMutationConfiguration<Order, Error, string, { body?: Order | null }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    usePlaceOrder<TData = APIResponse<Order>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<Order>, TError, { body?: Order | null }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<Order, Error, string, { body?: Order | null }>(
-        '/store/order',
-        (_key: string, { arg }: { arg: { body?: Order | null } }) =>
-          storeClient.placeOrder(arg.body, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<Order>, TError, { body?: Order | null }>({
+        mutationFn: (vars) => storeClient.placeOrder(vars.body, $httpConfig),
+        ...$config
+      });
     },
 
   },
 
   queryKeys: {
-    inventory: () => `/store/inventory`,
-    orderById: (orderId: number, ) => `/store/order/${encodeURIComponent(`${orderId}`)}`,
+    inventory: () => ['store', 'storeInventory'] as const,
+    orderById: (orderId: number, ) => ['store', 'storeOrderById', orderId] as const,
   },
 };
 export const userClient = {
@@ -522,7 +506,7 @@ export const userClient = {
   */
   createUser(body?: User | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<User>> {
+  ): Promise<APIResponse<User>> {
     const url = `/user`;
 
     return http.request<User>({
@@ -533,13 +517,13 @@ export const userClient = {
     });
   },
 
-   /**
+ /**
   * Creates list of users with given input array
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<User>> {
+  ): Promise<APIResponse<User>> {
     const url = `/user/createWithList`;
 
     return http.request<User>({
@@ -550,14 +534,14 @@ export const userClient = {
     });
   },
 
-   /**
+ /**
   * Delete user
   * This can only be done by the logged in user.
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
+  ): Promise<APIResponse<unknown>> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<unknown>({
@@ -567,13 +551,13 @@ export const userClient = {
     });
   },
 
-   /**
+ /**
   * Get user by user name
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<User>> {
+  ): Promise<APIResponse<User>> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<User>({
@@ -583,13 +567,13 @@ export const userClient = {
     });
   },
 
-   /**
+ /**
   * Logs user into the system
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<string>> {
+  ): Promise<APIResponse<string>> {
     const url = `/user/login`;
 
     return http.request<string>({
@@ -603,9 +587,9 @@ export const userClient = {
     });
   },
 
-  /** Logs out current logged in user session */
+/** Logs out current logged in user session */
   logoutUser($config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
+  ): Promise<APIResponse<unknown>> {
     const url = `/user/logout`;
 
     return http.request<unknown>({
@@ -615,7 +599,7 @@ export const userClient = {
     });
   },
 
-   /**
+ /**
   * Update user
   * This can only be done by the logged in user.
   * @param body (optional)
@@ -624,7 +608,7 @@ export const userClient = {
   updateUser(body: FormData | null | undefined,
     username: string ,
     $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
+  ): Promise<APIResponse<unknown>> {
     const url = `/user/${encodeURIComponent(`${username}`)}`;
 
     return http.request<unknown>({
@@ -635,7 +619,7 @@ export const userClient = {
     });
   },
 
-  };
+};
 
 
 export const user = {
@@ -643,57 +627,49 @@ export const user = {
    /**
     * Get user by user name
     * @param username - The name that needs to be fetched. Use user1 for testing.
-    */
-    useUserByName(
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useUserByName<TData = APIResponse<User>, TError = Error>(
       username: string,
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+      $config?: Omit<UseQueryOptions<APIResponse<User>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? user.queryKeys.userByName(username, );
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<User>(
-        cacheUrl,
-        () => userClient.getUserByName(username, $httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<User>, TError, TData>({
+        queryKey: user.queryKeys.userByName(username, ),
+        queryFn: () => userClient.getUserByName(username, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Logs user into the system
     * @param queryParams (optional) - Grouped query parameters object (username, password)
-    */
-    useLoginUser(
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useLoginUser<TData = APIResponse<string>, TError = Error>(
       queryParams?: { username?: string | null; password?: string | null; } | null,
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+      $config?: Omit<UseQueryOptions<APIResponse<string>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<string>(
-        cacheUrl,
-        () => userClient.loginUser(queryParams, $httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<string>, TError, TData>({
+        queryKey: user.queryKeys.loginUser(queryParams, ),
+        queryFn: () => userClient.loginUser(queryParams, $httpConfig),
+        ...$config
+      });
     },
 
-  /** Logs out current logged in user session */
-    useLogoutUser(
-      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
+  /** Logs out current logged in user session
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useLogoutUser<TData = APIResponse<unknown>, TError = Error>(
+      $config?: Omit<UseQueryOptions<APIResponse<unknown>, TError, TData>, 'queryKey' | 'queryFn'>,
       $httpConfig?: XiorRequestConfig    ) {
-      const { key, ...config } = $config || {};
-      const cacheUrl = key ?? user.queryKeys.logoutUser();
-
-      const { data, error, isLoading, isValidating, mutate } = useSWR<unknown>(
-        cacheUrl,
-        () => userClient.logoutUser($httpConfig).then((resp) => resp.data),
-        config
-      );
-
-      return { data, isLoading, isValidating, error, mutate };
+      return useQuery<APIResponse<unknown>, TError, TData>({
+        queryKey: user.queryKeys.logoutUser(),
+        queryFn: () => userClient.logoutUser($httpConfig),
+        ...$config
+      });
     },
 
   },
@@ -703,47 +679,47 @@ export const user = {
     * Create user
     * This can only be done by the logged in user.
     * @param body (optional)
-    */
-    useCreateUser(
-      $config?: SWRMutationConfiguration<User, Error, string, { body?: User | null }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useCreateUser<TData = APIResponse<User>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<User>, TError, { body?: User | null }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<User, Error, string, { body?: User | null }>(
-        '/user',
-        (_key: string, { arg }: { arg: { body?: User | null } }) =>
-          userClient.createUser(arg.body, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<User>, TError, { body?: User | null }>({
+        mutationFn: (vars) => userClient.createUser(vars.body, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Creates list of users with given input array
     * @param body (optional)
-    */
-    useCreateUsersWithListInput(
-      $config?: SWRMutationConfiguration<User, Error, string, { body?: User[] | null }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useCreateUsersWithListInput<TData = APIResponse<User>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<User>, TError, { body?: User[] | null }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<User, Error, string, { body?: User[] | null }>(
-        '/user/createWithList',
-        (_key: string, { arg }: { arg: { body?: User[] | null } }) =>
-          userClient.createUsersWithListInput(arg.body, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<User>, TError, { body?: User[] | null }>({
+        mutationFn: (vars) => userClient.createUsersWithListInput(vars.body, $httpConfig),
+        ...$config
+      });
     },
 
    /**
     * Delete user
     * This can only be done by the logged in user.
     * @param username - The name that needs to be deleted
-    */
-    useDeleteUser(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { username: string }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useDeleteUser<TData = APIResponse<unknown>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<unknown>, TError, { username: string }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { username: string }>(
-        '/user/*',
-        (_key: string, { arg }: { arg: { username: string } }) =>
-          userClient.deleteUser(arg.username, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<unknown>, TError, { username: string }>({
+        mutationFn: (vars) => userClient.deleteUser(vars.username, $httpConfig),
+        ...$config
+      });
     },
 
    /**
@@ -751,24 +727,24 @@ export const user = {
     * This can only be done by the logged in user.
     * @param body (optional)
     * @param username - name that needs to be updated
-    */
-    useUpdateUser(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { body: FormData | null; username: string }>,
+    * @param $config (optional) Additional configuration for TanStack Query
+    * @param $httpConfig (optional) Additional HTTP client configuration (passed to the underlying XiorRequestConfig)
+   */
+    useUpdateUser<TData = APIResponse<unknown>, TError = Error>(
+      $config?: UseMutationOptions<APIResponse<unknown>, TError, { body: FormData | null; username: string }>,
       $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { body: FormData | null; username: string }>(
-        '/user/*',
-        (_key: string, { arg }: { arg: { body: FormData | null; username: string } }) =>
-          userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) => resp.data),
-        $config
-      );
+      return useMutation<APIResponse<unknown>, TError, { body: FormData | null; username: string }>({
+        mutationFn: (vars) => userClient.updateUser(vars.body, vars.username, $httpConfig),
+        ...$config
+      });
     },
 
   },
 
   queryKeys: {
-    userByName: (username: string, ) => `/user/${encodeURIComponent(`${username}`)}`,
-    loginUser: (queryParams?: { username?: string | null; password?: string | null; } | null, ) => `/user/login?${encodeParams({'username': queryParams?.username, 'password': queryParams?.password, })}`,
-    logoutUser: () => `/user/logout`,
+    userByName: (username: string, ) => ['user', 'userUserByName', username] as const,
+    loginUser: (queryParams?: { username?: string | null; password?: string | null; } | null, ) => ['user', 'userLoginUser', queryParams] as const,
+    logoutUser: () => ['user', 'userLogoutUser'] as const,
   },
 };
 export { encodeParams } from 'xior';

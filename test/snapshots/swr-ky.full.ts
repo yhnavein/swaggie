@@ -17,33 +17,34 @@ interface SwrConfig extends SWRConfiguration {
   /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
   key?: SWRKey;
 }
-import xior, { type XiorResponse, type XiorRequestConfig, encodeParams } from "xior";
+import ky, { type Options as KyOptions } from 'ky';
 
-export const http = xior.create({
-  baseURL: '',
-  paramsSerializer: (params: any) =>
-    encodeParams(params, true, null, {
-      allowDots: true,
-      arrayFormat: 'repeat',
-    }),
+export const http = ky.create({
+  prefix: '',
 });
-
+export interface APIResponse<T> {
+  data: T;
+  headers: Headers;
+  status: number;
+}
 export const petClient = {
    /**
   * Add a new pet to the store
   * @param body
   */
   addPet(body: Pet ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet>> {
-    const url = `/pet`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Pet>> {
+    const url = `pet`;
 
-    return http.request<Pet>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Pet,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -53,18 +54,20 @@ export const petClient = {
   */
   deletePet(apiKey: string | null | undefined,
     petId: number ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<unknown>> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'DELETE',
+    return http.delete(url, {
       headers: {
         'api_key': apiKey,
       },
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as unknown,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -73,14 +76,12 @@ export const petClient = {
   * @param queryParams (optional) - Grouped query parameters object (status, name, type, owner, sortBy, order, page, limit, city, registrationDate)
   */
   findPets(queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet[]>> {
-    const url = `/pet/find`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Pet[]>> {
+    const url = `pet/find`;
 
-    return http.request<Pet[]>({
-      url: url,
-      method: 'GET',
-      params: {
+    return http.get(url, {
+      searchParams: encodeParams({
         'status': queryParams?.status,
         'name': queryParams?.name,
         'type': queryParams?.type,
@@ -91,9 +92,13 @@ export const petClient = {
         'limit': queryParams?.limit,
         'city': queryParams?.city,
         'registrationDate': queryParams?.registrationDate,
-      },
+      }),
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Pet[],
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -103,18 +108,20 @@ export const petClient = {
   * @param tags (optional) - Tags to filter by
   */
   findPetsByTags(tags?: string[] | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet[]>> {
-    const url = `/pet/findByTags`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Pet[]>> {
+    const url = `pet/findByTags`;
 
-    return http.request<Pet[]>({
-      url: url,
-      method: 'GET',
-      params: {
+    return http.get(url, {
+      searchParams: encodeParams({
         'tags': tags,
-      },
+      }),
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Pet[],
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -123,15 +130,17 @@ export const petClient = {
   * @param petId - ID of the pet
   */
   getPetById(petId: number ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet>> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Pet>> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return http.request<Pet>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Pet,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -139,19 +148,21 @@ export const petClient = {
   * @param body
   */
   updatePet(body: Pet ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Pet>> {
-    const url = `/pet`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Pet>> {
+    const url = `pet`;
 
-    return http.request<Pet>({
-      url: url,
-      method: 'PUT',
-      data: new URLSearchParams(body as any),
+    return http.put(url, {
+      body: new URLSearchParams(body as any),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Pet,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -161,19 +172,21 @@ export const petClient = {
   */
   updatePetWithForm(petId: number ,
     queryParams?: { name?: string | null; status?: string | null; } | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<unknown>> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'POST',
-      params: {
+    return http.post(url, {
+      searchParams: encodeParams({
         'name': queryParams?.name,
         'status': queryParams?.status,
-      },
+      }),
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as unknown,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -185,19 +198,21 @@ export const petClient = {
   uploadFile(body: File | null | undefined,
     petId: number ,
     additionalMetadata?: string | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<File>> {
-    const url = `/pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
+    $config?: KyOptions
+  ): Promise<APIResponse<File>> {
+    const url = `pet/${encodeURIComponent(`${petId}`)}/uploadImage`;
 
-    return http.request<File>({
-      url: url,
-      method: 'POST',
-      data: body,
-      params: {
+    return http.post(url, {
+      body: body,
+      searchParams: encodeParams({
         'additionalMetadata': additionalMetadata,
-      },
+      }),
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.blob()) as File,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
   };
@@ -213,13 +228,13 @@ export const pet = {
     useFindPets(
       queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet[]>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Pet[]>>(
         cacheUrl,
-        () => petClient.findPets(queryParams, $httpConfig).then((resp) => resp.data),
+        () => petClient.findPets(queryParams, $httpConfig),
         config
       );
 
@@ -235,13 +250,13 @@ export const pet = {
     useFindPetsByTags(
       tags?: string[] | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet[]>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Pet[]>>(
         cacheUrl,
-        () => petClient.findPetsByTags(tags, $httpConfig).then((resp) => resp.data),
+        () => petClient.findPetsByTags(tags, $httpConfig),
         config
       );
 
@@ -256,13 +271,13 @@ export const pet = {
     usePetById(
       petId: number,
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.petById(petId, );
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Pet>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Pet>>(
         cacheUrl,
-        () => petClient.getPetById(petId, $httpConfig).then((resp) => resp.data),
+        () => petClient.getPetById(petId, $httpConfig),
         config
       );
 
@@ -277,12 +292,12 @@ export const pet = {
     * @param body
     */
     useAddPet(
-      $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<Pet, Error, string, { body: Pet }>(
+      $config?: SWRMutationConfiguration<APIResponse<Pet>, Error, string, { body: Pet }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<Pet>, Error, string, { body: Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: Pet } }) =>
-          petClient.addPet(arg.body, $httpConfig).then((resp) => resp.data),
+          petClient.addPet(arg.body, $httpConfig),
         $config
       );
     },
@@ -293,12 +308,12 @@ export const pet = {
     * @param petId - ID of the pet
     */
     useDeletePet(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { apiKey: string | null; petId: number }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { apiKey: string | null; petId: number }>(
+      $config?: SWRMutationConfiguration<APIResponse<unknown>, Error, string, { apiKey: string | null; petId: number }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<unknown>, Error, string, { apiKey: string | null; petId: number }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { apiKey: string | null; petId: number } }) =>
-          petClient.deletePet(arg.apiKey, arg.petId, $httpConfig).then((resp) => resp.data),
+          petClient.deletePet(arg.apiKey, arg.petId, $httpConfig),
         $config
       );
     },
@@ -308,12 +323,12 @@ export const pet = {
     * @param body
     */
     useUpdatePet(
-      $config?: SWRMutationConfiguration<Pet, Error, string, { body: Pet }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<Pet, Error, string, { body: Pet }>(
+      $config?: SWRMutationConfiguration<APIResponse<Pet>, Error, string, { body: Pet }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<Pet>, Error, string, { body: Pet }>(
         '/pet',
         (_key: string, { arg }: { arg: { body: Pet } }) =>
-          petClient.updatePet(arg.body, $httpConfig).then((resp) => resp.data),
+          petClient.updatePet(arg.body, $httpConfig),
         $config
       );
     },
@@ -324,12 +339,12 @@ export const pet = {
     * @param queryParams (optional) - Grouped query parameters object (name, status)
     */
     useUpdatePetWithForm(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>(
+      $config?: SWRMutationConfiguration<APIResponse<unknown>, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<unknown>, Error, string, { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null }>(
         '/pet/*',
         (_key: string, { arg }: { arg: { petId: number; queryParams?: { name?: string | null; status?: string | null; } | null } }) =>
-          petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig).then((resp) => resp.data),
+          petClient.updatePetWithForm(arg.petId, arg.queryParams, $httpConfig),
         $config
       );
     },
@@ -341,12 +356,12 @@ export const pet = {
     * @param additionalMetadata (optional) - Additional Metadata
     */
     useUploadFile(
-      $config?: SWRMutationConfiguration<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<File, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
+      $config?: SWRMutationConfiguration<APIResponse<File>, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<File>, Error, string, { body: File | null; petId: number; additionalMetadata?: string | null }>(
         '/pet/*/uploadImage',
         (_key: string, { arg }: { arg: { body: File | null; petId: number; additionalMetadata?: string | null } }) =>
-          petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig).then((resp) => resp.data),
+          petClient.uploadFile(arg.body, arg.petId, arg.additionalMetadata, $httpConfig),
         $config
       );
     },
@@ -366,30 +381,34 @@ export const storeClient = {
   * @param orderId - ID of the order that needs to be deleted
   */
   deleteOrder(orderId: number ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<unknown>> {
+    const url = `store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'DELETE',
+    return http.delete(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as unknown,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
   * Returns pet inventories by status
   * Returns a map of status codes to quantities
   */
-  getInventory($config?: XiorRequestConfig
-  ): Promise<XiorResponse<Record<string, number>>> {
-    const url = `/store/inventory`;
+  getInventory($config?: KyOptions
+  ): Promise<APIResponse<Record<string, number>>> {
+    const url = `store/inventory`;
 
-    return http.request<Record<string, number>>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Record<string, number>,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -398,15 +417,17 @@ export const storeClient = {
   * @param orderId - ID of order that needs to be fetched
   */
   getOrderById(orderId: number ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Order>> {
-    const url = `/store/order/${encodeURIComponent(`${orderId}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Order>> {
+    const url = `store/order/${encodeURIComponent(`${orderId}`)}`;
 
-    return http.request<Order>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Order,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -415,16 +436,18 @@ export const storeClient = {
   * @param body (optional)
   */
   placeOrder(body?: Order | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<Order>> {
-    const url = `/store/order`;
+    $config?: KyOptions
+  ): Promise<APIResponse<Order>> {
+    const url = `store/order`;
 
-    return http.request<Order>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as Order,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
   };
@@ -438,13 +461,13 @@ export const store = {
     */
     useInventory(
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.inventory();
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Record<string, number>>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Record<string, number>>>(
         cacheUrl,
-        () => storeClient.getInventory($httpConfig).then((resp) => resp.data),
+        () => storeClient.getInventory($httpConfig),
         config
       );
 
@@ -459,13 +482,13 @@ export const store = {
     useOrderById(
       orderId: number,
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<Order>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Order>>(
         cacheUrl,
-        () => storeClient.getOrderById(orderId, $httpConfig).then((resp) => resp.data),
+        () => storeClient.getOrderById(orderId, $httpConfig),
         config
       );
 
@@ -481,12 +504,12 @@ export const store = {
     * @param orderId - ID of the order that needs to be deleted
     */
     useDeleteOrder(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { orderId: number }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { orderId: number }>(
+      $config?: SWRMutationConfiguration<APIResponse<unknown>, Error, string, { orderId: number }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<unknown>, Error, string, { orderId: number }>(
         '/store/order/*',
         (_key: string, { arg }: { arg: { orderId: number } }) =>
-          storeClient.deleteOrder(arg.orderId, $httpConfig).then((resp) => resp.data),
+          storeClient.deleteOrder(arg.orderId, $httpConfig),
         $config
       );
     },
@@ -497,12 +520,12 @@ export const store = {
     * @param body (optional)
     */
     usePlaceOrder(
-      $config?: SWRMutationConfiguration<Order, Error, string, { body?: Order | null }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<Order, Error, string, { body?: Order | null }>(
+      $config?: SWRMutationConfiguration<APIResponse<Order>, Error, string, { body?: Order | null }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<Order>, Error, string, { body?: Order | null }>(
         '/store/order',
         (_key: string, { arg }: { arg: { body?: Order | null } }) =>
-          storeClient.placeOrder(arg.body, $httpConfig).then((resp) => resp.data),
+          storeClient.placeOrder(arg.body, $httpConfig),
         $config
       );
     },
@@ -521,16 +544,18 @@ export const userClient = {
   * @param body (optional)
   */
   createUser(body?: User | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<User>> {
-    const url = `/user`;
+    $config?: KyOptions
+  ): Promise<APIResponse<User>> {
+    const url = `user`;
 
-    return http.request<User>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as User,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -538,16 +563,18 @@ export const userClient = {
   * @param body (optional)
   */
   createUsersWithListInput(body?: User[] | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<User>> {
-    const url = `/user/createWithList`;
+    $config?: KyOptions
+  ): Promise<APIResponse<User>> {
+    const url = `user/createWithList`;
 
-    return http.request<User>({
-      url: url,
-      method: 'POST',
-      data: body,
+    return http.post(url, {
+      json: body,
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as User,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -556,15 +583,17 @@ export const userClient = {
   * @param username - The name that needs to be deleted
   */
   deleteUser(username: string ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    const url = `/user/${encodeURIComponent(`${username}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<unknown>> {
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'DELETE',
+    return http.delete(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as unknown,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -572,15 +601,17 @@ export const userClient = {
   * @param username - The name that needs to be fetched. Use user1 for testing.
   */
   getUserByName(username: string ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<User>> {
-    const url = `/user/${encodeURIComponent(`${username}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<User>> {
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return http.request<User>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as User,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -588,31 +619,35 @@ export const userClient = {
   * @param queryParams (optional) - Grouped query parameters object (username, password)
   */
   loginUser(queryParams?: { username?: string | null; password?: string | null; } | null,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<string>> {
-    const url = `/user/login`;
+    $config?: KyOptions
+  ): Promise<APIResponse<string>> {
+    const url = `user/login`;
 
-    return http.request<string>({
-      url: url,
-      method: 'GET',
-      params: {
+    return http.get(url, {
+      searchParams: encodeParams({
         'username': queryParams?.username,
         'password': queryParams?.password,
-      },
+      }),
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as string,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
   /** Logs out current logged in user session */
-  logoutUser($config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    const url = `/user/logout`;
+  logoutUser($config?: KyOptions
+  ): Promise<APIResponse<unknown>> {
+    const url = `user/logout`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'GET',
+    return http.get(url, {
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as unknown,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
    /**
@@ -623,16 +658,18 @@ export const userClient = {
   */
   updateUser(body: FormData | null | undefined,
     username: string ,
-    $config?: XiorRequestConfig
-  ): Promise<XiorResponse<unknown>> {
-    const url = `/user/${encodeURIComponent(`${username}`)}`;
+    $config?: KyOptions
+  ): Promise<APIResponse<unknown>> {
+    const url = `user/${encodeURIComponent(`${username}`)}`;
 
-    return http.request<unknown>({
-      url: url,
-      method: 'PUT',
-      data: body,
+    return http.put(url, {
+      body: body,
       ...$config,
-    });
+    }).then(async (response) => ({
+      data: (await response.json()) as unknown,
+      headers: response.headers,
+      status: response.status,
+    }));
   },
 
   };
@@ -647,13 +684,13 @@ export const user = {
     useUserByName(
       username: string,
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.userByName(username, );
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<User>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<User>>(
         cacheUrl,
-        () => userClient.getUserByName(username, $httpConfig).then((resp) => resp.data),
+        () => userClient.getUserByName(username, $httpConfig),
         config
       );
 
@@ -667,13 +704,13 @@ export const user = {
     useLoginUser(
       queryParams?: { username?: string | null; password?: string | null; } | null,
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<string>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<string>>(
         cacheUrl,
-        () => userClient.loginUser(queryParams, $httpConfig).then((resp) => resp.data),
+        () => userClient.loginUser(queryParams, $httpConfig),
         config
       );
 
@@ -683,13 +720,13 @@ export const user = {
   /** Logs out current logged in user session */
     useLogoutUser(
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
-      $httpConfig?: XiorRequestConfig    ) {
+      $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.logoutUser();
 
-      const { data, error, isLoading, isValidating, mutate } = useSWR<unknown>(
+      const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<unknown>>(
         cacheUrl,
-        () => userClient.logoutUser($httpConfig).then((resp) => resp.data),
+        () => userClient.logoutUser($httpConfig),
         config
       );
 
@@ -705,12 +742,12 @@ export const user = {
     * @param body (optional)
     */
     useCreateUser(
-      $config?: SWRMutationConfiguration<User, Error, string, { body?: User | null }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<User, Error, string, { body?: User | null }>(
+      $config?: SWRMutationConfiguration<APIResponse<User>, Error, string, { body?: User | null }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<User>, Error, string, { body?: User | null }>(
         '/user',
         (_key: string, { arg }: { arg: { body?: User | null } }) =>
-          userClient.createUser(arg.body, $httpConfig).then((resp) => resp.data),
+          userClient.createUser(arg.body, $httpConfig),
         $config
       );
     },
@@ -720,12 +757,12 @@ export const user = {
     * @param body (optional)
     */
     useCreateUsersWithListInput(
-      $config?: SWRMutationConfiguration<User, Error, string, { body?: User[] | null }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<User, Error, string, { body?: User[] | null }>(
+      $config?: SWRMutationConfiguration<APIResponse<User>, Error, string, { body?: User[] | null }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<User>, Error, string, { body?: User[] | null }>(
         '/user/createWithList',
         (_key: string, { arg }: { arg: { body?: User[] | null } }) =>
-          userClient.createUsersWithListInput(arg.body, $httpConfig).then((resp) => resp.data),
+          userClient.createUsersWithListInput(arg.body, $httpConfig),
         $config
       );
     },
@@ -736,12 +773,12 @@ export const user = {
     * @param username - The name that needs to be deleted
     */
     useDeleteUser(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { username: string }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { username: string }>(
+      $config?: SWRMutationConfiguration<APIResponse<unknown>, Error, string, { username: string }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<unknown>, Error, string, { username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { username: string } }) =>
-          userClient.deleteUser(arg.username, $httpConfig).then((resp) => resp.data),
+          userClient.deleteUser(arg.username, $httpConfig),
         $config
       );
     },
@@ -753,12 +790,12 @@ export const user = {
     * @param username - name that needs to be updated
     */
     useUpdateUser(
-      $config?: SWRMutationConfiguration<unknown, Error, string, { body: FormData | null; username: string }>,
-      $httpConfig?: XiorRequestConfig    ) {
-      return useSWRMutation<unknown, Error, string, { body: FormData | null; username: string }>(
+      $config?: SWRMutationConfiguration<APIResponse<unknown>, Error, string, { body: FormData | null; username: string }>,
+      $httpConfig?: KyOptions    ) {
+      return useSWRMutation<APIResponse<unknown>, Error, string, { body: FormData | null; username: string }>(
         '/user/*',
         (_key: string, { arg }: { arg: { body: FormData | null; username: string } }) =>
-          userClient.updateUser(arg.body, arg.username, $httpConfig).then((resp) => resp.data),
+          userClient.updateUser(arg.body, arg.username, $httpConfig),
         $config
       );
     },
@@ -771,7 +808,80 @@ export const user = {
     logoutUser: () => `/user/logout`,
   },
 };
-export { encodeParams } from 'xior';
+
+/**
+ * Serializes a params object into a query string that is compatible with different REST APIs.
+ * Implementation from: https://github.com/suhaotian/xior/blob/main/src/utils.ts
+ * Kudos to @suhaotian for the original implementation
+ */
+function _encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  if (params === undefined || params === null) return '';
+  const encodedParams: string[] = [];
+  const paramsIsArray = Array.isArray(params);
+  const { arrayFormat, allowDots, serializeDate } = options || {};
+
+  const getKey = (key: string) => {
+    if (allowDots && !paramsIsArray) return `.${key}`;
+    if (paramsIsArray) {
+      if (arrayFormat === 'brackets') {
+        return '[]';
+      }
+      if (arrayFormat === 'repeat') {
+        return '';
+      }
+    }
+    return `[${key}]`;
+  };
+
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      let value = (params as any)[key];
+      if (value !== undefined) {
+        const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);
+
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+        if (!isNaN(value) && value instanceof Date) {
+          value = serializeDate ? serializeDate(value) : value.toISOString();
+        }
+        if (typeof value === 'object') {
+          // If the value is an object or array, recursively encode its contents
+          const result = _encodeParams(value, encodedKey, options);
+          if (result !== '') encodedParams.push(result);
+        } else {
+          // Otherwise, encode the key-value pair
+          encodedParams.push(`${encodeURIComponent(encodedKey)}=${encodeURIComponent(value)}`);
+        }
+      }
+    }
+  }
+
+  return encodedParams.join('&');
+}
+
+/** Serializes a params object into a query string. Options override the generated defaults (allowDots, arrayFormat). */
+export function encodeParams<T = any>(
+  params: T,
+  parentKey: string | null = null,
+  options?: {
+    allowDots?: boolean;
+    serializeDate?: (value: Date) => string;
+    arrayFormat?: 'indices' | 'repeat' | 'brackets';
+  }
+): string {
+  return _encodeParams(params, parentKey, {
+    allowDots: true,
+    arrayFormat: 'repeat',
+    ...options,
+  });
+}
 export interface Order {
   /** @format int64 */
   id?: number;

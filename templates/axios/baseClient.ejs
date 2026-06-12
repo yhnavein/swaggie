@@ -1,4 +1,4 @@
-import Axios, { type AxiosPromise, type AxiosRequestConfig } from "axios";
+import Axios, { type AxiosPromise, type AxiosRequestConfig<% if (it.responseShape === 'full') { %>, type AxiosResponse<% } %> } from "axios";
 
 export const axios = Axios.create({
   baseURL: '<%= it.baseUrl || '' %>',
@@ -8,4 +8,11 @@ export const axios = Axios.create({
       arrayFormat: '<%= it.arrayFormat %>',
     }),
 });
+<% if (it.responseShape === 'full') { %>
+export interface <%= it.apiResponseType %><T> {
+  data: T;
+  headers: AxiosResponse<T>['headers'];
+  status: number;
+}
+<% } %>
 

@@ -132,6 +132,20 @@ export interface ClientOptions {
 
   /** Excludes specific operations from code generation by tag or operationId */
   exclude?: ExcludeOptions;
+
+  /**
+   * Controls the shape of the value each generated operation returns.
+   * - `undefined` (default) — leave each template's current return shape untouched
+   *   (non-breaking). axios/xior return their full native response, while
+   *   fetch/ky/ng return the response body only.
+   * - `'body'` — standardize every template to return just the response body (`T`).
+   * - `'full'` — standardize every template to return a unified `APIResponse<T>`
+   *   wrapper exposing `data`, `headers` (template-native type) and `statusCode`.
+   *
+   * Any explicit value (`'body'` or `'full'`) is a deliberate, potentially
+   * breaking change relative to the template's default return shape.
+   */
+  responseShape?: ResponseShape;
 }
 
 export interface CliOptions extends Omit<FullAppOptions, 'enumNamesStyle'> {
@@ -179,6 +193,12 @@ export type SchemaDeclarationStyle = 'interface' | 'type';
 export type EnumDeclarationStyle = 'union' | 'enum';
 export type EnumNamesStyle = 'original' | 'PascalCase';
 export type TestingFramework = 'vitest' | 'jest';
+/**
+ * Controls the shape of the value each generated operation returns.
+ * `'body'` returns the response body (`T`); `'full'` returns an `APIResponse<T>`
+ * wrapper. When unset, each template keeps its current default return shape.
+ */
+export type ResponseShape = 'body' | 'full';
 
 /**
  * Internal options type used throughout the app after `prepareAppOptions` has run.

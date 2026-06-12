@@ -24,6 +24,16 @@ import type {
 import { prepareJsDocsForOperation } from './jsDocs';
 
 /**
+ * Name of the generated wrapper interface emitted when `responseShape: 'full'`.
+ * Exposed to templates as `it.apiResponseType` so the name lives in one place.
+ *
+ * NOTE: like the 3rd-party type imports (e.g. `AxiosRequestConfig`), this name is
+ * not currently guarded against collisions with a user-defined schema of the same
+ * name. Keep it stable and reasonably unique.
+ */
+const API_RESPONSE_TYPE = 'APIResponse';
+
+/**
  * Function that will analyze paths in the spec and generate the code for all the operations.
  *
  * @param relativeSetupImport - When `--clientSetup` is active for the ky template, the relative
@@ -45,6 +55,8 @@ export default async function generateOperations(
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,
+    responseShape: options.responseShape,
+    apiResponseType: API_RESPONSE_TYPE,
     // For the ky+setup variant, embed the relative import to the setup file
     ...(isKyWithSetup && relativeSetupImport ? { relativeSetupImport } : {}),
   };
@@ -81,7 +93,9 @@ export default async function generateOperations(
       ...clientData,
       servicePrefix,
       httpConfigType: getHttpConfigType(options.template),
-      responseMapper: getResponseMapper(options.template),
+      responseMapper: getResponseMapper(options.template, options.responseShape),
+      responseShape: options.responseShape,
+      apiResponseType: API_RESPONSE_TYPE,
       // For the ky+setup variant, operations call getKyHttp() instead of the
       // module-level `http` singleton.
       httpAccessor: isKyWithSetup ? 'getKyHttp()' : 'http',
@@ -157,6 +171,8 @@ export async function generateHooks(
     servicePrefix,
     baseUrl: options.baseUrl,
     ...options.queryParamsSerialization,
+    responseShape: options.responseShape,
+    apiResponseType: API_RESPONSE_TYPE,
   };
 
   // L2 base client contains the reactive library imports (useSWR, useQuery, etc.)
@@ -191,7 +207,9 @@ export async function generateHooks(
       ...clientData,
       servicePrefix,
       httpConfigType: getHttpConfigType(options.template),
-      responseMapper: getResponseMapper(options.template),
+      responseMapper: getResponseMapper(options.template, options.responseShape),
+      responseShape: options.responseShape,
+      apiResponseType: API_RESPONSE_TYPE,
       // Template helper functions — defined once here, used in all L2 templates.
       toOpName,
       safeOperation,

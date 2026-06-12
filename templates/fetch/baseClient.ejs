@@ -6,4 +6,11 @@ export const defaults = {
       arrayFormat: '<%= it.arrayFormat %>',
     }),
 };
+<% if (it.responseShape === 'full') { %>
+export interface <%= it.apiResponseType %><T> {
+  data: T;
+  headers: Headers;
+  status: number;
+}
+<% } %>
 

@@ -5,10 +5,15 @@ import generateMocks from '../src/gen/genMocks';
 import { loadAllTemplateFiles } from '../src/utils';
 import { validateTemplate, normalizeTemplate } from '../src/utils/templateValidator';
 import { APP_DEFAULTS } from '../src/swagger';
-import type { FullAppOptions, TemplateInput, TestingFramework } from '../src/types';
+import type { FullAppOptions, ResponseShape, TemplateInput, TestingFramework } from '../src/types';
 import type { AppOptions } from '../src/types';
 
 type SnapshotEntry = { snapshotName: string; template: TemplateInput };
+type ResponseShapeSnapshotEntry = {
+  snapshotName: string;
+  template: TemplateInput;
+  responseShape: ResponseShape;
+};
 type HooksSnapshotEntry = { snapshotName: string; hooksSnapshotName: string; template: TemplateInput };
 type MockSnapshotEntry = {
   snapshotName: string;
@@ -28,6 +33,26 @@ const snapshots: SnapshotEntry[] = [
   { snapshotName: 'swr-axios', template: ['swr', 'axios'] },
   { snapshotName: 'swr-ky', template: ['swr', 'ky'] },
   { snapshotName: 'tsq', template: ['tsq', 'xior'] },
+];
+
+/**
+ * Snapshots that test the `responseShape` option. `full` is exercised for every
+ * template (it changes output everywhere); `body` is exercised for axios/xior and
+ * an L2 (the cases that actually change vs. the default).
+ */
+const responseShapeSnapshots: ResponseShapeSnapshotEntry[] = [
+  { snapshotName: 'axios.full', template: 'axios', responseShape: 'full' },
+  { snapshotName: 'xior.full', template: 'xior', responseShape: 'full' },
+  { snapshotName: 'fetch.full', template: 'fetch', responseShape: 'full' },
+  { snapshotName: 'ky.full', template: 'ky', responseShape: 'full' },
+  { snapshotName: 'ng1.full', template: 'ng1', responseShape: 'full' },
+  { snapshotName: 'ng2.full', template: 'ng2', responseShape: 'full' },
+  { snapshotName: 'swr-axios.full', template: ['swr', 'axios'], responseShape: 'full' },
+  { snapshotName: 'swr-ky.full', template: ['swr', 'ky'], responseShape: 'full' },
+  { snapshotName: 'tsq.full', template: ['tsq', 'xior'], responseShape: 'full' },
+  { snapshotName: 'axios.body', template: 'axios', responseShape: 'body' },
+  { snapshotName: 'xior.body', template: 'xior', responseShape: 'body' },
+  { snapshotName: 'tsq.body', template: ['tsq', 'xior'], responseShape: 'body' },
 ];
 
 type ClientSetupSnapshotEntry = {
@@ -132,6 +157,28 @@ describe('petstore snapshots', () => {
       expect(existingSnapshot).toBe(generatedCode);
     }
   });
+});
+
+describe('petstore responseShape snapshots', () => {
+  for (const { snapshotName, template, responseShape } of responseShapeSnapshots) {
+    test(`should match existing ${snapshotName} snapshot`, async () => {
+      const snapshotFile = `./test/snapshots/${snapshotName}.ts`;
+      const parameters: FullAppOptions = {
+        ...BASE_PARAMS,
+        template: template as any,
+        responseShape,
+      };
+
+      const [generatedCode] = await runCodeGenerator(parameters);
+
+      if (process.env.UPDATE_SNAPSHOTS) {
+        await Bun.file(snapshotFile).write(generatedCode);
+      } else {
+        const existingSnapshot = await Bun.file(snapshotFile).text();
+        expect(existingSnapshot).toBe(generatedCode);
+      }
+    });
+  }
 });
 
 describe('petstore split-file (hooksOut) snapshots', () => {

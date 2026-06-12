@@ -1,4 +1,4 @@
-import type { IHttpService, IRequestShortcutConfig, IPromise } from 'angular';
+import type { IHttpService, IRequestShortcutConfig, IPromise<% if (it.responseShape === 'full') { %>, IHttpHeadersGetter<% } %> } from 'angular';
 
 abstract class BaseService {
   constructor(protected readonly $http: IHttpService, public baseUrl: string) { }
@@ -88,6 +88,63 @@ abstract class BaseService {
       });
   }
 
+<% if (it.responseShape === 'full') { %>
+  protected $getFull<T>(
+    url: string,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.get(this.baseUrl + url, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected $deleteFull<T>(
+    url: string,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.delete(this.baseUrl + url, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected $headFull<T>(
+    url: string,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.head(this.baseUrl + url, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected $jsonpFull<T>(
+    url: string,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.jsonp(this.baseUrl + url, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected $postFull<T>(
+    url: string,
+    data: any,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.post(this.baseUrl + url, data, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected $putFull<T>(
+    url: string,
+    data: any,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.put(this.baseUrl + url, data, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected $patchFull<T>(
+    url: string,
+    data: any,
+    config?: IRequestShortcutConfig
+  ): IPromise<<%= it.apiResponseType %><T>> {
+    return this.$http.patch(this.baseUrl + url, data, config).then((response: any) => this.processFull<T>(response));
+  }
+
+  protected processFull<T>(response: any): <%= it.apiResponseType %><T> {
+    return { data: response.data, headers: response.headers, status: response.status };
+  }
+<% } %>
   protected processSingle<T>(response: any): T {
     var data = response.data;
     var status = response.status;
@@ -110,4 +167,11 @@ abstract class BaseService {
     }
   }
 }
+<% if (it.responseShape === 'full') { %>
+export interface <%= it.apiResponseType %><T> {
+  data: T;
+  headers: IHttpHeadersGetter;
+  status: number;
+}
+<% } %>
 

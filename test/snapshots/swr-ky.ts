@@ -10,12 +10,12 @@
 // biome-ignore-all lint: auto-generated code
 // deno-lint-ignore-file
 
-import useSWR, { type SWRConfiguration, type Key } from 'swr';
+import useSWR, { type SWRConfiguration, type Key as SWRKey } from 'swr';
 import useSWRMutation, { type SWRMutationConfiguration } from 'swr/mutation';
 
 interface SwrConfig extends SWRConfiguration {
   /* Custom key for SWR. You don't have to worry about this as by default it's the URL. You can use standard SWR Key here if you need more flexibility. */
-  key?: Key;
+  key?: SWRKey;
 }
 import ky, { type Options as KyOptions } from 'ky';
 
@@ -190,7 +190,7 @@ export const pet = {
     */
     useFindPets(
       queryParams?: { status?: "available" | "pending" | "sold" | null; name?: string | null; type?: string | null; owner?: string | null; sortBy?: string | null; order?: "asc" | "desc" | null; page?: number | null; limit?: number | null; city?: string | null; registrationDate?: Date | null; } | null,
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
@@ -212,7 +212,7 @@ export const pet = {
     */
     useFindPetsByTags(
       tags?: string[] | null,
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
@@ -233,7 +233,7 @@ export const pet = {
     */
     usePetById(
       petId: number,
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? pet.queryKeys.petById(petId, );
@@ -407,7 +407,7 @@ export const store = {
     * Returns a map of status codes to quantities
     */
     useInventory(
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.inventory();
@@ -428,7 +428,7 @@ export const store = {
     */
     useOrderById(
       orderId: number,
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
@@ -602,7 +602,7 @@ export const user = {
     */
     useUserByName(
       username: string,
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.userByName(username, );
@@ -622,7 +622,7 @@ export const user = {
     */
     useLoginUser(
       queryParams?: { username?: string | null; password?: string | null; } | null,
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
@@ -638,7 +638,7 @@ export const user = {
 
   /** Logs out current logged in user session */
     useLogoutUser(
-      $config?: Omit<SwrConfig, 'key'> & { key?: Key },
+      $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: KyOptions    ) {
       const { key, ...config } = $config || {};
       const cacheUrl = key ?? user.queryKeys.logoutUser();
