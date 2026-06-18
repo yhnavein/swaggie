@@ -47,7 +47,7 @@ export const petClient = {
         'api_key': apiKey ?? undefined,
       },
       ...$config,
-    }).json<unknown>();
+    });
   },
 
  /**
@@ -146,7 +146,7 @@ export const petClient = {
         'status': queryParams?.status,
       }),
       ...$config,
-    }).json<unknown>();
+    });
   },
 
  /**
@@ -185,7 +185,7 @@ export const storeClient = {
 
     return http.delete(url, {
       ...$config,
-    }).json<unknown>();
+    });
   },
 
  /**
@@ -277,7 +277,7 @@ export const userClient = {
 
     return http.delete(url, {
       ...$config,
-    }).json<unknown>();
+    });
   },
 
  /**
@@ -319,7 +319,7 @@ export const userClient = {
 
     return http.get(url, {
       ...$config,
-    }).json<unknown>();
+    });
   },
 
  /**
@@ -337,7 +337,7 @@ export const userClient = {
     return http.put(url, {
       body: body,
       ...$config,
-    }).json<unknown>();
+    });
   },
 
 };

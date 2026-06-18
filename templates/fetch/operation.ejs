@@ -1,5 +1,6 @@
 <%
 var parseMethod = it.responseContentType === 'binary' ? 'blob' : (it.responseContentType === 'text' ? 'text' : 'json');
+var hasResponseBody = it.responseContentType !== null;
 var returnTypeWrapped = it.responseShape === 'full'
   ? 'Promise<' + it.apiResponseType + '<' + it.returnType + '>>'
   : 'Promise<' + it.returnType + '>';
@@ -67,10 +68,16 @@ $config?: RequestInit
 <% } %>
 <% if (it.responseShape === 'full') { %>
     .then(async (response) => ({
+<% if (hasResponseBody) { %>
       data: (await response.<%= parseMethod %>()) as <%~ it.returnType %>,
+<% } else { %>
+      data: undefined as <%~ it.returnType %>,
+<% } %>
       headers: response.headers,
       status: response.status,
     }));
+<% } else if(!hasResponseBody) { %>
+    ;
 <% } else { %>
     .then((response) => response.<%= parseMethod %>() as Promise<<%~ it.returnType %>>);
 <% } %>

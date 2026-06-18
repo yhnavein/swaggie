@@ -70,7 +70,7 @@ export const petClient = {
       headers,
       ...$configRest,
     })
-    .then((response) => response.json() as Promise<unknown>);
+    ;
   },
 
  /**
@@ -179,7 +179,7 @@ export const petClient = {
       method: 'POST',
       ...$config,
     })
-    .then((response) => response.json() as Promise<unknown>);
+    ;
   },
 
  /**
@@ -220,7 +220,7 @@ export const storeClient = {
       method: 'DELETE',
       ...$config,
     })
-    .then((response) => response.json() as Promise<unknown>);
+    ;
   },
 
  /**
@@ -351,7 +351,7 @@ export const userClient = {
       method: 'DELETE',
       ...$config,
     })
-    .then((response) => response.json() as Promise<unknown>);
+    ;
   },
 
  /**
@@ -397,7 +397,7 @@ export const userClient = {
       method: 'GET',
       ...$config,
     })
-    .then((response) => response.json() as Promise<unknown>);
+    ;
   },
 
  /**
@@ -417,7 +417,7 @@ export const userClient = {
       body: body,
       ...$config,
     })
-    .then((response) => response.json() as Promise<unknown>);
+    ;
   },
 
 };

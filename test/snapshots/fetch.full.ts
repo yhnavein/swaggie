@@ -80,7 +80,7 @@ export const petClient = {
       ...$configRest,
     })
     .then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -209,7 +209,7 @@ export const petClient = {
       ...$config,
     })
     .then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -258,7 +258,7 @@ export const storeClient = {
       ...$config,
     })
     .then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -413,7 +413,7 @@ export const userClient = {
       ...$config,
     })
     .then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -471,7 +471,7 @@ export const userClient = {
       ...$config,
     })
     .then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -495,7 +495,7 @@ export const userClient = {
       ...$config,
     })
     .then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));

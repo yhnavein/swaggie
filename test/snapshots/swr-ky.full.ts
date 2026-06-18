@@ -64,7 +64,7 @@ export const petClient = {
       },
       ...$config,
     }).then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -183,7 +183,7 @@ export const petClient = {
       }),
       ...$config,
     }).then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -388,7 +388,7 @@ export const storeClient = {
     return http.delete(url, {
       ...$config,
     }).then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -590,7 +590,7 @@ export const userClient = {
     return http.delete(url, {
       ...$config,
     }).then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -644,7 +644,7 @@ export const userClient = {
     return http.get(url, {
       ...$config,
     }).then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
@@ -666,7 +666,7 @@ export const userClient = {
       body: body,
       ...$config,
     }).then(async (response) => ({
-      data: (await response.json()) as unknown,
+      data: undefined as unknown,
       headers: response.headers,
       status: response.status,
     }));
