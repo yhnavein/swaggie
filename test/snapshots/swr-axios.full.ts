@@ -220,7 +220,7 @@ export const pet = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? pet.queryKeys.findPets(queryParams, );
+      const cacheUrl = key !== undefined ? key : pet.queryKeys.findPets(queryParams, );
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Pet[]>>(
         cacheUrl,
@@ -242,7 +242,7 @@ export const pet = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? pet.queryKeys.findPetsByTags(tags, );
+      const cacheUrl = key !== undefined ? key : pet.queryKeys.findPetsByTags(tags, );
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Pet[]>>(
         cacheUrl,
@@ -263,7 +263,7 @@ export const pet = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? pet.queryKeys.petById(petId, );
+      const cacheUrl = key !== undefined ? key : pet.queryKeys.petById(petId, );
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Pet>>(
         cacheUrl,
@@ -445,7 +445,7 @@ export const store = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? store.queryKeys.inventory();
+      const cacheUrl = key !== undefined ? key : store.queryKeys.inventory();
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Record<string, number>>>(
         cacheUrl,
@@ -466,7 +466,7 @@ export const store = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? store.queryKeys.orderById(orderId, );
+      const cacheUrl = key !== undefined ? key : store.queryKeys.orderById(orderId, );
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<Order>>(
         cacheUrl,
@@ -654,7 +654,7 @@ export const user = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? user.queryKeys.userByName(username, );
+      const cacheUrl = key !== undefined ? key : user.queryKeys.userByName(username, );
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<User>>(
         cacheUrl,
@@ -674,7 +674,7 @@ export const user = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? user.queryKeys.loginUser(queryParams, );
+      const cacheUrl = key !== undefined ? key : user.queryKeys.loginUser(queryParams, );
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<string>>(
         cacheUrl,
@@ -690,7 +690,7 @@ export const user = {
       $config?: Omit<SwrConfig, 'key'> & { key?: SWRKey },
       $httpConfig?: AxiosRequestConfig    ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? user.queryKeys.logoutUser();
+      const cacheUrl = key !== undefined ? key : user.queryKeys.logoutUser();
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<APIResponse<unknown>>(
         cacheUrl,

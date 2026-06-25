@@ -8,7 +8,7 @@
       $httpConfig?: <%= it.httpConfigType %>
     ) {
       const { key, ...config } = $config || {};
-      const cacheUrl = key ?? <%= it.clientName %>.queryKeys.<%= it.swrOpName.charAt(3).toLowerCase() + it.swrOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>);
+      const cacheUrl = key !== undefined ? key : <%= it.clientName %>.queryKeys.<%= it.swrOpName.charAt(3).toLowerCase() + it.swrOpName.slice(4) %>(<% it.parameters.forEach((parameter) => { %><%= parameter.name %>, <% }); %>);
 
       const { data, error, isLoading, isValidating, mutate } = useSWR<<%~ dataType %>>(
         cacheUrl,
