@@ -314,4 +314,101 @@ describe('getOperations', () => {
     ];
     expect(res).toEqual(validResp);
   });
+
+  test('should extract Xquik search operation metadata', () => {
+    const spec = getDocument({
+      components: {
+        securitySchemes: {
+          apiKey: {
+            type: 'apiKey',
+            in: 'header',
+            name: 'x-api-key',
+          },
+        },
+      },
+      paths: {
+        '/api/v1/x/tweets/search': {
+          get: {
+            tags: ['Tweets'],
+            operationId: 'searchTweets',
+            security: [{ apiKey: [] }],
+            parameters: [
+              {
+                name: 'q',
+                in: 'query',
+                required: true,
+                schema: { type: 'string' },
+              },
+              {
+                name: 'cursor',
+                in: 'query',
+                schema: { type: 'string' },
+              },
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'integer', maximum: 200 },
+              },
+            ],
+            responses: {
+              200: {
+                description: 'Search results',
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/PaginatedTweets',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const res = getOperations(spec);
+
+    const validResp: ApiOperation[] = [
+      {
+        group: 'Tweets',
+        operationId: 'searchTweets',
+        method: 'get',
+        path: '/api/v1/x/tweets/search',
+        parameters: [
+          {
+            name: 'q',
+            in: 'query',
+            required: true,
+            schema: { type: 'string' },
+          },
+          {
+            name: 'cursor',
+            in: 'query',
+            schema: { type: 'string' },
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            schema: { type: 'integer', maximum: 200 },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Search results',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PaginatedTweets',
+                },
+              },
+            },
+          },
+        },
+        security: [{ apiKey: [] }],
+        tags: ['Tweets'],
+      },
+    ];
+    expect(res).toEqual(validResp);
+  });
 });
