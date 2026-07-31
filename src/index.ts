@@ -187,7 +187,7 @@ function verifyTopLevelDefaults(configUrl: string, defaults: Record<string, unkn
  * Throws if any file-path CLI flags are combined with a multi-config file.
  * Each entry in "configs" must define its own output paths.
  */
-function verifyOptionsForArrayConfig(options: Partial<FullAppOptions>) {
+function verifyOptionsForArrayConfig(options: Partial<FullAppOptions> | Partial<CliOptions>) {
   const blocked: Array<[keyof FullAppOptions, string]> = [
     ['out', '--out'],
     ['hooksOut', '--hooksOut'],

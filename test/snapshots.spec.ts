@@ -6,7 +6,7 @@ import { loadAllTemplateFiles } from '../src/utils';
 import { validateTemplate, normalizeTemplate } from '../src/utils/templateValidator';
 import { APP_DEFAULTS } from '../src/swagger';
 import type { FullAppOptions, ResponseShape, TemplateInput, TestingFramework } from '../src/types';
-import type { AppOptions } from '../src/types';
+import type { AppOptions, CodeGenResult } from '../src/types';
 
 type SnapshotEntry = { snapshotName: string; template: TemplateInput };
 type ResponseShapeSnapshotEntry = {
@@ -121,7 +121,7 @@ describe('petstore snapshots', () => {
         template: template as any,
       };
 
-      const [generatedCode] = await runCodeGenerator(parameters);
+      const [generatedCode] = (await runCodeGenerator(parameters)) as CodeGenResult;
 
       if (process.env.UPDATE_SNAPSHOTS) {
         await Bun.file(snapshotFile).write(generatedCode);
@@ -146,7 +146,7 @@ describe('petstore snapshots', () => {
       schemaDeclarationStyle: 'type',
     };
 
-    const [generatedCode] = await runCodeGenerator(parameters);
+    const [generatedCode] = (await runCodeGenerator(parameters)) as CodeGenResult;
 
     if (process.env.UPDATE_SNAPSHOTS) {
       await Bun.file(snapshotFile).write(generatedCode);
@@ -169,7 +169,7 @@ describe('petstore responseShape snapshots', () => {
         responseShape,
       };
 
-      const [generatedCode] = await runCodeGenerator(parameters);
+      const [generatedCode] = (await runCodeGenerator(parameters)) as CodeGenResult;
 
       if (process.env.UPDATE_SNAPSHOTS) {
         await Bun.file(snapshotFile).write(generatedCode);
@@ -198,7 +198,7 @@ describe('petstore split-file (hooksOut) snapshots', () => {
         useClient: true,
       };
 
-      const [generatedCode] = await runCodeGenerator(parameters);
+      const [generatedCode] = (await runCodeGenerator(parameters)) as CodeGenResult;
 
       // Read the hooks file that was written to disk
       const hooksCode = await Bun.file(hooksOut).text();
@@ -285,7 +285,7 @@ describe('petstore --clientSetup snapshots', () => {
         forceSetup: true,
       };
 
-      const [generatedCode] = await runCodeGenerator(parameters);
+      const [generatedCode] = (await runCodeGenerator(parameters)) as CodeGenResult;
       const setupCode = await Bun.file(setupOut).text();
 
       if (process.env.UPDATE_SNAPSHOTS) {
