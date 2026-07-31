@@ -404,8 +404,11 @@ export interface Order {
   complete?: boolean;
 }
 
-export type Category = { id?: number;
-name?: string; } & Record<string, boolean>;
+export type Category = {
+  /** @format int64 */
+  id?: number;
+  name?: string;
+} & Record<string, boolean>;
 
 export type User = { id: number;
 username?: string;
@@ -430,11 +433,16 @@ export interface Tag {
   name?: string;
 }
 
-export type Pet = { id?: number;
-name: string;
-category?: Category;
-photoUrls: string[] | null;
-tags?: Tag[];
-status?: "available" | "pending" | "sold"; } & Record<string, Item>;
+export type Pet = {
+  /** @format int64 */
+  id?: number;
+  name: string;
+  category?: Category;
+  photoUrls: string[] | null;
+  /** @deprecated */
+  tags?: Tag[];
+  /** pet status in the store */
+  status?: "available" | "pending" | "sold";
+} & Record<string, Item>;
 
 export type Item = Record<string, Tag>;

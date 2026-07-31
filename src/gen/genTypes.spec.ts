@@ -604,7 +604,92 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type WorkspaceAccess = { products?: Record<string, AccessItem>; } & Record<string, AccessItem>;'
+        `export type WorkspaceAccess = {
+  products?: Record<string, AccessItem>;
+} & Record<string, AccessItem>;`
+      );
+    });
+
+    test('should preserve property JSDoc comments with additionalProperties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Pet: {
+            type: 'object',
+            required: ['name'],
+            properties: {
+              id: {
+                type: 'integer',
+                format: 'int64',
+              },
+              name: {
+                type: 'string',
+                description: 'The pet name',
+              },
+              tags: {
+                type: 'array',
+                deprecated: true,
+                items: {
+                  $ref: '#/components/schemas/Tag',
+                },
+              },
+            },
+            additionalProperties: {
+              $ref: '#/components/schemas/Item',
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export type Pet = {
+  /** @format int64 */
+  id?: number;
+  /** The pet name */
+  name: string;
+  /** @deprecated */
+  tags?: Tag[];
+} & Record<string, Item>;`
+      );
+    });
+
+    test('should preserve property JSDoc comments with allOf and additionalProperties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Extended: {
+            allOf: [
+              { $ref: '#/components/schemas/Base' },
+              {
+                type: 'object',
+                properties: {
+                  note: {
+                    type: 'string',
+                    description: 'An extra note',
+                    deprecated: true,
+                  },
+                },
+                additionalProperties: {
+                  $ref: '#/components/schemas/Item',
+                },
+              },
+            ],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export type Extended = Base & {
+  /**
+   * An extra note
+   * @deprecated
+   */
+  note?: string;
+} & Record<string, Item>;`
       );
     });
 

@@ -98,7 +98,6 @@ function renderSchema(
   if ('allOf' in schema) {
     const types = getRefCompositeTypes(schema);
     const mergedSchema = getMergedCompositeObjects(schema);
-    const objectType = getTypeFromSchema(mergedSchema, options, `${schemaContext}.allOf`);
     const objectContents = generateObjectTypeContents(mergedSchema, options, schemaContext);
     const hasAdditionalProperties = !!mergedSchema.additionalProperties;
 
@@ -108,7 +107,14 @@ function renderSchema(
     const requiredPickType = getRequiredPickType(schema, mergedSchema, types);
 
     if (hasAdditionalProperties) {
-      const compositeTypes = [...types, requiredPickType, objectType].filter(Boolean).join(' & ');
+      // Compose the commented object literal (preserving per-property JSDoc, including
+      // @deprecated) with the `Record<string, X>` index signature and any $ref/required
+      // composite types, instead of delegating the whole body to getTypeFromSchema
+      // (which would drop property comments).
+      const recordSuffix = renderAdditionalPropsRecord(mergedSchema, options, schemaContext);
+      const objectLiteral = objectContents ? `{\n${objectContents}\n}` : '';
+      const allTypes = [...types, requiredPickType, objectLiteral, recordSuffix].filter(Boolean);
+      const compositeTypes = allTypes.join(' & ');
       result.push(`export type ${safeName} = ${compositeTypes};`);
       return `${result.join('\n')}\n`;
     }
@@ -147,6 +153,17 @@ function renderSchema(
 
     const objectContents = generateObjectTypeContents(schema, options, schemaContext);
     if (hasAdditionalProperties) {
+      // When the schema also declares named `properties`, compose a commented object
+      // literal (so per-property JSDoc, including @deprecated, is preserved) with the
+      // `Record<string, X>` index signature. Free-form objects (no properties) have
+      // nothing to comment, so we emit the plain type produced by getTypeFromSchema.
+      if (objectContents) {
+        const recordSuffix = renderAdditionalPropsRecord(schema, options, schemaContext);
+        result.push(`export type ${safeName} = {`);
+        result.push(objectContents);
+        return `${result.join('\n')}\n} & ${recordSuffix};\n`;
+      }
+
       result.push(`export type ${safeName} = ${objectType};`);
       return `${result.join('\n')}\n`;
     }
@@ -183,6 +200,28 @@ function generateObjectTypeContents(
   }
 
   return result.join('\n');
+}
+
+/**
+ * Renders the `Record<string, X>` index-signature suffix for a schema that declares
+ * `additionalProperties`. Mirrors the logic in typesExtractor's getTypeFromObject,
+ * but is applied at the top-level schema so we can compose it with a commented
+ * object literal produced by generateObjectTypeContents.
+ */
+function renderAdditionalPropsRecord(
+  schema: OA3.SchemaObject,
+  options: AppOptions,
+  schemaContext: string
+): string {
+  const unknownType = options.preferAny ? 'any' : 'unknown';
+  const extraProps = schema.additionalProperties;
+
+  const valueType =
+    extraProps && extraProps !== true
+      ? getTypeFromSchema(extraProps, options, `${schemaContext}.additionalProperties`)
+      : unknownType;
+
+  return `Record<string, ${valueType}>`;
 }
 
 function generateItemsType(schema: OA3.ReferenceObject | OA3.SchemaObject, options: AppOptions) {
