@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { runCodeGenerator, applyConfigFile, prepareAppOptions } from './';
 import { mockFetchWithFile } from '../test/test.utils';
 
-import type { CliOptions } from './types';
+import type { AppOptions, CliOptions, CodeGenResult } from './types';
 import { APP_DEFAULTS } from './swagger';
 
 describe('runCodeGenerator', () => {
@@ -249,7 +249,7 @@ describe('applyConfigFile', () => {
   test('should use default values', async () => {
     const parameters = { src: './test/petstore-v3.yml', out: './.tmp/test/' };
 
-    const conf = await applyConfigFile(parameters);
+    const conf = (await applyConfigFile(parameters)) as AppOptions;
 
     expect(conf).toBeDefined();
     expect(conf.queryParamsSerialization).toEqual({
@@ -265,7 +265,7 @@ describe('applyConfigFile', () => {
       config: './test/sample-config.json',
     };
 
-    const conf = await applyConfigFile(parameters);
+    const conf = (await applyConfigFile(parameters)) as AppOptions;
 
     expect(conf).toBeDefined();
     expect(conf.baseUrl).toBe('https://google.pl');
@@ -291,7 +291,7 @@ describe('applyConfigFile', () => {
       template: 'fetch',
     };
 
-    const conf = await applyConfigFile(parameters);
+    const conf = (await applyConfigFile(parameters)) as AppOptions;
 
     expect(conf).toBeDefined();
     expect(conf.baseUrl).toBe('https://wp.pl');
@@ -984,7 +984,7 @@ describe('runCodeGenerator — template validation', () => {
       useClient: true,
     };
 
-    const [code] = await runCodeGenerator(parameters as any);
+    const [code] = (await runCodeGenerator(parameters as any)) as CodeGenResult;
     expect(code).toBeDefined();
     expect(code.startsWith("'use client';\n")).toBe(true);
   });
@@ -995,7 +995,7 @@ describe('runCodeGenerator — template validation', () => {
       template: ['swr', 'axios'],
     };
 
-    const [code] = await runCodeGenerator(parameters as any);
+    const [code] = (await runCodeGenerator(parameters as any)) as CodeGenResult;
     expect(code).toBeDefined();
     expect(code.startsWith("'use client'")).toBe(false);
   });
@@ -1007,7 +1007,7 @@ describe('runCodeGenerator — template validation', () => {
       useClient: true,
     };
 
-    const [, opts] = await runCodeGenerator(parameters as any);
+    const [, opts] = (await runCodeGenerator(parameters as any)) as CodeGenResult;
     expect(opts.useClient).toBe(true);
   });
 
@@ -1150,13 +1150,13 @@ describe('runCodeGenerator — template validation', () => {
       const outPath = './.tmp/test/hooks-use-client/api.ts';
       const hooksPath = './.tmp/test/hooks-use-client/hooks.ts';
 
-      const [mainCode] = await runCodeGenerator({
+      const [mainCode] = (await runCodeGenerator({
         src: './test/petstore-v3.yml',
         out: outPath,
         template: ['swr', 'axios'],
         hooksOut: hooksPath,
         useClient: true,
-      } as any);
+      } as any)) as CodeGenResult;
 
       const hooksFile = await Bun.file(hooksPath).text();
 

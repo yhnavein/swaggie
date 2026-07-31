@@ -124,6 +124,51 @@ export type StringEnum = "Active" | "Disabled";`
       );
     });
 
+    test('should emit @deprecated for deprecated schemas and properties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          LegacyModel: {
+            type: 'object',
+            description: 'An old model',
+            deprecated: true,
+            properties: {
+              id: { type: 'string' },
+              oldField: {
+                type: 'string',
+                description: 'Do not use',
+                deprecated: true,
+              },
+              deprecatedOnly: {
+                type: 'string',
+                deprecated: true,
+              },
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+/**
+ * An old model
+ * @deprecated
+ */
+export interface LegacyModel {
+  id?: string;
+  /**
+   * Do not use
+   * @deprecated
+   */
+  oldField?: string;
+  /** @deprecated */
+  deprecatedOnly?: string;
+}`
+      );
+    });
+
     test('should emit TypeScript enums for plain string enums when enabled', () => {
       const res = generateTypes(
         prepareSchemas({
@@ -559,7 +604,92 @@ export enum AccessType {
 
       assertEqualIgnoringWhitespace(
         res,
-        'export type WorkspaceAccess = { products?: Record<string, AccessItem>; } & Record<string, AccessItem>;'
+        `export type WorkspaceAccess = {
+  products?: Record<string, AccessItem>;
+} & Record<string, AccessItem>;`
+      );
+    });
+
+    test('should preserve property JSDoc comments with additionalProperties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Pet: {
+            type: 'object',
+            required: ['name'],
+            properties: {
+              id: {
+                type: 'integer',
+                format: 'int64',
+              },
+              name: {
+                type: 'string',
+                description: 'The pet name',
+              },
+              tags: {
+                type: 'array',
+                deprecated: true,
+                items: {
+                  $ref: '#/components/schemas/Tag',
+                },
+              },
+            },
+            additionalProperties: {
+              $ref: '#/components/schemas/Item',
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export type Pet = {
+  /** @format int64 */
+  id?: number;
+  /** The pet name */
+  name: string;
+  /** @deprecated */
+  tags?: Tag[];
+} & Record<string, Item>;`
+      );
+    });
+
+    test('should preserve property JSDoc comments with allOf and additionalProperties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          Extended: {
+            allOf: [
+              { $ref: '#/components/schemas/Base' },
+              {
+                type: 'object',
+                properties: {
+                  note: {
+                    type: 'string',
+                    description: 'An extra note',
+                    deprecated: true,
+                  },
+                },
+                additionalProperties: {
+                  $ref: '#/components/schemas/Item',
+                },
+              },
+            ],
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `export type Extended = Base & {
+  /**
+   * An extra note
+   * @deprecated
+   */
+  note?: string;
+} & Record<string, Item>;`
       );
     });
 

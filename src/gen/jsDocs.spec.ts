@@ -1,6 +1,6 @@
 import { test, describe, expect } from 'bun:test';
 
-import { prepareJsDocsForOperation, renderComment } from './jsDocs';
+import { buildSchemaComment, prepareJsDocsForOperation, renderComment } from './jsDocs';
 import { assertEqualIgnoringWhitespace } from '../../test/test.utils';
 import { IOperationParam } from './types';
 
@@ -119,6 +119,57 @@ describe('prepareJsDocsForOperation', () => {
   * @param date (optional) (API name: X-Amz-Date)
   */`
     );
+  });
+});
+
+describe('buildSchemaComment', () => {
+  test('should render @deprecated for a deprecated schema without description', () => {
+    const res = buildSchemaComment({ deprecated: true });
+
+    assertEqualIgnoringWhitespace(res, `/** @deprecated */`);
+  });
+
+  test('should render description together with @deprecated', () => {
+    const res = buildSchemaComment({
+      description: 'A legacy field',
+      deprecated: true,
+    });
+
+    assertEqualIgnoringWhitespace(
+      res,
+      `/**
+  * A legacy field
+  * @deprecated
+  */`
+    );
+  });
+
+  test('should place @deprecated after @default and @format', () => {
+    const res = buildSchemaComment({
+      description: 'A legacy field',
+      default: 'foo',
+      format: 'date-time',
+      deprecated: true,
+    });
+
+    assertEqualIgnoringWhitespace(
+      res,
+      `/**
+  * A legacy field
+  * @default "foo"
+  * @format date-time
+  * @deprecated
+  */`
+    );
+  });
+
+  test('should not render @deprecated when schema is not deprecated', () => {
+    const res = buildSchemaComment({
+      description: 'A regular field',
+      deprecated: false,
+    });
+
+    assertEqualIgnoringWhitespace(res, `/** A regular field */`);
   });
 });
 

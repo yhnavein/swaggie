@@ -31,6 +31,11 @@ bun run types
 bun run rm-tests
 ```
 
+### Type check
+```bash
+bun run type-check
+```
+
 ### Test: full suite
 ```bash
 bun test
@@ -71,18 +76,11 @@ UPDATE_SNAPSHOTS=1 bun test
 ```
 
 ### Lint / formatting
-No dedicated `lint` script exists in `package.json`.
 
 Use Biome:
 ```bash
 bunx @biomejs/biome check .
 bunx @biomejs/biome check . --write
-```
-
-Or Prettier:
-```bash
-bunx prettier . --check
-bunx prettier . --write
 ```
 
 Recommended local validation before PR:
@@ -151,19 +149,9 @@ bun run build && bun test
 - prefer small, isolated changes in `src/gen/`, `src/swagger/`, and `src/utils/`
 - when changing options behavior, validate both config-file and CLI-flag paths
 
-## Cursor/Copilot instructions
-Checked paths:
-- `.cursor/rules/`
-- `.cursorrules`
-- `.github/copilot-instructions.md`
-
-Status for this repository:
-- no Cursor or Copilot instruction files are currently present
-- if those files are added later, treat them as higher-priority local instructions
-
 ## Suggested agent workflow
 1. Read relevant source and adjacent tests first.
 2. Implement the smallest safe change.
 3. Run targeted tests (`bun test <file>` and/or `bun test -t <pattern>`).
-4. Run `bun run build` before finalizing.
+4. Run `bun run type-check` and `bun run build` before finalizing.
 5. Run full tests for broad behavior changes.
