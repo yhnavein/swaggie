@@ -21,6 +21,7 @@ export type Order = {
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
+  /** @deprecated */
   complete?: boolean;
 };
 
@@ -57,6 +58,7 @@ password?: string;
 phone?: string | null;
 userStatus?: number; };
 
+/** @deprecated */
 export type Tag = {
   /** @format int64 */
   id?: number;

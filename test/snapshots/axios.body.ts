@@ -457,6 +457,7 @@ export interface Order {
   shipDate?: Date;
   /** Order Status */
   status?: "placed" | "approved" | "delivered";
+  /** @deprecated */
   complete?: boolean;
 }
 
@@ -479,6 +480,7 @@ password?: string;
 phone?: string | null;
 userStatus?: number; };
 
+/** @deprecated */
 export interface Tag {
   /** @format int64 */
   id?: number;

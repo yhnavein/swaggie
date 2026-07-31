@@ -664,6 +664,7 @@ components:
             - delivered
           example: approved
         complete:
+          deprecated: true
           type: boolean
       xml:
         name: order
@@ -763,6 +764,7 @@ components:
             - username
     Tag:
       x-swagger-router-model: io.swagger.petstore.model.Tag
+      deprecated: true
       properties:
         id:
           type: integer
@@ -798,6 +800,7 @@ components:
               name: photoUrl
         tags:
           type: array
+          deprecated: true
           xml:
             wrapped: true
           items:

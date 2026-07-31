@@ -298,7 +298,8 @@ function renderTypeProp(
     'description' in definition ||
     'title' in definition ||
     'format' in definition ||
-    'default' in definition
+    'default' in definition ||
+    'deprecated' in definition
   ) {
     const renderedComment = buildSchemaComment(definition as OA3.SchemaObject);
     if (renderedComment) {

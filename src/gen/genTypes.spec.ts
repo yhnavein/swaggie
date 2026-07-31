@@ -124,6 +124,51 @@ export type StringEnum = "Active" | "Disabled";`
       );
     });
 
+    test('should emit @deprecated for deprecated schemas and properties', () => {
+      const res = generateTypes(
+        prepareSchemas({
+          LegacyModel: {
+            type: 'object',
+            description: 'An old model',
+            deprecated: true,
+            properties: {
+              id: { type: 'string' },
+              oldField: {
+                type: 'string',
+                description: 'Do not use',
+                deprecated: true,
+              },
+              deprecatedOnly: {
+                type: 'string',
+                deprecated: true,
+              },
+            },
+          },
+        }),
+        opts,
+        false
+      );
+
+      assertEqualIgnoringWhitespace(
+        res,
+        `
+/**
+ * An old model
+ * @deprecated
+ */
+export interface LegacyModel {
+  id?: string;
+  /**
+   * Do not use
+   * @deprecated
+   */
+  oldField?: string;
+  /** @deprecated */
+  deprecatedOnly?: string;
+}`
+      );
+    });
+
     test('should emit TypeScript enums for plain string enums when enabled', () => {
       const res = generateTypes(
         prepareSchemas({

@@ -89,6 +89,7 @@ export function buildSchemaComment(schema: {
   title?: string;
   format?: string;
   default?: unknown;
+  deprecated?: boolean;
 }): string {
   const lines: string[] = [];
 
@@ -109,6 +110,10 @@ export function buildSchemaComment(schema: {
 
   if (schema.format !== undefined) {
     lines.push(`@format ${schema.format}`);
+  }
+
+  if (schema.deprecated) {
+    lines.push('@deprecated');
   }
 
   return renderComment(lines.join('\n'));
