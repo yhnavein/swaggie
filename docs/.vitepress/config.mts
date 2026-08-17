@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 import path from 'node:path';
-import { version } from '../../package.json';
+import { version } from '../../package.json' with { type: 'json' };
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -10,10 +10,10 @@ export default defineConfig({
       alias: {
         // Point the browser entry to the TypeScript source so Vite can
         // bundle it as ESM with proper named exports.
-        'swaggie/browser': path.resolve(__dirname, '../../src/browser.ts'),
+        'swaggie/browser': path.resolve(import.meta.dirname, '../../src/browser.ts'),
         // Stub out Node built-ins that eta references but never calls in browser mode
-        'node:fs': path.resolve(__dirname, '../shims/node-fs.ts'),
-        'node:path': path.resolve(__dirname, '../shims/node-path.ts'),
+        'node:fs': path.resolve(import.meta.dirname, '../shims/node-fs.ts'),
+        'node:path': path.resolve(import.meta.dirname, '../shims/node-path.ts'),
       },
     },
     optimizeDeps: {
