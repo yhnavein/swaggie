@@ -11,7 +11,7 @@ import {
   escapePropName,
   orderBy,
   getBestContentType,
-  MyContentType,
+  type MyContentType,
 } from './utils';
 import type { ApiOperation } from '../types';
 

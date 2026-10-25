@@ -14,7 +14,7 @@ import generateOperations, {
 } from './genOperations';
 import type { ApiOperation } from '../types';
 import { getClientOptions, getDocument } from '../../test/test.utils';
-import { IBodyParam, PositionedParameter } from './types';
+import type { IBodyParam, PositionedParameter } from './types';
 import { loadAllTemplateFiles } from '../utils';
 import { normalizeTemplate } from '../utils/templateValidator';
 
@@ -1097,7 +1097,10 @@ describe('prepareOperations', () => {
             group: 'adminV2',
           },
         ];
-        const operations = prepareOperations(ops, getClientOptions({ exclude: { tags: ['admin*'] } }));
+        const operations = prepareOperations(
+          ops,
+          getClientOptions({ exclude: { tags: ['admin*'] } })
+        );
         expect(operations.map((o) => o.name)).toEqual(['getPets', 'internalSync']);
       });
 
@@ -1642,8 +1645,10 @@ describe('prefixApiType', () => {
   });
 
   test('prefixes multiple named types inside an inline object type', () => {
-    const input = '{ aggregationProfile: ChargeAggregationProfileSlugV5; window: ConsumptionWindowV5; }';
-    const expected = '{ aggregationProfile: API.ChargeAggregationProfileSlugV5; window: API.ConsumptionWindowV5; }';
+    const input =
+      '{ aggregationProfile: ChargeAggregationProfileSlugV5; window: ConsumptionWindowV5; }';
+    const expected =
+      '{ aggregationProfile: API.ChargeAggregationProfileSlugV5; window: API.ConsumptionWindowV5; }';
     expect(prefixApiType(input)).toBe(expected);
   });
 
@@ -1786,12 +1791,10 @@ describe('matchesPattern', () => {
  */
 interface ExtendedApiOperation extends Omit<ApiOperation, 'parameters' | 'requestBody'> {
   parameters: (
-    | OA3.ReferenceObject
-    | (OA3.ParameterObject & { [key: `x-${string}`]: number | string })
+    OA3.ReferenceObject | (OA3.ParameterObject & { [key: `x-${string}`]: number | string })
   )[];
   requestBody?:
-    | OA3.ReferenceObject
-    | (OA3.RequestBodyObject & { [key: `x-${string}`]: number | string });
+    OA3.ReferenceObject | (OA3.RequestBodyObject & { [key: `x-${string}`]: number | string });
 }
 
 // ─── hooksCamelCaseName: reserved-word guard for hooks exports ────────────────

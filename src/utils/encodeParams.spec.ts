@@ -35,7 +35,7 @@ function _encodeParams<T = any>(
   };
 
   for (const key in params) {
-    if (Object.prototype.hasOwnProperty.call(params, key)) {
+    if (Object.hasOwn(params, key)) {
       let value = (params as any)[key];
       if (value !== undefined) {
         const encodedKey = parentKey ? `${parentKey}${getKey(key)}` : (key as string);

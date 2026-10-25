@@ -53,10 +53,10 @@ function stripSpecificHtmlTags(str: string) {
       // Replace links with markdown links
       .replace(/<a href="([^"]+)">([^<]+)<\/a>/gi, '[$2]($1)')
       .replace(/\n{3,}/g, '\n\n')
-      .replace(/\<=/g, '&le;')
-      .replace(/\>=/g, '&ge;')
-      .replace(/\</g, '&lt;')
-      .replace(/\>/g, '&gt;')
+      .replace(/<=/g, '&le;')
+      .replace(/>=/g, '&ge;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
       .trim()
   );
 }

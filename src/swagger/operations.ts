@@ -84,8 +84,8 @@ function getPathOperation(
   // and make it normalized for further usage
   if (!op.operationId) {
     op.operationId = (method + pathInfo.path)
-      .replace(/[\/{(?\/{)\-]([^{.])/g, (_, m) => m.toUpperCase())
-      .replace(/[\/}\-]/g, '');
+      .replace(/[/{(?/{)-]([^{.])/g, (_, m) => m.toUpperCase())
+      .replace(/[/}-]/g, '');
   }
 
   const pathLevelParams = spec.paths?.[pathInfo.path]?.parameters ?? [];

@@ -4,7 +4,7 @@ import { getRefCompositeTypes, getSafeIdentifier, getTypeFromSchema } from '../s
 import type { AppOptions } from '../types';
 import { escapePropName } from '../utils/utils';
 import { findAllUsedRefs } from './refsHelper';
-import { buildSchemaComment, renderComment } from './jsDocs';
+import { buildSchemaComment } from './jsDocs';
 
 /**
  * Generates TypeScript code with all the types for the given OpenAPI 3 document.

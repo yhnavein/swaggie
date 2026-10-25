@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { expect, Mock } from 'bun:test';
+import { expect, type Mock } from 'bun:test';
 import type { OpenAPIV3 as OA3 } from 'openapi-types';
 
 import type { AppOptions, ClientOptions } from '../src/types';

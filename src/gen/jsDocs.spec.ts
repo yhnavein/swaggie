@@ -2,7 +2,7 @@ import { test, describe, expect } from 'bun:test';
 
 import { buildSchemaComment, prepareJsDocsForOperation, renderComment } from './jsDocs';
 import { assertEqualIgnoringWhitespace } from '../../test/test.utils';
-import { IOperationParam } from './types';
+import type { IOperationParam } from './types';
 
 describe('prepareJsDocsForOperation', () => {
   test('should return null if there are no docs and no params', () => {
